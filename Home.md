@@ -13,14 +13,13 @@ A generation is made of 4 phases :
 - Initializing the dungeon
 
 ### What you need to do
-First of all, since a dungeon is composed of a set of room, you have to create your room levels and room data [make a link to a wiki page].
+First of all, since a dungeon is composed of a set of room, you have to [[create your room levels and room data|Room Architecture]].
 
 In order to get your dungeon generating, you have to override at least those function in your DungeonGenerator blueprint:
-- Choose First Room Data
-- Choose Next Room Data
-- Is Valid Dungeon
-- Continuing Adding Room
-[Todo: make those link to their respective wiki page]
+- [[Choose First Room Data]]
+- [[Choose Next Room Data]]
+- [[Is Valid Dungeon]]
+- [[Continue Adding Room]]
 
 
 
