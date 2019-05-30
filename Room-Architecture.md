@@ -37,3 +37,5 @@ For example, if your room unit is 10m\*10m\*4m and your real room size is 5m\*23
 You can add as many door as you want in your room, and the entrance will be chosen randomly at generation.\
 But keep in mind that a door have to be on the border of the room boundary, not inside, and the arrow have to point to the outside of the room boundary.\
 Door position is expressed in room unit and correspond to the "cell" of the room.
+
+You can change room unit and door size in Project Settings -> Plugins -> Procedural Dungeon.
