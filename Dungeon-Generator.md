@@ -5,7 +5,7 @@
 The dungeon generator is the actor which generate the dungeon.\
 To create one, create a new blueprint, expand "All Classes" and type "DungeonGenerator".
 
-The dungeon generator don't work directly by itself, you have to [[create rooms data and rooms levels first|Room Architecture]].
+The dungeon generator don't work directly by itself, you have to [[create rooms data and rooms levels|Room Architecture]] first.
 
 To be able to generate a dungeon, you also have to override some minimal functions:
 - [[Choose First Room Data]]
@@ -37,4 +37,4 @@ Return the current number of room during the generation, or total number of room
 ### Tips
 The dungeon generator use RoomData Class References.\
 To create variables of this type, in the Variable Type field search "RoomData", hover it and click on "Class Reference".\
-[Insert image here]
+[[Images/CreateClassReferenceVariable.jpg]]
