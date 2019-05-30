@@ -12,6 +12,7 @@ A generation is made of 4 phases :
 - Loading the dungeon (spawning actors, etc.)
 - Initializing the dungeon
 
+[[Images/ProceduralDungeonLifecycle.png]]
 ### What you need to do
 First of all, since a dungeon is composed of a set of room, you have to [[create your room levels and room data|Room Architecture]].
 
