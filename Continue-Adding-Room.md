@@ -8,5 +8,5 @@ So you have to return false in this function to stop the generation.
 
 In output, you have to return true to continue the generation, or false to stop it.
 
-Here an example where we let the generation end naturally (be carefull of infinite loop):\
-[Insert image here]
+Here an example where we let the generation end naturally (**be careful of infinite loop**):\
+[[Images/ContinueAddingRoom.jpg]]
