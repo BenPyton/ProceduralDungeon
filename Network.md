@@ -20,5 +20,5 @@ To do that, you have to click on the arrow next to the play button and go to "Ad
 Then in Multiplayer Options, set number of player to 2, uncheck the single process box and set the play mode to "Listen Server" or "Client".\
 [[Images/MultiOptions.jpg]]
 
-Finally, close the settings window and click again on the arrow next to the Play button and choose "Standalone Game".
+Finally, close the settings window and click again on the arrow next to the Play button and choose "Standalone Game".\
 [[Images/Standalone.jpg]]
