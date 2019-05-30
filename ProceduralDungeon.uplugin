@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "ProceduralDungeon",
+	"Description": "Procedural Dungeon",
+	"Category": "Other",
+	"CreatedBy": "Ben Pyton",
+	"CreatedByURL": "",
+	"DocsURL": "https://github.com/BenPyton/ProceduralDungeon/wiki",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": true,
+	"Modules": [
+    {
+      "Name": "ProceduralDungeon",
+      "Type": "Runtime",
+      "LoadingPhase": "PreDefault",
+      "WhitelistPlatforms": [ "Win64", "Mac", "Linux" ]
+    }
+	]
+}
