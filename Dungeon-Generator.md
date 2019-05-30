@@ -14,10 +14,11 @@ To be able to generate a dungeon, you also have to override some minimal functio
 - [[Continue Adding Room]]
 
 There are some other functions you can override:
-- **Generation Init**: Called to reset all generation data
-- **On Room Added**: Called when a room is successfully added to the dungeon
-- **Pre Generation**: Called after unloading previous dungeon but before generating new dungeon
-- **Post Generation**: Called after loading and initializing all rooms of the dungeon
+- **Generation Init**: Called to reset all generation data.
+- **On Room Added**: Called when a room is successfully added to the dungeon.
+- **Pre Generation**: Called after unloading previous dungeon but before generating new dungeon.
+- **Post Generation**: Called after loading and initializing all rooms of the dungeon.
+- **Choose Door**: Set the Door Class to spawn, return null if you don't want a door.
 
 ### Methods you can use
 
@@ -35,5 +36,5 @@ Return the current number of room during the generation, or total number of room
 
 ### Tips
 The dungeon generator use RoomData Class References.\
-To create variables of this type, in the Variable Type field search "RoomData", hever it and click on "Class Reference".
+To create variables of this type, in the Variable Type field search "RoomData", hover it and click on "Class Reference".\
 [Insert image here]
