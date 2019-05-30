@@ -6,5 +6,5 @@ it's where you set your rules.
 In input, you have the current RoomData.\
 In output you have to pass a non-null RoomData.
 
-Here an example of a simple dungeon made by 9 standard rooms before setting an exit room:\
-[insert image here]
+Here an example of a simple dungeon made by NbRoom randomly chosen standard rooms before setting an exit room:\
+[[Images/ChooseNextRoomData.jpg]]
