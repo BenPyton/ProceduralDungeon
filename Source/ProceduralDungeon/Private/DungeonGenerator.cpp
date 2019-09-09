@@ -96,7 +96,7 @@ void ADungeonGenerator::CreateDungeon()
 		AddRoom(*root);
 
 		TriesLeft--;
-	} while (TriesLeft > 0 && IsValidDungeon_BP());
+	} while (TriesLeft > 0 && !IsValidDungeon_BP());
 }
 
 
