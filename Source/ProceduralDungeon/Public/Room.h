@@ -77,4 +77,5 @@ public:
 	static FVector DoorSize();
 	static float DoorOffset();
 	static bool OcclusionCulling();
+	static bool DrawDebug();
 };

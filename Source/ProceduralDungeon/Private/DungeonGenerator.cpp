@@ -70,6 +70,7 @@ void ADungeonGenerator::Generate()
 void ADungeonGenerator::BeginGeneration_Implementation(uint32 _Seed)
 {
 	Seed = _Seed;
+	Random.Initialize(Seed);
 	SetState(EGenerationState::Unload);
 }
 
@@ -152,7 +153,7 @@ void ADungeonGenerator::AddRoom(URoom& Room)
 			// Create room from roomdef and set connections with current room
 			URoom* newRoom = NewObject<URoom>();
 			newRoom->Init(def, &Room);
-			int doorIndex = defaultObject->RandomDoor ? 0 : Random.RandRange(0, newRoom->Values->GetNbDoor() - 1);
+			int doorIndex = defaultObject->RandomDoor ? Random.RandRange(0, newRoom->Values->GetNbDoor() - 1) : 0;
 			
 			// Set position, rotation and connections between new room and parent room
 			newRoom->ConnectTo(doorIndex, Room, i);

@@ -106,18 +106,21 @@ void ARoomLevel::Tick(float DeltaTime)
 	Center = Transform.TransformPosition(Center);
 
 #if WITH_EDITOR
-	// Pivot
-	DrawDebugSphere(GetWorld(), Transform.GetLocation(), 100.0f, 4, FColor::Magenta);
-
-	// Room bounds
-	DrawDebugBox(GetWorld(), Center, HalfExtents, Transform.GetRotation(), FColor::Red);
-
-	FVector DoorSize = URoom::DoorSize();
-
-	// Doors
-	for (int i = 0; i < Values->Doors.Num(); i++)
+	if (URoom::DrawDebug())
 	{
-		ADoor::DrawDebug(GetWorld(), Values->Doors[i].Position, Values->Doors[i].Direction, Transform);
+		// Pivot
+		DrawDebugSphere(GetWorld(), Transform.GetLocation(), 100.0f, 4, FColor::Magenta);
+
+		// Room bounds
+		DrawDebugBox(GetWorld(), Center, HalfExtents, Transform.GetRotation(), FColor::Red);
+
+		FVector DoorSize = URoom::DoorSize();
+
+		// Doors
+		for (int i = 0; i < Values->Doors.Num(); i++)
+		{
+			ADoor::DrawDebug(GetWorld(), Values->Doors[i].Position, Values->Doors[i].Direction, Transform);
+		}
 	}
 #endif
 }

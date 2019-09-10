@@ -78,16 +78,19 @@ void ADoor::SetConnectingRooms(URoom * _roomA, URoom * _roomB)
 
 void ADoor::DrawDebug(UWorld* World, FIntVector DoorCell, EDirection DoorRot, FTransform Transform)
 {
-	FVector DoorSize = URoom::DoorSize();
-	FIntVector rot = URoom::GetDirection(DoorRot == EDirection::NbDirection ? EDirection::North : DoorRot);
-	FVector pos = URoom::GetRealDoorPosition(DoorCell, DoorRot) + FVector(0, 0, DoorSize.Z * 0.5f);
-	pos = Transform.TransformPosition(pos);
+	if (URoom::DrawDebug())
+	{
+		FVector DoorSize = URoom::DoorSize();
+		FIntVector rot = URoom::GetDirection(DoorRot == EDirection::NbDirection ? EDirection::North : DoorRot);
+		FVector pos = URoom::GetRealDoorPosition(DoorCell, DoorRot) + FVector(0, 0, DoorSize.Z * 0.5f);
+		pos = Transform.TransformPosition(pos);
 
-	// Arrow
-	DrawDebugDirectionalArrow(World, pos, pos + Transform.GetRotation() * FVector(rot) * 300, 300, FColor::Blue);
+		// Arrow
+		DrawDebugDirectionalArrow(World, pos, pos + Transform.GetRotation() * FVector(rot) * 300, 300, FColor::Blue);
 
-	// Door frame
-	FIntVector scale = URoom::Rotate(FIntVector(DoorSize * 0.5f), DoorRot);
-	DrawDebugBox(World, pos, FVector(scale), Transform.GetRotation(), FColor::Blue);
+		// Door frame
+		FIntVector scale = URoom::Rotate(FIntVector(DoorSize * 0.5f), DoorRot);
+		DrawDebugBox(World, pos, FVector(scale), Transform.GetRotation(), FColor::Blue);
+	}
 }
 

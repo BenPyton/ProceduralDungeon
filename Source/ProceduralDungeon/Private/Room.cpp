@@ -291,3 +291,9 @@ bool URoom::OcclusionCulling()
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
 	return Settings->OcclusionCulling;
 }
+
+bool URoom::DrawDebug()
+{
+	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
+	return Settings->DrawDebug;
+}

@@ -10,4 +10,5 @@ UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer&
 	DoorSize = FVector(40, 640, 400);
 	DoorOffset = 0.0f;
 	OcclusionCulling = true;
+	DrawDebug = true;
 }
