@@ -13,5 +13,8 @@ If you want more details about how it works and how to use it, please read the [
 
 If you have any suggestion/bug or you want to contribute, don't hesitate to add an issue or do a pull request.
 
+### Demo in video:
+[![](http://img.youtube.com/vi/DmyNEd0YtDE/0.jpg)](http://www.youtube.com/watch?v=DmyNEd0YtDE "Procedural Dungeon Demo")<br>
+
 ## Installation
-Get the [last release](https://github.com/BenPyton/ProceduralDungeon/releases) compatible with your Unreal version and extract it to the Plugins folder of your project.
+Get the [latest release](https://github.com/BenPyton/ProceduralDungeon/releases) compatible with your Unreal version and extract it to the Plugins folder of your project.
