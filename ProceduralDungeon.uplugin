@@ -1,10 +1,10 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.0",
+	"VersionName": "1.0.2",
 	"FriendlyName": "ProceduralDungeon",
 	"Description": "Procedural Dungeon",
-	"Category": "Other",
+	"Category": "Procedural",
 	"CreatedBy": "Ben Pyton",
 	"CreatedByURL": "",
 	"DocsURL": "https://github.com/BenPyton/ProceduralDungeon/wiki",
