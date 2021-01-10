@@ -18,7 +18,7 @@ enum class EGenerationState : uint8
 };
 
 UENUM(BlueprintType)
-enum class EDirection : uint8
+enum class EDoorDirection : uint8
 {
 	North = 0 				UMETA(DisplayName = "North"), // rotation = 0 (world forward)
 	East = 255 				UMETA(DisplayName = "East"),  // rotation = -90 (world right)
@@ -28,11 +28,12 @@ enum class EDirection : uint8
 };
 
 USTRUCT()
-struct FDoorDef {
+struct FDoorDef
+{
 	GENERATED_BODY()
 
+		UPROPERTY(EditAnywhere)
+		FIntVector Position;
 	UPROPERTY(EditAnywhere)
-	FIntVector Position;
-	UPROPERTY(EditAnywhere)
-	EDirection Direction;
+		EDoorDirection Direction;
 };

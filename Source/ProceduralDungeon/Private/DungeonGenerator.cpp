@@ -112,7 +112,7 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 		URoom* r = Room->GetConnection(i).Get();
 
 		FIntVector DoorCell = Room->GetDoorWorldPosition(i);
-		EDirection DoorRot = Room->GetDoorWorldOrientation(i);
+		EDoorDirection DoorRot = Room->GetDoorWorldOrientation(i);
 
 		// Don't instantiate room nor door if it's the parent
 		if (r != Room->Parent)

@@ -76,5 +76,5 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Is Open"))
 	bool IsOpen() { return isOpen; }
 
-	static void DrawDebug(UWorld* World, FIntVector DoorCell = FIntVector::ZeroValue, EDirection DoorRot = EDirection::NbDirection, FTransform Transform = FTransform::Identity);
+	static void DrawDebug(UWorld* World, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity);
 };

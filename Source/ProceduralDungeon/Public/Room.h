@@ -26,7 +26,7 @@ public:
 	UPROPERTY()
 	URoom* Parent;
 	FIntVector Position;
-	EDirection Direction;
+	EDoorDirection Direction;
 
 	UPROPERTY()
 	URoomData* Values = nullptr;
@@ -48,15 +48,15 @@ public:
 	void Destroy(UWorld* World);
 	ARoomLevel* GetLevelScript();
 
-	EDirection GetDoorWorldOrientation(int DoorIndex);
+	EDoorDirection GetDoorWorldOrientation(int DoorIndex);
 	FIntVector GetDoorWorldPosition(int DoorIndex);
 	int GetConnectionCount() { return Connections.Num(); }
 
 	FIntVector WorldToRoom(FIntVector WorldPos);
 	FIntVector RoomToWorld(FIntVector RoomPos);
-	void SetRotationFromDoor(int DoorIndex, EDirection WorldRot);
+	void SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot);
 	void SetPositionFromDoor(int DoorIndex, FIntVector WorldPos);
-	void SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDirection WorldRot);
+	void SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot);
 	bool IsOccupied(FIntVector Cell);
 
 	void ConnectTo(int ThisDoorIndex, URoom& OtherRoom, int OtherDoorIndex);
@@ -65,12 +65,12 @@ public:
 	// AABB Overlapping
 	static bool Overlap(URoom& A, URoom& B);
 	static bool Overlap(URoom& Room, TArray<URoom*>& RoomList);
-	static EDirection Add(EDirection A, EDirection B);
-	static EDirection Sub(EDirection A, EDirection B);
-	static FIntVector GetDirection(EDirection O);
-	static FIntVector Rotate(FIntVector Pos, EDirection Rot);
+	static EDoorDirection Add(EDoorDirection A, EDoorDirection B);
+	static EDoorDirection Sub(EDoorDirection A, EDoorDirection B);
+	static FIntVector GetDirection(EDoorDirection O);
+	static FIntVector Rotate(FIntVector Pos, EDoorDirection Rot);
 
-	static FVector GetRealDoorPosition(FIntVector DoorCell, EDirection DoorRot);
+	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot);
 
 	// Plugin Settings
 	static FVector Unit();

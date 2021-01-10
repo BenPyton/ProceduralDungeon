@@ -76,12 +76,12 @@ void ADoor::SetConnectingRooms(URoom * _roomA, URoom * _roomB)
 	RoomB = _roomB;
 }
 
-void ADoor::DrawDebug(UWorld* World, FIntVector DoorCell, EDirection DoorRot, FTransform Transform)
+void ADoor::DrawDebug(UWorld* World, FIntVector DoorCell, EDoorDirection DoorRot, FTransform Transform)
 {
 	if (URoom::DrawDebug())
 	{
 		FVector DoorSize = URoom::DoorSize();
-		FIntVector rot = URoom::GetDirection(DoorRot == EDirection::NbDirection ? EDirection::North : DoorRot);
+		FIntVector rot = URoom::GetDirection(DoorRot == EDoorDirection::NbDirection ? EDoorDirection::North : DoorRot);
 		FVector pos = URoom::GetRealDoorPosition(DoorCell, DoorRot) + FVector(0, 0, DoorSize.Z * 0.5f);
 		pos = Transform.TransformPosition(pos);
 

@@ -65,7 +65,7 @@ void ARoomLevel::Tick(float DeltaTime)
 			Transform.SetRotation(FRotator(0.0f, -90.0f * (int8)Room->Direction, 0.0f).Quaternion());
 
 			FIntVector forward = URoom::GetDirection(Room->Direction);
-			FIntVector right = URoom::GetDirection(URoom::Add(Room->Direction, EDirection::East));
+			FIntVector right = URoom::GetDirection(URoom::Add(Room->Direction, EDoorDirection::East));
 
 			// Create triggerBox for occlusion culling
 			Center = 0.5f * (URoom::Unit() * FVector(Room->Position + Room->RoomToWorld(Room->Values->Size) - forward - right));
@@ -96,8 +96,8 @@ void ARoomLevel::Tick(float DeltaTime)
 
 	URoomData* Values = Data.GetDefaultObject();
 
-	FIntVector forward = URoom::GetDirection(EDirection::North);
-	FIntVector right = URoom::GetDirection(URoom::Add(EDirection::North, EDirection::East));
+	FIntVector forward = URoom::GetDirection(EDoorDirection::North);
+	FIntVector right = URoom::GetDirection(URoom::Add(EDoorDirection::North, EDoorDirection::East));
 
 	Center = 0.5f * (URoom::Unit() * FVector(Values->Size - forward - right));
 	HalfExtents = 0.5f * (URoom::Unit() * FVector(Values->Size));

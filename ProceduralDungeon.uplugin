@@ -18,7 +18,7 @@
       "Name": "ProceduralDungeon",
       "Type": "Runtime",
       "LoadingPhase": "PreDefault",
-      "WhitelistPlatforms": [ "Win64", "Mac", "Linux" ]
+      "WhitelistPlatforms": [ "Win64" ]
     }
 	]
 }
