@@ -22,5 +22,15 @@ In order to get your dungeon generating, you have to override at least those fun
 - [[Is Valid Dungeon]]
 - [[Continue Adding Room]]
 
+### Tips
+The generation take a certain time (the generation itself is done on one frame, but the instantiation and loading of each room take some times proportionally to the number and complexity of the rooms).<br/>
+So, if you have the player character spawned at start, it will fall into the void of the universe before the dungeon has the time to generate.
+
+To manage this situation, you have 2 solutions:
+- The easy and ugly way is to place a little plane somewhere with the player start on it, and disable the inputs from the player to prevent him to fall from this plane, then when the generation is complete you teleport the player into the firstroom and unlock the inputs;
+- The better and cleaner way is to not spawn the player until the generation is finished, and you place a player start in your first room and trigger the spawn of the player when the generation is finished.
+
+Both solutions use the `Post Generation Event` to know when the generation is done.
+You will also want to show a loading screen when you start your game map which you hide on this event too.
 
 
