@@ -94,30 +94,40 @@ void ADungeonGenerator::CreateDungeon()
 		RoomList.Add(root);
 
 		// Build the list of rooms with recursive function
-		AddRoom(*root);
+		TArray<URoom*> roomStack;
+		roomStack.Push(root);
+		URoom* currentRoom = nullptr;
+		while(ContinueGeneration_BP() && roomStack.Num() > 0)
+		{
+			currentRoom = roomStack.Pop();
+			if(IsValid(currentRoom))
+			{
+				AddRooms(*currentRoom, roomStack);
+			}
+		}
 
 		TriesLeft--;
 	} while (TriesLeft > 0 && !IsValidDungeon_BP());
 }
 
 
-void ADungeonGenerator::InstantiateRoom(URoom* Room)
+void ADungeonGenerator::InstantiateRoom(URoom* _Room)
 {
 	// Instantiate room
-	Room->Instantiate(GetWorld());
+	_Room->Instantiate(GetWorld());
 
-	for (int i = 0; i < Room->GetConnectionCount(); i++)
+	for (int i = 0; i < _Room->GetConnectionCount(); i++)
 	{
 		// Get next room
-		URoom* r = Room->GetConnection(i).Get();
+		URoom* r = _Room->GetConnection(i).Get();
 
-		FIntVector DoorCell = Room->GetDoorWorldPosition(i);
-		EDoorDirection DoorRot = Room->GetDoorWorldOrientation(i);
+		FIntVector DoorCell = _Room->GetDoorWorldPosition(i);
+		EDoorDirection DoorRot = _Room->GetDoorWorldOrientation(i);
 
 		// Don't instantiate room nor door if it's the parent
-		if (r != Room->Parent)
+		if (r != _Room->Parent)
 		{
-			TSubclassOf<ADoor> DoorClass = ChooseDoor(Room->GetRoomDataClass(), nullptr != r ? r->GetRoomDataClass() : nullptr);
+			TSubclassOf<ADoor> DoorClass = ChooseDoor(_Room->GetRoomDataClass(), nullptr != r ? r->GetRoomDataClass() : nullptr);
 
 			if (DoorClass != nullptr)
 			{
@@ -127,7 +137,7 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 
 				if (nullptr != Door)
 				{
-					Door->SetConnectingRooms(Room, r);
+					Door->SetConnectingRooms(_Room, r);
 					DoorList.Add(Door);
 				}
 				else
@@ -139,43 +149,37 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 	}
 }
 
-void ADungeonGenerator::AddRoom(URoom& Room)
+void ADungeonGenerator::AddRooms(URoom& _FromRoom, TArray<URoom*>& _RoomStack)
 {
-	int nbDoor = Room.Values->GetNbDoor();
+	int nbDoor = _FromRoom.Values->GetNbDoor();
 
 	for (int i = 0; i < nbDoor; i++)
 	{
-		if (!Room.IsConnected(i))
+		if (!_FromRoom.IsConnected(i))
 		{
-			TSubclassOf<URoomData> def = ChooseNextRoomData(Room.GetRoomDataClass());
+			TSubclassOf<URoomData> def = ChooseNextRoomData(_FromRoom.GetRoomDataClass());
 			URoomData* defaultObject = def.GetDefaultObject();
 
 			// Create room from roomdef and set connections with current room
 			URoom* newRoom = NewObject<URoom>();
-			newRoom->Init(def, &Room);
+			newRoom->Init(def, &_FromRoom);
 			int doorIndex = defaultObject->RandomDoor ? Random.RandRange(0, newRoom->Values->GetNbDoor() - 1) : 0;
 			
 			// Set position, rotation and connections between new room and parent room
-			newRoom->ConnectTo(doorIndex, Room, i);
+			newRoom->ConnectTo(doorIndex, _FromRoom, i);
 
 			if (!URoom::Overlap(*newRoom, RoomList))
 			{
+				_RoomStack.Add(newRoom);
 				RoomList.Add(newRoom);
-
 				OnRoomAdded(newRoom->GetRoomDataClass());
-
-				if(ContinueGeneration_BP())
-				{
-					AddRoom(*newRoom);
-				}
 			}
 			else
 			{
-				delete newRoom;
-				Room.SetConnection(i, nullptr);
+				_FromRoom.SetConnection(i, nullptr);
 			}
 		}
-	}
+	} // for loop
 }
 
 
@@ -370,18 +374,18 @@ void ADungeonGenerator::OnStateEnd(EGenerationState _State)
 	}
 }
 
-TSubclassOf<URoomData> ADungeonGenerator::GetRandomRoomData(TArray<TSubclassOf<URoomData>> RoomDataArray)
+TSubclassOf<URoomData> ADungeonGenerator::GetRandomRoomData(TArray<TSubclassOf<URoomData>> _RoomDataArray)
 {
-	int n = Random.RandRange(0, RoomDataArray.Num() - 1);
-	return RoomDataArray[n];
+	int n = Random.RandRange(0, _RoomDataArray.Num() - 1);
+	return _RoomDataArray[n];
 }
 
-bool ADungeonGenerator::HasAlreadyRoomData(TSubclassOf<URoomData> RoomData)
+bool ADungeonGenerator::HasAlreadyRoomData(TSubclassOf<URoomData> _RoomData)
 {
 	bool hasIt = false;
 	for (int i = 0; i < RoomList.Num(); i++)
 	{
-		if (RoomList[i]->GetRoomDataClass() == RoomData)
+		if (RoomList[i]->GetRoomDataClass() == _RoomData)
 		{
 			hasIt = true;
 			break;

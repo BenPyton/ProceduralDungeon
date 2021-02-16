@@ -125,10 +125,10 @@ private:
 	void CreateDungeon();
 
 	// Recursive function to generate all rooms
-	void AddRoom(URoom& _room);
+	void AddRooms(URoom& _FromRoom, TArray<URoom*>& _RoomStack);
 
 	// Instantiate a room in the scene
-	void InstantiateRoom(URoom* _room);
+	void InstantiateRoom(URoom* _Room);
 
 	// Load all room levels
 	UFUNCTION()
