@@ -2,7 +2,6 @@
 
 #include "ProceduralDungeonSettings.h"
 
-
 UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -11,4 +10,6 @@ UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer&
 	DoorOffset = 0.0f;
 	OcclusionCulling = true;
 	DrawDebug = true;
+	OnScreenPrintDebug = false;
+	PrintDebugDuration = 60.0f;
 }

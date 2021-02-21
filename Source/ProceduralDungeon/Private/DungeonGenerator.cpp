@@ -10,7 +10,110 @@
 #include "Door.h"
 #include "RoomLevel.h"
 #include "ProceduralDungeon.h"
+#include "ProceduralDungeonSettings.h"
 
+template<typename T>
+class TQueueOrStack
+{
+public:
+	enum class Mode { QUEUE, STACK };
+
+	TQueueOrStack(Mode _mode) : m_mode(_mode), m_queue(), m_stack() {}
+
+	void Push(T& _element)
+	{
+		switch(m_mode)
+		{
+		case Mode::QUEUE:
+			m_queue.Enqueue(_element);
+			break;
+		case Mode::STACK:
+			m_stack.Push(_element);
+			break;
+		}
+	}
+
+	T Pop()
+	{
+		check(!IsEmpty());
+		T item = T();
+		switch(m_mode)
+		{
+		case Mode::QUEUE:
+			m_queue.Dequeue(item);
+			break;
+		case Mode::STACK:
+			item = m_stack.Pop();
+			break;
+		}
+		return item;
+	}
+
+	int Num()
+	{
+		switch(m_mode)
+		{
+		case Mode::QUEUE:
+			return m_queue.Num();
+		case Mode::STACK:
+			return m_stack.Num();
+		}
+	}
+
+	bool IsEmpty()
+	{
+		switch(m_mode)
+		{
+		case Mode::QUEUE:
+			return m_queue.IsEmpty();
+		case Mode::STACK:
+			return m_stack.Num() <= 0;
+		}
+		return true;
+	}
+
+private:
+	Mode m_mode;
+	TQueue<T> m_queue;
+	TArray<T> m_stack;
+};
+
+bool ShowLogsOnScreen(float& _duration)
+{
+	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
+	_duration = Settings->PrintDebugDuration;
+	return Settings->OnScreenPrintDebug;
+}
+
+void LogInfo(FString message, bool showOnScreen = true)
+{
+	UE_LOG(LogProceduralDungeon, Log, TEXT("%s"), *message);
+	float duration;
+	if(showOnScreen && ShowLogsOnScreen(duration))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::White, message);
+	}
+}
+
+void LogWarning(FString message, bool showOnScreen = true)
+{
+	UE_LOG(LogProceduralDungeon, Warning, TEXT("%s"), *message);
+	float duration;
+	if(showOnScreen && ShowLogsOnScreen(duration))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Yellow, message);
+	}
+}
+
+void LogError(FString message, bool showOnScreen = true)
+{
+	UE_LOG(LogProceduralDungeon, Error, TEXT("%s"), *message);
+	float duration;
+	if(showOnScreen && ShowLogsOnScreen(duration))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Red, message);
+	}
+}
 
 // Sets default values
 ADungeonGenerator::ADungeonGenerator()
@@ -18,8 +121,8 @@ ADungeonGenerator::ADungeonGenerator()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	RandomSeed = true;
-	AutoIncrementSeed = false;
+	GenerationType = EGenerationType::DFS;
+	SeedType = ESeedType::Random;
 	Seed = 123456789; // default Seed
 
 	bAlwaysRelevant = true;
@@ -52,7 +155,7 @@ void ADungeonGenerator::Generate()
 	// Do it only on server, do nothing on clients
 	if (HasAuthority())
 	{
-		if (RandomSeed)
+		if (SeedType == ESeedType::Random)
 		{
 			Random.GenerateNewSeed();
 			Seed = Random.GetCurrentSeed();
@@ -60,7 +163,7 @@ void ADungeonGenerator::Generate()
 
 		BeginGeneration(Seed);
 
-		if (!RandomSeed && AutoIncrementSeed)
+		if (SeedType == ESeedType::AutoIncrement)
 		{
 			Seed += 123456;
 		}
@@ -71,6 +174,7 @@ void ADungeonGenerator::BeginGeneration_Implementation(uint32 _Seed)
 {
 	Seed = _Seed;
 	Random.Initialize(Seed);
+	LogInfo(FString::Printf(TEXT("Seed: %d"), Seed));
 	SetState(EGenerationState::Unload);
 }
 
@@ -85,7 +189,7 @@ void ADungeonGenerator::CreateDungeon()
 		// Reset generation data
 		UProceduralLevelStreaming::UniqueLevelInstanceId = 0;
 		ARoomLevel::Count = 0;
-		OnGenerationInit_BP();
+		DispatchGenerationInit();
 
 		// Create the first room
 		RoomList.Empty();
@@ -93,21 +197,35 @@ void ADungeonGenerator::CreateDungeon()
 		root->Init(ChooseFirstRoomData());
 		RoomList.Add(root);
 
-		// Build the list of rooms with recursive function
-		TArray<URoom*> roomStack;
+		// Create the list with the correct mode (depth or breadth)
+		TQueueOrStack<URoom*>::Mode listMode;
+		switch(GenerationType)
+		{
+		case EGenerationType::DFS:
+			listMode = TQueueOrStack<URoom*>::Mode::STACK;
+			break;
+		case EGenerationType::BFS:
+			listMode = TQueueOrStack<URoom*>::Mode::QUEUE;
+			break;
+		}
+
+		// Build the list of rooms
+		TQueueOrStack<URoom*> roomStack(listMode);
 		roomStack.Push(root);
 		URoom* currentRoom = nullptr;
-		while(ContinueGeneration_BP() && roomStack.Num() > 0)
+		URoom* newRoom = nullptr;
+		while(ContinueToAddRoom() && !roomStack.IsEmpty())
 		{
 			currentRoom = roomStack.Pop();
-			if(IsValid(currentRoom))
+			check(IsValid(currentRoom)); // currentRoom should always be valid
+			for(URoom* room : AddNewRooms(*currentRoom))
 			{
-				AddRooms(*currentRoom, roomStack);
+				roomStack.Push(room);
 			}
 		}
 
 		TriesLeft--;
-	} while (TriesLeft > 0 && !IsValidDungeon_BP());
+	} while (TriesLeft > 0 && !IsValidDungeon());
 }
 
 
@@ -142,44 +260,54 @@ void ADungeonGenerator::InstantiateRoom(URoom* _Room)
 				}
 				else
 				{
-					UE_LOG(LogProceduralDungeon, Error, TEXT("Failed to spawn Door, make sure you set door actor to always spawning."));
+					LogError("Failed to spawn Door, make sure you set door actor to always spawning.");
 				}
 			}
 		}
 	}
 }
 
-void ADungeonGenerator::AddRooms(URoom& _FromRoom, TArray<URoom*>& _RoomStack)
+TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& _ParentRoom)
 {
-	int nbDoor = _FromRoom.Values->GetNbDoor();
-
-	for (int i = 0; i < nbDoor; i++)
+	TArray<URoom*> newRooms;
+	int nbDoor = _ParentRoom.Values->GetNbDoor();
+	URoom* newRoom = nullptr;
+	for(int i = 0; i < nbDoor; ++i)
 	{
-		if (!_FromRoom.IsConnected(i))
+		int nbTries = MaxRoomTry;
+		do
 		{
-			TSubclassOf<URoomData> def = ChooseNextRoomData(_FromRoom.GetRoomDataClass());
+			nbTries--;
+			TSubclassOf<URoomData> def = ChooseNextRoomData(_ParentRoom.GetRoomDataClass());
 			URoomData* defaultObject = def.GetDefaultObject();
 
 			// Create room from roomdef and set connections with current room
-			URoom* newRoom = NewObject<URoom>();
-			newRoom->Init(def, &_FromRoom);
+			newRoom = NewObject<URoom>();
+			newRoom->Init(def, &_ParentRoom);
 			int doorIndex = defaultObject->RandomDoor ? Random.RandRange(0, newRoom->Values->GetNbDoor() - 1) : 0;
-			
-			// Set position, rotation and connections between new room and parent room
-			newRoom->ConnectTo(doorIndex, _FromRoom, i);
 
-			if (!URoom::Overlap(*newRoom, RoomList))
+			// Set position, rotation and connections between new room and parent room
+			newRoom->ConnectTo(doorIndex, _ParentRoom, i);
+
+			if(!URoom::Overlap(*newRoom, RoomList))
 			{
-				_RoomStack.Add(newRoom);
 				RoomList.Add(newRoom);
-				OnRoomAdded(newRoom->GetRoomDataClass());
+				DispatchRoomAdded(newRoom->GetRoomDataClass());
 			}
 			else
 			{
-				_FromRoom.SetConnection(i, nullptr);
+				newRoom = nullptr;
+				_ParentRoom.SetConnection(i, nullptr);
 			}
+		} while(nbTries > 0 && newRoom == nullptr);
+
+		if(newRoom != nullptr)
+		{
+			newRooms.Add(newRoom);
 		}
-	} // for loop
+	}
+
+	return newRooms;
 }
 
 
@@ -224,26 +352,23 @@ void ADungeonGenerator::OnStateBegin(EGenerationState _State)
 	switch (State)
 	{
 	case EGenerationState::Unload:
-		UE_LOG(LogProceduralDungeon, Log, TEXT("======= Begin Unload All Levels ======="));
+		LogInfo("======= Begin Unload All Levels =======");
 		UnloadAllRooms();
 		NbUnloadedRoom = 0;
 		break;
 	case EGenerationState::Generation:
-		//GetWorld()->GetGameState<AGameState>()->OnPreGeneration.Broadcast();
-		UE_LOG(LogProceduralDungeon, Log, TEXT("Seed: %d"), Seed);
-		OnPreGenerationEvent.Broadcast();
-		OnPreGeneration_BP();
-		UE_LOG(LogProceduralDungeon, Log, TEXT("======= Begin Map Generation ======="));
+		DispatchPreGeneration();
+		LogInfo("======= Begin Map Generation =======");
 		CreateDungeon();
 		break;
 	case EGenerationState::Load:
-		UE_LOG(LogProceduralDungeon, Log, TEXT("======= Begin Load All Levels ======="));
+		LogInfo("======= Begin Load All Levels =======");
 		LoadAllRooms();
 		NbLoadedRoom = 0;
 		break;
 	case EGenerationState::Initialization:
-		UE_LOG(LogProceduralDungeon, Log, TEXT("======= Begin Init All Levels ======="));
-		UE_LOG(LogProceduralDungeon, Log, TEXT("Nb Room To Initialize: %d"), RoomList.Num());
+		LogInfo("======= Begin Init All Levels =======");
+		LogInfo(FString::Printf(TEXT("Nb Room To Initialize: %d"), RoomList.Num()));
 		break;
 	default:
 		break;
@@ -309,7 +434,7 @@ void ADungeonGenerator::OnStateTick(EGenerationState _State)
 						script->Room = nullptr;
 						script->Init(room);
 
-						UE_LOG(LogProceduralDungeon, Log, TEXT("Room Initialization: %d/%d"), NbInitRoom, RoomList.Num());
+						LogInfo(FString::Printf(TEXT("Room Initialization: %d/%d"), NbInitRoom, RoomList.Num()), false);
 					}
 				}
 				else
@@ -341,37 +466,90 @@ void ADungeonGenerator::OnStateEnd(EGenerationState _State)
 		RoomList.Empty();
 		GetWorld()->FlushLevelStreaming();
 		GEngine->ForceGarbageCollection(true);
-		UE_LOG(LogProceduralDungeon, Log, TEXT("======= End Unload All Levels ======="));
+		LogInfo("======= End Unload All Levels =======");
 		break;
 	case EGenerationState::Generation:
-		UE_LOG(LogProceduralDungeon, Log, TEXT("======= End Map Generation ======="));
+		LogInfo("======= End Map Generation =======");
 		break;
 	case EGenerationState::Load:
-		UE_LOG(LogProceduralDungeon, Log, TEXT("======= End Load All Levels ======="));
+		LogInfo("======= End Load All Levels =======");
 		break;
 	case EGenerationState::Initialization:
-		UE_LOG(LogProceduralDungeon, Log, TEXT("======= End Init All Levels ======="));
+		LogInfo("======= End Init All Levels =======");
 
 		// Try to rebuild the navmesh
 		nav = UNavigationSystemV1::GetCurrent(GetWorld());
 		if (nullptr != nav)
 		{
-			UE_LOG(LogProceduralDungeon, Log, TEXT("Build navmesh"));
+			LogInfo("Rebuild navmesh");
 			nav->CancelBuild();
 			nav->Build();
 		}
-		else
-		{
-			UE_LOG(LogProceduralDungeon, Error, TEXT("Error: Navmesh not found"));
-		}
 
 		// Invoke Post Generation Event when initialization is done
-		OnPostGenerationEvent.Broadcast();
-		OnPostGeneration_BP();
+		DispatchPostGeneration();
 		break;
 	default:
 		break;
 	}
+}
+
+TSubclassOf<URoomData> ADungeonGenerator::ChooseFirstRoomData_Implementation()
+{
+	LogError("Error: ChooseFirstRoomData not implemented");
+	return nullptr;
+}
+
+TSubclassOf<URoomData> ADungeonGenerator::ChooseNextRoomData_Implementation(TSubclassOf<URoomData> CurrentRoom)
+{
+	LogError("Error: ChooseNextRoomData not implemented");
+	return nullptr;
+}
+
+TSubclassOf<ADoor> ADungeonGenerator::ChooseDoor_Implementation(TSubclassOf<URoomData> CurrentRoom, TSubclassOf<URoomData> NextRoom)
+{
+	LogError("Error: ChooseDoor not implemented");
+	return nullptr;
+}
+
+bool ADungeonGenerator::IsValidDungeon_Implementation()
+{
+	LogError("Error: IsValidDungeon not implemented");
+	return false;
+}
+
+bool ADungeonGenerator::ContinueToAddRoom_Implementation()
+{
+	LogError("Error: ContinueToAddRoom not implemented");
+	return false;
+}
+
+void ADungeonGenerator::DispatchPreGeneration()
+{
+	OnPreGeneration();
+	OnPreGeneration_BP();
+	OnPreGenerationEvent.Broadcast();
+}
+
+void ADungeonGenerator::DispatchPostGeneration()
+{
+	OnPostGeneration();
+	OnPostGeneration_BP();
+	OnPostGenerationEvent.Broadcast();
+}
+
+void ADungeonGenerator::DispatchGenerationInit()
+{
+	OnGenerationInit();
+	OnGenerationInit_BP();
+	OnGenerationInitEvent.Broadcast();
+}
+
+void ADungeonGenerator::DispatchRoomAdded(TSubclassOf<URoomData> NewRoom)
+{
+	OnRoomAdded(NewRoom);
+	OnRoomAdded_BP(NewRoom);
+	OnRoomAddedEvent.Broadcast(NewRoom);
 }
 
 TSubclassOf<URoomData> ADungeonGenerator::GetRandomRoomData(TArray<TSubclassOf<URoomData>> _RoomDataArray)
@@ -382,14 +560,36 @@ TSubclassOf<URoomData> ADungeonGenerator::GetRandomRoomData(TArray<TSubclassOf<U
 
 bool ADungeonGenerator::HasAlreadyRoomData(TSubclassOf<URoomData> _RoomData)
 {
-	bool hasIt = false;
-	for (int i = 0; i < RoomList.Num(); i++)
+	return CountRoomData(_RoomData) > 0;
+}
+
+bool ADungeonGenerator::HasAlreadyOneRoomDataFrom(TArray<TSubclassOf<URoomData>> _RoomDataList)
+{
+	return CountTotalRoomData(_RoomDataList) > 0;
+}
+
+int ADungeonGenerator::CountRoomData(TSubclassOf<URoomData> _RoomData)
+{
+	int count = 0;
+	for(int i = 0; i < RoomList.Num(); i++)
 	{
-		if (RoomList[i]->GetRoomDataClass() == _RoomData)
+		if(RoomList[i]->GetRoomDataClass() == _RoomData)
 		{
-			hasIt = true;
-			break;
+			count++;
 		}
 	}
-	return  hasIt;
+	return  count;
+}
+
+int ADungeonGenerator::CountTotalRoomData(TArray<TSubclassOf<URoomData>> _RoomDataList)
+{
+	int count = 0;
+	for(int i = 0; i < RoomList.Num(); i++)
+	{
+		if(_RoomDataList.Contains(RoomList[i]->GetRoomDataClass()))
+		{
+			count++;
+		}
+	}
+	return  count;
 }

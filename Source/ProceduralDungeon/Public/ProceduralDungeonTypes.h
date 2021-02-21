@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "ProceduralDungeonTypes.generated.h"
 
-UENUM(BlueprintType)
+UENUM()
 enum class EGenerationState : uint8
 {
 	None					UMETA(DisplayName = "None"),
@@ -27,13 +27,30 @@ enum class EDoorDirection : uint8
 	NbDirection = 4 		UMETA(Hidden)
 };
 
+UENUM()
+enum class EGenerationType : uint8
+{
+	DFS = 0 				UMETA(DisplayName = "Depth First", Tooltip = "Make the dungeon more linear"),
+	BFS = 1 				UMETA(DisplayName = "Breadth First", Tooltip = "Make the dungeon less linear"),
+	NbType = 2 				UMETA(Hidden)
+};
+
+UENUM()
+enum class ESeedType : uint8
+{
+	Random = 0 				UMETA(DisplayName = "Random", Tooltip = "Random seed at each generation"),
+	AutoIncrement = 1 		UMETA(DisplayName = "Auto Increment", Tooltip = "Get the initial seed and increment at each generation"),
+	Fixed = 2 				UMETA(DisplayName = "Fixed", Tooltip = "Always use initial seed (or you can set it manually via blueprint)"),
+	NbType = 3 				UMETA(Hidden)
+};
+
 USTRUCT()
 struct FDoorDef
 {
 	GENERATED_BODY()
 
-		UPROPERTY(EditAnywhere)
-		FIntVector Position;
 	UPROPERTY(EditAnywhere)
-		EDoorDirection Direction;
+	FIntVector Position;
+	UPROPERTY(EditAnywhere)
+	EDoorDirection Direction;
 };

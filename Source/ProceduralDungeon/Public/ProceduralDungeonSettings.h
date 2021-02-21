@@ -6,19 +6,15 @@
 #include "UObject/NoExportTypes.h"
 #include "ProceduralDungeonSettings.generated.h"
 
-/**
- * 
- */
 UCLASS(config = Game, defaultconfig)
 class PROCEDURALDUNGEON_API UProceduralDungeonSettings : public UObject
 {
 	GENERATED_BODY()
 	
-
 public:
 	UProceduralDungeonSettings(const FObjectInitializer& ObjectInitializer);
 
-	UPROPERTY(EditAnywhere, config, Category="Procedural Dungeon")
+	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
 	FVector RoomUnit;
 
 	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
@@ -32,4 +28,10 @@ public:
 
 	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
 	bool DrawDebug;
+
+	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
+	bool OnScreenPrintDebug;
+
+	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
+	float PrintDebugDuration;
 };

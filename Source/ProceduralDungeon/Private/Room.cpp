@@ -56,6 +56,18 @@ int URoom::GetConnectionIndex(URoom& Room)
 	return Index;
 }
 
+int URoom::GetFirstEmptyConnection()
+{
+	for(int i = 0; i < Connections.Num(); ++i)
+	{
+		if(Connections[i] == nullptr)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
 void URoom::Instantiate(UWorld* world)
 {
 	if (Instance == nullptr)

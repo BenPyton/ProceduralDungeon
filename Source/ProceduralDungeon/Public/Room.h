@@ -43,6 +43,7 @@ public:
 	void SetConnection(int Index, URoom* Room);
 	TWeakObjectPtr<URoom> GetConnection(int Index);
 	int GetConnectionIndex(URoom& Room);
+	int GetFirstEmptyConnection();
 
 	void Instantiate(UWorld* World);
 	void Destroy(UWorld* World);
