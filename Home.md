@@ -20,7 +20,8 @@ In order to get your dungeon generating, you have to override at least those fun
 - [[Choose First Room Data]]
 - [[Choose Next Room Data]]
 - [[Is Valid Dungeon]]
-- [[Continue Adding Room]]
+- [[Continue To Add Room]]
+- [[Choose Door]]
 
 ### Tips
 The generation take a certain time (the generation itself is done on one frame, but the instantiation and loading of each room take some times proportionally to the number and complexity of the rooms).<br/>
