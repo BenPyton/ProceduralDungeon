@@ -1,9 +1,9 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.0.3",
+	"VersionName": "1.1.0",
 	"FriendlyName": "ProceduralDungeon",
-	"Description": "Create procedural dungeons like \"The Binding of Isaac\" or \"Rogue Legacy\" but in 3D.\n You can define your own generation rules.",
+	"Description": "Create procedural dungeons like \"The Binding of Isaac\" or \"Rogue Legacy\" but in 3D.\r\nYou can define your own generation rules.",
 	"Category": "Procedural",
 	"CreatedBy": "Ben Pyton",
 	"CreatedByURL": "",
@@ -12,13 +12,16 @@
 	"SupportURL": "",
 	"CanContainContent": false,
 	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
 	"Installed": true,
 	"Modules": [
-    {
-      "Name": "ProceduralDungeon",
-      "Type": "Runtime",
-      "LoadingPhase": "PreDefault",
-      "WhitelistPlatforms": [ "Win64" ]
-    }
+		{
+			"Name": "ProceduralDungeon",
+			"Type": "Runtime",
+			"LoadingPhase": "PreDefault",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
+		}
 	]
 }
