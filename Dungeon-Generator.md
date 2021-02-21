@@ -54,7 +54,7 @@ This will result in a dungeon more linear with shorter dead ends.\
 The breadth first will prioritize the first added room to continue the generation. This will result in a more spread dungeon.\
 
 This is an example using the same very basic generation rules defined in this wiki. We just set a counter of 20 rooms to add the end room. So with depth first we have a lot of rooms to reach the end but dead-ends of only 1 room each. And with the breadth first, we have less rooms until the end, but the dead-ends are the same length of the path to reach the end (some dead-ends are shorter because the algorithm can't place a room after).\
-[[DepthBreadth]]
+[[Images/DepthBreadth.jpg]]
 
 **Seed Type**\
 You can choose how the seed is generated:
