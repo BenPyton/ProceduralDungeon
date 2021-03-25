@@ -12,4 +12,5 @@ UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer&
 	DrawDebug = true;
 	OnScreenPrintDebug = false;
 	PrintDebugDuration = 60.0f;
+	CanLoop = true;
 }

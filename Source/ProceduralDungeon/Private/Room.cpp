@@ -9,11 +9,11 @@
 #include "ProceduralDungeonSettings.h"
 #include "../Public/Room.h"
 
-void URoom::Init(TSubclassOf<URoomData> _RoomClass, URoom* _Parent)
+#pragma optimize("", off)
+void URoom::Init(TSubclassOf<URoomData> _RoomClass)
 {
 	RoomClass = _RoomClass;
 	Instance = nullptr;
-	Parent = _Parent;
 	Position = FIntVector(0,0,0);
 	Direction = EDoorDirection::North;
 
@@ -22,7 +22,7 @@ void URoom::Init(TSubclassOf<URoomData> _RoomClass, URoom* _Parent)
 	{
 		for (int i = 0; i < Values->GetNbDoor(); i++)
 		{
-			Connections.Add(nullptr);
+			Connections.Add(FRoomConnection());
 		}
 	}
 }
@@ -30,37 +30,27 @@ void URoom::Init(TSubclassOf<URoomData> _RoomClass, URoom* _Parent)
 bool URoom::IsConnected(int _index)
 {
 	check(_index >= 0 && _index < Connections.Num());
-	return Connections[_index] != nullptr;
+	return Connections[_index].OtherRoom != nullptr;
 }
 
-void URoom::SetConnection(int Index, URoom* Room)
+void URoom::SetConnection(int Index, URoom* Room, int OtherIndex)
 {
 	check(Index >= 0 && Index < Connections.Num());
-	Connections[Index] = Room;
+	Connections[Index].OtherRoom = Room;
+	Connections[Index].OtherDoorIndex = OtherIndex;
 }
 
 TWeakObjectPtr<URoom> URoom::GetConnection(int Index)
 {
 	check(Index >= 0 && Index < Connections.Num());
-	return Connections[Index];
-}
-
-// return -1 if _room = null or room is not connected
-int URoom::GetConnectionIndex(URoom& Room)
-{
-	int Index = -1;
-	if (!Connections.Find(&Room, Index))
-	{
-		return -1;
-	}
-	return Index;
+	return Connections[Index].OtherRoom;
 }
 
 int URoom::GetFirstEmptyConnection()
 {
 	for(int i = 0; i < Connections.Num(); ++i)
 	{
-		if(Connections[i] == nullptr)
+		if(Connections[i].OtherRoom == nullptr)
 		{
 			return i;
 		}
@@ -120,6 +110,38 @@ FIntVector URoom::GetDoorWorldPosition(int DoorIndex)
 	return RoomToWorld(Values->Doors[DoorIndex].Position);
 }
 
+int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot)
+{
+	FIntVector localPos = WorldToRoom(WorldPos);
+	EDoorDirection localRot = WorldToRoom(WorldRot);
+
+	for(int i = 0; i < Values->Doors.Num(); ++i)
+	{
+		const FDoorDef door = Values->Doors[i];
+		if(door.Position == localPos && door.Direction == localRot)
+			return i;
+	}
+	return -1;
+}
+
+bool URoom::IsDoorInstanced(int _DoorIndex)
+{
+	check(_DoorIndex >= 0 && _DoorIndex < Values->Doors.Num());
+	return IsValid(Connections[_DoorIndex].DoorInstance);
+}
+
+void URoom::SetDoorInstance(int _DoorIndex, ADoor* _Door)
+{
+	check(_DoorIndex >= 0 && _DoorIndex < Values->Doors.Num());
+	Connections[_DoorIndex].DoorInstance = _Door;
+}
+
+int URoom::GetOtherDoorIndex(int _DoorIndex)
+{
+	check(_DoorIndex >= 0 && _DoorIndex < Values->Doors.Num());
+	return Connections[_DoorIndex].OtherDoorIndex;
+}
+
 FIntVector URoom::WorldToRoom(FIntVector WorldPos)
 {
 	return Rotate(WorldPos - Position, Sub(EDoorDirection::North, Direction));
@@ -128,6 +150,16 @@ FIntVector URoom::WorldToRoom(FIntVector WorldPos)
 FIntVector URoom::RoomToWorld(FIntVector RoomPos)
 {
 	return Rotate(RoomPos, Direction) + Position;
+}
+
+EDoorDirection URoom::WorldToRoom(EDoorDirection WorldRot)
+{
+	return Sub(WorldRot, Direction);
+}
+
+EDoorDirection URoom::RoomToWorld(EDoorDirection RoomRot)
+{
+	return Add(RoomRot, Direction);
 }
 
 void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)
@@ -145,28 +177,36 @@ void URoom::SetPositionFromDoor(int DoorIndex, FIntVector WorldPos)
 void URoom::SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot)
 {
 	check(DoorIndex >= 0 && DoorIndex < Values->Doors.Num());
-	Direction = Add(Sub(WorldRot, Values->Doors[DoorIndex].Direction), EDoorDirection::South);
+	Direction = Sub(WorldRot, Values->Doors[DoorIndex].Direction);
 	Position = WorldPos - RoomToWorld(Values->Doors[DoorIndex].Position);
 }
 
 
 bool URoom::IsOccupied(FIntVector Cell)
 {
-	return Cell.X >= Position.X && Cell.X < Position.X + Values->Size.X
-		&& Cell.Y >= Position.Y && Cell.Y < Position.Y + Values->Size.Y
-		&& Cell.Z >= Position.Z && Cell.Z < Position.Z + Values->Size.Z;
+	FIntVector local = WorldToRoom(Cell);
+	return local.X >= 0 && local.X < Values->Size.X
+		&& local.Y >= 0 && local.Y < Values->Size.Y
+		&& local.Z >= 0 && local.Z < Values->Size.Z;
 }
 
-void URoom::ConnectTo(int ThisDoorIndex, URoom & OtherRoom, int OtherDoorIndex)
+void URoom::TryConnectToExistingDoors(TArray<URoom*>& _RoomList)
 {
-	// Connect room between them
-	OtherRoom.SetConnection(OtherDoorIndex, this);
-	this->SetConnection(ThisDoorIndex, &OtherRoom);
+	for(int i = 0; i < Values->GetNbDoor(); ++i)
+	{
+		EDoorDirection dir = GetDoorWorldOrientation(i);
+		FIntVector pos = GetDoorWorldPosition(i) + URoom::GetDirection(dir);
+		URoom* otherRoom = GetRoomAt(pos, _RoomList);
 
-	// Set position and rotation of new room in world
-	EDoorDirection OtherDoorOrientation = OtherRoom.GetDoorWorldOrientation(OtherDoorIndex);
-	this->SetRotationFromDoor(ThisDoorIndex, OtherDoorOrientation);
-	this->SetPositionFromDoor(ThisDoorIndex, OtherRoom.GetDoorWorldPosition(OtherDoorIndex) + URoom::GetDirection(OtherDoorOrientation));
+		if(IsValid(otherRoom))
+		{
+			int j = otherRoom->GetDoorIndexAt(pos, URoom::Opposite(dir));
+			if(j >= 0) // -1 if no door
+			{
+				Connect(*this, i, *otherRoom, j);
+			}
+		}
+	}
 }
 
 FIntVector Max(const FIntVector& A, const FIntVector& B)
@@ -230,6 +270,11 @@ EDoorDirection URoom::Sub(EDoorDirection A, EDoorDirection B)
 	return (EDoorDirection)D;
 }
 
+EDoorDirection URoom::Opposite(EDoorDirection O)
+{
+	return Add(O, EDoorDirection::South);
+}
+
 FIntVector URoom::GetDirection(EDoorDirection O)
 {
 	FIntVector Dir = FIntVector::ZeroValue;
@@ -280,6 +325,24 @@ FVector URoom::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot)
 	return URoom::Unit() * (FVector(DoorCell) + 0.5f * FVector(URoom::GetDirection(DoorRot)) + FVector(0, 0, URoom::DoorOffset()));
 }
 
+void URoom::Connect(URoom& _RoomA, int _DoorA, URoom& _RoomB, int _DoorB)
+{
+	_RoomA.SetConnection(_DoorA, &_RoomB, _DoorB);
+	_RoomB.SetConnection(_DoorB, &_RoomA, _DoorA);
+}
+
+URoom* URoom::GetRoomAt(FIntVector _RoomCell, TArray<URoom*>& _RoomList)
+{
+	for(auto it = _RoomList.begin(); it != _RoomList.end(); ++it)
+	{
+		if(IsValid(*it) && (*it)->IsOccupied(_RoomCell))
+		{
+			return *it;
+		}
+	}
+	return nullptr;
+}
+
 FVector URoom::Unit()
 {
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
@@ -309,3 +372,12 @@ bool URoom::DrawDebug()
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
 	return Settings->DrawDebug;
 }
+
+bool URoom::CanLoop()
+{
+	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
+	return Settings->CanLoop;
+}
+
+
+#pragma optimize("", on)

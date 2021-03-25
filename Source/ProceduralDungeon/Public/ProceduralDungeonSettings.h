@@ -27,6 +27,9 @@ public:
 	bool OcclusionCulling;
 
 	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
+	bool CanLoop;
+
+	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
 	bool DrawDebug;
 
 	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")

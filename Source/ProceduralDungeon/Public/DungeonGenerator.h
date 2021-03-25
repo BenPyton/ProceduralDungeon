@@ -101,6 +101,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (CompactNodeTitle="Nb Room"))
 	int GetNbRoom() { return RoomList.Num(); }
 
+	URoom* GetRoomAt(FIntVector _roomCell);
+
 	// ===== Events =====
 
 	UPROPERTY(BlueprintAssignable)

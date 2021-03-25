@@ -238,25 +238,30 @@ void ADungeonGenerator::InstantiateRoom(URoom* _Room)
 	{
 		// Get next room
 		URoom* r = _Room->GetConnection(i).Get();
-
 		FIntVector DoorCell = _Room->GetDoorWorldPosition(i);
 		EDoorDirection DoorRot = _Room->GetDoorWorldOrientation(i);
+		int j = _Room->GetOtherDoorIndex(i);
 
-		// Don't instantiate room nor door if it's the parent
-		if (r != _Room->Parent)
+		// Don't instantiate door if it's the parent
+		if (!_Room->IsDoorInstanced(i))
 		{
 			TSubclassOf<ADoor> DoorClass = ChooseDoor(_Room->GetRoomDataClass(), nullptr != r ? r->GetRoomDataClass() : nullptr);
 
 			if (DoorClass != nullptr)
 			{
-				FVector InstanceDoorPos = URoom::GetRealDoorPosition(DoorCell, DoorRot); // URoom::Unit() * (FVector(doorCell) + 0.5f * FVector(URoom::GetDirection(DoorRot)) + FVector(0, 0, URoom::DoorOffset()));
+				FVector InstanceDoorPos = URoom::GetRealDoorPosition(DoorCell, DoorRot);
 				FRotator InstanceDoorRot = FRotator(0, -90 * (int8)DoorRot, 0);
 				ADoor* Door = GetWorld()->SpawnActor<ADoor>(DoorClass, InstanceDoorPos, InstanceDoorRot);
 
 				if (nullptr != Door)
 				{
-					Door->SetConnectingRooms(_Room, r);
 					DoorList.Add(Door);
+					Door->SetConnectingRooms(_Room, r);
+					_Room->SetDoorInstance(i, Door);
+					if(IsValid(r))
+					{
+						r->SetDoorInstance(j, Door);
+					}
 				}
 				else
 				{
@@ -278,6 +283,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& _ParentRoom)
 			continue;
 
 		int nbTries = MaxRoomTry;
+		// Try to place a new room
 		do
 		{
 			nbTries--;
@@ -286,28 +292,32 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& _ParentRoom)
 
 			// Create room from roomdef and set connections with current room
 			newRoom = NewObject<URoom>();
-			newRoom->Init(def, &_ParentRoom);
+			newRoom->Init(def);
 			int doorIndex = defaultObject->RandomDoor ? Random.RandRange(0, newRoom->Values->GetNbDoor() - 1) : 0;
 
-			// Set position, rotation and connections between new room and parent room
-			newRoom->ConnectTo(doorIndex, _ParentRoom, i);
+			// Place the room at its world position with the correct rotation
+			EDoorDirection parentDoorDir = _ParentRoom.GetDoorWorldOrientation(i);
+			FIntVector newRoomPos = _ParentRoom.GetDoorWorldPosition(i) + URoom::GetDirection(parentDoorDir);
+			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomPos, URoom::Opposite(parentDoorDir));
 
+			// Test if it fit in the place
 			if(!URoom::Overlap(*newRoom, RoomList))
 			{
+				// connect the doors to all possible existing rooms
+				URoom::Connect(*newRoom, doorIndex, _ParentRoom, i);
+				if(URoom::CanLoop())
+				{
+					newRoom->TryConnectToExistingDoors(RoomList);
+				}
 				RoomList.Add(newRoom);
+				newRooms.Add(newRoom);
 				DispatchRoomAdded(newRoom->GetRoomDataClass());
 			}
 			else
 			{
 				newRoom = nullptr;
-				_ParentRoom.SetConnection(i, nullptr);
 			}
 		} while(nbTries > 0 && newRoom == nullptr);
-
-		if(newRoom != nullptr)
-		{
-			newRooms.Add(newRoom);
-		}
 	}
 
 	return newRooms;
@@ -559,6 +569,11 @@ TSubclassOf<URoomData> ADungeonGenerator::GetRandomRoomData(TArray<TSubclassOf<U
 {
 	int n = Random.RandRange(0, _RoomDataArray.Num() - 1);
 	return _RoomDataArray[n];
+}
+
+URoom* ADungeonGenerator::GetRoomAt(FIntVector _RoomCell)
+{
+	return URoom::GetRoomAt(_RoomCell, RoomList);
 }
 
 bool ADungeonGenerator::HasAlreadyRoomData(TSubclassOf<URoomData> _RoomData)
