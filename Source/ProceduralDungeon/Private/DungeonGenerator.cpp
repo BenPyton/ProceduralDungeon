@@ -274,6 +274,9 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& _ParentRoom)
 	URoom* newRoom = nullptr;
 	for(int i = 0; i < nbDoor; ++i)
 	{
+		if(_ParentRoom.IsConnected(i))
+			continue;
+
 		int nbTries = MaxRoomTry;
 		do
 		{
