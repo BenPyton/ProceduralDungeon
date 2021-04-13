@@ -33,88 +33,88 @@ public:
 
 	// Update the seed and call the generation on all clients
 	// Do nothing when called on clients
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Dungeon Generator")
 	void Generate();
 
 	// ===== Methods that should be overriden in blueprint =====
 
 	// Return the RoomData you want as root of the dungeon generation
-	UFUNCTION(BlueprintNativeEvent, meta = (DisplayName = "Choose First Room"))
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose First Room"))
 	TSubclassOf<URoomData> ChooseFirstRoomData();
 
 	// Return the RoomData that will be connected to the Current Room
-	UFUNCTION(BlueprintNativeEvent, meta = (DisplayName = "Choose Next Room"))
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Next Room"))
 	TSubclassOf<URoomData> ChooseNextRoomData(TSubclassOf<URoomData> CurrentRoom);
 
 	// Return the door which will be spawned between Current Room and Next Room
-	UFUNCTION(BlueprintNativeEvent, meta = (DisplayName = "Choose Door"))
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Door"))
 	TSubclassOf<ADoor> ChooseDoor(TSubclassOf<URoomData> CurrentRoom, TSubclassOf<URoomData> NextRoom);
 
 	// Condition to validate a dungeon Generation
-	UFUNCTION(BlueprintNativeEvent, meta = (DisplayName = "Is Valid Dungeon"))
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Is Valid Dungeon"))
 	bool IsValidDungeon();
 
 	// Condition to continue or stop adding room to the dungeon
-	UFUNCTION(BlueprintNativeEvent, meta = (DisplayName = "Continue To Add Room"))
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Continue To Add Room"))
 	bool ContinueToAddRoom();
 
 	// ===== Optional events =====
 
 	// Called after unloading previous dungeon but before generating next dungeon.
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Pre Generation"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "Pre Generation"))
 	void OnPreGeneration_BP();
 
 	// Called after all rooms are loaded and initialized
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Post Generation"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "Post Generation"))
 	void OnPostGeneration_BP();
 
 	// Called before generating a new dungeon and each time IsValidDungeon return false
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "Generation Init"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "Generation Init"))
 	void OnGenerationInit_BP();
 
 	// Called when the room NewRoom is added in the generation (but not spawned yet)
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "On Room Added"))
+	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "On Room Added"))
 	void OnRoomAdded_BP(TSubclassOf<URoomData> NewRoom);
 
 	// ===== Utility functions you can use in blueprint =====
 
 	// Return true if a specific RoomData is already in the dungeon
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
 	bool HasAlreadyRoomData(TSubclassOf<URoomData> RoomData);
 
 	// Return true if at least one of the RoomData from the list provided is already in the dungeon
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
 	bool HasAlreadyOneRoomDataFrom(TArray<TSubclassOf<URoomData>> RoomDataList);
 
 	// Return the number of a specific RoomData in the dungeon
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
 	int CountRoomData(TSubclassOf<URoomData> RoomData);
 
 	// Return the total number of RoomData in the dungeon from the list provided
-	UFUNCTION(BlueprintCallable, BlueprintPure)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
 	int CountTotalRoomData(TArray<TSubclassOf<URoomData>> RoomDataList);
 
 	// Return a random RoomData from the array provided
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	TSubclassOf<URoomData> GetRandomRoomData(TArray<TSubclassOf<URoomData>> RoomDataArray);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, meta = (CompactNodeTitle="Nb Room"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle="Nb Room"))
 	int GetNbRoom() { return RoomList.Num(); }
 
 	URoom* GetRoomAt(FIntVector _roomCell);
 
 	// ===== Events =====
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FGenerationEvent OnPreGenerationEvent;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FGenerationEvent OnPostGenerationEvent;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FGenerationEvent OnGenerationInitEvent;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FRoomEvent OnRoomAddedEvent;
 
 protected:
@@ -152,7 +152,7 @@ protected:
 
 private:
 	// Launch the generation process of the dungeon
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Reliable, Category = "Dungeon Generator")
 	void BeginGeneration(uint32 _Seed);
 
 	// Create virtually the dungeon (no load nor initialization of rooms)

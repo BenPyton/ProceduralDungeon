@@ -49,8 +49,8 @@ struct FDoorDef
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "DoorDef")
 	FIntVector Position;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "DoorDef")
 	EDoorDirection Direction;
 };

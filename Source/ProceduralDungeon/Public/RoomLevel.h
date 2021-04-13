@@ -31,7 +31,7 @@ public:
 	bool PendingInit = false;
 	bool IsLocked = false;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Room Level")
 	bool AlwaysVisible = false;
 
 public:
@@ -46,7 +46,7 @@ public:
 	uint32 GetId() { return Id; }
 
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Room Level")
 	uint32 Id;
 	UPROPERTY()
 	TArray<AActor*> ActorsInLevel;

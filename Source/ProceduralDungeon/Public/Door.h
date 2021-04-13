@@ -70,10 +70,10 @@ private:
 public:
 	void SetConnectingRooms(URoom* _roomA, URoom* _roomB);
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName="Is Locked"))
+	UFUNCTION(BlueprintCallable, Category = "Door", meta = (DisplayName="Is Locked"))
 	bool IsLocked() { return locked; }
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Is Open"))
+	UFUNCTION(BlueprintCallable, Category = "Door", meta = (DisplayName = "Is Open"))
 	bool IsOpen() { return isOpen; }
 
 	static void DrawDebug(UWorld* World, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity);

@@ -62,7 +62,7 @@ class PROCEDURALDUNGEON_API UProceduralLevelStreaming : public ULevelStreaming
 
 	virtual void SetShouldBeLoaded(bool bShouldBeLoaded) override;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Procedural Level Streaming")
 	void OnLevelDynamicUnloaded();
 
 	bool IsLevelUnloaded() { return bIsUnloaded; }

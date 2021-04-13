@@ -17,4 +17,13 @@ If you have any suggestion/bug or you want to contribute, don't hesitate to add 
 [![](http://img.youtube.com/vi/DmyNEd0YtDE/0.jpg)](http://www.youtube.com/watch?v=DmyNEd0YtDE "Procedural Dungeon Demo")<br>
 
 ## Installation
-Get the [latest release](https://github.com/BenPyton/ProceduralDungeon/releases) compatible with your Unreal version and extract it to the Plugins folder of your project.
+Get the [latest release](https://github.com/BenPyton/ProceduralDungeon/releases) compatible with your Unreal version.
+
+**For blueprint only projects**\
+You have to extract the plugin inside your Ureal engine `Plugins` folder.\
+For instance: `C:\Program Files\Epic Games\UE_4.26\Engine\Plugins`
+
+**For C++ projects**\
+You can install the plugin in the engine like for blueprint projects.\
+You can also extract the plugin in the `Plugins` folder of your project.\
+For instance: `D:\PathToYourProject\Plugins`

@@ -26,14 +26,14 @@ protected:
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger Type")
 	float TickDuration;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger Type")
 	float ActivationDelay;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger Type")
 	uint8 requiredActorCountToActivate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trigger Type")
 	TSubclassOf<AActor> ActorType;
 
 	UPROPERTY(BlueprintAssignable, Meta = (DisplayName = "On Actor Enter"))
@@ -56,10 +56,10 @@ public:
 	TArray<AActor*> GetActorList() { return ActorList; }
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trigger Type")
 	bool bIsActivated;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trigger Type")
 	TArray<AActor*> ActorList;
 
 private:
