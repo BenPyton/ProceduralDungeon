@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #include "ProceduralLevelStreaming.h"
 #include "Engine/World.h"
 #include "Engine/Level.h"
