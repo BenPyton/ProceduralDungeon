@@ -4,7 +4,6 @@
 #include "Room.h"
 #include "RoomLevel.h"
 #include "DrawDebugHelpers.h"
-#include "../Public/Door.h"
 
 // Sets default values
 ADoor::ADoor()

@@ -7,9 +7,8 @@
 #include "RoomData.h"
 #include "RoomLevel.h"
 #include "ProceduralDungeonSettings.h"
-#include "../Public/Room.h"
+#include "ProceduralDungeonLog.h"
 
-#pragma optimize("", off)
 void URoom::Init(TSubclassOf<URoomData> _RoomClass)
 {
 	RoomClass = _RoomClass;
@@ -24,6 +23,10 @@ void URoom::Init(TSubclassOf<URoomData> _RoomClass)
 		{
 			Connections.Add(FRoomConnection());
 		}
+	}
+	else
+	{
+		LogError("No RoomData provided.");
 	}
 }
 
@@ -62,12 +65,18 @@ void URoom::Instantiate(UWorld* world)
 {
 	if (Instance == nullptr)
 	{
+		if(Values == nullptr)
+		{
+			LogError("Failed to instantiate the room: it has no RoomData.");
+			return;
+		}
+
 		Instance = UProceduralLevelStreaming::Load(world, Values, URoom::Unit() * FVector(Position), FRotator(0, -90 * (int)Direction, 0));
 		UE_LOG(LogProceduralDungeon, Log, TEXT("Load room Instance: %s"), nullptr != Instance ? *Instance->GetWorldAssetPackageName() : TEXT("Null"));
 	}
 	else
 	{
-		UE_LOG(LogProceduralDungeon, Error, TEXT("Can't instantiate an already instanciated room"));
+		LogError("Failed to instantiate the room: it is already instanciated.");
 	}
 }
 
@@ -88,7 +97,6 @@ void URoom::Destroy(UWorld * world)
 	}
 }
 
-
 ARoomLevel* URoom::GetLevelScript()
 {
 	if (Instance == nullptr || !IsValid(Instance))
@@ -96,6 +104,24 @@ ARoomLevel* URoom::GetLevelScript()
 		return nullptr;
 	}
 	return Cast<ARoomLevel>(Instance->GetLevelScriptActor());
+}
+
+bool URoom::IsInstanceLoaded()
+{
+	if(Instance == nullptr || !IsValid(Instance))
+	{
+		return true;
+	}
+	return Instance->IsLevelLoaded();
+}
+
+bool URoom:: IsInstanceUnloaded()
+{
+	if(Instance == nullptr || !IsValid(Instance))
+	{
+		return true;
+	}
+	return Instance->IsLevelUnloaded();
 }
 
 EDoorDirection URoom::GetDoorWorldOrientation(int DoorIndex)
@@ -379,5 +405,3 @@ bool URoom::CanLoop()
 	return Settings->CanLoop;
 }
 
-
-#pragma optimize("", on)

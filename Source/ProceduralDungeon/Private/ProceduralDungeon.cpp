@@ -7,8 +7,6 @@
 
 #define LOCTEXT_NAMESPACE "FProceduralDungeonModule"
 
-DEFINE_LOG_CATEGORY(LogProceduralDungeon);
-
 void FProceduralDungeonModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module

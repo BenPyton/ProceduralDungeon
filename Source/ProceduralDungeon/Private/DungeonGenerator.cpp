@@ -11,6 +11,7 @@
 #include "RoomLevel.h"
 #include "ProceduralDungeon.h"
 #include "ProceduralDungeonSettings.h"
+#include "ProceduralDungeonLog.h"
 
 template<typename T>
 class TQueueOrStack
@@ -77,43 +78,6 @@ private:
 	TQueue<T> m_queue;
 	TArray<T> m_stack;
 };
-
-bool ShowLogsOnScreen(float& _duration)
-{
-	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	_duration = Settings->PrintDebugDuration;
-	return Settings->OnScreenPrintDebug;
-}
-
-void LogInfo(FString message, bool showOnScreen = true)
-{
-	UE_LOG(LogProceduralDungeon, Log, TEXT("%s"), *message);
-	float duration;
-	if(showOnScreen && ShowLogsOnScreen(duration))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::White, message);
-	}
-}
-
-void LogWarning(FString message, bool showOnScreen = true)
-{
-	UE_LOG(LogProceduralDungeon, Warning, TEXT("%s"), *message);
-	float duration;
-	if(showOnScreen && ShowLogsOnScreen(duration))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Yellow, message);
-	}
-}
-
-void LogError(FString message, bool showOnScreen = true)
-{
-	UE_LOG(LogProceduralDungeon, Error, TEXT("%s"), *message);
-	float duration;
-	if(showOnScreen && ShowLogsOnScreen(duration))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Red, message);
-	}
-}
 
 // Sets default values
 ADungeonGenerator::ADungeonGenerator()
@@ -186,6 +150,8 @@ void ADungeonGenerator::CreateDungeon()
 
 	// generate level until there IsValidDungeon return true
 	do {
+		TriesLeft--;
+
 		// Reset generation data
 		UProceduralLevelStreaming::UniqueLevelInstanceId = 0;
 		ARoomLevel::Count = 0;
@@ -193,8 +159,16 @@ void ADungeonGenerator::CreateDungeon()
 
 		// Create the first room
 		RoomList.Empty();
+
+		TSubclassOf<URoomData> def = ChooseFirstRoomData();
+		if(def == nullptr)
+		{
+			LogError("ChooseFirstRoomData returned null.");
+			continue;
+		}
+
 		URoom* root = NewObject<URoom>();
-		root->Init(ChooseFirstRoomData());
+		root->Init(def);
 		RoomList.Add(root);
 
 		// Create the list with the correct mode (depth or breadth)
@@ -224,7 +198,6 @@ void ADungeonGenerator::CreateDungeon()
 			}
 		}
 
-		TriesLeft--;
 	} while (TriesLeft > 0 && !IsValidDungeon());
 }
 
@@ -288,6 +261,12 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& _ParentRoom)
 		{
 			nbTries--;
 			TSubclassOf<URoomData> def = ChooseNextRoomData(_ParentRoom.GetRoomDataClass());
+			if(def == nullptr)
+			{
+				LogError("ChooseNextRoomData returned null.");
+				continue;
+			}
+
 			URoomData* defaultObject = def.GetDefaultObject();
 
 			// Create room from roomdef and set connections with current room
@@ -398,7 +377,7 @@ void ADungeonGenerator::OnStateTick(EGenerationState _State)
 		// Count nb level loaded
 		for (int i = 0; i < RoomList.Num(); i++)
 		{
-			if (RoomList[i]->Instance->IsLevelUnloaded())
+			if (RoomList[i]->IsInstanceUnloaded())
 			{
 				tmp++;
 			}
@@ -417,7 +396,7 @@ void ADungeonGenerator::OnStateTick(EGenerationState _State)
 		// Count nb level loaded
 		for (int i = 0; i < RoomList.Num(); i++)
 		{
-			if (RoomList[i]->Instance->IsLevelLoaded())
+			if (RoomList[i]->IsInstanceLoaded())
 			{
 				tmp++;
 			}

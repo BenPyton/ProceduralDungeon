@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogProceduralDungeon, Log, All);
 
 class FProceduralDungeonModule : public IModuleInterface
 {

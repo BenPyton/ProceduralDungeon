@@ -57,6 +57,8 @@ public:
 	void Instantiate(UWorld* World);
 	void Destroy(UWorld* World);
 	ARoomLevel* GetLevelScript();
+	bool IsInstanceLoaded();
+	bool IsInstanceUnloaded();
 
 	EDoorDirection GetDoorWorldOrientation(int DoorIndex);
 	FIntVector GetDoorWorldPosition(int DoorIndex);
