@@ -61,7 +61,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
 
-	void Init(URoom* _room);
+	void Init(URoom* Room);
 	uint32 GetId() { return Id; }
 
 private:

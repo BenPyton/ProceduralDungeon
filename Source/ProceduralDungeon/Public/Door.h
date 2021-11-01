@@ -71,8 +71,8 @@ protected:
 	void OnDoorClose_BP();
 
 protected:
-	bool locked = false;
-	bool isOpen = false;
+	bool bLocked = false;
+	bool bIsOpen = false;
 
 	// The two connected rooms to this door
 	UPROPERTY()
@@ -80,23 +80,23 @@ protected:
 	UPROPERTY()
 	URoom* RoomB;
 
-	UPROPERTY(EditAnywhere, Category = "Door")
-	bool AlwaysVisible = false;
+	UPROPERTY(EditAnywhere, Category = "Door", meta = (DisplayName = "Always Visible"))
+	bool bAlwaysVisible = false;
 
-	UPROPERTY(EditAnywhere, Category = "Door")
-	bool AlwaysUnlocked = false;
+	UPROPERTY(EditAnywhere, Category = "Door", meta = (DisplayName = "Always Unlocked"))
+	bool bAlwaysUnlocked = false;
 
 private:
-	bool prevLocked = false;
+	bool bPrevLocked = false;
 
 public:
-	void SetConnectingRooms(URoom* _roomA, URoom* _roomB);
+	void SetConnectingRooms(URoom* RoomA, URoom* RoomB);
 
 	UFUNCTION(BlueprintCallable, Category = "Door", meta = (DisplayName="Is Locked"))
-	bool IsLocked() { return locked; }
+	bool IsLocked() { return bLocked; }
 
 	UFUNCTION(BlueprintCallable, Category = "Door", meta = (DisplayName = "Is Open"))
-	bool IsOpen() { return isOpen; }
+	bool IsOpen() { return bIsOpen; }
 
 	static void DrawDebug(UWorld* World, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity);
 };

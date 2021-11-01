@@ -31,9 +31,9 @@
 #include "ProceduralDungeonSettings.h"
 #include "ProceduralDungeonLog.h"
 
-void URoom::Init(URoomData* _RoomData)
+void URoom::Init(URoomData* Data)
 {
-	RoomData = _RoomData;
+	RoomData = Data;
 	Instance = nullptr;
 	Position = FIntVector(0,0,0);
 	Direction = EDoorDirection::North;
@@ -51,10 +51,10 @@ void URoom::Init(URoomData* _RoomData)
 	}
 }
 
-bool URoom::IsConnected(int _index)
+bool URoom::IsConnected(int Index)
 {
-	check(_index >= 0 && _index < Connections.Num());
-	return Connections[_index].OtherRoom != nullptr;
+	check(Index >= 0 && Index < Connections.Num());
+	return Connections[Index].OtherRoom != nullptr;
 }
 
 void URoom::SetConnection(int Index, URoom* Room, int OtherIndex)
@@ -82,7 +82,7 @@ int URoom::GetFirstEmptyConnection()
 	return -1;
 }
 
-void URoom::Instantiate(UWorld* world)
+void URoom::Instantiate(UWorld* World)
 {
 	if (Instance == nullptr)
 	{
@@ -92,7 +92,7 @@ void URoom::Instantiate(UWorld* world)
 			return;
 		}
 
-		Instance = UProceduralLevelStreaming::Load(world, RoomData, URoom::Unit() * FVector(Position), FRotator(0, -90 * (int)Direction, 0));
+		Instance = UProceduralLevelStreaming::Load(World, RoomData, URoom::Unit() * FVector(Position), FRotator(0, -90 * (int)Direction, 0));
 		UE_LOG(LogProceduralDungeon, Log, TEXT("Load room Instance: %s"), nullptr != Instance ? *Instance->GetWorldAssetPackageName() : TEXT("Null"));
 	}
 	else
@@ -101,7 +101,7 @@ void URoom::Instantiate(UWorld* world)
 	}
 }
 
-void URoom::Destroy(UWorld * world)
+void URoom::Destroy(UWorld* World)
 {
 	if (Instance != nullptr)
 	{
@@ -114,7 +114,7 @@ void URoom::Destroy(UWorld * world)
 			script->Destroy();
 		}
 
-		UProceduralLevelStreaming::Unload(world, Instance);
+		UProceduralLevelStreaming::Unload(World, Instance);
 	}
 }
 
@@ -171,22 +171,22 @@ int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot)
 	return -1;
 }
 
-bool URoom::IsDoorInstanced(int _DoorIndex)
+bool URoom::IsDoorInstanced(int DoorIndex)
 {
-	check(_DoorIndex >= 0 && _DoorIndex < RoomData->Doors.Num());
-	return IsValid(Connections[_DoorIndex].DoorInstance);
+	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	return IsValid(Connections[DoorIndex].DoorInstance);
 }
 
-void URoom::SetDoorInstance(int _DoorIndex, ADoor* _Door)
+void URoom::SetDoorInstance(int DoorIndex, ADoor* Door)
 {
-	check(_DoorIndex >= 0 && _DoorIndex < RoomData->Doors.Num());
-	Connections[_DoorIndex].DoorInstance = _Door;
+	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	Connections[DoorIndex].DoorInstance = Door;
 }
 
-int URoom::GetOtherDoorIndex(int _DoorIndex)
+int URoom::GetOtherDoorIndex(int DoorIndex)
 {
-	check(_DoorIndex >= 0 && _DoorIndex < RoomData->Doors.Num());
-	return Connections[_DoorIndex].OtherDoorIndex;
+	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	return Connections[DoorIndex].OtherDoorIndex;
 }
 
 FIntVector URoom::WorldToRoom(FIntVector WorldPos)
@@ -237,13 +237,13 @@ bool URoom::IsOccupied(FIntVector Cell)
 		&& local.Z >= 0 && local.Z < RoomData->Size.Z;
 }
 
-void URoom::TryConnectToExistingDoors(TArray<URoom*>& _RoomList)
+void URoom::TryConnectToExistingDoors(TArray<URoom*>& RoomList)
 {
 	for(int i = 0; i < RoomData->GetNbDoor(); ++i)
 	{
 		EDoorDirection dir = GetDoorWorldOrientation(i);
 		FIntVector pos = GetDoorWorldPosition(i) + URoom::GetDirection(dir);
-		URoom* otherRoom = GetRoomAt(pos, _RoomList);
+		URoom* otherRoom = GetRoomAt(pos, RoomList);
 
 		if(IsValid(otherRoom))
 		{
@@ -372,17 +372,17 @@ FVector URoom::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot)
 	return URoom::Unit() * (FVector(DoorCell) + 0.5f * FVector(URoom::GetDirection(DoorRot)) + FVector(0, 0, URoom::DoorOffset()));
 }
 
-void URoom::Connect(URoom& _RoomA, int _DoorA, URoom& _RoomB, int _DoorB)
+void URoom::Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB)
 {
-	_RoomA.SetConnection(_DoorA, &_RoomB, _DoorB);
-	_RoomB.SetConnection(_DoorB, &_RoomA, _DoorA);
+	RoomA.SetConnection(DoorA, &RoomB, DoorB);
+	RoomB.SetConnection(DoorB, &RoomA, DoorA);
 }
 
-URoom* URoom::GetRoomAt(FIntVector _RoomCell, TArray<URoom*>& _RoomList)
+URoom* URoom::GetRoomAt(FIntVector RoomCell, TArray<URoom*>& RoomList)
 {
-	for(auto it = _RoomList.begin(); it != _RoomList.end(); ++it)
+	for(auto it = RoomList.begin(); it != RoomList.end(); ++it)
 	{
-		if(IsValid(*it) && (*it)->IsOccupied(_RoomCell))
+		if(IsValid(*it) && (*it)->IsOccupied(RoomCell))
 		{
 			return *it;
 		}

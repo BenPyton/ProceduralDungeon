@@ -123,7 +123,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle="Nb Room"))
 	int GetNbRoom() { return RoomList.Num(); }
 
-	URoom* GetRoomAt(FIntVector _roomCell);
+	URoom* GetRoomAt(FIntVector RoomCell);
 
 	// ===== Events =====
 
@@ -175,17 +175,17 @@ protected:
 private:
 	// Launch the generation process of the dungeon
 	UFUNCTION(NetMulticast, Reliable, Category = "Dungeon Generator")
-	void BeginGeneration(uint32 _Seed);
+	void BeginGeneration(uint32 GenerationSeed);
 
 	// Create virtually the dungeon (no load nor initialization of rooms)
 	UFUNCTION()
 	void CreateDungeon();
 
 	// That add a room function to generate all rooms
-	TArray<URoom*> AddNewRooms(URoom& _ParentRoom);
+	TArray<URoom*> AddNewRooms(URoom& ParentRoom);
 
 	// Instantiate a room in the scene
-	void InstantiateRoom(URoom* _Room);
+	void InstantiateRoom(URoom* Room);
 
 	// Load all room levels
 	UFUNCTION()
@@ -200,11 +200,11 @@ private:
 	UFUNCTION()
 	void SetState(EGenerationState NewState);
 	UFUNCTION()
-	void OnStateBegin(EGenerationState _State);
+	void OnStateBegin(EGenerationState State);
 	UFUNCTION()
-	void OnStateTick(EGenerationState _State);
+	void OnStateTick(EGenerationState State);
 	UFUNCTION()
-	void OnStateEnd(EGenerationState _State);
+	void OnStateEnd(EGenerationState State);
 
 	// ===== Dispatch optional events =====
 
@@ -241,7 +241,5 @@ private:
 	int NbInitRoom = 0;
 	int NbLoadedRoom = 0;
 	int NbUnloadedRoom = 0;
-
-	EGenerationState PreviousState = EGenerationState::None;
-	EGenerationState State = EGenerationState::None;
+	EGenerationState CurrentState = EGenerationState::None;
 };

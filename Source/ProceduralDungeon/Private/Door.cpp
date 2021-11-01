@@ -41,17 +41,17 @@ void ADoor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	locked = !AlwaysUnlocked && 
+	bLocked = !bAlwaysUnlocked && 
 		   ((RoomA == nullptr || (RoomA->GetLevelScript() != nullptr && RoomA->GetLevelScript()->IsLocked))
 		||  (RoomB == nullptr || (RoomB->GetLevelScript() != nullptr && RoomB->GetLevelScript()->IsLocked)));
 
-	SetActorHiddenInGame( !AlwaysVisible &&
+	SetActorHiddenInGame( !bAlwaysVisible &&
 			(RoomA == nullptr || (RoomA->GetLevelScript() != nullptr && RoomA->GetLevelScript()->IsHidden)) 
 		&&	(RoomB == nullptr || (RoomB->GetLevelScript() != nullptr && RoomB->GetLevelScript()->IsHidden)));
 
-	if (locked != prevLocked)
+	if (bLocked != bPrevLocked)
 	{
-		if (locked)
+		if (bLocked)
 		{
 			CloseDoor();
 			OnDoorLock();
@@ -64,7 +64,7 @@ void ADoor::Tick(float DeltaTime)
 		}
 	}
 
-	prevLocked = locked;
+	bPrevLocked = bLocked;
 
 #if WITH_EDITOR
 	DrawDebug(GetWorld());
@@ -73,9 +73,9 @@ void ADoor::Tick(float DeltaTime)
 
 void ADoor::OpenDoor()
 {
-	if (!isOpen && !locked)
+	if (!bIsOpen && !bLocked)
 	{
-		isOpen = true;
+		bIsOpen = true;
 		OnDoorOpen();
 		OnDoorOpen_BP();
 	}
@@ -83,18 +83,18 @@ void ADoor::OpenDoor()
 
 void ADoor::CloseDoor()
 {
-	if (isOpen)
+	if (bIsOpen)
 	{
-		isOpen = false;
+		bIsOpen = false;
 		OnDoorClose();
 		OnDoorClose_BP();
 	}
 }
 
-void ADoor::SetConnectingRooms(URoom * _roomA, URoom * _roomB)
+void ADoor::SetConnectingRooms(URoom * _RoomA, URoom * _RoomB)
 {
-	RoomA = _roomA;
-	RoomB = _roomB;
+	RoomA = _RoomA;
+	RoomB = _RoomB;
 }
 
 void ADoor::DrawDebug(UWorld* World, FIntVector DoorCell, EDoorDirection DoorRot, FTransform Transform)

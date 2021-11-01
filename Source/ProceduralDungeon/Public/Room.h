@@ -67,7 +67,7 @@ private:
 	URoomData* RoomData;
 
 public:
-	void Init(URoomData* _RoomData);
+	void Init(URoomData* RoomData);
 
 	bool IsConnected(int Index);
 	void SetConnection(int Index, URoom* Room, int OtherDoorIndex);
@@ -84,9 +84,9 @@ public:
 	FIntVector GetDoorWorldPosition(int DoorIndex);
 	int GetConnectionCount() { return Connections.Num(); }
 	int GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot);
-	bool IsDoorInstanced(int _DoorIndex);
-	void SetDoorInstance(int _DoorIndex, ADoor* _Door);
-	int GetOtherDoorIndex(int _DoorIndex);
+	bool IsDoorInstanced(int DoorIndex);
+	void SetDoorInstance(int DoorIndex, ADoor* Door);
+	int GetOtherDoorIndex(int DoorIndex);
 	void TryConnectToExistingDoors(TArray<URoom*>& RoomList);
 
 	FIntVector WorldToRoom(FIntVector WorldPos);
@@ -109,8 +109,8 @@ public:
 
 	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot);
 
-	static void Connect(URoom& _RoomA, int _DoorA, URoom& _RoomB, int _DoorB);
-	static URoom* GetRoomAt(FIntVector _RoomCell, TArray<URoom*>& _RoomList);
+	static void Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB);
+	static URoom* GetRoomAt(FIntVector RoomCell, TArray<URoom*>& RoomList);
 
 	// Plugin Settings
 	static FVector Unit();
