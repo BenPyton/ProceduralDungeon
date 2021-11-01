@@ -31,7 +31,7 @@
 #include "DungeonGenerator.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGenerationEvent);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRoomEvent, TSubclassOf<URoomData>, NewRoom);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRoomEvent, URoomData*, NewRoom);
 
 class ADoor;
 class URoom;
@@ -62,15 +62,15 @@ public:
 
 	// Return the RoomData you want as root of the dungeon generation
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose First Room"))
-	TSubclassOf<URoomData> ChooseFirstRoomData();
+	URoomData* ChooseFirstRoomData();
 
 	// Return the RoomData that will be connected to the Current Room
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Next Room"))
-	TSubclassOf<URoomData> ChooseNextRoomData(TSubclassOf<URoomData> CurrentRoom);
+	URoomData* ChooseNextRoomData(URoomData* CurrentRoom);
 
 	// Return the door which will be spawned between Current Room and Next Room
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Door"))
-	TSubclassOf<ADoor> ChooseDoor(TSubclassOf<URoomData> CurrentRoom, TSubclassOf<URoomData> NextRoom);
+	TSubclassOf<ADoor> ChooseDoor(URoomData* CurrentRoom, URoomData* NextRoom);
 
 	// Condition to validate a dungeon Generation
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Is Valid Dungeon"))
@@ -96,29 +96,29 @@ public:
 
 	// Called when the room NewRoom is added in the generation (but not spawned yet)
 	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "On Room Added"))
-	void OnRoomAdded_BP(TSubclassOf<URoomData> NewRoom);
+	void OnRoomAdded_BP(URoomData* NewRoom);
 
 	// ===== Utility functions you can use in blueprint =====
 
 	// Return true if a specific RoomData is already in the dungeon
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
-	bool HasAlreadyRoomData(TSubclassOf<URoomData> RoomData);
+	bool HasAlreadyRoomData(URoomData* RoomData);
 
 	// Return true if at least one of the RoomData from the list provided is already in the dungeon
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
-	bool HasAlreadyOneRoomDataFrom(TArray<TSubclassOf<URoomData>> RoomDataList);
+	bool HasAlreadyOneRoomDataFrom(TArray<URoomData*> RoomDataList);
 
 	// Return the number of a specific RoomData in the dungeon
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
-	int CountRoomData(TSubclassOf<URoomData> RoomData);
+	int CountRoomData(URoomData* RoomData);
 
 	// Return the total number of RoomData in the dungeon from the list provided
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
-	int CountTotalRoomData(TArray<TSubclassOf<URoomData>> RoomDataList);
+	int CountTotalRoomData(TArray<URoomData*> RoomDataList);
 
 	// Return a random RoomData from the array provided
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
-	TSubclassOf<URoomData> GetRandomRoomData(TArray<TSubclassOf<URoomData>> RoomDataArray);
+	URoomData* GetRandomRoomData(TArray<URoomData*> RoomDataArray);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle="Nb Room"))
 	int GetNbRoom() { return RoomList.Num(); }
@@ -144,13 +144,13 @@ protected:
 	// ===== Implementation of blueprint native events  =====
 
 	UFUNCTION()
-	virtual TSubclassOf<URoomData> ChooseFirstRoomData_Implementation();
+	virtual URoomData* ChooseFirstRoomData_Implementation();
 
 	UFUNCTION()
-	virtual TSubclassOf<URoomData> ChooseNextRoomData_Implementation(TSubclassOf<URoomData> CurrentRoom);
+	virtual URoomData* ChooseNextRoomData_Implementation(URoomData* CurrentRoom);
 
 	UFUNCTION()
-	virtual TSubclassOf<ADoor> ChooseDoor_Implementation(TSubclassOf<URoomData> CurrentRoom, TSubclassOf<URoomData> NextRoom);
+	virtual TSubclassOf<ADoor> ChooseDoor_Implementation(URoomData* CurrentRoom, URoomData* NextRoom);
 
 	UFUNCTION()
 	virtual bool IsValidDungeon_Implementation();
@@ -170,7 +170,7 @@ protected:
 	virtual void OnGenerationInit() {}
 
 	UFUNCTION()
-	virtual void OnRoomAdded(TSubclassOf<URoomData> NewRoom) {}
+	virtual void OnRoomAdded(URoomData* NewRoom) {}
 
 private:
 	// Launch the generation process of the dungeon
@@ -218,7 +218,7 @@ private:
 	void DispatchGenerationInit();
 
 	UFUNCTION()
-	void DispatchRoomAdded(TSubclassOf<URoomData> NewRoom);
+	void DispatchRoomAdded(URoomData* NewRoom);
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Procedural Generation")

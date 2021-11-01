@@ -46,7 +46,7 @@ void ARoomLockerBase::SetLocked(bool Locked, bool Self, TSubclassOf<URoomData> R
 			{
 				if (nullptr != Room->GetConnection(i) && nullptr != Room->GetConnection(i)->GetLevelScript())
 				{
-					if (RoomType == Room->GetConnection(i)->GetRoomDataClass())
+					if (RoomType == Room->GetConnection(i)->GetRoomData()->GetClass())
 					{
 						Room->GetConnection(i)->GetLevelScript()->IsLocked = Locked;
 					}

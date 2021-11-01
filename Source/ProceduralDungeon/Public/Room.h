@@ -60,16 +60,14 @@ public:
 	FIntVector Position;
 	EDoorDirection Direction;
 
-	UPROPERTY()
-	URoomData* Values = nullptr;
-
-	TSubclassOf<URoomData> GetRoomDataClass() { return RoomClass; }
+	URoomData* GetRoomData() { return RoomData; }
 
 private:
-	TSubclassOf<URoomData> RoomClass;
+	UPROPERTY()
+	URoomData* RoomData;
 
 public:
-	void Init(TSubclassOf<URoomData> Values);
+	void Init(URoomData* _RoomData);
 
 	bool IsConnected(int Index);
 	void SetConnection(int Index, URoom* Room, int OtherDoorIndex);

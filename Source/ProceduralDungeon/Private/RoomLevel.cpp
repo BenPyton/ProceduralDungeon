@@ -90,8 +90,8 @@ void ARoomLevel::Tick(float DeltaTime)
 			FIntVector right = URoom::GetDirection(URoom::Add(Room->Direction, EDoorDirection::East));
 
 			// Create triggerBox for occlusion culling
-			Center = 0.5f * (URoom::Unit() * FVector(Room->Position + Room->RoomToWorld(Room->Values->Size) - forward - right));
-			HalfExtents = 0.5f * (URoom::Unit() * FVector(Room->RoomToWorld(Room->Values->Size) - Room->Position));
+			Center = 0.5f * (URoom::Unit() * FVector(Room->Position + Room->RoomToWorld(Room->GetRoomData()->Size) - forward - right));
+			HalfExtents = 0.5f * (URoom::Unit() * FVector(Room->RoomToWorld(Room->GetRoomData()->Size) - Room->Position));
 			HalfExtents = FVector(FMath::Abs(HalfExtents.X), FMath::Abs(HalfExtents.Y), FMath::Abs(HalfExtents.Z));
 
 			// Register All Actors in the level
@@ -113,16 +113,14 @@ void ARoomLevel::Tick(float DeltaTime)
 		Display();
 	}
 
-	if (Data == nullptr)
+	if (!IsValid(Data))
 		return;
-
-	URoomData* Values = Data.GetDefaultObject();
 
 	FIntVector forward = URoom::GetDirection(EDoorDirection::North);
 	FIntVector right = URoom::GetDirection(URoom::Add(EDoorDirection::North, EDoorDirection::East));
 
-	Center = 0.5f * (URoom::Unit() * FVector(Values->Size - forward - right));
-	HalfExtents = 0.5f * (URoom::Unit() * FVector(Values->Size));
+	Center = 0.5f * (URoom::Unit() * FVector(Data->Size - forward - right));
+	HalfExtents = 0.5f * (URoom::Unit() * FVector(Data->Size));
 	HalfExtents = FVector(FMath::Abs(HalfExtents.X), FMath::Abs(HalfExtents.Y), FMath::Abs(HalfExtents.Z));
 
 	Center = Transform.TransformPosition(Center);
@@ -139,9 +137,9 @@ void ARoomLevel::Tick(float DeltaTime)
 		FVector DoorSize = URoom::DoorSize();
 
 		// Doors
-		for (int i = 0; i < Values->Doors.Num(); i++)
+		for (int i = 0; i < Data->Doors.Num(); i++)
 		{
-			ADoor::DrawDebug(GetWorld(), Values->Doors[i].Position, Values->Doors[i].Direction, Transform);
+			ADoor::DrawDebug(GetWorld(), Data->Doors[i].Position, Data->Doors[i].Direction, Transform);
 		}
 	}
 #endif

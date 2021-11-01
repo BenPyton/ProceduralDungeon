@@ -182,8 +182,8 @@ void ADungeonGenerator::CreateDungeon()
 		// Create the first room
 		RoomList.Empty();
 
-		TSubclassOf<URoomData> def = ChooseFirstRoomData();
-		if(def == nullptr)
+		URoomData* def = ChooseFirstRoomData();
+		if(!IsValid(def))
 		{
 			LogError("ChooseFirstRoomData returned null.");
 			continue;
@@ -240,7 +240,7 @@ void ADungeonGenerator::InstantiateRoom(URoom* _Room)
 		// Don't instantiate door if it's the parent
 		if (!_Room->IsDoorInstanced(i))
 		{
-			TSubclassOf<ADoor> DoorClass = ChooseDoor(_Room->GetRoomDataClass(), nullptr != r ? r->GetRoomDataClass() : nullptr);
+			TSubclassOf<ADoor> DoorClass = ChooseDoor(_Room->GetRoomData(), nullptr != r ? r->GetRoomData() : nullptr);
 
 			if (DoorClass != nullptr)
 			{
@@ -270,7 +270,7 @@ void ADungeonGenerator::InstantiateRoom(URoom* _Room)
 TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& _ParentRoom)
 {
 	TArray<URoom*> newRooms;
-	int nbDoor = _ParentRoom.Values->GetNbDoor();
+	int nbDoor = _ParentRoom.GetRoomData()->GetNbDoor();
 	URoom* newRoom = nullptr;
 	for(int i = 0; i < nbDoor; ++i)
 	{
@@ -282,19 +282,17 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& _ParentRoom)
 		do
 		{
 			nbTries--;
-			TSubclassOf<URoomData> def = ChooseNextRoomData(_ParentRoom.GetRoomDataClass());
-			if(def == nullptr)
+			URoomData* def = ChooseNextRoomData(_ParentRoom.GetRoomData());
+			if(!IsValid(def))
 			{
 				LogError("ChooseNextRoomData returned null.");
 				continue;
 			}
 
-			URoomData* defaultObject = def.GetDefaultObject();
-
 			// Create room from roomdef and set connections with current room
 			newRoom = NewObject<URoom>();
 			newRoom->Init(def);
-			int doorIndex = defaultObject->RandomDoor ? Random.RandRange(0, newRoom->Values->GetNbDoor() - 1) : 0;
+			int doorIndex = def->RandomDoor ? Random.RandRange(0, newRoom->GetRoomData()->GetNbDoor() - 1) : 0;
 
 			// Place the room at its world position with the correct rotation
 			EDoorDirection parentDoorDir = _ParentRoom.GetDoorWorldOrientation(i);
@@ -312,7 +310,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& _ParentRoom)
 				}
 				RoomList.Add(newRoom);
 				newRooms.Add(newRoom);
-				DispatchRoomAdded(newRoom->GetRoomDataClass());
+				DispatchRoomAdded(newRoom->GetRoomData());
 			}
 			else
 			{
@@ -508,19 +506,19 @@ void ADungeonGenerator::OnStateEnd(EGenerationState _State)
 	}
 }
 
-TSubclassOf<URoomData> ADungeonGenerator::ChooseFirstRoomData_Implementation()
+URoomData* ADungeonGenerator::ChooseFirstRoomData_Implementation()
 {
 	LogError("Error: ChooseFirstRoomData not implemented");
 	return nullptr;
 }
 
-TSubclassOf<URoomData> ADungeonGenerator::ChooseNextRoomData_Implementation(TSubclassOf<URoomData> CurrentRoom)
+URoomData* ADungeonGenerator::ChooseNextRoomData_Implementation(URoomData* CurrentRoom)
 {
 	LogError("Error: ChooseNextRoomData not implemented");
 	return nullptr;
 }
 
-TSubclassOf<ADoor> ADungeonGenerator::ChooseDoor_Implementation(TSubclassOf<URoomData> CurrentRoom, TSubclassOf<URoomData> NextRoom)
+TSubclassOf<ADoor> ADungeonGenerator::ChooseDoor_Implementation(URoomData* CurrentRoom, URoomData* NextRoom)
 {
 	LogError("Error: ChooseDoor not implemented");
 	return nullptr;
@@ -559,14 +557,14 @@ void ADungeonGenerator::DispatchGenerationInit()
 	OnGenerationInitEvent.Broadcast();
 }
 
-void ADungeonGenerator::DispatchRoomAdded(TSubclassOf<URoomData> NewRoom)
+void ADungeonGenerator::DispatchRoomAdded(URoomData* NewRoom)
 {
 	OnRoomAdded(NewRoom);
 	OnRoomAdded_BP(NewRoom);
 	OnRoomAddedEvent.Broadcast(NewRoom);
 }
 
-TSubclassOf<URoomData> ADungeonGenerator::GetRandomRoomData(TArray<TSubclassOf<URoomData>> _RoomDataArray)
+URoomData* ADungeonGenerator::GetRandomRoomData(TArray<URoomData*> _RoomDataArray)
 {
 	int n = Random.RandRange(0, _RoomDataArray.Num() - 1);
 	return _RoomDataArray[n];
@@ -577,22 +575,22 @@ URoom* ADungeonGenerator::GetRoomAt(FIntVector _RoomCell)
 	return URoom::GetRoomAt(_RoomCell, RoomList);
 }
 
-bool ADungeonGenerator::HasAlreadyRoomData(TSubclassOf<URoomData> _RoomData)
+bool ADungeonGenerator::HasAlreadyRoomData(URoomData* _RoomData)
 {
 	return CountRoomData(_RoomData) > 0;
 }
 
-bool ADungeonGenerator::HasAlreadyOneRoomDataFrom(TArray<TSubclassOf<URoomData>> _RoomDataList)
+bool ADungeonGenerator::HasAlreadyOneRoomDataFrom(TArray<URoomData*> _RoomDataList)
 {
 	return CountTotalRoomData(_RoomDataList) > 0;
 }
 
-int ADungeonGenerator::CountRoomData(TSubclassOf<URoomData> _RoomData)
+int ADungeonGenerator::CountRoomData(URoomData* _RoomData)
 {
 	int count = 0;
 	for(int i = 0; i < RoomList.Num(); i++)
 	{
-		if(RoomList[i]->GetRoomDataClass() == _RoomData)
+		if(RoomList[i]->GetRoomData() == _RoomData)
 		{
 			count++;
 		}
@@ -600,12 +598,12 @@ int ADungeonGenerator::CountRoomData(TSubclassOf<URoomData> _RoomData)
 	return  count;
 }
 
-int ADungeonGenerator::CountTotalRoomData(TArray<TSubclassOf<URoomData>> _RoomDataList)
+int ADungeonGenerator::CountTotalRoomData(TArray<URoomData*> _RoomDataList)
 {
 	int count = 0;
 	for(int i = 0; i < RoomList.Num(); i++)
 	{
-		if(_RoomDataList.Contains(RoomList[i]->GetRoomDataClass()))
+		if(_RoomDataList.Contains(RoomList[i]->GetRoomData()))
 		{
 			count++;
 		}

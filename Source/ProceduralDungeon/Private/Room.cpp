@@ -31,17 +31,16 @@
 #include "ProceduralDungeonSettings.h"
 #include "ProceduralDungeonLog.h"
 
-void URoom::Init(TSubclassOf<URoomData> _RoomClass)
+void URoom::Init(URoomData* _RoomData)
 {
-	RoomClass = _RoomClass;
+	RoomData = _RoomData;
 	Instance = nullptr;
 	Position = FIntVector(0,0,0);
 	Direction = EDoorDirection::North;
 
-	Values = _RoomClass.GetDefaultObject();
-	if (nullptr != Values)
+	if (IsValid(RoomData))
 	{
-		for (int i = 0; i < Values->GetNbDoor(); i++)
+		for (int i = 0; i < RoomData->GetNbDoor(); i++)
 		{
 			Connections.Add(FRoomConnection());
 		}
@@ -87,13 +86,13 @@ void URoom::Instantiate(UWorld* world)
 {
 	if (Instance == nullptr)
 	{
-		if(Values == nullptr)
+		if(!IsValid(RoomData))
 		{
 			LogError("Failed to instantiate the room: it has no RoomData.");
 			return;
 		}
 
-		Instance = UProceduralLevelStreaming::Load(world, Values, URoom::Unit() * FVector(Position), FRotator(0, -90 * (int)Direction, 0));
+		Instance = UProceduralLevelStreaming::Load(world, RoomData, URoom::Unit() * FVector(Position), FRotator(0, -90 * (int)Direction, 0));
 		UE_LOG(LogProceduralDungeon, Log, TEXT("Load room Instance: %s"), nullptr != Instance ? *Instance->GetWorldAssetPackageName() : TEXT("Null"));
 	}
 	else
@@ -148,14 +147,14 @@ bool URoom:: IsInstanceUnloaded()
 
 EDoorDirection URoom::GetDoorWorldOrientation(int DoorIndex)
 {
-	check(DoorIndex >= 0 && DoorIndex < Values->Doors.Num());
-	return Add(Values->Doors[DoorIndex].Direction, Direction);
+	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	return Add(RoomData->Doors[DoorIndex].Direction, Direction);
 }
 
 FIntVector URoom::GetDoorWorldPosition(int DoorIndex)
 {
-	check(DoorIndex >= 0 && DoorIndex < Values->Doors.Num());
-	return RoomToWorld(Values->Doors[DoorIndex].Position);
+	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	return RoomToWorld(RoomData->Doors[DoorIndex].Position);
 }
 
 int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot)
@@ -163,9 +162,9 @@ int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot)
 	FIntVector localPos = WorldToRoom(WorldPos);
 	EDoorDirection localRot = WorldToRoom(WorldRot);
 
-	for(int i = 0; i < Values->Doors.Num(); ++i)
+	for(int i = 0; i < RoomData->Doors.Num(); ++i)
 	{
-		const FDoorDef door = Values->Doors[i];
+		const FDoorDef door = RoomData->Doors[i];
 		if(door.Position == localPos && door.Direction == localRot)
 			return i;
 	}
@@ -174,19 +173,19 @@ int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot)
 
 bool URoom::IsDoorInstanced(int _DoorIndex)
 {
-	check(_DoorIndex >= 0 && _DoorIndex < Values->Doors.Num());
+	check(_DoorIndex >= 0 && _DoorIndex < RoomData->Doors.Num());
 	return IsValid(Connections[_DoorIndex].DoorInstance);
 }
 
 void URoom::SetDoorInstance(int _DoorIndex, ADoor* _Door)
 {
-	check(_DoorIndex >= 0 && _DoorIndex < Values->Doors.Num());
+	check(_DoorIndex >= 0 && _DoorIndex < RoomData->Doors.Num());
 	Connections[_DoorIndex].DoorInstance = _Door;
 }
 
 int URoom::GetOtherDoorIndex(int _DoorIndex)
 {
-	check(_DoorIndex >= 0 && _DoorIndex < Values->Doors.Num());
+	check(_DoorIndex >= 0 && _DoorIndex < RoomData->Doors.Num());
 	return Connections[_DoorIndex].OtherDoorIndex;
 }
 
@@ -212,35 +211,35 @@ EDoorDirection URoom::RoomToWorld(EDoorDirection RoomRot)
 
 void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)
 {
-	check(DoorIndex >= 0 && DoorIndex < Values->Doors.Num());
-	Direction = Add(Sub(WorldRot, Values->Doors[DoorIndex].Direction), EDoorDirection::South);
+	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	Direction = Add(Sub(WorldRot, RoomData->Doors[DoorIndex].Direction), EDoorDirection::South);
 }
 
 void URoom::SetPositionFromDoor(int DoorIndex, FIntVector WorldPos)
 {
-	check(DoorIndex >= 0 && DoorIndex < Values->Doors.Num());
-	Position = WorldPos - RoomToWorld(Values->Doors[DoorIndex].Position);
+	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	Position = WorldPos - RoomToWorld(RoomData->Doors[DoorIndex].Position);
 }
 
 void URoom::SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot)
 {
-	check(DoorIndex >= 0 && DoorIndex < Values->Doors.Num());
-	Direction = Sub(WorldRot, Values->Doors[DoorIndex].Direction);
-	Position = WorldPos - RoomToWorld(Values->Doors[DoorIndex].Position);
+	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	Direction = Sub(WorldRot, RoomData->Doors[DoorIndex].Direction);
+	Position = WorldPos - RoomToWorld(RoomData->Doors[DoorIndex].Position);
 }
 
 
 bool URoom::IsOccupied(FIntVector Cell)
 {
 	FIntVector local = WorldToRoom(Cell);
-	return local.X >= 0 && local.X < Values->Size.X
-		&& local.Y >= 0 && local.Y < Values->Size.Y
-		&& local.Z >= 0 && local.Z < Values->Size.Z;
+	return local.X >= 0 && local.X < RoomData->Size.X
+		&& local.Y >= 0 && local.Y < RoomData->Size.Y
+		&& local.Z >= 0 && local.Z < RoomData->Size.Z;
 }
 
 void URoom::TryConnectToExistingDoors(TArray<URoom*>& _RoomList)
 {
-	for(int i = 0; i < Values->GetNbDoor(); ++i)
+	for(int i = 0; i < RoomData->GetNbDoor(); ++i)
 	{
 		EDoorDirection dir = GetDoorWorldOrientation(i);
 		FIntVector pos = GetDoorWorldPosition(i) + URoom::GetDirection(dir);
@@ -272,8 +271,8 @@ bool URoom::Overlap(URoom& A, URoom& B)
 {
 	FIntVector A_firstPoint = A.Position;
 	FIntVector B_firstPoint = B.Position;
-	FIntVector A_secondPoint = A.RoomToWorld(A.Values->Size - FIntVector(1,1,1));
-	FIntVector B_secondPoint = B.RoomToWorld(B.Values->Size - FIntVector(1,1,1));
+	FIntVector A_secondPoint = A.RoomToWorld(A.RoomData->Size - FIntVector(1,1,1));
+	FIntVector B_secondPoint = B.RoomToWorld(B.RoomData->Size - FIntVector(1,1,1));
 
 	FIntVector A_min = Min(A_firstPoint, A_secondPoint);
 	FIntVector A_max = Max(A_firstPoint, A_secondPoint);
