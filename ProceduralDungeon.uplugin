@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.2.2",
+	"VersionName": "2.0.0",
 	"FriendlyName": "ProceduralDungeon",
 	"Description": "Create procedural dungeons like \"The Binding of Isaac\" or \"Rogue Legacy\" but in 3D.\r\nYou can define your own generation rules.",
 	"Category": "Procedural",
