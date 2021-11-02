@@ -1,41 +1,36 @@
-# Room Architecture
+# (Legacy) Room Architecture
 
-WARNING: This page is for plugin version 2.0.0 and higher. If you use an older version, please read the page [[(Legacy)-Room-Architecture]] instead.
+WARNING: This page is for plugin version 1.2.2 and older. If you use 2.0.0 or higher version, please read the page [[Room-Architecture]] instead.
 
 ### Understanding the architecture
 Rooms are composed by 2 objects : the level and the data.\
-[[Images/DataAndLevel.jpg]]
+[[Images/DataAndLevel(Legacy).jpg]]
 
 The level is an Unreal level where you create your room.\
 The data is an asset of type RoomData that define the room properties.\
 You can inherit from RoomData to add properties specific to your dungeon.
 
 ### How to create a room
-First, create a new Unreal level that will contains the actors and meshes of your rooms.
+First, create a new Unreal level.
 
 Then create a new blueprint that inherit from RoomData.\
-For that, expand the "all classes" and type "RoomData" in the search bar and select it.\
+For that, expand the "all classes" and type "RoomData" in the search bar and select it.
 [[Images/CreateRoomData.jpg]]
 
-You can add your own data inside this blueprint class. You can also make multiple RoomData blueprint classes, but I will don't tell you how Unreal works here ;)
-
-After that, you need to create an instance of your new RoomData class (using `right click -> Miscellaneous -> Data Asset`).\
-[[Images/CreateRoomDataInstance.png]]
-
-Then, open the RoomData instance you've juste created and set the level field with your newly created level.\
+After that, open the RoomData blueprint and set the level field with your newly created level.
 [[Images/SetRoomDataLevel.jpg]]
 
-Then open your level, and go to the level blueprint (`Blueprints -> Open Level Blueprint`).
+Then open your level, and go to the level blueprint (Blueprints -> Open Level Blueprint).
 [[Images/OpenLevelBlueprint.jpg]]
 
 If it's not already done, reparent the blueprint to RoomLevel.\
 [[Images/ReparentLevel.jpg]]
 
-(In general you want to create a lot of room, so you can go to `Project Settings -> Engine -> General Settings` and set the "Level Script Actor Class" to RoomLevel thus you don't have to reparent each level)\
+(In general you want to create a lot of room, so you can go to your project settings -> Engine -> General Settings and set the "Level Script Actor Class" to RoomLevel thus you don't have to reparent each level)\
 [[Images/DefaultLevelScriptClass.jpg]]
 
-Then, in the data field of this blueprint, set your room data you've just created.\
-[[Images/SetLevelRoomData.jpg]]
+Then in the data field of this blueprint set your room data you've just created.\
+[[Images/SetLevelRoomData(Legacy).jpg]]
 
 There you have successfully created your room.
 
@@ -48,7 +43,7 @@ All actors and meshes should not cross the red boundary.\
 Doors are represented by a blue box.\
 The magenta sphere is the room origin (this cannot be changed).
 
-You can set the size of your room (the red box) in its RoomData instance.\
+You can set the size of your room (the red box) in its RoomData blueprint.\
 [[Images/SetRoomSize.jpg]]
 
 This size is expressed in room unit, can't be a float value and should not be negative nor zero.\
@@ -58,7 +53,7 @@ You can add as many door as you want in your room, and the entrance will be chos
 But keep in mind that a door has to be on the border of the room boundary, not inside, and the arrow have to point to the outside of the room boundary.\
 [[Images/DoorRightPosition.jpg]]
 
-Door positions are expressed in room unit and correspond to the "cell" of the room.
+Door position is expressed in room unit and correspond to the "cell" of the room.
 
-You can change room unit and door size in `Project Settings -> Plugins -> Procedural Dungeon`.\
+You can change room unit and door size in Project Settings -> Plugins -> Procedural Dungeon.\
 [[Images/Settings.jpg]]
