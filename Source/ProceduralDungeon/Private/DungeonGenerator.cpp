@@ -158,7 +158,6 @@ void ADungeonGenerator::CreateDungeon()
 	} while (TriesLeft > 0 && !IsValidDungeon());
 }
 
-
 void ADungeonGenerator::InstantiateRoom(URoom* Room)
 {
 	// Instantiate room
@@ -256,7 +255,6 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
 
 	return newRooms;
 }
-
 
 void ADungeonGenerator::LoadAllRooms()
 {
@@ -543,4 +541,51 @@ int ADungeonGenerator::CountTotalRoomData(TArray<URoomData*> RoomDataList)
 		}
 	}
 	return  count;
+}
+
+bool ADungeonGenerator::HasAlreadyRoomType(TSubclassOf<URoomData> RoomType)
+{
+	return CountRoomType(RoomType) > 0;
+}
+
+bool ADungeonGenerator::HasAlreadyOneRoomTypeFrom(TArray<TSubclassOf<URoomData>> RoomTypeList)
+{
+	return CountTotalRoomType(RoomTypeList) > 0;
+}
+
+int ADungeonGenerator::CountRoomType(TSubclassOf<URoomData> RoomType)
+{
+	int count = 0;
+	for (int i = 0; i < RoomList.Num(); i++)
+	{
+		if (RoomList[i]->GetRoomData()->GetClass()->IsChildOf(RoomType))
+		{
+			count++;
+		}
+	}
+	return  count;
+}
+
+int ADungeonGenerator::CountTotalRoomType(TArray<TSubclassOf<URoomData>> RoomTypeList)
+{
+	int count = 0;
+	for (int i = 0; i < RoomList.Num(); i++)
+	{
+		URoomData* roomData = RoomList[i]->GetRoomData();
+		if (RoomTypeList.ContainsByPredicate([&roomData](const TSubclassOf<URoomData> roomType) { return roomData->GetClass()->IsChildOf(roomType); } ))
+		{
+			count++;
+		}
+	}
+	return  count;
+}
+
+void ADungeonGenerator::SetSeed(int32 NewSeed)
+{
+	Seed = static_cast<uint32>(NewSeed);
+}
+
+int32 ADungeonGenerator::GetSeed()
+{
+	return static_cast<int32>(Seed);
 }

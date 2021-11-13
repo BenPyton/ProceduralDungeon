@@ -116,6 +116,22 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
 	int CountTotalRoomData(TArray<URoomData*> RoomDataList);
 
+	// Return true if a specific RoomData type is already in the dungeon
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	bool HasAlreadyRoomType(TSubclassOf<URoomData> RoomType);
+
+	// Return true if at least one of the RoomData type from the list provided is already in the dungeon
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	bool HasAlreadyOneRoomTypeFrom(TArray<TSubclassOf<URoomData>> RoomTypeList);
+
+	// Return the number of a specific RoomData type in the dungeon
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	int CountRoomType(TSubclassOf<URoomData> RoomType);
+
+	// Return the total number of RoomData type in the dungeon from the list provided
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	int CountTotalRoomType(TArray<TSubclassOf<URoomData>> RoomTypeList);
+
 	// Return a random RoomData from the array provided
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	URoomData* GetRandomRoomData(TArray<URoomData*> RoomDataArray);
@@ -220,11 +236,19 @@ private:
 	UFUNCTION()
 	void DispatchRoomAdded(URoomData* NewRoom);
 
-private:
-	UPROPERTY(EditAnywhere, Category = "Procedural Generation")
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
 	EGenerationType GenerationType;
-	UPROPERTY(EditAnywhere, Category = "Procedural Generation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
 	ESeedType SeedType;
+
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
+	void SetSeed(int32 NewSeed);
+
+	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta=(CompactNodeTitle = "Seed"))
+	int32 GetSeed();
+
+private:
 	UPROPERTY(EditAnywhere, Category = "Procedural Generation")
 	uint32 Seed;
 
