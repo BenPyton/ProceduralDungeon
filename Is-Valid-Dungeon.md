@@ -8,3 +8,6 @@ In output, you have to return true to validate the dungeon, or false to regenera
 
 Here an example where we check if the dungeon has an exit:\
 [[Images/IsValidDungeon.jpg]]
+
+### **Next Step**
+The next step validating the generation is to [[choose the doors between the rooms|Choose Door]].

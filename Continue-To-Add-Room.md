@@ -10,3 +10,6 @@ In output, you have to return true to continue the generation, or false to stop 
 
 Here an example where we let the generation ends naturally (**be careful of infinite loop**):\
 [[Images/ContinueAddingRoom.jpg]]
+
+### **Next Step**
+The next step after stopping the generation is [[to validate the generation|Is Valid Dungeon]].

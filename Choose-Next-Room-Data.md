@@ -8,3 +8,6 @@ In output you have to pass a non-null RoomData.
 
 Here an example of a simple dungeon made by NbRoom randomly chosen standard rooms before setting an exit room:\
 [[Images/ChooseNextRoomData.jpg]]
+
+### **Next Step**
+The next step after choosing the rooms is [[how to stop the generation|Continue To Add Room]].

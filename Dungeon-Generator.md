@@ -10,8 +10,8 @@ The dungeon generator don't work directly by itself, you have to [[create data a
 To be able to generate a dungeon, you also have to override some minimal functions:
 - [[Choose First Room Data]]
 - [[Choose Next Room Data]]
-- [[Is Valid Dungeon]]
 - [[Continue To Add Room]]
+- [[Is Valid Dungeon]]
 - [[Choose Door]]
 
 There are some other functions you can override:

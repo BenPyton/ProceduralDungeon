@@ -5,3 +5,6 @@ One of the room class input can be null if there is no room connected to it. You
 
 For instance:\
 [[Images/ChooseDoor.jpg]]
+
+### **Next Step**
+The next step is to [[actually generate the dungeon by calling the Generate function|Dungeon Generator]].
