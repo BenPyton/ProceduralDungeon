@@ -2,8 +2,8 @@
 
 This function determine if the generation should continue or not.
 
-A generation will naturally stops if there are no door left with no room connected.\
-But you could want to have doors with no room after in your generation.\
+A generation will naturally stops if there are no unconnected door left.\
+But in most cases this is not happening and you have to stop the generation before it spawns too many rooms.\
 So you have to return false in this function to stop the generation.
 
 In output, you have to return true to continue the generation, or false to stop it.

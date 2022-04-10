@@ -2,7 +2,7 @@
 
 ### Create a dungeon generator
 
-The dungeon generator is the actor which generate the dungeon.\
+The dungeon generator is an actor placed in your main level and which generates the dungeon and spawns the room levels.\
 To create one, create a new blueprint, expand "All Classes" and type "DungeonGenerator".
 
 The dungeon generator don't work directly by itself, you have to [[create data and levels for your rooms|Room Architecture]] first.
@@ -58,9 +58,9 @@ This is an example using the same very basic generation rules defined in this wi
 
 **Seed Type**\
 You can choose how the seed is generated:
-- Random: at each generation, the seed is randomly choosed.
-- Auto Increment: the initial seed is used the first time, then a fixed number will be added at each generation. This will produce different dungeon at each generation, but you will have the same generation sequence each time you open the map.
-- Fixed: the initial seed is used each time you generate.
+- Random: at each generation, the seed is randomly chosen.
+- Auto Increment: the initial seed is used the first time, then a fixed number will be added at each generation. This will produce different dungeon at each generation, but you will have the same generation sequence each time you play.
+- Fixed: the initial seed is used each time you generate, so you will always get the same dungeon.
 
 **Seed**\
 The initial seed you want to use if the `Seed Type` is not `Random` 
