@@ -18,7 +18,7 @@ A generation is made of 4 phases :
 First, read the [[Installation]] page to install the plugin.\
 Then, read and follow the instructions in the [[Dungeon-Generator]] page.
 
-You can get the project example in the release page if you want a minimal working project. 
+You can get the [example project in the release page](https://github.com/BenPyton/ProceduralDungeon/releases/tag/v2.0.1) if you want a minimal working project.
 
 ### Tips
 The generation take a certain time (the generation itself is done on one frame, but the instantiation and loading of each room take some times proportionally to the number and complexity of the rooms).<br/>
