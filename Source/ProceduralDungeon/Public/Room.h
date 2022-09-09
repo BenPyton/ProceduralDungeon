@@ -113,7 +113,7 @@ public:
 	static FIntVector GetDirection(EDoorDirection O);
 	static FIntVector Rotate(FIntVector Pos, EDoorDirection Rot);
 
-	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot);
+	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset = true);
 
 	static void Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB);
 	static URoom* GetRoomAt(FIntVector RoomCell, TArray<URoom*>& RoomList);

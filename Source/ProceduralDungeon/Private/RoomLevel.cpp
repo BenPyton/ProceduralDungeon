@@ -134,7 +134,7 @@ void ARoomLevel::Tick(float DeltaTime)
 		// Doors
 		for (int i = 0; i < Data->Doors.Num(); i++)
 		{
-			ADoor::DrawDebug(GetWorld(), Data->Doors[i].Position, Data->Doors[i].Direction, Transform);
+			ADoor::DrawDebug(GetWorld(), Data->Doors[i].Position, Data->Doors[i].Direction, Transform, true);
 		}
 	}
 #endif

@@ -377,9 +377,9 @@ FIntVector URoom::Rotate(FIntVector Pos, EDoorDirection Rot)
 	return NewPos;
 }
 
-FVector URoom::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot)
+FVector URoom::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset)
 {
-	return URoom::Unit() * (FVector(DoorCell) + 0.5f * FVector(URoom::GetDirection(DoorRot)) + FVector(0, 0, URoom::DoorOffset()));
+	return URoom::Unit() * (FVector(DoorCell) + 0.5f * FVector(URoom::GetDirection(DoorRot)) + FVector(0, 0, includeOffset ? URoom::DoorOffset() : 0));
 }
 
 void URoom::Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB)

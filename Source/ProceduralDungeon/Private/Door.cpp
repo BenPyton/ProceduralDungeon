@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2022 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -97,13 +97,13 @@ void ADoor::SetConnectingRooms(URoom * _RoomA, URoom * _RoomB)
 	RoomB = _RoomB;
 }
 
-void ADoor::DrawDebug(UWorld* World, FIntVector DoorCell, EDoorDirection DoorRot, FTransform Transform)
+void ADoor::DrawDebug(UWorld* World, FIntVector DoorCell, EDoorDirection DoorRot, FTransform Transform, bool includeOffset)
 {
 	if (URoom::DrawDebug())
 	{
 		FVector DoorSize = URoom::DoorSize();
 		FIntVector rot = URoom::GetDirection(DoorRot == EDoorDirection::NbDirection ? EDoorDirection::North : DoorRot);
-		FVector pos = URoom::GetRealDoorPosition(DoorCell, DoorRot) + FVector(0, 0, DoorSize.Z * 0.5f);
+		FVector pos = URoom::GetRealDoorPosition(DoorCell, DoorRot, includeOffset) + FVector(0, 0, DoorSize.Z * 0.5f);
 		pos = Transform.TransformPosition(pos);
 
 		// Arrow
