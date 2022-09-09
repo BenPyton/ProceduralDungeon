@@ -140,6 +140,9 @@ void ADungeonGenerator::CreateDungeon()
 		case EGenerationType::BFS:
 			listMode = TQueueOrStack<URoom*>::EMode::QUEUE;
 			break;
+		default:
+			LogError("GenerationType value is not supported.");
+			return;
 		}
 
 		// Build the list of rooms
