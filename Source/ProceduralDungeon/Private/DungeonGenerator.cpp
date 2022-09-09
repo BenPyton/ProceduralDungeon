@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2022 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,8 @@
 #include "ProceduralDungeonLog.h"
 #include "QueueOrStack.h"
 
+int32 ADungeonGenerator::GeneratorCount = 0;
+
 // Sets default values
 ADungeonGenerator::ADungeonGenerator()
 {
@@ -45,6 +47,7 @@ ADungeonGenerator::ADungeonGenerator()
 	GenerationType = EGenerationType::DFS;
 	SeedType = ESeedType::Random;
 	Seed = 123456789; // default Seed
+	UniqueId = GeneratorCount++; // TODO: make it better than a static increment. It can be increased very quickly in editor when we move an actor.
 
 	bAlwaysRelevant = true;
 	bReplicates = true;
@@ -110,8 +113,6 @@ void ADungeonGenerator::CreateDungeon()
 		TriesLeft--;
 
 		// Reset generation data
-		UProceduralLevelStreaming::UniqueLevelInstanceId = 0;
-		ARoomLevel::Count = 0;
 		DispatchGenerationInit();
 
 		// Create the first room
@@ -125,7 +126,7 @@ void ADungeonGenerator::CreateDungeon()
 		}
 
 		URoom* root = NewObject<URoom>();
-		root->Init(def);
+		root->Init(def, this, 0);
 		RoomList.Add(root);
 
 		// Create the list with the correct mode (depth or breadth)
@@ -225,7 +226,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
 
 			// Create room from roomdef and set connections with current room
 			newRoom = NewObject<URoom>();
-			newRoom->Init(def);
+			newRoom->Init(def, this, RoomList.Num());
 			int doorIndex = def->RandomDoor ? Random.RandRange(0, newRoom->GetRoomData()->GetNbDoor() - 1) : 0;
 
 			// Place the room at its world position with the correct rotation

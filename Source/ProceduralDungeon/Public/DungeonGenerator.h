@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2022 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -248,10 +248,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta=(CompactNodeTitle = "Seed"))
 	int32 GetSeed();
 
+	int32 GetUniqueId() const { return UniqueId; }
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Procedural Generation")
 	uint32 Seed;
 
+	static int32 GeneratorCount;
 	static const int MaxTry = 500;
 	static const int MaxRoomTry = 10;
 	FRandomStream Random;
@@ -266,4 +269,5 @@ private:
 	int NbLoadedRoom = 0;
 	int NbUnloadedRoom = 0;
 	EGenerationState CurrentState = EGenerationState::None;
+	int32 UniqueId;
 };

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2022 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,16 +34,11 @@
 #include "Room.h"
 #include "RoomData.h"
 #include "Door.h"
-
-
-uint32 ARoomLevel::Count = 0;
+#include "DungeonGenerator.h"
 
 // Use this for initialization
 void ARoomLevel::Init(URoom* _Room)
 {
-	Id = Count;
-	Count++;
-
 	IsInit = false;
 	Room = _Room;
 	PendingInit = true;

@@ -7,7 +7,7 @@
 
 /**
  * This file was copied from the ULevelStreamingDynamic of the engine
- * But an Unload methods is added and the UniqueLevelInstanceID is switch to public (accessed by the generator)
+ * But an Unload methods is added and the UniqueLevelInstanceID is replaced by a string suffix passed in parameter of the different load funtcions
  */
 UCLASS(BlueprintType)
 class PROCEDURALDUNGEON_API UProceduralLevelStreaming : public ULevelStreaming
@@ -37,15 +37,15 @@ class PROCEDURALDUNGEON_API UProceduralLevelStreaming : public ULevelStreaming
 	* @return Streaming level object for a level instance
 	*/
 	UFUNCTION(BlueprintCallable, Category = LevelStreaming, meta = (DisplayName = "Load Level Instance (by Name)", WorldContext = "WorldContextObject"))
-	static UProceduralLevelStreaming* LoadLevelInstance(UObject* WorldContextObject, FString LevelName, FVector Location, FRotator Rotation, bool& bOutSuccess);
+	static UProceduralLevelStreaming* LoadLevelInstance(UObject* WorldContextObject, FString LevelName, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation, bool& bOutSuccess);
 
 	UFUNCTION(BlueprintCallable, Category = LevelStreaming, meta = (DisplayName = "Load Level Instance (by Object Reference)", WorldContext = "WorldContextObject"))
-	static UProceduralLevelStreaming* LoadLevelInstanceBySoftObjectPtr(UObject* WorldContextObject, TSoftObjectPtr<UWorld> Level, FVector Location, FRotator Rotation, bool& bOutSuccess);
+	static UProceduralLevelStreaming* LoadLevelInstanceBySoftObjectPtr(UObject* WorldContextObject, TSoftObjectPtr<UWorld> Level, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation, bool& bOutSuccess);
 
 
 
 	UFUNCTION(BlueprintCallable, Category = LevelStreaming, meta = (DisplayName = "Load Level Instance (by Room Data)", WorldContext = "WorldContextObject"))
-	static UProceduralLevelStreaming* Load(UObject* WorldContextObject, class URoomData* Data, FVector Location, FRotator Rotation);
+	static UProceduralLevelStreaming* Load(UObject* WorldContextObject, class URoomData* Data, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation);
 	UFUNCTION(BlueprintCallable, Category = LevelStreaming, meta = (DisplayName = "Unload Level Instance", WorldContext = "WorldContextObject"))
 	static void Unload(UObject* WorldContextObject, UProceduralLevelStreaming* Instance);
 
@@ -65,12 +65,9 @@ class PROCEDURALDUNGEON_API UProceduralLevelStreaming : public ULevelStreaming
 
 	bool IsLevelUnloaded() { return bIsUnloaded; }
 
-public:
-	// Counter used by LoadLevelInstance to create unique level names
-	static int32 UniqueLevelInstanceId;
 private:
 
 	uint32 bIsUnloaded : 1;
 
-	static UProceduralLevelStreaming* LoadLevelInstance_Internal(UWorld* World, const FString& LongPackageName, FVector Location, FRotator Rotation, bool& bOutSuccess);
+	static UProceduralLevelStreaming* LoadLevelInstance_Internal(UWorld* World, const FString& LongPackageName, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation, bool& bOutSuccess);
 };

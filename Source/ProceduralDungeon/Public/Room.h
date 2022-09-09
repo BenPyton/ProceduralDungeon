@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2022 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@
 #include "ProceduralDungeonTypes.h"
 #include "Room.generated.h"
 
+class ADungeonGenerator;
 class ARoomLevel;
 class URoomData;
 class ADoor;
@@ -53,6 +54,9 @@ private:
 	UPROPERTY()
 	TArray<FRoomConnection> Connections;
 
+	ADungeonGenerator* GeneratorOwner;
+	int64 Id;
+
 public:
 	UPROPERTY()
 	UProceduralLevelStreaming* Instance;
@@ -62,12 +66,14 @@ public:
 
 	URoomData* GetRoomData() { return RoomData; }
 
+	ADungeonGenerator* Generator() const { return GeneratorOwner; }
+
 private:
 	UPROPERTY()
 	URoomData* RoomData;
 
 public:
-	void Init(URoomData* RoomData);
+	void Init(URoomData* RoomData, ADungeonGenerator* Generator, int32 RoomId);
 
 	bool IsConnected(int Index);
 	void SetConnection(int Index, URoom* Room, int OtherDoorIndex);

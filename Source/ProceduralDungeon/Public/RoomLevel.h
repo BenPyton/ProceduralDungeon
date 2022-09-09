@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2022 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,8 +40,6 @@ public:
 	class URoomData* Data;
 
 public:
-	static uint32 Count;
-
 	UPROPERTY()
 	URoom* Room = nullptr;
 	bool PlayerInside = false;
@@ -62,11 +60,8 @@ public:
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
 
 	void Init(URoom* Room);
-	uint32 GetId() { return Id; }
 
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Room Level")
-	uint32 Id;
 	UPROPERTY()
 	TArray<AActor*> ActorsInLevel;
 	FTransform Transform;

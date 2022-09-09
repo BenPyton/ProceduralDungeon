@@ -7,8 +7,6 @@
 
 #define LOCTEXT_NAMESPACE "World"
 
-int32 UProceduralLevelStreaming::UniqueLevelInstanceId = 0;
-
 UProceduralLevelStreaming::UProceduralLevelStreaming(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -51,7 +49,7 @@ void UProceduralLevelStreaming::OnLevelDynamicUnloaded()
 	bIsUnloaded = true;
 }
 
-UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstance(UObject* WorldContextObject, const FString LevelName, const FVector Location, const FRotator Rotation, bool& bOutSuccess)
+UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstance(UObject* WorldContextObject, const FString LevelName, const FString& InstanceNameSuffix, const FVector Location, const FRotator Rotation, bool& bOutSuccess)
 {
 	bOutSuccess = false;
 	UWorld* const World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
@@ -68,10 +66,10 @@ UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstance(UObject*
 		return nullptr;
 	}
 
-	return LoadLevelInstance_Internal(World, LongPackageName, Location, Rotation, bOutSuccess);
+	return LoadLevelInstance_Internal(World, LongPackageName, InstanceNameSuffix, Location, Rotation, bOutSuccess);
 }
 
-UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstanceBySoftObjectPtr(UObject* WorldContextObject, const TSoftObjectPtr<UWorld> Level, const FVector Location, const FRotator Rotation, bool& bOutSuccess)
+UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstanceBySoftObjectPtr(UObject* WorldContextObject, const TSoftObjectPtr<UWorld> Level, const FString& InstanceNameSuffix, const FVector Location, const FRotator Rotation, bool& bOutSuccess)
 {
 	bOutSuccess = false;
 	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
@@ -86,10 +84,10 @@ UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstanceBySoftObj
 		return nullptr;
 	}
 
-	return LoadLevelInstance_Internal(World, Level.GetLongPackageName(), Location, Rotation, bOutSuccess);
+	return LoadLevelInstance_Internal(World, Level.GetLongPackageName(), InstanceNameSuffix, Location, Rotation, bOutSuccess);
 }
 
-UProceduralLevelStreaming * UProceduralLevelStreaming::Load(UObject * WorldContextObject, URoomData * Data, FVector Location, FRotator Rotation)
+UProceduralLevelStreaming * UProceduralLevelStreaming::Load(UObject* WorldContextObject, URoomData* Data, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation)
 {
 	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 	if (nullptr == World)
@@ -104,7 +102,7 @@ UProceduralLevelStreaming * UProceduralLevelStreaming::Load(UObject * WorldConte
 	}
 
 	bool success = false;
-	UProceduralLevelStreaming* Instance = UProceduralLevelStreaming::LoadLevelInstanceBySoftObjectPtr(World, Data->Level, Location, Rotation, success);
+	UProceduralLevelStreaming* Instance = UProceduralLevelStreaming::LoadLevelInstanceBySoftObjectPtr(World, Data->Level, InstanceNameSuffix, Location, Rotation, success);
 
 	if (!success)
 	{
@@ -139,7 +137,7 @@ void UProceduralLevelStreaming::Unload(UObject * WorldContextObject, UProcedural
 	UGameplayStatics::UnloadStreamLevel(World, *LevelName, LatentInfo, false);
 }
 
-UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstance_Internal(UWorld* World, const FString& LongPackageName, const FVector Location, const FRotator Rotation, bool& bOutSuccess)
+UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstance_Internal(UWorld* World, const FString& LongPackageName, const FString& InstanceNameSuffix, const FVector Location, const FRotator Rotation, bool& bOutSuccess)
 {
 	// Create Unique Name for sub-level package
 	const FString ShortPackageName = FPackageName::GetShortName(LongPackageName);
@@ -148,7 +146,7 @@ UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstance_Internal
 
 	//UE_LOG(LogProceduralDungeon, Warning, TEXT("Unique Id: %d"), UniqueLevelInstanceId);
 
-	UniqueLevelPackageName += TEXT("_LevelInstance_") + FString::FromInt(++UniqueLevelInstanceId);
+	UniqueLevelPackageName += TEXT("_LevelInstance_") + InstanceNameSuffix;
 
 	// Setup streaming level object that will load specified map
 	UProceduralLevelStreaming* StreamingLevel = NewObject<UProceduralLevelStreaming>(World, UProceduralLevelStreaming::StaticClass(), NAME_None, RF_Transient, NULL);

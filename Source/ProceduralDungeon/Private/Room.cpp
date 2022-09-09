@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2022 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,13 +30,16 @@
 #include "RoomLevel.h"
 #include "ProceduralDungeonSettings.h"
 #include "ProceduralDungeonLog.h"
+#include "DungeonGenerator.h"
 
-void URoom::Init(URoomData* Data)
+void URoom::Init(URoomData* Data, ADungeonGenerator* Generator, int32 RoomId)
 {
 	RoomData = Data;
 	Instance = nullptr;
-	Position = FIntVector(0,0,0);
+	Position = FIntVector(0, 0, 0);
 	Direction = EDoorDirection::North;
+	GeneratorOwner = Generator;
+	Id = RoomId;
 
 	if (IsValid(RoomData))
 	{
@@ -92,7 +95,14 @@ void URoom::Instantiate(UWorld* World)
 			return;
 		}
 
-		Instance = UProceduralLevelStreaming::Load(World, RoomData, URoom::Unit() * FVector(Position), FRotator(0, -90 * (int)Direction, 0));
+		FVector offset(0, 0, 0);
+		FString nameSuffix = FString::FromInt(Id);
+		if (GeneratorOwner != nullptr)
+		{
+			nameSuffix = FString::FromInt(GeneratorOwner->GetUniqueId()) + TEXT("_") + nameSuffix;
+		}
+
+		Instance = UProceduralLevelStreaming::Load(World, RoomData, nameSuffix, URoom::Unit() * FVector(Position) + offset, FRotator(0, -90 * (int)Direction, 0));
 		UE_LOG(LogProceduralDungeon, Log, TEXT("Load room Instance: %s"), nullptr != Instance ? *Instance->GetWorldAssetPackageName() : TEXT("Null"));
 	}
 	else
