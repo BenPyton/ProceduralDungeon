@@ -96,13 +96,18 @@ void URoom::Instantiate(UWorld* World)
 		}
 
 		FVector offset(0, 0, 0);
+		FQuat rotation = FQuat::Identity;
 		FString nameSuffix = FString::FromInt(Id);
 		if (GeneratorOwner != nullptr)
 		{
+			offset = GeneratorOwner->GetDungeonOffset();
+			rotation = GeneratorOwner->GetDungeonRotation();
 			nameSuffix = FString::FromInt(GeneratorOwner->GetUniqueId()) + TEXT("_") + nameSuffix;
 		}
 
-		Instance = UProceduralLevelStreaming::Load(World, RoomData, nameSuffix, URoom::Unit() * FVector(Position) + offset, FRotator(0, -90 * (int)Direction, 0));
+		FVector FinalLocation = rotation.RotateVector(URoom::Unit() * FVector(Position)) + offset;
+		FQuat FinalRotation = rotation * FRotator(0, -90 * (int)Direction, 0).Quaternion();
+		Instance = UProceduralLevelStreaming::Load(World, RoomData, nameSuffix, FinalLocation, FinalRotation.Rotator());
 		UE_LOG(LogProceduralDungeon, Log, TEXT("Load room Instance: %s"), nullptr != Instance ? *Instance->GetWorldAssetPackageName() : TEXT("Null"));
 	}
 	else

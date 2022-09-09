@@ -67,6 +67,7 @@ void ADoor::Tick(float DeltaTime)
 	bPrevLocked = bLocked;
 
 #if WITH_EDITOR
+	// TODO: Place it in an editor module of the plugin
 	DrawDebug(GetWorld());
 #endif
 }

@@ -241,6 +241,8 @@ public:
 	EGenerationType GenerationType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
 	ESeedType SeedType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
+	bool bUseGeneratorTransform;
 
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	void SetSeed(int32 NewSeed);
@@ -249,6 +251,10 @@ public:
 	int32 GetSeed();
 
 	int32 GetUniqueId() const { return UniqueId; }
+
+	inline bool UseGeneratorTransform() const { return bUseGeneratorTransform; }
+	FVector GetDungeonOffset() const;
+	FQuat GetDungeonRotation() const;
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Procedural Generation")

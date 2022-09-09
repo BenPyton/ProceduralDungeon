@@ -78,16 +78,9 @@ void ARoomLevel::Tick(float DeltaTime)
 	{
 		if (PendingInit && Room != nullptr)
 		{
-			Transform.SetLocation(FVector(Room->Position) * URoom::Unit());
-			Transform.SetRotation(FRotator(0.0f, -90.0f * (int8)Room->Direction, 0.0f).Quaternion());
-
-			FIntVector forward = URoom::GetDirection(Room->Direction);
-			FIntVector right = URoom::GetDirection(URoom::Add(Room->Direction, EDoorDirection::East));
-
-			// Create triggerBox for occlusion culling
-			Center = 0.5f * (URoom::Unit() * FVector(Room->Position + Room->RoomToWorld(Room->GetRoomData()->Size) - forward - right));
-			HalfExtents = 0.5f * (URoom::Unit() * FVector(Room->RoomToWorld(Room->GetRoomData()->Size) - Room->Position));
-			HalfExtents = FVector(FMath::Abs(HalfExtents.X), FMath::Abs(HalfExtents.Y), FMath::Abs(HalfExtents.Z));
+			FQuat generatorRotation = Room->Generator()->GetDungeonRotation();
+			Transform.SetLocation(generatorRotation.RotateVector(FVector(Room->Position) * URoom::Unit()) + Room->Generator()->GetDungeonOffset());
+			Transform.SetRotation(generatorRotation * FRotator(0.0f, -90.0f * (int8)Room->Direction, 0.0f).Quaternion());
 
 			// Register All Actors in the level
 			for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
@@ -111,16 +104,19 @@ void ARoomLevel::Tick(float DeltaTime)
 	if (!IsValid(Data))
 		return;
 
+	// TODO: make them const
 	FIntVector forward = URoom::GetDirection(EDoorDirection::North);
 	FIntVector right = URoom::GetDirection(URoom::Add(EDoorDirection::North, EDoorDirection::East));
 
+	// Update triggerBox for occlusion culling (also the red box drawn in debug)
+	// TODO: compute them only once, they don't need to be updated each tick
 	Center = 0.5f * (URoom::Unit() * FVector(Data->Size - forward - right));
+	Center = Transform.TransformPosition(Center);
 	HalfExtents = 0.5f * (URoom::Unit() * FVector(Data->Size));
 	HalfExtents = FVector(FMath::Abs(HalfExtents.X), FMath::Abs(HalfExtents.Y), FMath::Abs(HalfExtents.Z));
 
-	Center = Transform.TransformPosition(Center);
-
 #if WITH_EDITOR
+	// TODO: Place the debug draw in an editor module of the plugin
 	if (URoom::DrawDebug())
 	{
 		// Pivot

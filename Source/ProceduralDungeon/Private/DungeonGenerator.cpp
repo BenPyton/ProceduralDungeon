@@ -48,6 +48,7 @@ ADungeonGenerator::ADungeonGenerator()
 	SeedType = ESeedType::Random;
 	Seed = 123456789; // default Seed
 	UniqueId = GeneratorCount++; // TODO: make it better than a static increment. It can be increased very quickly in editor when we move an actor.
+	bUseGeneratorTransform = false;
 
 	bAlwaysRelevant = true;
 	bReplicates = true;
@@ -179,9 +180,9 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 
 			if (DoorClass != nullptr)
 			{
-				FVector InstanceDoorPos = URoom::GetRealDoorPosition(DoorCell, DoorRot);
-				FRotator InstanceDoorRot = FRotator(0, -90 * (int8)DoorRot, 0);
-				ADoor* Door = GetWorld()->SpawnActor<ADoor>(DoorClass, InstanceDoorPos, InstanceDoorRot);
+				FVector InstanceDoorPos = GetDungeonRotation().RotateVector(URoom::GetRealDoorPosition(DoorCell, DoorRot)) + GetDungeonOffset();
+				FQuat InstanceDoorRot = GetDungeonRotation() * FRotator(0, -90 * (int8)DoorRot, 0).Quaternion();
+				ADoor* Door = GetWorld()->SpawnActor<ADoor>(DoorClass, InstanceDoorPos, InstanceDoorRot.Rotator());
 
 				if (nullptr != Door)
 				{
@@ -589,4 +590,14 @@ void ADungeonGenerator::SetSeed(int32 NewSeed)
 int32 ADungeonGenerator::GetSeed()
 {
 	return static_cast<int32>(Seed);
+}
+
+FVector ADungeonGenerator::GetDungeonOffset() const
+{
+	return UseGeneratorTransform() ? GetActorLocation() : FVector::ZeroVector;
+}
+
+FQuat ADungeonGenerator::GetDungeonRotation() const
+{
+	return UseGeneratorTransform() ? GetActorQuat() : FQuat::Identity;
 }
