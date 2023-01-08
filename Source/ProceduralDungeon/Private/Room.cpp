@@ -271,6 +271,19 @@ void URoom::TryConnectToExistingDoors(TArray<URoom*>& RoomList)
 	}
 }
 
+FBoxCenterAndExtent URoom::GetBounds() const
+{
+	return RoomData->GetBounds(GetTransform());
+}
+
+FTransform URoom::GetTransform() const
+{
+	FTransform Transform;
+	Transform.SetLocation(FVector(Position) * URoom::Unit());
+	Transform.SetRotation(GetRotation(Direction));
+	return Transform;
+}
+
 FIntVector Max(const FIntVector& A, const FIntVector& B)
 {
 	return FIntVector(FMath::Max(A.X, B.X), FMath::Max(A.Y, B.Y), FMath::Max(A.Z, B.Z));
@@ -356,6 +369,11 @@ FIntVector URoom::GetDirection(EDoorDirection O)
 		break;
 	}
 	return Dir;
+}
+
+FQuat URoom::GetRotation(EDoorDirection O)
+{
+	return FRotator(0.0f, -90.0f * (int8)O, 0.0f).Quaternion();
 }
 
 FIntVector URoom::Rotate(FIntVector Pos, EDoorDirection Rot)

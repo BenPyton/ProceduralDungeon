@@ -36,21 +36,47 @@
 #include "Door.h"
 #include "DungeonGenerator.h"
 
-// Use this for initialization
-void ARoomLevel::Init(URoom* _Room)
-{
-	IsInit = false;
-	Room = _Room;
-	PendingInit = true;
-}
-
-ARoomLevel::ARoomLevel(const FObjectInitializer & ObjectInitializer)
+ARoomLevel::ARoomLevel(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	IsInit = false;
 	PendingInit = false;
 	Room = nullptr;
+	Transform = FTransform::Identity;
+}
+
+void ARoomLevel::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	UpdateBounds();
+}
+
+void ARoomLevel::UpdateBounds()
+{
+	if (IsValid(Room))
+	{
+		Bounds = Room->GetBounds();
+	}
+	else if (IsValid(Data))
+	{
+		Bounds = Data->GetBounds();
+	}
+}
+
+// Use this for initialization
+void ARoomLevel::Init(URoom* _Room)
+{
+	IsInit = false;
+	Room = _Room;
+	PendingInit = true;
+
+	Transform.SetLocation(Room->Generator()->GetDungeonOffset());
+	Transform.SetRotation(Room->Generator()->GetDungeonRotation());
+
+	// Update triggerBox for occlusion culling (also the red box drawn in debug)
+	UpdateBounds();
 }
 
 void ARoomLevel::BeginPlay()
@@ -78,10 +104,6 @@ void ARoomLevel::Tick(float DeltaTime)
 	{
 		if (PendingInit && Room != nullptr)
 		{
-			FQuat generatorRotation = Room->Generator()->GetDungeonRotation();
-			Transform.SetLocation(generatorRotation.RotateVector(FVector(Room->Position) * URoom::Unit()) + Room->Generator()->GetDungeonOffset());
-			Transform.SetRotation(generatorRotation * FRotator(0.0f, -90.0f * (int8)Room->Direction, 0.0f).Quaternion());
-
 			// Register All Actors in the level
 			for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 			{
@@ -104,33 +126,25 @@ void ARoomLevel::Tick(float DeltaTime)
 	if (!IsValid(Data))
 		return;
 
-	// TODO: make them const
-	FIntVector forward = URoom::GetDirection(EDoorDirection::North);
-	FIntVector right = URoom::GetDirection(URoom::Add(EDoorDirection::North, EDoorDirection::East));
-
-	// Update triggerBox for occlusion culling (also the red box drawn in debug)
-	// TODO: compute them only once, they don't need to be updated each tick
-	Center = 0.5f * (URoom::Unit() * FVector(Data->Size - forward - right));
-	Center = Transform.TransformPosition(Center);
-	HalfExtents = 0.5f * (URoom::Unit() * FVector(Data->Size));
-	HalfExtents = FVector(FMath::Abs(HalfExtents.X), FMath::Abs(HalfExtents.Y), FMath::Abs(HalfExtents.Z));
 
 #if WITH_EDITOR
 	// TODO: Place the debug draw in an editor module of the plugin
 	if (URoom::DrawDebug())
 	{
+		FTransform RoomTransform = (Room != nullptr) ? Room->GetTransform() : FTransform::Identity;
+
 		// Pivot
-		DrawDebugSphere(GetWorld(), Transform.GetLocation(), 100.0f, 4, FColor::Magenta);
+		DrawDebugSphere(GetWorld(), Transform.TransformPosition(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
 
 		// Room bounds
-		DrawDebugBox(GetWorld(), Center, HalfExtents, Transform.GetRotation(), FColor::Red);
-
-		FVector DoorSize = URoom::DoorSize();
+		DrawDebugBox(GetWorld(), Transform.TransformPosition(Bounds.Center), Bounds.Extent, Transform.GetRotation(), FColor::Red);
 
 		// Doors
-		for (int i = 0; i < Data->Doors.Num(); i++)
+		FVector DoorSize = URoom::DoorSize();
+		for (int i = 0; i < Data->GetNbDoor(); i++)
 		{
-			ADoor::DrawDebug(GetWorld(), Data->Doors[i].Position, Data->Doors[i].Direction, Transform, true);
+			bool isConnected = Room == nullptr || Room->IsConnected(i);
+			ADoor::DrawDebug(GetWorld(), Data->Doors[i].Position, Data->Doors[i].Direction, RoomTransform * Transform, true, isConnected);
 		}
 	}
 #endif
@@ -140,14 +154,14 @@ bool ARoomLevel::IsPlayerInside()
 {
 	bool inside = false;
 
-	FCollisionShape box = FCollisionShape::MakeBox(HalfExtents);
+	FCollisionShape box = FCollisionShape::MakeBox(Bounds.Extent);
 
 	APawn* player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawnOrSpectator();
 	TArray<FOverlapResult> overlappedActors;
 
 	if (GetWorld()->OverlapMultiByObjectType(
 		overlappedActors,
-		Center,
+		Transform.TransformPosition(Bounds.Center),
 		Transform.GetRotation(),
 		FCollisionObjectQueryParams::AllDynamicObjects,
 		box))
@@ -191,3 +205,10 @@ void ARoomLevel::Display()
 		}
 	}
 }
+
+#if WITH_EDITOR
+void ARoomLevel::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	UpdateBounds();
+}
+#endif

@@ -65,9 +65,16 @@ private:
 	UPROPERTY()
 	TArray<AActor*> ActorsInLevel;
 	FTransform Transform;
-	FVector Center;
-	FVector HalfExtents;
+	FBoxCenterAndExtent Bounds;
 
+private:
 	bool IsPlayerInside();
 	void Display();
+	void UpdateBounds();
+
+	virtual void PostInitProperties() override;
+
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 };

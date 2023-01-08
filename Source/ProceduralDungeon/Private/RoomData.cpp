@@ -25,6 +25,7 @@
 #include "RoomData.h"
 #include "RoomLevel.h"
 #include "ProceduralDungeonTypes.h"
+#include "Room.h" // Access to URoom static values (like URoom::Unit)
 
 URoomData::URoomData()
 	: Super()
@@ -32,4 +33,12 @@ URoomData::URoomData()
 	Doors.Add(FDoorDef());
 	Size = FIntVector(1, 1, 1);
 	RandomDoor = true;
+}
+
+FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
+{
+	FVector Center = Transform.TransformPosition(0.5f * URoom::Unit() * FVector(Size - FIntVector(1, 1, 0)));
+	FVector Extent = Transform.TransformVector(0.5f * URoom::Unit() * FVector(Size));
+
+	return FBoxCenterAndExtent(Center, Extent.GetAbs());
 }

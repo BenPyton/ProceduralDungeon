@@ -54,4 +54,6 @@ public:
 	URoomData();
 
 	int GetNbDoor() const { return Doors.Num(); }
+
+	FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
 };
