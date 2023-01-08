@@ -124,4 +124,3 @@ void ADoor::DrawDebug(UWorld* World, FIntVector DoorCell, EDoorDirection DoorRot
 		}
 	}
 }
-

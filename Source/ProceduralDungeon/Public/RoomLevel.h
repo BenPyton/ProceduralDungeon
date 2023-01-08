@@ -36,8 +36,8 @@ class PROCEDURALDUNGEON_API ARoomLevel : public ALevelScriptActor
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Data", meta = ( BlueprintBaseOnly /* Doesn't work... */ ) )
 	class URoomData* Data;
+	UPROPERTY(EditAnywhere, Category = "Data", meta = (BlueprintBaseOnly /* Doesn't work... */))
 
 public:
 	UPROPERTY()

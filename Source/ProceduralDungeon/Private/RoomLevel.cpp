@@ -107,7 +107,7 @@ void ARoomLevel::Tick(float DeltaTime)
 			// Register All Actors in the level
 			for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
 			{
-				ULevel *Level = ActorItr->GetLevel();
+				ULevel* Level = ActorItr->GetLevel();
 				if (Level->GetOuter() == GetLevel()->GetOuter())
 				{
 					ActorsInLevel.Add(*ActorItr);

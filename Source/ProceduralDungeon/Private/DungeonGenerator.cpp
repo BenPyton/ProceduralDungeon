@@ -41,7 +41,7 @@ int32 ADungeonGenerator::GeneratorCount = 0;
 // Sets default values
 ADungeonGenerator::ADungeonGenerator()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	GenerationType = EGenerationType::DFS;
@@ -120,7 +120,7 @@ void ADungeonGenerator::CreateDungeon()
 		RoomList.Empty();
 
 		URoomData* def = ChooseFirstRoomData();
-		if(!IsValid(def))
+		if (!IsValid(def))
 		{
 			LogError("ChooseFirstRoomData returned null.");
 			continue;
@@ -132,7 +132,7 @@ void ADungeonGenerator::CreateDungeon()
 
 		// Create the list with the correct mode (depth or breadth)
 		TQueueOrStack<URoom*>::EMode listMode;
-		switch(GenerationType)
+		switch (GenerationType)
 		{
 		case EGenerationType::DFS:
 			listMode = TQueueOrStack<URoom*>::EMode::STACK;
@@ -150,16 +150,15 @@ void ADungeonGenerator::CreateDungeon()
 		roomStack.Push(root);
 		URoom* currentRoom = nullptr;
 		URoom* newRoom = nullptr;
-		while(ContinueToAddRoom() && !roomStack.IsEmpty())
+		while (ContinueToAddRoom() && !roomStack.IsEmpty())
 		{
 			currentRoom = roomStack.Pop();
 			check(IsValid(currentRoom)); // currentRoom should always be valid
-			for(URoom* room : AddNewRooms(*currentRoom))
+			for (URoom* room : AddNewRooms(*currentRoom))
 			{
 				roomStack.Push(room);
 			}
 		}
-
 	} while (TriesLeft > 0 && !IsValidDungeon());
 }
 
@@ -192,7 +191,7 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 					DoorList.Add(Door);
 					Door->SetConnectingRooms(Room, r);
 					Room->SetDoorInstance(i, Door);
-					if(IsValid(r))
+					if (IsValid(r))
 					{
 						r->SetDoorInstance(j, Door);
 					}
@@ -211,9 +210,9 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
 	TArray<URoom*> newRooms;
 	int nbDoor = ParentRoom.GetRoomData()->GetNbDoor();
 	URoom* newRoom = nullptr;
-	for(int i = 0; i < nbDoor; ++i)
+	for (int i = 0; i < nbDoor; ++i)
 	{
-		if(ParentRoom.IsConnected(i))
+		if (ParentRoom.IsConnected(i))
 			continue;
 
 		int nbTries = MaxRoomTry;
@@ -222,7 +221,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
 		{
 			nbTries--;
 			URoomData* def = ChooseNextRoomData(ParentRoom.GetRoomData());
-			if(!IsValid(def))
+			if (!IsValid(def))
 			{
 				LogError("ChooseNextRoomData returned null.");
 				continue;
@@ -239,11 +238,11 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
 			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomPos, URoom::Opposite(parentDoorDir));
 
 			// Test if it fit in the place
-			if(!URoom::Overlap(*newRoom, RoomList))
+			if (!URoom::Overlap(*newRoom, RoomList))
 			{
 				// connect the doors to all possible existing rooms
 				URoom::Connect(*newRoom, doorIndex, ParentRoom, i);
-				if(URoom::CanLoop())
+				if (URoom::CanLoop())
 				{
 					newRoom->TryConnectToExistingDoors(RoomList);
 				}
@@ -255,7 +254,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
 			{
 				newRoom = nullptr;
 			}
-		} while(nbTries > 0 && newRoom == nullptr);
+		} while (nbTries > 0 && newRoom == nullptr);
 	}
 
 	return newRooms;
@@ -399,7 +398,7 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 			return;
 		}
 		break;
-	
+
 	default:
 		break;
 	}
@@ -525,9 +524,9 @@ bool ADungeonGenerator::HasAlreadyOneRoomDataFrom(TArray<URoomData*> RoomDataLis
 int ADungeonGenerator::CountRoomData(URoomData* RoomData)
 {
 	int count = 0;
-	for(int i = 0; i < RoomList.Num(); i++)
+	for (int i = 0; i < RoomList.Num(); i++)
 	{
-		if(RoomList[i]->GetRoomData() == RoomData)
+		if (RoomList[i]->GetRoomData() == RoomData)
 		{
 			count++;
 		}
@@ -538,9 +537,9 @@ int ADungeonGenerator::CountRoomData(URoomData* RoomData)
 int ADungeonGenerator::CountTotalRoomData(TArray<URoomData*> RoomDataList)
 {
 	int count = 0;
-	for(int i = 0; i < RoomList.Num(); i++)
+	for (int i = 0; i < RoomList.Num(); i++)
 	{
-		if(RoomDataList.Contains(RoomList[i]->GetRoomData()))
+		if (RoomDataList.Contains(RoomList[i]->GetRoomData()))
 		{
 			count++;
 		}
@@ -577,7 +576,7 @@ int ADungeonGenerator::CountTotalRoomType(TArray<TSubclassOf<URoomData>> RoomTyp
 	for (int i = 0; i < RoomList.Num(); i++)
 	{
 		URoomData* roomData = RoomList[i]->GetRoomData();
-		if (RoomTypeList.ContainsByPredicate([&roomData](const TSubclassOf<URoomData> roomType) { return roomData->GetClass()->IsChildOf(roomType); } ))
+		if (RoomTypeList.ContainsByPredicate([&roomData](const TSubclassOf<URoomData> roomType) { return roomData->GetClass()->IsChildOf(roomType); }))
 		{
 			count++;
 		}

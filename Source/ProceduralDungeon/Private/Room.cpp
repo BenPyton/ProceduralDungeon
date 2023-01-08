@@ -75,9 +75,9 @@ TWeakObjectPtr<URoom> URoom::GetConnection(int Index)
 
 int URoom::GetFirstEmptyConnection()
 {
-	for(int i = 0; i < Connections.Num(); ++i)
+	for (int i = 0; i < Connections.Num(); ++i)
 	{
-		if(Connections[i].OtherRoom == nullptr)
+		if (Connections[i].OtherRoom == nullptr)
 		{
 			return i;
 		}
@@ -89,7 +89,7 @@ void URoom::Instantiate(UWorld* World)
 {
 	if (Instance == nullptr)
 	{
-		if(!IsValid(RoomData))
+		if (!IsValid(RoomData))
 		{
 			LogError("Failed to instantiate the room: it has no RoomData.");
 			return;
@@ -144,16 +144,16 @@ ARoomLevel* URoom::GetLevelScript()
 
 bool URoom::IsInstanceLoaded()
 {
-	if(Instance == nullptr || !IsValid(Instance))
+	if (Instance == nullptr || !IsValid(Instance))
 	{
 		return true;
 	}
 	return Instance->IsLevelLoaded();
 }
 
-bool URoom:: IsInstanceUnloaded()
+bool URoom::IsInstanceUnloaded()
 {
-	if(Instance == nullptr || !IsValid(Instance))
+	if (Instance == nullptr || !IsValid(Instance))
 	{
 		return true;
 	}
@@ -177,10 +177,10 @@ int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot)
 	FIntVector localPos = WorldToRoom(WorldPos);
 	EDoorDirection localRot = WorldToRoom(WorldRot);
 
-	for(int i = 0; i < RoomData->Doors.Num(); ++i)
+	for (int i = 0; i < RoomData->Doors.Num(); ++i)
 	{
 		const FDoorDef door = RoomData->Doors[i];
-		if(door.Position == localPos && door.Direction == localRot)
+		if (door.Position == localPos && door.Direction == localRot)
 			return i;
 	}
 	return -1;
@@ -243,7 +243,6 @@ void URoom::SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, E
 	Position = WorldPos - RoomToWorld(RoomData->Doors[DoorIndex].Position);
 }
 
-
 bool URoom::IsOccupied(FIntVector Cell)
 {
 	FIntVector local = WorldToRoom(Cell);
@@ -254,16 +253,16 @@ bool URoom::IsOccupied(FIntVector Cell)
 
 void URoom::TryConnectToExistingDoors(TArray<URoom*>& RoomList)
 {
-	for(int i = 0; i < RoomData->GetNbDoor(); ++i)
+	for (int i = 0; i < RoomData->GetNbDoor(); ++i)
 	{
 		EDoorDirection dir = GetDoorWorldOrientation(i);
 		FIntVector pos = GetDoorWorldPosition(i) + URoom::GetDirection(dir);
 		URoom* otherRoom = GetRoomAt(pos, RoomList);
 
-		if(IsValid(otherRoom))
+		if (IsValid(otherRoom))
 		{
 			int j = otherRoom->GetDoorIndexAt(pos, URoom::Opposite(dir));
-			if(j >= 0) // -1 if no door
+			if (j >= 0) // -1 if no door
 			{
 				Connect(*this, i, *otherRoom, j);
 			}
@@ -299,8 +298,8 @@ bool URoom::Overlap(URoom& A, URoom& B)
 {
 	FIntVector A_firstPoint = A.Position;
 	FIntVector B_firstPoint = B.Position;
-	FIntVector A_secondPoint = A.RoomToWorld(A.RoomData->Size - FIntVector(1,1,1));
-	FIntVector B_secondPoint = B.RoomToWorld(B.RoomData->Size - FIntVector(1,1,1));
+	FIntVector A_secondPoint = A.RoomToWorld(A.RoomData->Size - FIntVector(1, 1, 1));
+	FIntVector B_secondPoint = B.RoomToWorld(B.RoomData->Size - FIntVector(1, 1, 1));
 
 	FIntVector A_min = Min(A_firstPoint, A_secondPoint);
 	FIntVector A_max = Max(A_firstPoint, A_secondPoint);
@@ -316,7 +315,7 @@ bool URoom::Overlap(URoom& A, URoom& B)
 	return true;
 }
 
-bool URoom::Overlap(URoom & Room, TArray<URoom*>& RoomList)
+bool URoom::Overlap(URoom& Room, TArray<URoom*>& RoomList)
 {
 	bool overlap = false;
 	for (int i = 0; i < RoomList.Num() && !overlap; i++)
@@ -413,9 +412,9 @@ void URoom::Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB)
 
 URoom* URoom::GetRoomAt(FIntVector RoomCell, TArray<URoom*>& RoomList)
 {
-	for(auto it = RoomList.begin(); it != RoomList.end(); ++it)
+	for (auto it = RoomList.begin(); it != RoomList.end(); ++it)
 	{
-		if(IsValid(*it) && (*it)->IsOccupied(RoomCell))
+		if (IsValid(*it) && (*it)->IsOccupied(RoomCell))
 		{
 			return *it;
 		}
@@ -458,4 +457,3 @@ bool URoom::CanLoop()
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
 	return Settings->CanLoop;
 }
-

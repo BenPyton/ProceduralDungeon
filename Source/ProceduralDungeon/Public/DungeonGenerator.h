@@ -40,8 +40,8 @@ UCLASS()
 class PROCEDURALDUNGEON_API ADungeonGenerator : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ADungeonGenerator();
 
@@ -136,8 +136,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	URoomData* GetRandomRoomData(TArray<URoomData*> RoomDataArray);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle="Nb Room"))
 	int GetNbRoom() { return RoomList.Num(); }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle = "Nb Room"))
 
 	URoom* GetRoomAt(FIntVector RoomCell);
 
@@ -247,8 +247,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	void SetSeed(int32 NewSeed);
 
-	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta=(CompactNodeTitle = "Seed"))
 	int32 GetSeed();
+	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle = "Seed"))
 
 	int32 GetUniqueId() const { return UniqueId; }
 
