@@ -30,7 +30,7 @@
 // Sets default values
 ADoor::ADoor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
@@ -92,27 +92,36 @@ void ADoor::CloseDoor()
 	}
 }
 
-void ADoor::SetConnectingRooms(URoom * _RoomA, URoom * _RoomB)
+void ADoor::SetConnectingRooms(URoom* _RoomA, URoom* _RoomB)
 {
 	RoomA = _RoomA;
 	RoomB = _RoomB;
 }
 
-void ADoor::DrawDebug(UWorld* World, FIntVector DoorCell, EDoorDirection DoorRot, FTransform Transform, bool includeOffset)
+void ADoor::DrawDebug(UWorld* World, FIntVector DoorCell, EDoorDirection DoorRot, FTransform Transform, bool includeOffset, bool isConnected)
 {
 	if (URoom::DrawDebug())
 	{
 		FVector DoorSize = URoom::DoorSize();
-		FIntVector rot = URoom::GetDirection(DoorRot == EDoorDirection::NbDirection ? EDoorDirection::North : DoorRot);
-		FVector pos = URoom::GetRealDoorPosition(DoorCell, DoorRot, includeOffset) + FVector(0, 0, DoorSize.Z * 0.5f);
-		pos = Transform.TransformPosition(pos);
-
-		// Arrow
-		DrawDebugDirectionalArrow(World, pos, pos + Transform.GetRotation() * FVector(rot) * 300, 300, FColor::Blue);
+		FQuat DoorRotation = Transform.GetRotation() * URoom::GetRotation(DoorRot == EDoorDirection::NbDirection ? EDoorDirection::North : DoorRot);
+		FVector DoorPosition = Transform.TransformPosition(URoom::GetRealDoorPosition(DoorCell, DoorRot, includeOffset) + FVector(0, 0, DoorSize.Z * 0.5f));
 
 		// Door frame
-		FIntVector scale = URoom::Rotate(FIntVector(DoorSize * 0.5f), DoorRot);
-		DrawDebugBox(World, pos, FVector(scale), Transform.GetRotation(), FColor::Blue);
+		DrawDebugBox(World, DoorPosition, DoorSize * 0.5f, DoorRotation, FColor::Blue);
+
+		if (isConnected)
+		{
+			// Arrow (there is a room on the other side OR in the editor preview)
+			DrawDebugDirectionalArrow(World, DoorPosition, DoorPosition + DoorRotation * FVector(300, 0, 0), 300, FColor::Blue);
+		}
+		else
+		{
+			// Cross (there is no room on the other side)
+			FVector HalfSize = DoorRotation * FVector(0, DoorSize.Y, DoorSize.Z) * 0.5f;
+			FVector HalfSizeConjugate = DoorRotation * FVector(0, DoorSize.Y, -DoorSize.Z) * 0.5f;
+			DrawDebugLine(World, DoorPosition - HalfSize, DoorPosition + HalfSize, FColor::Blue);
+			DrawDebugLine(World, DoorPosition - HalfSizeConjugate, DoorPosition + HalfSizeConjugate, FColor::Blue);
+		}
 	}
 }
 

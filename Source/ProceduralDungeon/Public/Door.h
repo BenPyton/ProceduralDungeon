@@ -35,11 +35,11 @@ UCLASS()
 class PROCEDURALDUNGEON_API ADoor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	ADoor();
 
-public:	
+public:
 	virtual void Tick(float DeltaTime) override;
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
 
@@ -98,5 +98,5 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Door", meta = (DisplayName = "Is Open"))
 	bool IsOpen() { return bIsOpen; }
 
-	static void DrawDebug(UWorld* World, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity, bool includeOffset = false);
+	static void DrawDebug(UWorld* World, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity, bool includeOffset = false, bool isConnected = true);
 };
