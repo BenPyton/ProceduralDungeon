@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2022 Benoit Pelletier
+ * Copyright (c) 2019-2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,7 +54,9 @@ ADungeonGenerator::ADungeonGenerator()
 	bReplicates = true;
 	NetPriority = 10.0f;
 	NetUpdateFrequency = 10;
- }
+
+	Octree = MakeUnique<FDungeonOctree>(FVector::ZeroVector, HALF_WORLD_MAX);
+}
 
 // Called when the game starts or when spawned
 void ADungeonGenerator::BeginPlay()
@@ -160,6 +162,16 @@ void ADungeonGenerator::CreateDungeon()
 			}
 		}
 	} while (TriesLeft > 0 && !IsValidDungeon());
+
+	// Update Octree
+	Octree->Destroy();
+	for (URoom* r : RoomList)
+	{
+		check(IsValid(r))
+		FBoxCenterAndExtent bounds = r->GetBounds();
+		FDungeonOctreeElement octreeElement(r);
+		Octree->AddElement(octreeElement);
+	}
 }
 
 void ADungeonGenerator::InstantiateRoom(URoom* Room)
@@ -283,6 +295,31 @@ void ADungeonGenerator::UnloadAllRooms()
 	}
 }
 
+void ADungeonGenerator::UpdateRoomVisibility()
+{
+	APawn* Player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawnOrSpectator();
+	if (!IsValid(Player))
+		return;
+
+	FBox WorldPlayerBox = Player->GetComponentsBoundingBox();
+	FTransform Transform = UseGeneratorTransform() ? GetTransform() : FTransform::Identity;
+	WorldPlayerBox = WorldPlayerBox.InverseTransformBy(Transform);
+
+	TSet<URoom*> RoomsToHide(CurrentPlayerRooms);
+	CurrentPlayerRooms.Empty();
+	Octree->FindElementsWithBoundsTest(WorldPlayerBox, [this, &RoomsToHide](const FDungeonOctreeElement& Element)
+	{
+		RoomsToHide.Remove(Element.Room);
+		CurrentPlayerRooms.Add(Element.Room);
+		Element.Room->GetLevelScript()->PlayerInside = true;
+	});
+
+	for (URoom* room : RoomsToHide)
+	{
+		room->GetLevelScript()->PlayerInside = false;
+	}
+}
+
 /*
  *	=======================================
  *				State Machine
@@ -317,6 +354,9 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 	case EGenerationState::Initialization:
 		LogInfo("======= Begin Init All Levels =======");
 		LogInfo(FString::Printf(TEXT("Nb Room To Initialize: %d"), RoomList.Num()));
+		break;
+	case EGenerationState::Play:
+		LogInfo("======= Ready To Play =======");
 		break;
 	default:
 		break;
@@ -393,12 +433,14 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 
 			if (IsInit)
 			{
-				SetState(EGenerationState::None);
+				SetState(EGenerationState::Play);
 			}
 			return;
 		}
 		break;
-
+	case EGenerationState::Play:
+		UpdateRoomVisibility();
+		break;
 	default:
 		break;
 	}
@@ -436,6 +478,9 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 
 		// Invoke Post Generation Event when initialization is done
 		DispatchPostGeneration();
+		break;
+	case EGenerationState::Play:
+		LogInfo("======= End Play =======");
 		break;
 	default:
 		break;

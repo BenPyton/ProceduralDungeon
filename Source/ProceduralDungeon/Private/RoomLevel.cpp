@@ -137,7 +137,7 @@ void ARoomLevel::Tick(float DeltaTime)
 		DrawDebugSphere(GetWorld(), Transform.TransformPosition(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
 
 		// Room bounds
-		DrawDebugBox(GetWorld(), Transform.TransformPosition(Bounds.Center), Bounds.Extent, Transform.GetRotation(), FColor::Red);
+		DrawDebugBox(GetWorld(), Transform.TransformPosition(Bounds.Center), Bounds.Extent, Transform.GetRotation(), PlayerInside ? FColor::Green : FColor::Red);
 
 		// Doors
 		FVector DoorSize = URoom::DoorSize();
@@ -150,38 +150,10 @@ void ARoomLevel::Tick(float DeltaTime)
 #endif
 }
 
-bool ARoomLevel::IsPlayerInside()
-{
-	bool inside = false;
-
-	FCollisionShape box = FCollisionShape::MakeBox(Bounds.Extent);
-
-	APawn* player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawnOrSpectator();
-	TArray<FOverlapResult> overlappedActors;
-
-	if (GetWorld()->OverlapMultiByObjectType(
-		overlappedActors,
-		Transform.TransformPosition(Bounds.Center),
-		Transform.GetRotation(),
-		FCollisionObjectQueryParams::AllDynamicObjects,
-		box))
-	{
-		for (FOverlapResult result : overlappedActors)
-		{
-			if (player == result.GetActor())
-			{
-				inside = true;
-			}
-		}
-	}
-	return inside;
-}
-
 void ARoomLevel::Display()
 {
 	if (!IsPendingKill() && Room != nullptr && URoom::OcclusionCulling())
 	{
-		PlayerInside = IsPlayerInside();
 		IsHidden = !PlayerInside;
 		for (int i = 0; i < Room->GetConnectionCount(); i++)
 		{

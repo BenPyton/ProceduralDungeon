@@ -36,8 +36,8 @@ class PROCEDURALDUNGEON_API ARoomLevel : public ALevelScriptActor
 	GENERATED_BODY()
 
 public:
-	class URoomData* Data;
 	UPROPERTY(EditAnywhere, Category = "Data", meta = (BlueprintBaseOnly /* Doesn't work... */))
+	class URoomData* Data;
 
 public:
 	UPROPERTY()
@@ -68,7 +68,6 @@ private:
 	FBoxCenterAndExtent Bounds;
 
 private:
-	bool IsPlayerInside();
 	void Display();
 	void UpdateBounds();
 

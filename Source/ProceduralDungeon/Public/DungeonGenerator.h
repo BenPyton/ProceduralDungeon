@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2022 Benoit Pelletier
+ * Copyright (c) 2019-2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Math/RandomStream.h"
+#include "DungeonOctree.h"
 #include "ProceduralDungeonTypes.h"
 #include "DungeonGenerator.generated.h"
 
@@ -136,8 +137,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	URoomData* GetRandomRoomData(TArray<URoomData*> RoomDataArray);
 
-	int GetNbRoom() { return RoomList.Num(); }
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle = "Nb Room"))
+	int GetNbRoom() { return RoomList.Num(); }
 
 	URoom* GetRoomAt(FIntVector RoomCell);
 
@@ -211,6 +212,9 @@ private:
 	UFUNCTION()
 	void UnloadAllRooms();
 
+	// Update the rooms visibility based on the player position
+	void UpdateRoomVisibility();
+
 	// ===== FSM =====
 
 	UFUNCTION()
@@ -276,4 +280,8 @@ private:
 	int NbUnloadedRoom = 0;
 	EGenerationState CurrentState = EGenerationState::None;
 	int32 UniqueId;
+
+	// Occlusion culling system
+	TUniquePtr<FDungeonOctree> Octree;
+	TSet<URoom*> CurrentPlayerRooms;
 };

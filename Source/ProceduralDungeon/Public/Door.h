@@ -92,8 +92,8 @@ private:
 public:
 	void SetConnectingRooms(URoom* RoomA, URoom* RoomB);
 
-	bool IsLocked() { return bLocked; }
 	UFUNCTION(BlueprintCallable, Category = "Door", meta = (DisplayName = "Is Locked"))
+	bool IsLocked() { return bLocked; }
 
 	UFUNCTION(BlueprintCallable, Category = "Door", meta = (DisplayName = "Is Open"))
 	bool IsOpen() { return bIsOpen; }

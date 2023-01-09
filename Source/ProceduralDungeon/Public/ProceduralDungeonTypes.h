@@ -36,6 +36,7 @@ enum class EGenerationState : uint8
 	Load 					UMETA(DisplayName = "Load"),
 	Initialization 			UMETA(DisplayName = "Initialization"),
 	Unload 					UMETA(DisplayName = "Unload"),
+	Play					UMETA(DisplayName = "Play"),
 	NbState					UMETA(Hidden)
 };
 
