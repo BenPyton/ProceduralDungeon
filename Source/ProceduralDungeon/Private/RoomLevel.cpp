@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2022 Benoit Pelletier
+ * Copyright (c) 2019-2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,25 +46,6 @@ ARoomLevel::ARoomLevel(const FObjectInitializer& ObjectInitializer)
 	Transform = FTransform::Identity;
 }
 
-void ARoomLevel::PostInitProperties()
-{
-	Super::PostInitProperties();
-
-	UpdateBounds();
-}
-
-void ARoomLevel::UpdateBounds()
-{
-	if (IsValid(Room))
-	{
-		Bounds = Room->GetBounds();
-	}
-	else if (IsValid(Data))
-	{
-		Bounds = Data->GetBounds();
-	}
-}
-
 // Use this for initialization
 void ARoomLevel::Init(URoom* _Room)
 {
@@ -77,6 +58,31 @@ void ARoomLevel::Init(URoom* _Room)
 
 	// Update triggerBox for occlusion culling (also the red box drawn in debug)
 	UpdateBounds();
+}
+
+void ARoomLevel::SetPlayerInside(bool PlayerInside)
+{
+	if (bPlayerInside == PlayerInside)
+		return;
+
+	bPlayerInside = PlayerInside;
+	UpdateVisibility();
+
+	if (!IsValid(Room))
+		return;
+
+	for (int i = 0; i < Room->GetConnectionCount(); ++i)
+	{
+		TWeakObjectPtr<URoom> OtherRoom = Room->GetConnection(i);
+		if (!OtherRoom.IsValid())
+			continue;
+
+		ARoomLevel* RoomLevel = OtherRoom->GetLevelScript();
+		if (!IsValid(RoomLevel))
+			continue;
+
+		RoomLevel->UpdateVisibility();
+	}
 }
 
 void ARoomLevel::BeginPlay()
@@ -114,18 +120,15 @@ void ARoomLevel::Tick(float DeltaTime)
 				}
 			}
 
+			UpdateVisibility();
+
 			PendingInit = false;
 			IsInit = true;
 		}
 	}
-	else
-	{
-		Display();
-	}
 
 	if (!IsValid(Data))
 		return;
-
 
 #if WITH_EDITOR
 	// TODO: Place the debug draw in an editor module of the plugin
@@ -137,7 +140,7 @@ void ARoomLevel::Tick(float DeltaTime)
 		DrawDebugSphere(GetWorld(), Transform.TransformPosition(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
 
 		// Room bounds
-		DrawDebugBox(GetWorld(), Transform.TransformPosition(Bounds.Center), Bounds.Extent, Transform.GetRotation(), PlayerInside ? FColor::Green : FColor::Red);
+		DrawDebugBox(GetWorld(), Transform.TransformPosition(Bounds.Center), Bounds.Extent, Transform.GetRotation(), IsPlayerInside() ? FColor::Green : FColor::Red);
 
 		// Doors
 		FVector DoorSize = URoom::DoorSize();
@@ -150,37 +153,70 @@ void ARoomLevel::Tick(float DeltaTime)
 #endif
 }
 
-void ARoomLevel::Display()
+void ARoomLevel::UpdateBounds()
 {
-	if (!IsPendingKill() && Room != nullptr && URoom::OcclusionCulling())
+	if (IsValid(Room))
 	{
-		IsHidden = !PlayerInside;
+		Bounds = Room->GetBounds();
+	}
+	else if (IsValid(Data))
+	{
+		Bounds = Data->GetBounds();
+	}
+}
+
+void ARoomLevel::UpdateVisibility()
+{
+	if (!URoom::OcclusionCulling())
+	{
+		// TODO: Force visibility
+		return;
+	}
+
+	if (IsPendingKill() || !IsValid(Room))
+		return;
+
+	bool PrevIsVisible = bIsVisible;
+
+	if (AlwaysVisible)
+		bIsVisible = true;
+	else
+	{
+		bIsVisible = bPlayerInside;
 		for (int i = 0; i < Room->GetConnectionCount(); i++)
 		{
 			if (Room->GetConnection(i) != nullptr
 				&& IsValid(Room->GetConnection(i)->GetLevelScript())
-				&& Room->GetConnection(i)->GetLevelScript()->PlayerInside)
+				&& Room->GetConnection(i)->GetLevelScript()->IsPlayerInside())
 			{
-				IsHidden = false;
-			}
-		}
-
-		// force IsHidden to false if AlwaysVisible is true
-		IsHidden &= !AlwaysVisible;
-
-		for (AActor* Actor : ActorsInLevel)
-		{
-			if (IsValid(Actor))
-			{
-				Actor->SetActorHiddenInGame(IsHidden);
+				bIsVisible = true;
 			}
 		}
 	}
+
+	if(PrevIsVisible != bIsVisible)
+		SetVisible(bIsVisible);
+}
+
+void ARoomLevel::SetVisible(bool Visible)
+{
+	for (AActor* Actor : ActorsInLevel)
+	{
+		if (IsValid(Actor))
+			Actor->SetActorHiddenInGame(!Visible);
+	}
+}
+
+void ARoomLevel::PostInitProperties()
+{
+	Super::PostInitProperties();
+	UpdateBounds();
 }
 
 #if WITH_EDITOR
 void ARoomLevel::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
+	Super::PostEditChangeProperty(PropertyChangedEvent);
 	UpdateBounds();
 }
 #endif

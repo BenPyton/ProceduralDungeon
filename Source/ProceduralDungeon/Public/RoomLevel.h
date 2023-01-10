@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2022 Benoit Pelletier
+ * Copyright (c) 2019-2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,8 +42,6 @@ public:
 public:
 	UPROPERTY()
 	URoom* Room = nullptr;
-	bool PlayerInside = false;
-	bool IsHidden = false;
 	bool IsInit = false;
 	bool PendingInit = false;
 	bool IsLocked = false;
@@ -60,16 +58,27 @@ public:
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
 
 	void Init(URoom* Room);
+	void SetPlayerInside(bool PlayerInside);
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE bool IsPlayerInside() const { return bPlayerInside; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE bool IsVisible() const { return bIsVisible; }
 
 private:
+	bool bPlayerInside = false;
+	bool bIsVisible = true;
+
 	UPROPERTY()
 	TArray<AActor*> ActorsInLevel;
 	FTransform Transform;
 	FBoxCenterAndExtent Bounds;
 
 private:
-	void Display();
 	void UpdateBounds();
+	void UpdateVisibility();
+	void SetVisible(bool Visible);
 
 	virtual void PostInitProperties() override;
 

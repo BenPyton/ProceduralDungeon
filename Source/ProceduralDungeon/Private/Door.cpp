@@ -46,8 +46,8 @@ void ADoor::Tick(float DeltaTime)
 		||  (RoomB == nullptr || (RoomB->GetLevelScript() != nullptr && RoomB->GetLevelScript()->IsLocked)));
 
 	SetActorHiddenInGame( !bAlwaysVisible &&
-			(RoomA == nullptr || (RoomA->GetLevelScript() != nullptr && RoomA->GetLevelScript()->IsHidden)) 
-		&&	(RoomB == nullptr || (RoomB->GetLevelScript() != nullptr && RoomB->GetLevelScript()->IsHidden)));
+			(RoomA == nullptr || (RoomA->GetLevelScript() != nullptr && !RoomA->GetLevelScript()->IsVisible())) 
+		&&	(RoomB == nullptr || (RoomB->GetLevelScript() != nullptr && !RoomB->GetLevelScript()->IsVisible())));
 
 	if (bLocked != bPrevLocked)
 	{

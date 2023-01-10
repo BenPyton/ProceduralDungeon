@@ -311,12 +311,12 @@ void ADungeonGenerator::UpdateRoomVisibility()
 	{
 		RoomsToHide.Remove(Element.Room);
 		CurrentPlayerRooms.Add(Element.Room);
-		Element.Room->GetLevelScript()->PlayerInside = true;
+		Element.Room->GetLevelScript()->SetPlayerInside(true);
 	});
 
 	for (URoom* room : RoomsToHide)
 	{
-		room->GetLevelScript()->PlayerInside = false;
+		room->GetLevelScript()->SetPlayerInside(false);
 	}
 }
 
