@@ -56,33 +56,8 @@ void ARoomLevel::Init(URoom* _Room)
 	Transform.SetLocation(Room->Generator()->GetDungeonOffset());
 	Transform.SetRotation(Room->Generator()->GetDungeonRotation());
 
-	// Update triggerBox for occlusion culling (also the red box drawn in debug)
+	// Update the room's bounding box for occlusion culling (also the red box drawn in debug)
 	UpdateBounds();
-}
-
-void ARoomLevel::SetPlayerInside(bool PlayerInside)
-{
-	if (bPlayerInside == PlayerInside)
-		return;
-
-	bPlayerInside = PlayerInside;
-	UpdateVisibility();
-
-	if (!IsValid(Room))
-		return;
-
-	for (int i = 0; i < Room->GetConnectionCount(); ++i)
-	{
-		TWeakObjectPtr<URoom> OtherRoom = Room->GetConnection(i);
-		if (!OtherRoom.IsValid())
-			continue;
-
-		ARoomLevel* RoomLevel = OtherRoom->GetLevelScript();
-		if (!IsValid(RoomLevel))
-			continue;
-
-		RoomLevel->UpdateVisibility();
-	}
 }
 
 void ARoomLevel::BeginPlay()
@@ -120,7 +95,7 @@ void ARoomLevel::Tick(float DeltaTime)
 				}
 			}
 
-			UpdateVisibility();
+			Room->UpdateVisibility();
 
 			PendingInit = false;
 			IsInit = true;
@@ -165,40 +140,7 @@ void ARoomLevel::UpdateBounds()
 	}
 }
 
-void ARoomLevel::UpdateVisibility()
-{
-	if (!URoom::OcclusionCulling())
-	{
-		// TODO: Force visibility
-		return;
-	}
-
-	if (IsPendingKill() || !IsValid(Room))
-		return;
-
-	bool PrevIsVisible = bIsVisible;
-
-	if (AlwaysVisible)
-		bIsVisible = true;
-	else
-	{
-		bIsVisible = bPlayerInside;
-		for (int i = 0; i < Room->GetConnectionCount(); i++)
-		{
-			if (Room->GetConnection(i) != nullptr
-				&& IsValid(Room->GetConnection(i)->GetLevelScript())
-				&& Room->GetConnection(i)->GetLevelScript()->IsPlayerInside())
-			{
-				bIsVisible = true;
-			}
-		}
-	}
-
-	if(PrevIsVisible != bIsVisible)
-		SetVisible(bIsVisible);
-}
-
-void ARoomLevel::SetVisible(bool Visible)
+void ARoomLevel::SetActorsVisible(bool Visible)
 {
 	for (AActor* Actor : ActorsInLevel)
 	{

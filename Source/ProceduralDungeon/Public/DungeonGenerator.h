@@ -37,7 +37,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRoomEvent, URoomData*, NewRoom);
 class ADoor;
 class URoom;
 
-UCLASS()
+UCLASS(Blueprintable, ClassGroup="Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADungeonGenerator : public AActor
 {
 	GENERATED_BODY()
@@ -191,7 +191,7 @@ protected:
 
 private:
 	// Launch the generation process of the dungeon
-	UFUNCTION(NetMulticast, Reliable, Category = "Dungeon Generator")
+	UFUNCTION(NetMulticast, Reliable)
 	void BeginGeneration(uint32 GenerationSeed);
 
 	// Create virtually the dungeon (no load nor initialization of rooms)
@@ -205,11 +205,9 @@ private:
 	void InstantiateRoom(URoom* Room);
 
 	// Load all room levels
-	UFUNCTION()
 	void LoadAllRooms();
 
 	// unload all room levels
-	UFUNCTION()
 	void UnloadAllRooms();
 
 	// Update the rooms visibility based on the player position
@@ -217,27 +215,16 @@ private:
 
 	// ===== FSM =====
 
-	UFUNCTION()
 	void SetState(EGenerationState NewState);
-	UFUNCTION()
 	void OnStateBegin(EGenerationState State);
-	UFUNCTION()
 	void OnStateTick(EGenerationState State);
-	UFUNCTION()
 	void OnStateEnd(EGenerationState State);
 
 	// ===== Dispatch optional events =====
 
-	UFUNCTION()
 	void DispatchPreGeneration();
-
-	UFUNCTION()
 	void DispatchPostGeneration();
-
-	UFUNCTION()
 	void DispatchGenerationInit();
-
-	UFUNCTION()
 	void DispatchRoomAdded(URoomData* NewRoom);
 
 public:
@@ -251,8 +238,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	void SetSeed(int32 NewSeed);
 
-	int32 GetSeed();
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle = "Seed"))
+	int32 GetSeed();
 
 	int32 GetUniqueId() const { return UniqueId; }
 

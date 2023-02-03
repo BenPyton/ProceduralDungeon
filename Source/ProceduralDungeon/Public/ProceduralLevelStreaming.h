@@ -56,6 +56,7 @@ class PROCEDURALDUNGEON_API UProceduralLevelStreaming : public ULevelStreaming
 
 	//~ Begin ULevelStreaming Interface
 	virtual bool ShouldBeLoaded() const override { return bShouldBeLoaded; }
+	virtual bool ShouldBeAlwaysLoaded() const override { return true; }
 	//~ End ULevelStreaming Interface
 
 	virtual void SetShouldBeLoaded(bool bShouldBeLoaded) override;

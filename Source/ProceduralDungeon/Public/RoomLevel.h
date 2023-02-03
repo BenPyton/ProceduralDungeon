@@ -30,13 +30,13 @@
 
 class URoom;
 
-UCLASS()
+UCLASS(Blueprintable, ClassGroup="Procedural Dungeon")
 class PROCEDURALDUNGEON_API ARoomLevel : public ALevelScriptActor
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Data", meta = (BlueprintBaseOnly /* Doesn't work... */))
+	UPROPERTY(EditAnywhere, Category = "Data")
 	class URoomData* Data;
 
 public:
@@ -44,7 +44,6 @@ public:
 	URoom* Room = nullptr;
 	bool IsInit = false;
 	bool PendingInit = false;
-	bool IsLocked = false;
 
 	UPROPERTY(EditAnywhere, Category = "Room Level")
 	bool AlwaysVisible = false;
@@ -58,18 +57,21 @@ public:
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
 
 	void Init(URoom* Room);
-	void SetPlayerInside(bool PlayerInside);
+	void SetActorsVisible(bool Visible);
 
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE bool IsPlayerInside() const { return bPlayerInside; }
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Player Inside"))
+	bool IsPlayerInside() const { return IsValid(Room) ? Room->IsPlayerInside() : false; }
 
-	UFUNCTION(BlueprintCallable)
-	FORCEINLINE bool IsVisible() const { return bIsVisible; }
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Visible"))
+	bool IsVisible() const { return IsValid(Room) ? Room->IsVisible() : true; }
+
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Locked"))
+	bool IsLocked() const { return IsValid(Room) ? Room->IsLocked() : false; }
+
+	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon")
+	void Lock(bool lock) { if(IsValid(Room)) Room->Lock(lock); }
 
 private:
-	bool bPlayerInside = false;
-	bool bIsVisible = true;
-
 	UPROPERTY()
 	TArray<AActor*> ActorsInLevel;
 	FTransform Transform;
@@ -77,9 +79,6 @@ private:
 
 private:
 	void UpdateBounds();
-	void UpdateVisibility();
-	void SetVisible(bool Visible);
-
 	virtual void PostInitProperties() override;
 
 #if WITH_EDITOR

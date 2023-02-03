@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2021, 2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,8 +45,11 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
 	float DoorOffset;
 
-	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
+	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon", meta=(Tooltip = "The rooms visibility will be toggled off when the player is not inside it or in a room next to it."))
 	bool OcclusionCulling;
+
+	//UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon", meta=(EditCondition="OcclusionCulling", Tooltip = "The legacy occlusion culling system only toggles the visibility of the actors in the rooms, keeping the collisions, ticking and all oher things.\nThe new system toggles instead the whole room levels visibility, shutting off the ticking and other things of the actors and the level script."))
+	//bool LegacyOcclusion;
 
 	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
 	bool CanLoop;

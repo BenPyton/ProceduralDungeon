@@ -40,7 +40,7 @@ enum class EGenerationState : uint8
 	NbState					UMETA(Hidden)
 };
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta = (DisplayName = "Door Direction"))
 enum class EDoorDirection : uint8
 {
 	North = 0 				UMETA(DisplayName = "North"), // rotation = 0 (world forward)
@@ -50,7 +50,7 @@ enum class EDoorDirection : uint8
 	NbDirection = 4 		UMETA(Hidden)
 };
 
-UENUM()
+UENUM(BlueprintType, meta = (DisplayName = "Generation Type"))
 enum class EGenerationType : uint8
 {
 	DFS = 0 				UMETA(DisplayName = "Depth First", Tooltip = "Make the dungeon more linear"),
@@ -58,7 +58,7 @@ enum class EGenerationType : uint8
 	NbType = 2 				UMETA(Hidden)
 };
 
-UENUM()
+UENUM(BlueprintType, meta = (DisplayName = "Seed Type"))
 enum class ESeedType : uint8
 {
 	Random = 0 				UMETA(DisplayName = "Random", Tooltip = "Random seed at each generation"),

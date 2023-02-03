@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2022 Benoit Pelletier
+ * Copyright (c) 2019-2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -446,6 +446,13 @@ bool URoom::OcclusionCulling()
 	return Settings->OcclusionCulling;
 }
 
+bool URoom::UseLegacyOcclusion()
+{
+	//UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
+	//return Settings->LegacyOcclusion;
+	return true;
+}
+
 bool URoom::DrawDebug()
 {
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
@@ -456,4 +463,61 @@ bool URoom::CanLoop()
 {
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
 	return Settings->CanLoop;
+}
+
+
+void URoom::UpdateVisibility()
+{
+	if (!URoom::OcclusionCulling())
+	{
+		// TODO: Force visibility
+		return;
+	}
+
+	bool PrevIsVisible = bIsVisible;
+	bIsVisible = bPlayerInside;
+	for (int i = 0; i < GetConnectionCount(); i++)
+	{
+		if (GetConnection(i).IsValid()
+			&& GetConnection(i)->IsPlayerInside())
+		{
+			bIsVisible = true;
+		}
+	}
+
+	if(PrevIsVisible != bIsVisible)
+		SetVisible(bIsVisible);
+}
+
+void URoom::SetVisible(bool Visible)
+{
+	if (URoom::UseLegacyOcclusion())
+	{
+		GetLevelScript()->SetActorsVisible(Visible);
+	}
+	else if(IsValid(Instance))
+	{
+		// TODO: make the level be veisible again, I don't know why it is not visible although
+		// the Visible and Loaded of StreamingLevel are correctly set to true 
+		// and the Loaded of Level instance inside it is also set to true...
+		// In the meantime, only the legacy version will remains.
+		//Instance->SetShouldBeVisible(Visible);
+		//Instance->BroadcastLevelVisibleStatus(Instance->GetWorld(), Instance->GetWorldAssetPackageFName(), Visible);
+	}
+}
+
+void URoom::SetPlayerInside(bool PlayerInside)
+{
+	if (bPlayerInside == PlayerInside)
+		return;
+
+	bPlayerInside = PlayerInside;
+	UpdateVisibility();
+
+	for (int i = 0; i < GetConnectionCount(); ++i)
+	{
+		TWeakObjectPtr<URoom> OtherRoom = GetConnection(i);
+		if (OtherRoom.IsValid())
+			OtherRoom->UpdateVisibility();
+	}
 }

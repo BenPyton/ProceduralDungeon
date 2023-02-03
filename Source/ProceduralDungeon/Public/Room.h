@@ -68,9 +68,24 @@ public:
 
 	ADungeonGenerator* Generator() const { return GeneratorOwner; }
 
+	void SetPlayerInside(bool PlayerInside);
+
+	FORCEINLINE bool IsPlayerInside() const { return bPlayerInside; }
+	FORCEINLINE bool IsVisible() const { return bIsVisible; }
+	FORCEINLINE bool IsLocked() const { return bIsLocked; }
+	FORCEINLINE void Lock(bool lock) { bIsLocked = lock; }
+
+	void UpdateVisibility();
+
 private:
 	UPROPERTY()
 	URoomData* RoomData;
+
+	bool bPlayerInside = false;
+	bool bIsVisible = true;
+	bool bIsLocked = false;
+
+	void SetVisible(bool Visible);
 
 public:
 	void Init(URoomData* RoomData, ADungeonGenerator* Generator, int32 RoomId);
@@ -127,6 +142,7 @@ public:
 	static FVector DoorSize();
 	static float DoorOffset();
 	static bool OcclusionCulling();
+	static bool UseLegacyOcclusion();
 	static bool DrawDebug();
 	static bool CanLoop();
 };

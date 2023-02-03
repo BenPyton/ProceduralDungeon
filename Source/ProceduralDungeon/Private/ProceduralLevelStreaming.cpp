@@ -157,6 +157,7 @@ UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstance_Internal
 	StreamingLevel->bShouldBlockOnLoad = false;
 	StreamingLevel->bInitiallyLoaded = true;
 	StreamingLevel->bInitiallyVisible = true;
+	StreamingLevel->bDisableDistanceStreaming = true;
 	// Transform
 	StreamingLevel->LevelTransform = FTransform(Rotation, Location);
 	// Map to Load

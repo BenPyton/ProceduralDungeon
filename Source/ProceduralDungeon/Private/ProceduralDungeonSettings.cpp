@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2021, 2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer&
 	DoorSize = FVector(40, 640, 400);
 	DoorOffset = 0.0f;
 	OcclusionCulling = true;
+	//LegacyOcclusion = true;
 	DrawDebug = true;
 	OnScreenPrintDebug = false;
 	PrintDebugDuration = 60.0f;

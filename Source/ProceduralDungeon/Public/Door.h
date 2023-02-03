@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2022 Benoit Pelletier
+ * Copyright (c) 2019-2022, 2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@
 
 class URoom;
 
-UCLASS()
+UCLASS(Blueprintable, ClassGroup="Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADoor : public AActor
 {
 	GENERATED_BODY()
@@ -44,9 +44,9 @@ public:
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
 
 public:
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Door")
 	void OpenDoor();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Door")
 	void CloseDoor();
 
 protected:
@@ -73,6 +73,7 @@ protected:
 protected:
 	bool bLocked = false;
 	bool bIsOpen = false;
+	bool bShouldBeLocked = false;
 
 	// The two connected rooms to this door
 	UPROPERTY()
@@ -92,11 +93,14 @@ private:
 public:
 	void SetConnectingRooms(URoom* RoomA, URoom* RoomB);
 
-	UFUNCTION(BlueprintCallable, Category = "Door", meta = (DisplayName = "Is Locked"))
+	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Locked"))
 	bool IsLocked() { return bLocked; }
 
-	UFUNCTION(BlueprintCallable, Category = "Door", meta = (DisplayName = "Is Open"))
+	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Open"))
 	bool IsOpen() { return bIsOpen; }
+
+	UFUNCTION(BlueprintCallable, Category = "Door")
+	void Lock(bool lock) { bShouldBeLocked = lock; }
 
 	static void DrawDebug(UWorld* World, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity, bool includeOffset = false, bool isConnected = true);
 };

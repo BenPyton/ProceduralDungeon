@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2021, 2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ void ARoomLockerBase::SetLocked(bool Locked, bool Self, TSubclassOf<URoomData> R
 	{
 		if (Self)
 		{
-			Script->IsLocked = Locked;
+			Script->Lock(Locked);
 		}
 
 		URoom* Room = Script->Room;
@@ -44,11 +44,11 @@ void ARoomLockerBase::SetLocked(bool Locked, bool Self, TSubclassOf<URoomData> R
 		{
 			for (int i = 0; i < Room->GetConnectionCount(); i++)
 			{
-				if (nullptr != Room->GetConnection(i) && nullptr != Room->GetConnection(i)->GetLevelScript())
+				if (nullptr != Room->GetConnection(i))
 				{
 					if (RoomType == Room->GetConnection(i)->GetRoomData()->GetClass())
 					{
-						Room->GetConnection(i)->GetLevelScript()->IsLocked = Locked;
+						Room->GetConnection(i)->Lock(Locked);
 					}
 				}
 			}
