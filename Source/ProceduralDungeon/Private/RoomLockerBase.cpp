@@ -29,7 +29,7 @@
 #include "GameFramework/GameState.h"
 #include "Engine/World.h"
 
-void ARoomLockerBase::SetLocked(bool Locked, bool Self, TSubclassOf<URoomData> RoomType)
+void ADEPRECATED_RoomLockerBase::SetLocked(bool Locked, bool Self, TSubclassOf<URoomData> RoomType)
 {
 	ARoomLevel* Script = GetRoomLevel();
 	if (nullptr != Script)
@@ -56,7 +56,7 @@ void ARoomLockerBase::SetLocked(bool Locked, bool Self, TSubclassOf<URoomData> R
 	}
 }
 
-ARoomLevel * ARoomLockerBase::GetRoomLevel()
+ARoomLevel * ADEPRECATED_RoomLockerBase::GetRoomLevel()
 {
 	return Cast<ARoomLevel>(GetLevel()->GetLevelScriptActor());
 }
