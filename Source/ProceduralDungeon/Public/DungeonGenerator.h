@@ -213,6 +213,9 @@ private:
 	// Update the rooms visibility based on the player position
 	void UpdateRoomVisibility();
 
+	// Reset all data from a specific generation
+	void Reset();
+
 	// ===== FSM =====
 
 	void SetState(EGenerationState NewState);

@@ -320,6 +320,12 @@ void ADungeonGenerator::UpdateRoomVisibility()
 	}
 }
 
+void ADungeonGenerator::Reset()
+{
+	CurrentPlayerRooms.Empty();
+	Octree->Destroy();
+}
+
 /*
  *	=======================================
  *				State Machine
@@ -338,6 +344,7 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 	{
 	case EGenerationState::Unload:
 		LogInfo("======= Begin Unload All Levels =======");
+		Reset();
 		UnloadAllRooms();
 		NbUnloadedRoom = 0;
 		break;
