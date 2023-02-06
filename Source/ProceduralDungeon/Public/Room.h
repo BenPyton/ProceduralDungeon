@@ -50,12 +50,6 @@ UCLASS()
 class PROCEDURALDUNGEON_API URoom : public UObject
 {
 	GENERATED_BODY()
-private:
-	UPROPERTY()
-	TArray<FRoomConnection> Connections;
-
-	ADungeonGenerator* GeneratorOwner;
-	int64 Id;
 
 public:
 	UPROPERTY()
@@ -64,23 +58,27 @@ public:
 	FIntVector Position;
 	EDoorDirection Direction;
 
+	URoom();
+
 	URoomData* GetRoomData() { return RoomData; }
-
 	ADungeonGenerator* Generator() const { return GeneratorOwner; }
-
 	void SetPlayerInside(bool PlayerInside);
+	void UpdateVisibility();
 
 	FORCEINLINE bool IsPlayerInside() const { return bPlayerInside; }
 	FORCEINLINE bool IsVisible() const { return bIsVisible; }
 	FORCEINLINE bool IsLocked() const { return bIsLocked; }
 	FORCEINLINE void Lock(bool lock) { bIsLocked = lock; }
 
-	void UpdateVisibility();
-
 private:
 	UPROPERTY()
 	URoomData* RoomData;
 
+	UPROPERTY()
+	TArray<FRoomConnection> Connections;
+
+	ADungeonGenerator* GeneratorOwner;
+	int64 Id;
 	bool bPlayerInside = false;
 	bool bIsVisible = true;
 	bool bIsLocked = false;

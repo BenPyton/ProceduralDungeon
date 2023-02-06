@@ -40,8 +40,8 @@ ARoomLevel::ARoomLevel(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
-	IsInit = false;
-	PendingInit = false;
+	bIsInit = false;
+	bPendingInit = false;
 	Room = nullptr;
 	Transform = FTransform::Identity;
 }
@@ -49,9 +49,9 @@ ARoomLevel::ARoomLevel(const FObjectInitializer& ObjectInitializer)
 // Use this for initialization
 void ARoomLevel::Init(URoom* _Room)
 {
-	IsInit = false;
 	Room = _Room;
-	PendingInit = true;
+	bIsInit = false;
+	bPendingInit = true;
 
 	Transform.SetLocation(Room->Generator()->GetDungeonOffset());
 	Transform.SetRotation(Room->Generator()->GetDungeonRotation());
@@ -67,13 +67,7 @@ void ARoomLevel::BeginPlay()
 
 void ARoomLevel::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
-	for (AActor* Actor : ActorsInLevel)
-	{
-		if (IsValid(Actor))
-		{
-			Actor->Destroy();
-		}
-	}
+	Super::EndPlay(EndPlayReason);
 }
 
 // Update is called once per frame
@@ -81,25 +75,12 @@ void ARoomLevel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!IsInit)
+	if (!bIsInit && bPendingInit && Room != nullptr)
 	{
-		if (PendingInit && Room != nullptr)
-		{
-			// Register All Actors in the level
-			for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-			{
-				ULevel* Level = ActorItr->GetLevel();
-				if (Level->GetOuter() == GetLevel()->GetOuter())
-				{
-					ActorsInLevel.Add(*ActorItr);
-				}
-			}
+		Room->UpdateVisibility();
 
-			Room->UpdateVisibility();
-
-			PendingInit = false;
-			IsInit = true;
-		}
+		bPendingInit = false;
+		bIsInit = true;
 	}
 
 	if (!IsValid(Data))
@@ -142,10 +123,14 @@ void ARoomLevel::UpdateBounds()
 
 void ARoomLevel::SetActorsVisible(bool Visible)
 {
-	for (AActor* Actor : ActorsInLevel)
+	ULevel* Level = GetLevel();
+	if (IsValid(Level))
 	{
-		if (IsValid(Actor))
-			Actor->SetActorHiddenInGame(!Visible);
+		for (AActor* Actor : Level->Actors)
+		{
+			if (IsValid(Actor))
+				Actor->SetActorHiddenInGame(!Visible);
+		}
 	}
 }
 

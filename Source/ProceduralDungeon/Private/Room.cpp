@@ -32,6 +32,15 @@
 #include "ProceduralDungeonLog.h"
 #include "DungeonGenerator.h"
 
+URoom::URoom()
+	: Super()
+	, Instance(nullptr)
+	, RoomData(nullptr)
+	, GeneratorOwner(nullptr)
+	, Connections()
+{
+}
+
 void URoom::Init(URoomData* Data, ADungeonGenerator* Generator, int32 RoomId)
 {
 	RoomData = Data;
@@ -293,6 +302,39 @@ FIntVector Min(const FIntVector& A, const FIntVector& B)
 	return FIntVector(FMath::Min(A.X, B.X), FMath::Min(A.Y, B.Y), FMath::Min(A.Z, B.Z));
 }
 
+void URoom::SetVisible(bool Visible)
+{
+	if (URoom::UseLegacyOcclusion())
+	{
+		GetLevelScript()->SetActorsVisible(Visible);
+	}
+	else if(IsValid(Instance))
+	{
+		// TODO: make the level be veisible again, I don't know why it is not visible although
+		// the Visible and Loaded of StreamingLevel are correctly set to true 
+		// and the Loaded of Level instance inside it is also set to true...
+		// In the meantime, only the legacy version will remains.
+		//Instance->SetShouldBeVisible(Visible);
+		//Instance->BroadcastLevelVisibleStatus(Instance->GetWorld(), Instance->GetWorldAssetPackageFName(), Visible);
+	}
+}
+
+void URoom::SetPlayerInside(bool PlayerInside)
+{
+	if (bPlayerInside == PlayerInside)
+		return;
+
+	bPlayerInside = PlayerInside;
+	UpdateVisibility();
+
+	for (int i = 0; i < GetConnectionCount(); ++i)
+	{
+		TWeakObjectPtr<URoom> OtherRoom = GetConnection(i);
+		if (OtherRoom.IsValid())
+			OtherRoom->UpdateVisibility();
+	}
+}
+
 // AABB Overlapping
 bool URoom::Overlap(URoom& A, URoom& B)
 {
@@ -487,37 +529,4 @@ void URoom::UpdateVisibility()
 
 	if(PrevIsVisible != bIsVisible)
 		SetVisible(bIsVisible);
-}
-
-void URoom::SetVisible(bool Visible)
-{
-	if (URoom::UseLegacyOcclusion())
-	{
-		GetLevelScript()->SetActorsVisible(Visible);
-	}
-	else if(IsValid(Instance))
-	{
-		// TODO: make the level be veisible again, I don't know why it is not visible although
-		// the Visible and Loaded of StreamingLevel are correctly set to true 
-		// and the Loaded of Level instance inside it is also set to true...
-		// In the meantime, only the legacy version will remains.
-		//Instance->SetShouldBeVisible(Visible);
-		//Instance->BroadcastLevelVisibleStatus(Instance->GetWorld(), Instance->GetWorldAssetPackageFName(), Visible);
-	}
-}
-
-void URoom::SetPlayerInside(bool PlayerInside)
-{
-	if (bPlayerInside == PlayerInside)
-		return;
-
-	bPlayerInside = PlayerInside;
-	UpdateVisibility();
-
-	for (int i = 0; i < GetConnectionCount(); ++i)
-	{
-		TWeakObjectPtr<URoom> OtherRoom = GetConnection(i);
-		if (OtherRoom.IsValid())
-			OtherRoom->UpdateVisibility();
-	}
 }

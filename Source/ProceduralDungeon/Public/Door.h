@@ -31,7 +31,7 @@
 
 class URoom;
 
-UCLASS(Blueprintable, ClassGroup="Procedural Dungeon")
+UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADoor : public AActor
 {
 	GENERATED_BODY()

@@ -42,8 +42,6 @@ public:
 public:
 	UPROPERTY()
 	URoom* Room = nullptr;
-	bool IsInit = false;
-	bool PendingInit = false;
 
 	UPROPERTY(EditAnywhere, Category = "Room Level")
 	bool AlwaysVisible = false;
@@ -59,6 +57,9 @@ public:
 	void Init(URoom* Room);
 	void SetActorsVisible(bool Visible);
 
+	FORCEINLINE bool IsInit() const { return bIsInit; }
+	FORCEINLINE bool PendingInit() const { return bPendingInit; }
+
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Player Inside"))
 	bool IsPlayerInside() const { return IsValid(Room) ? Room->IsPlayerInside() : false; }
 
@@ -72,8 +73,8 @@ public:
 	void Lock(bool lock) { if(IsValid(Room)) Room->Lock(lock); }
 
 private:
-	UPROPERTY()
-	TArray<AActor*> ActorsInLevel;
+	bool bIsInit = false;
+	bool bPendingInit = false;
 	FTransform Transform;
 	FBoxCenterAndExtent Bounds;
 

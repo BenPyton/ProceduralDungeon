@@ -354,6 +354,7 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 	case EGenerationState::Initialization:
 		LogInfo("======= Begin Init All Levels =======");
 		LogInfo(FString::Printf(TEXT("Nb Room To Initialize: %d"), RoomList.Num()));
+		IsInit = false;
 		break;
 	case EGenerationState::Play:
 		LogInfo("======= Ready To Play =======");
@@ -406,21 +407,24 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 		break;
 	case EGenerationState::Initialization:
 		// While initialization isn't done, try to initialize all rooms
-		if (!IsInit)
+		if (IsInit)
+		{
+			SetState(EGenerationState::Play);
+		}
+		else
 		{
 			IsInit = true;
-			for (URoom* room : RoomList)
+			for (URoom* Room : RoomList)
 			{
-				ARoomLevel* script = room->GetLevelScript();
+				ARoomLevel* Script = Room->GetLevelScript();
 
-				if (nullptr != script)
+				if (IsValid(Script))
 				{
-					IsInit &= script->IsInit;
-					if (!script->IsInit && !script->PendingInit)
+					IsInit &= Script->IsInit();
+					if (!Script->IsInit() && !Script->PendingInit())
 					{
 						NbInitRoom++;
-						script->Room = nullptr;
-						script->Init(room);
+						Script->Init(Room);
 
 						LogInfo(FString::Printf(TEXT("Room Initialization: %d/%d"), NbInitRoom, RoomList.Num()), false);
 					}
@@ -428,14 +432,12 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 				else
 				{
 					IsInit = false;
+					FString ErrMsg("Room Level Script does not derive from ARoomLevel: ");
+					Room->GetRoomData()->AppendName(ErrMsg);
+					LogError(ErrMsg);
+					SetState(EGenerationState::None);
 				}
 			}
-
-			if (IsInit)
-			{
-				SetState(EGenerationState::Play);
-			}
-			return;
 		}
 		break;
 	case EGenerationState::Play:

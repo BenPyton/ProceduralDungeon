@@ -37,7 +37,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRoomEvent, URoomData*, NewRoom);
 class ADoor;
 class URoom;
 
-UCLASS(Blueprintable, ClassGroup="Procedural Dungeon")
+UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADungeonGenerator : public AActor
 {
 	GENERATED_BODY()
