@@ -77,7 +77,7 @@ void ARoomLevel::Tick(float DeltaTime)
 
 	if (!bIsInit && bPendingInit && Room != nullptr)
 	{
-		Room->UpdateVisibility();
+		SetActorsVisible(Room->IsVisible());
 
 		bPendingInit = false;
 		bIsInit = true;

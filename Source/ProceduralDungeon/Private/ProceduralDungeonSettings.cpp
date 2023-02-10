@@ -32,6 +32,7 @@ UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer&
 	DoorOffset = 0.0f;
 	OcclusionCulling = true;
 	//LegacyOcclusion = true;
+	OcclusionDistance = 2;
 	DrawDebug = true;
 	OnScreenPrintDebug = false;
 	PrintDebugDuration = 60.0f;

@@ -35,6 +35,7 @@
 #include "ProceduralDungeonSettings.h"
 #include "ProceduralDungeonLog.h"
 #include "QueueOrStack.h"
+#include <functional>
 
 int32 ADungeonGenerator::GeneratorCount = 0;
 
@@ -295,6 +296,34 @@ void ADungeonGenerator::UnloadAllRooms()
 	}
 }
 
+void TraverseRooms(const TSet<URoom*>& inRooms, TSet<URoom*>* outRooms, uint32 distance, std::function<void(URoom*)> lambda)
+{
+	TSet<URoom*> openList(inRooms);
+	TSet<URoom*> closedList, currentList;
+	while (distance > 0 && openList.Num() > 0)
+	{
+		for (URoom* openRoom : openList)
+			closedList.Add(openRoom);
+
+		std::swap(currentList, openList);
+		openList.Empty();
+		for (URoom* currentRoom : currentList)
+		{
+			lambda(currentRoom);
+			for (int i = 0; i < currentRoom->GetConnectionCount(); ++i)
+			{
+				URoom* nextRoom = currentRoom->GetConnection(i).Get();
+				if(IsValid(nextRoom) && !closedList.Contains(nextRoom))
+					openList.Add(nextRoom);
+			}
+		}
+		distance--;
+	}
+
+	if (outRooms != nullptr)
+		std::swap(*outRooms, closedList);
+}
+
 void ADungeonGenerator::UpdateRoomVisibility()
 {
 	APawn* Player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawnOrSpectator();
@@ -318,6 +347,11 @@ void ADungeonGenerator::UpdateRoomVisibility()
 	{
 		room->SetPlayerInside(false);
 	}
+
+	uint32 OcclusionDistance = URoom::OcclusionDistance();
+	TSet<URoom*> VisibleRooms;
+	TraverseRooms(CurrentPlayerRooms, &VisibleRooms, OcclusionDistance, [](URoom* room) { room->SetVisible(true); });
+	TraverseRooms(RoomsToHide, nullptr, OcclusionDistance, [&VisibleRooms](URoom* room) { room->SetVisible(VisibleRooms.Contains(room)); });
 }
 
 void ADungeonGenerator::Reset()

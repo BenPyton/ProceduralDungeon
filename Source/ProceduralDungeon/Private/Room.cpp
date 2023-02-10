@@ -44,11 +44,11 @@ URoom::URoom()
 void URoom::Init(URoomData* Data, ADungeonGenerator* Generator, int32 RoomId)
 {
 	RoomData = Data;
+	GeneratorOwner = Generator;
+	Id = RoomId;
 	Instance = nullptr;
 	Position = FIntVector(0, 0, 0);
 	Direction = EDoorDirection::North;
-	GeneratorOwner = Generator;
-	Id = RoomId;
 
 	if (IsValid(RoomData))
 	{
@@ -61,6 +61,8 @@ void URoom::Init(URoomData* Data, ADungeonGenerator* Generator, int32 RoomId)
 	{
 		LogError("No RoomData provided.");
 	}
+
+	SetVisible(false);
 }
 
 bool URoom::IsConnected(int Index)
@@ -127,15 +129,15 @@ void URoom::Instantiate(UWorld* World)
 
 void URoom::Destroy(UWorld* World)
 {
-	if (Instance != nullptr)
+	if (IsValid(Instance))
 	{
 		UE_LOG(LogProceduralDungeon, Log, TEXT("Unload room Instance: %s"), nullptr != Instance ? *Instance->GetWorldAssetPackageName() : TEXT("Null"));
 
-		ARoomLevel* script = GetLevelScript();
-		if (script != nullptr)
+		ARoomLevel* Script = GetLevelScript();
+		if (IsValid(Script))
 		{
-			script->Room = nullptr;
-			script->Destroy();
+			Script->Room = nullptr;
+			Script->Destroy();
 		}
 
 		UProceduralLevelStreaming::Unload(World, Instance);
@@ -292,25 +294,22 @@ FTransform URoom::GetTransform() const
 	return Transform;
 }
 
-FIntVector Max(const FIntVector& A, const FIntVector& B)
-{
-	return FIntVector(FMath::Max(A.X, B.X), FMath::Max(A.Y, B.Y), FMath::Max(A.Z, B.Z));
-}
-
-FIntVector Min(const FIntVector& A, const FIntVector& B)
-{
-	return FIntVector(FMath::Min(A.X, B.X), FMath::Min(A.Y, B.Y), FMath::Min(A.Z, B.Z));
-}
-
 void URoom::SetVisible(bool Visible)
 {
+	if (Visible == bIsVisible)
+		return;
+
+	bIsVisible = Visible;
+
 	if (URoom::UseLegacyOcclusion())
 	{
-		GetLevelScript()->SetActorsVisible(Visible);
+		ARoomLevel* LevelScript = GetLevelScript();
+		if(IsValid(LevelScript))
+			LevelScript->SetActorsVisible(Visible);
 	}
 	else if(IsValid(Instance))
 	{
-		// TODO: make the level be veisible again, I don't know why it is not visible although
+		// TODO: make the level be visible again, I don't know why it is not visible although
 		// the Visible and Loaded of StreamingLevel are correctly set to true 
 		// and the Loaded of Level instance inside it is also set to true...
 		// In the meantime, only the legacy version will remains.
@@ -325,14 +324,16 @@ void URoom::SetPlayerInside(bool PlayerInside)
 		return;
 
 	bPlayerInside = PlayerInside;
-	UpdateVisibility();
+}
 
-	for (int i = 0; i < GetConnectionCount(); ++i)
-	{
-		TWeakObjectPtr<URoom> OtherRoom = GetConnection(i);
-		if (OtherRoom.IsValid())
-			OtherRoom->UpdateVisibility();
-	}
+FIntVector Max(const FIntVector& A, const FIntVector& B)
+{
+	return FIntVector(FMath::Max(A.X, B.X), FMath::Max(A.Y, B.Y), FMath::Max(A.Z, B.Z));
+}
+
+FIntVector Min(const FIntVector& A, const FIntVector& B)
+{
+	return FIntVector(FMath::Min(A.X, B.X), FMath::Min(A.Y, B.Y), FMath::Min(A.Z, B.Z));
 }
 
 // AABB Overlapping
@@ -464,6 +465,9 @@ URoom* URoom::GetRoomAt(FIntVector RoomCell, TArray<URoom*>& RoomList)
 	return nullptr;
 }
 
+// =================== Plugin's Settings ========================
+// TODO: move them in UProceduralDungeonSettings instead?
+
 FVector URoom::Unit()
 {
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
@@ -495,6 +499,12 @@ bool URoom::UseLegacyOcclusion()
 	return true;
 }
 
+uint32 URoom::OcclusionDistance()
+{
+	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
+	return Settings->OcclusionDistance;
+}
+
 bool URoom::DrawDebug()
 {
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
@@ -505,28 +515,4 @@ bool URoom::CanLoop()
 {
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
 	return Settings->CanLoop;
-}
-
-
-void URoom::UpdateVisibility()
-{
-	if (!URoom::OcclusionCulling())
-	{
-		// TODO: Force visibility
-		return;
-	}
-
-	bool PrevIsVisible = bIsVisible;
-	bIsVisible = bPlayerInside;
-	for (int i = 0; i < GetConnectionCount(); i++)
-	{
-		if (GetConnection(i).IsValid()
-			&& GetConnection(i)->IsPlayerInside())
-		{
-			bIsVisible = true;
-		}
-	}
-
-	if(PrevIsVisible != bIsVisible)
-		SetVisible(bIsVisible);
 }
