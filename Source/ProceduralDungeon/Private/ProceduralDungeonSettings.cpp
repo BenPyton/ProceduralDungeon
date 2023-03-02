@@ -33,6 +33,7 @@ UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer&
 	OcclusionCulling = true;
 	//LegacyOcclusion = true;
 	OcclusionDistance = 2;
+	OccludeDynamicActors = false;
 	DrawDebug = true;
 	OnScreenPrintDebug = false;
 	PrintDebugDuration = 60.0f;

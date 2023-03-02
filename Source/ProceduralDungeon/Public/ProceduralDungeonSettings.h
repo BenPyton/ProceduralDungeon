@@ -54,6 +54,9 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
 	uint32 OcclusionDistance;
 
+	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon", meta=(Tooltip = "Keep track of dynamic actors entering and leaving the room to be able to show/hide them with the room."))
+	bool OccludeDynamicActors;
+
 	UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon")
 	bool CanLoop;
 

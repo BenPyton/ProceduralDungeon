@@ -116,6 +116,7 @@ public:
 	bool IsOccupied(FIntVector Cell);
 
 	FBoxCenterAndExtent GetBounds() const;
+	FBoxCenterAndExtent GetLocalBounds() const;
 	FTransform GetTransform() const;
 
 	// AABB Overlapping
@@ -140,6 +141,7 @@ public:
 	static bool OcclusionCulling();
 	static bool UseLegacyOcclusion();
 	static uint32 OcclusionDistance();
+	static bool OccludeDynamicActors();
 	static bool DrawDebug();
 	static bool CanLoop();
 };

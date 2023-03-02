@@ -283,7 +283,14 @@ void URoom::TryConnectToExistingDoors(TArray<URoom*>& RoomList)
 
 FBoxCenterAndExtent URoom::GetBounds() const
 {
+	check(IsValid(RoomData));
 	return RoomData->GetBounds(GetTransform());
+}
+
+FBoxCenterAndExtent URoom::GetLocalBounds() const
+{
+	check(IsValid(RoomData));
+	return RoomData->GetBounds();
 }
 
 FTransform URoom::GetTransform() const
@@ -503,6 +510,12 @@ uint32 URoom::OcclusionDistance()
 {
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
 	return Settings->OcclusionDistance;
+}
+
+bool URoom::OccludeDynamicActors()
+{
+	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
+	return Settings->OccludeDynamicActors;
 }
 
 bool URoom::DrawDebug()

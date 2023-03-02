@@ -35,6 +35,8 @@
 #include "RoomData.h"
 #include "Door.h"
 #include "DungeonGenerator.h"
+#include "Components/BoxComponent.h"
+#include "RoomVisibilityComponent.h"
 
 ARoomLevel::ARoomLevel(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -43,21 +45,27 @@ ARoomLevel::ARoomLevel(const FObjectInitializer& ObjectInitializer)
 	bIsInit = false;
 	bPendingInit = false;
 	Room = nullptr;
-	Transform = FTransform::Identity;
+	DungeonTransform = FTransform::Identity;
+
+	// Create a root component to have a world position
+	SetRootComponent(CreateDefaultSubobject<USceneComponent>(FName("Root")));
 }
 
 // Use this for initialization
 void ARoomLevel::Init(URoom* _Room)
 {
+	check(IsValid(_Room));
 	Room = _Room;
 	bIsInit = false;
 	bPendingInit = true;
 
-	Transform.SetLocation(Room->Generator()->GetDungeonOffset());
-	Transform.SetRotation(Room->Generator()->GetDungeonRotation());
+	DungeonTransform.SetLocation(Room->Generator()->GetDungeonOffset());
+	DungeonTransform.SetRotation(Room->Generator()->GetDungeonRotation());
 
 	// Update the room's bounding box for occlusion culling (also the red box drawn in debug)
 	UpdateBounds();
+
+	UE_LOG(LogTemp, Log, TEXT("[Init] Room Position: %s"), *GetActorLocation().ToString());
 }
 
 void ARoomLevel::BeginPlay()
@@ -79,6 +87,27 @@ void ARoomLevel::Tick(float DeltaTime)
 	{
 		SetActorsVisible(Room->IsVisible());
 
+		if (URoom::OccludeDynamicActors())
+		{
+			UE_LOG(LogTemp, Log, TEXT("[Begin Play] Room Position: %s"), *GetActorLocation().ToString());
+
+			// Create trigger box to track dynamic actors inside the room
+			RoomTrigger = NewObject<UBoxComponent>(this, UBoxComponent::StaticClass(), FName("Room Trigger"));
+			RoomTrigger->RegisterComponent();
+			RoomTrigger->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+			RoomTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+			RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
+			RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+
+			RoomTrigger->OnComponentBeginOverlap.AddDynamic(this, &ARoomLevel::OnTriggerBeginOverlap);
+			RoomTrigger->OnComponentEndOverlap.AddDynamic(this, &ARoomLevel::OnTriggerEndOverlap);
+
+			// Update trigger box to have the room's bounds
+			FBoxCenterAndExtent LocalBounds = Room->GetLocalBounds();
+			RoomTrigger->SetRelativeLocationAndRotation(LocalBounds.Center, FQuat::Identity);
+			RoomTrigger->SetBoxExtent(LocalBounds.Extent, true);
+		}
+
 		bPendingInit = false;
 		bIsInit = true;
 	}
@@ -93,20 +122,50 @@ void ARoomLevel::Tick(float DeltaTime)
 		FTransform RoomTransform = (Room != nullptr) ? Room->GetTransform() : FTransform::Identity;
 
 		// Pivot
-		DrawDebugSphere(GetWorld(), Transform.TransformPosition(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
+		DrawDebugSphere(GetWorld(), DungeonTransform.TransformPosition(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
 
 		// Room bounds
-		DrawDebugBox(GetWorld(), Transform.TransformPosition(Bounds.Center), Bounds.Extent, Transform.GetRotation(), IsPlayerInside() ? FColor::Green : FColor::Red);
+		DrawDebugBox(GetWorld(), DungeonTransform.TransformPosition(Bounds.Center), Bounds.Extent, DungeonTransform.GetRotation(), IsPlayerInside() ? FColor::Green : FColor::Red);
 
 		// Doors
 		FVector DoorSize = URoom::DoorSize();
 		for (int i = 0; i < Data->GetNbDoor(); i++)
 		{
 			bool isConnected = Room == nullptr || Room->IsConnected(i);
-			ADoor::DrawDebug(GetWorld(), Data->Doors[i].Position, Data->Doors[i].Direction, RoomTransform * Transform, true, isConnected);
+			ADoor::DrawDebug(GetWorld(), Data->Doors[i].Position, Data->Doors[i].Direction, RoomTransform * DungeonTransform, true, isConnected);
 		}
 	}
 #endif
+}
+
+void ARoomLevel::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, "Enter Room!");
+
+	if (!IsValid(OtherActor))
+		return;
+
+	URoomVisibilityComponent* comp = Cast<URoomVisibilityComponent>(OtherActor->GetComponentByClass(URoomVisibilityComponent::StaticClass()));
+	if (IsValid(comp) && !VisibilityComponents.Contains(comp))
+	{
+		VisibilityComponents.Add(comp);
+		comp->SetVisible(this, IsVisible());
+	}
+}
+
+void ARoomLevel::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, "Exit Room!");
+
+	if (!IsValid(OtherActor))
+		return;
+
+	URoomVisibilityComponent* comp = Cast<URoomVisibilityComponent>(OtherActor->GetComponentByClass(URoomVisibilityComponent::StaticClass()));
+	if (IsValid(comp))
+	{
+		VisibilityComponents.Remove(comp);
+		comp->ResetVisible(this);
+	}
 }
 
 void ARoomLevel::UpdateBounds()
@@ -131,6 +190,14 @@ void ARoomLevel::SetActorsVisible(bool Visible)
 			if (IsValid(Actor))
 				Actor->SetActorHiddenInGame(!Visible);
 		}
+	}
+
+	for (TWeakObjectPtr<URoomVisibilityComponent> Comp : VisibilityComponents)
+	{
+		if (!Comp.IsValid())
+			VisibilityComponents.Remove(Comp);
+		else
+			Comp->SetVisible(this, Visible);
 	}
 }
 
