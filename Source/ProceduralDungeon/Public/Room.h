@@ -83,6 +83,9 @@ private:
 	bool bIsVisible = true;
 	bool bIsLocked = false;
 
+	UFUNCTION() // needed macro for binding to delegate
+	void OnInstanceLoaded();
+
 public:
 	void Init(URoomData* RoomData, ADungeonGenerator* Generator, int32 RoomId);
 
@@ -93,9 +96,10 @@ public:
 
 	void Instantiate(UWorld* World);
 	void Destroy(UWorld* World);
-	ARoomLevel* GetLevelScript();
-	bool IsInstanceLoaded();
-	bool IsInstanceUnloaded();
+	ARoomLevel* GetLevelScript() const;
+	bool IsInstanceLoaded() const;
+	bool IsInstanceUnloaded() const;
+	bool IsInstanceInitialized() const;
 
 	EDoorDirection GetDoorWorldOrientation(int DoorIndex);
 	FIntVector GetDoorWorldPosition(int DoorIndex);

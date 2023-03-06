@@ -43,7 +43,6 @@ ARoomLevel::ARoomLevel(const FObjectInitializer& ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bIsInit = false;
-	bPendingInit = false;
 	Room = nullptr;
 	DungeonTransform = FTransform::Identity;
 
@@ -57,20 +56,42 @@ void ARoomLevel::Init(URoom* _Room)
 	check(IsValid(_Room));
 	Room = _Room;
 	bIsInit = false;
-	bPendingInit = true;
 
 	DungeonTransform.SetLocation(Room->Generator()->GetDungeonOffset());
 	DungeonTransform.SetRotation(Room->Generator()->GetDungeonRotation());
 
 	// Update the room's bounding box for occlusion culling (also the red box drawn in debug)
 	UpdateBounds();
-
-	UE_LOG(LogTemp, Log, TEXT("[Init] Room Position: %s"), *GetActorLocation().ToString());
 }
 
 void ARoomLevel::BeginPlay()
 {
 	Super::BeginPlay();
+
+	check(IsValid(Room));
+
+	if (URoom::OccludeDynamicActors())
+	{
+		// Create trigger box to track dynamic actors inside the room
+		RoomTrigger = NewObject<UBoxComponent>(this, UBoxComponent::StaticClass(), FName("Room Trigger"));
+		RoomTrigger->RegisterComponent();
+		RoomTrigger->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+		RoomTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
+		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+
+		RoomTrigger->OnComponentBeginOverlap.AddDynamic(this, &ARoomLevel::OnTriggerBeginOverlap);
+		RoomTrigger->OnComponentEndOverlap.AddDynamic(this, &ARoomLevel::OnTriggerEndOverlap);
+
+		// Update trigger box to have the room's bounds
+		FBoxCenterAndExtent LocalBounds = Room->GetLocalBounds();
+		RoomTrigger->SetRelativeLocationAndRotation(LocalBounds.Center, FQuat::Identity);
+		RoomTrigger->SetBoxExtent(LocalBounds.Extent, true);
+	}
+
+	SetActorsVisible(Room->IsVisible());
+
+	bIsInit = true;
 }
 
 void ARoomLevel::EndPlay(EEndPlayReason::Type EndPlayReason)
@@ -82,35 +103,6 @@ void ARoomLevel::EndPlay(EEndPlayReason::Type EndPlayReason)
 void ARoomLevel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (!bIsInit && bPendingInit && Room != nullptr)
-	{
-		SetActorsVisible(Room->IsVisible());
-
-		if (URoom::OccludeDynamicActors())
-		{
-			UE_LOG(LogTemp, Log, TEXT("[Begin Play] Room Position: %s"), *GetActorLocation().ToString());
-
-			// Create trigger box to track dynamic actors inside the room
-			RoomTrigger = NewObject<UBoxComponent>(this, UBoxComponent::StaticClass(), FName("Room Trigger"));
-			RoomTrigger->RegisterComponent();
-			RoomTrigger->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-			RoomTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-			RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
-			RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
-
-			RoomTrigger->OnComponentBeginOverlap.AddDynamic(this, &ARoomLevel::OnTriggerBeginOverlap);
-			RoomTrigger->OnComponentEndOverlap.AddDynamic(this, &ARoomLevel::OnTriggerEndOverlap);
-
-			// Update trigger box to have the room's bounds
-			FBoxCenterAndExtent LocalBounds = Room->GetLocalBounds();
-			RoomTrigger->SetRelativeLocationAndRotation(LocalBounds.Center, FQuat::Identity);
-			RoomTrigger->SetBoxExtent(LocalBounds.Extent, true);
-		}
-
-		bPendingInit = false;
-		bIsInit = true;
-	}
 
 	if (!IsValid(Data))
 		return;
@@ -140,8 +132,6 @@ void ARoomLevel::Tick(float DeltaTime)
 
 void ARoomLevel::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, "Enter Room!");
-
 	if (!IsValid(OtherActor))
 		return;
 
@@ -155,8 +145,6 @@ void ARoomLevel::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AAct
 
 void ARoomLevel::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Cyan, "Exit Room!");
-
 	if (!IsValid(OtherActor))
 		return;
 

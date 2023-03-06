@@ -108,8 +108,6 @@ void ADungeonGenerator::BeginGeneration_Implementation(uint32 GenerationSeed)
 
 void ADungeonGenerator::CreateDungeon()
 {
-	IsInit = false;
-	NbInitRoom = 0;
 	int TriesLeft = MaxTry;
 
 	// generate level until there IsValidDungeon return true
@@ -379,8 +377,8 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 	case EGenerationState::Unload:
 		LogInfo("======= Begin Unload All Levels =======");
 		Reset();
+		LogInfo(FString::Printf(TEXT("Nb Room To Unload: %d"), RoomList.Num()));
 		UnloadAllRooms();
-		NbUnloadedRoom = 0;
 		break;
 	case EGenerationState::Generation:
 		DispatchPreGeneration();
@@ -389,13 +387,12 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 		break;
 	case EGenerationState::Load:
 		LogInfo("======= Begin Load All Levels =======");
+		LogInfo(FString::Printf(TEXT("Nb Room To Load: %d"), RoomList.Num()));
 		LoadAllRooms();
-		NbLoadedRoom = 0;
 		break;
 	case EGenerationState::Initialization:
 		LogInfo("======= Begin Init All Levels =======");
 		LogInfo(FString::Printf(TEXT("Nb Room To Initialize: %d"), RoomList.Num()));
-		IsInit = false;
 		break;
 	case EGenerationState::Play:
 		LogInfo("======= Ready To Play =======");
@@ -407,79 +404,41 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 
 void ADungeonGenerator::OnStateTick(EGenerationState State)
 {
-	int tmp = 0;
+	int RoomCount = 0;
 	switch (State)
 	{
 	case EGenerationState::Unload:
+		for (URoom* Room : RoomList)
+		{
+			if (Room->IsInstanceUnloaded())
+				RoomCount++;
+		}
 
-		// Count nb level loaded
-		for (int i = 0; i < RoomList.Num(); i++)
-		{
-			if (RoomList[i]->IsInstanceUnloaded())
-			{
-				tmp++;
-			}
-		}
-		// Change state when all levels are loaded
-		if (tmp == RoomList.Num())
-		{
+		if (RoomCount == RoomList.Num())
 			SetState(EGenerationState::Generation);
-		}
 		break;
 	case EGenerationState::Generation:
 		SetState(EGenerationState::Load);
 		break;
 	case EGenerationState::Load:
-
-		// Count nb level loaded
-		for (int i = 0; i < RoomList.Num(); i++)
+		for (URoom* Room : RoomList)
 		{
-			if (RoomList[i]->IsInstanceLoaded())
-			{
-				tmp++;
-			}
+			if (Room->IsInstanceLoaded())
+				RoomCount++;
 		}
-		// Change state when all levels are loaded
-		if (tmp == RoomList.Num())
-		{
+
+		if (RoomCount == RoomList.Num())
 			SetState(EGenerationState::Initialization);
-		}
-
 		break;
 	case EGenerationState::Initialization:
-		// While initialization isn't done, try to initialize all rooms
-		if (IsInit)
+		for (URoom* Room : RoomList)
 		{
+			if (Room->IsInstanceInitialized())
+				RoomCount++;
+		}
+
+		if (RoomCount == RoomList.Num())
 			SetState(EGenerationState::Play);
-		}
-		else
-		{
-			IsInit = true;
-			for (URoom* Room : RoomList)
-			{
-				ARoomLevel* Script = Room->GetLevelScript();
-
-				if (IsValid(Script))
-				{
-					IsInit &= Script->IsInit();
-					if (!Script->IsInit() && !Script->PendingInit())
-					{
-						NbInitRoom++;
-						Script->Init(Room);
-
-						LogInfo(FString::Printf(TEXT("Room Initialization: %d/%d"), NbInitRoom, RoomList.Num()), false);
-					}
-				}
-				else
-				{
-					IsInit = false;
-					FString ErrMsg("Room Level Script does not derive from ARoomLevel: ");
-					Room->GetRoomData()->AppendName(ErrMsg);
-					LogError(ErrMsg);
-					SetState(EGenerationState::None);
-				}
-			}
-		}
 		break;
 	case EGenerationState::Play:
 		UpdateRoomVisibility();

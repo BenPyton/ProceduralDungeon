@@ -264,10 +264,6 @@ private:
 	UPROPERTY()
 	TArray<class ADoor*> DoorList;
 
-	bool IsInit = false;
-	int NbInitRoom = 0;
-	int NbLoadedRoom = 0;
-	int NbUnloadedRoom = 0;
 	EGenerationState CurrentState = EGenerationState::None;
 	int32 UniqueId;
 

@@ -36,8 +36,8 @@ URoom::URoom()
 	: Super()
 	, Instance(nullptr)
 	, RoomData(nullptr)
-	, GeneratorOwner(nullptr)
 	, Connections()
+	, GeneratorOwner(nullptr)
 {
 }
 
@@ -119,7 +119,15 @@ void URoom::Instantiate(UWorld* World)
 		FVector FinalLocation = rotation.RotateVector(URoom::Unit() * FVector(Position)) + offset;
 		FQuat FinalRotation = rotation * FRotator(0, -90 * (int)Direction, 0).Quaternion();
 		Instance = UProceduralLevelStreaming::Load(World, RoomData, nameSuffix, FinalLocation, FinalRotation.Rotator());
-		UE_LOG(LogProceduralDungeon, Log, TEXT("Load room Instance: %s"), nullptr != Instance ? *Instance->GetWorldAssetPackageName() : TEXT("Null"));
+
+		if (!IsValid(Instance))
+		{
+			LogError("Error when instantiating the room: unknown error.");
+			return;
+		}
+
+		LogInfo(FString::Printf(TEXT("Load room Instance: %s"), *Instance->GetWorldAssetPackageName()));
+		Instance->OnLevelLoaded.AddDynamic(this, &URoom::OnInstanceLoaded);
 	}
 	else
 	{
@@ -144,7 +152,22 @@ void URoom::Destroy(UWorld* World)
 	}
 }
 
-ARoomLevel* URoom::GetLevelScript()
+void URoom::OnInstanceLoaded()
+{
+	check(IsValid(Instance));
+	Instance->OnLevelLoaded.RemoveDynamic(this, &URoom::OnInstanceLoaded);
+
+	ARoomLevel* Script = GetLevelScript();
+	if (!IsValid(Script))
+	{
+		LogError("Error when instantiating the room: the level blueprint does not derive from RoomLevel.");
+		return;
+	}
+
+	Script->Init(this);
+}
+
+ARoomLevel* URoom::GetLevelScript() const
 {
 	if (Instance == nullptr || !IsValid(Instance))
 	{
@@ -153,22 +176,20 @@ ARoomLevel* URoom::GetLevelScript()
 	return Cast<ARoomLevel>(Instance->GetLevelScriptActor());
 }
 
-bool URoom::IsInstanceLoaded()
+bool URoom::IsInstanceLoaded() const
 {
-	if (Instance == nullptr || !IsValid(Instance))
-	{
-		return true;
-	}
-	return Instance->IsLevelLoaded();
+	return IsValid(Instance) ? Instance->IsLevelLoaded() : false;
 }
 
-bool URoom::IsInstanceUnloaded()
+bool URoom::IsInstanceUnloaded() const
 {
-	if (Instance == nullptr || !IsValid(Instance))
-	{
-		return true;
-	}
-	return Instance->IsLevelUnloaded();
+	return IsValid(Instance) ? Instance->IsLevelUnloaded() : true;
+}
+
+bool URoom::IsInstanceInitialized() const
+{
+	ARoomLevel* Script = GetLevelScript();
+	return (IsValid(Script)) ? Script->IsInit() : false;
 }
 
 EDoorDirection URoom::GetDoorWorldOrientation(int DoorIndex)

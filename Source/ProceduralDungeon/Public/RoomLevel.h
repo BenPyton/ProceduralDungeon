@@ -39,7 +39,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Data")
 	class URoomData* Data;
 
-public:
 	UPROPERTY()
 	URoom* Room = nullptr;
 
@@ -58,7 +57,6 @@ public:
 	void SetActorsVisible(bool Visible);
 
 	FORCEINLINE bool IsInit() const { return bIsInit; }
-	FORCEINLINE bool PendingInit() const { return bPendingInit; }
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Player Inside"))
 	bool IsPlayerInside() const { return IsValid(Room) ? Room->IsPlayerInside() : false; }
@@ -80,7 +78,6 @@ public:
 
 private:
 	bool bIsInit = false;
-	bool bPendingInit = false;
 	FTransform DungeonTransform;
 	FBoxCenterAndExtent Bounds;
 	UPROPERTY(Transient)
