@@ -62,23 +62,28 @@ void URoomVisibilityComponent::UpdateVisibility()
 	AActor* Actor = GetOwner();
 	if (IsValid(Actor))
 	{
-		switch (VisibilityMode)
+		// Can't use Actor->SetActorHiddenInGame() because it is replicated over network.
+		USceneComponent* Root = Actor->GetRootComponent();
+		if (IsValid(Root))
 		{
-		case EVisibilityMode::Default:
-			Actor->SetActorHiddenInGame(!IsVisible());
-			break;
-		case EVisibilityMode::ForceHidden:
-			Actor->SetActorHiddenInGame(true);
-			break;
-		case EVisibilityMode::ForceVisible:
-			Actor->SetActorHiddenInGame(false);
-			break;
-		case EVisibilityMode::Custom:
-			// The user handles the visibility
-			break;
-		default:
-			checkNoEntry();
-			break;
+			switch (VisibilityMode)
+			{
+			case EVisibilityMode::Default:
+				Root->SetVisibility(IsVisible(), true);
+				break;
+			case EVisibilityMode::ForceHidden:
+				Root->SetVisibility(false, true);
+				break;
+			case EVisibilityMode::ForceVisible:
+				Root->SetVisibility(true, true);
+				break;
+			case EVisibilityMode::Custom:
+				// The user handles the visibility
+				break;
+			default:
+				checkNoEntry();
+				break;
+			}
 		}
 	}
 }
