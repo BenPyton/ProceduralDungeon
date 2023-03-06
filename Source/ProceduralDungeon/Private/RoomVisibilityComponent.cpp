@@ -25,30 +25,49 @@
 #include "RoomVisibilityComponent.h"
 
 URoomVisibilityComponent::URoomVisibilityComponent()
+	: VisibilityMode(EVisibilityMode::Default)
 {
 	PrimaryComponentTick.bCanEverTick = false;
-	VisibilityMode = EVisibilityMode::Default;
 }
 
-bool URoomVisibilityComponent::IsVisible()
+void URoomVisibilityComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	UpdateVisibility();
+}
+
+bool URoomVisibilityComponent::IsVisible() const
 {
 	return VisibilityEnablers.Num() > 0;
 }
 
 void URoomVisibilityComponent::SetVisible(UObject* Owner, bool Visible)
 {
+	const bool bOldVisible = IsVisible();
 	if (Visible)
 		VisibilityEnablers.Add(Owner);
 	else
 		VisibilityEnablers.Remove(Owner);
 
-	UpdateVisibility();
+	const bool bNewVisible = IsVisible();
+	if (bOldVisible != bNewVisible)
+	{
+		UpdateVisibility();
+		OnRoomVisibilityChanged.Broadcast(GetOwner(), bNewVisible);
+	}
 }
 
 void URoomVisibilityComponent::ResetVisible(UObject* Owner)
 {
+	const bool bOldVisible = IsVisible();
 	VisibilityEnablers.Remove(Owner);
-	UpdateVisibility();
+
+	const bool bNewVisible = IsVisible();
+	if (bOldVisible != bNewVisible)
+	{
+		UpdateVisibility();
+		OnRoomVisibilityChanged.Broadcast(GetOwner(), bNewVisible);
+	}
 }
 
 void URoomVisibilityComponent::SetVisibilityMode(EVisibilityMode Mode)
@@ -59,6 +78,8 @@ void URoomVisibilityComponent::SetVisibilityMode(EVisibilityMode Mode)
 
 void URoomVisibilityComponent::UpdateVisibility()
 {
+	CleanEnablers();
+
 	AActor* Actor = GetOwner();
 	if (IsValid(Actor))
 	{
@@ -85,5 +106,20 @@ void URoomVisibilityComponent::UpdateVisibility()
 				break;
 			}
 		}
+	}
+}
+
+void URoomVisibilityComponent::CleanEnablers()
+{
+	TSet<TWeakObjectPtr<UObject>> ObjPtrToRemove;
+	for (TWeakObjectPtr<UObject> ObjPtr : VisibilityEnablers)
+	{
+		if (!ObjPtr.IsValid())
+			ObjPtrToRemove.Add(ObjPtr);
+	}
+
+	for (TWeakObjectPtr<UObject> ObjPtr : ObjPtrToRemove)
+	{
+		VisibilityEnablers.Remove(ObjPtr);
 	}
 }

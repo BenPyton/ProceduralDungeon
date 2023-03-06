@@ -34,9 +34,11 @@ enum class EVisibilityMode : uint8
 	Default			UMETA(DisplayName = "Same As Room"),
 	ForceVisible	UMETA(DisplayName = "Force Visible"),
 	ForceHidden		UMETA(DisplayName = "Force Hidden"),
-	Custom			UMETA(DisplayName = "Manual"),
+	Custom			UMETA(DisplayName = "Custom"),
 	NbMode			UMETA(Hidden)
 };
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoomVisibilityEvent, AActor*, Actor, bool, IsInVisibleRoom);
 
 UCLASS(ClassGroup = "ProceduralDungeon", meta = (BlueprintSpawnableComponent, DisplayName = "Room Visibility"))
 class PROCEDURALDUNGEON_API URoomVisibilityComponent : public UActorComponent
@@ -46,9 +48,15 @@ class PROCEDURALDUNGEON_API URoomVisibilityComponent : public UActorComponent
 public:
 	URoomVisibilityComponent();
 
-	bool IsVisible();
+	virtual void BeginPlay() override;
+
 	void SetVisible(UObject* Owner, bool Visible);
 	void ResetVisible(UObject* Owner);
+
+	// Returns true if the actor is in a visible room.
+	// Useful with "Custom" visibility.
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is In Visible Room", DisplayName = "Is In Visible Room"))
+	bool IsVisible() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon", meta = (DisplayName = "Set Visibility"))
 	void SetVisibilityMode(EVisibilityMode Mode);
@@ -56,10 +64,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Visibility", DisplayName = "Get Visibility"))
 	FORCEINLINE EVisibilityMode GetVisibilityMode() const { return VisibilityMode; }
 
+	// Called when the visibility from rooms changed (either by a room visibility change or by this actor moving between rooms).
+	// Useful to update a "Custom" visibility.
+	UPROPERTY(BlueprintAssignable, Category = "Procedural Dungeon")
+	FRoomVisibilityEvent OnRoomVisibilityChanged;
+
 protected:
 	void UpdateVisibility();
 
 private:
+	void CleanEnablers();
+
 	TSet<TWeakObjectPtr<UObject>> VisibilityEnablers;
 	EVisibilityMode VisibilityMode;
 };
