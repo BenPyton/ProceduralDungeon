@@ -58,8 +58,6 @@ void LogError(FString message, bool showOnScreen)
 {
 	UE_LOG(LogProceduralDungeon, Error, TEXT("%s"), *message);
 	float duration;
-	if(showOnScreen && ShowLogsOnScreen(duration))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Red, message);
-	}
+	ShowLogsOnScreen(duration);
+	GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Red, message);
 }
