@@ -24,6 +24,7 @@
 
 #include "TriggerDoor.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
 #include "Room.h"
 #include "RoomLevel.h"

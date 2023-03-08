@@ -24,6 +24,7 @@
 
 #include "ProceduralDungeonLog.h"
 #include "ProceduralDungeonSettings.h"
+#include "Engine/Engine.h" // GEngine
 
 DEFINE_LOG_CATEGORY(LogProceduralDungeon);
 

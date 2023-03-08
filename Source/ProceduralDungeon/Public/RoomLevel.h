@@ -26,6 +26,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/LevelScriptActor.h"
+#include "Math/GenericOctree.h" // for FBoxCenterAndExtent (required for UE5.0)
 #include "RoomLevel.generated.h"
 
 class URoom;

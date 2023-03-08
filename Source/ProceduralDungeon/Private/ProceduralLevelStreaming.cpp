@@ -1,7 +1,7 @@
 #include "ProceduralLevelStreaming.h"
 #include "Engine/World.h"
 #include "Engine/Level.h"
-#include "Engine.h"
+#include "Engine/Engine.h" // GEngine
 #include "RoomData.h"
 #include "ProceduralDungeon.h"
 
@@ -169,3 +169,5 @@ UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstance_Internal
 	bOutSuccess = true;
 	return StreamingLevel;
 }
+
+#undef LOCTEXT_NAMESPACE

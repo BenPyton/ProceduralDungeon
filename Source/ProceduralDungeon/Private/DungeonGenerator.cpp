@@ -24,7 +24,8 @@
 
 #include "DungeonGenerator.h"
 #include "Engine/World.h"
-#include "Engine.h"
+#include "Engine/Engine.h" // GEngine
+#include "Kismet/GameplayStatics.h"
 #include "NavigationSystem.h"
 #include "ProceduralLevelStreaming.h"
 #include "RoomData.h"

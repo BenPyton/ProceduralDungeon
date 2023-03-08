@@ -28,6 +28,7 @@
 #include "ProceduralLevelStreaming.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralDungeonTypes.h"
+#include "Math/GenericOctree.h" // for FBoxCenterAndExtent (required for UE5.0)
 #include "Room.generated.h"
 
 class ADungeonGenerator;
