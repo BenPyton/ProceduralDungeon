@@ -104,14 +104,12 @@ void ARoomLevel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!IsValid(Data))
-		return;
-
 #if WITH_EDITOR
 	// TODO: Place the debug draw in an editor module of the plugin
-	if (URoom::DrawDebug())
+	if (URoom::DrawDebug() && IsValid(Data))
 	{
 		FTransform RoomTransform = (Room != nullptr) ? Room->GetTransform() : FTransform::Identity;
+		UpdateBounds();
 
 		// Pivot
 		DrawDebugSphere(GetWorld(), DungeonTransform.TransformPosition(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
