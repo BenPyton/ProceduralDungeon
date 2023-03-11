@@ -25,7 +25,7 @@
 #pragma once
 
 #include "Math/GenericOctree.h"
-#include "Room.h" // Can't forward declare due to the inline functions below
+#include "Runtime/Launch/Resources/Version.h"
 
 #if ENGINE_MAJOR_VERSION < 4 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26)
 #define USE_LEGACY_OCTREE 1
@@ -35,7 +35,7 @@
 
 struct FDungeonOctreeElement
 {
-	URoom* Room;
+	class URoom* Room;
 	FBoxCenterAndExtent Bounds;
 
 	FDungeonOctreeElement(URoom* Room);
