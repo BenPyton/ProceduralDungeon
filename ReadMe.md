@@ -88,9 +88,9 @@ For multiplayer, you should do the spawning only on the server side. The spawn c
 <details>
 <summary><b>How does the occlusion culling work for multiplayer?</b></summary>
 
-The occlusion culling is client side. It will show only the room where the local player is and any adjacent room.\
-Only the visibility of actors that are inside the room during the loading process will be changed by the occlusion system. This means that any actors (like enemies) that are spawned afterward will remain always visible. You need to manage the occlusion of those actors yourself if you want to.\
-You can also disable the occlusion culling system of the plugin from the [settings](https://github.com/BenPyton/ProceduralDungeon/wiki/Plugin-Settings) and do it yourself in another way (in UE5 the performances are worse with it enabled).
+The occlusion culling is client side. It will show only the room where the local player is and any adjacent rooms.\
+You can read further details about the occlusion culling system of this plugin from the [wiki page](https://github.com/BenPyton/ProceduralDungeon/wiki/Occlusion-Culling).\
+You can also disable the occlusion culling from the [plugin's settings](https://github.com/BenPyton/ProceduralDungeon/wiki/Plugin-Settings) and do it yourself in another way.
 
 </details>
 
