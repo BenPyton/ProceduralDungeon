@@ -23,6 +23,7 @@
  */
 
 #include "DungeonOctree.h"
+#include "Room.h"
 
 FDungeonOctreeElement::FDungeonOctreeElement(URoom* Room)
 {
