@@ -27,6 +27,12 @@
 #include "Math/GenericOctree.h"
 #include "Room.h" // Can't forward declare due to the inline functions below
 
+#if ENGINE_MAJOR_VERSION < 4 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26)
+#define USE_LEGACY_OCTREE 1
+#else
+#define USE_LEGACY_OCTREE 0
+#endif
+
 struct FDungeonOctreeElement
 {
 	URoom* Room;
@@ -53,7 +59,12 @@ struct FDungeonOctreeSemantics
 		return A.Room == B.Room;
 	}
 
-	FORCEINLINE static void SetElementId(const FDungeonOctreeElement& Element, FOctreeElementId2 Id)
+	FORCEINLINE static void SetElementId(const FDungeonOctreeElement& Element
+#if USE_LEGACY_OCTREE
+		, FOctreeElementId Id)
+#else
+		, FOctreeElementId2 Id)
+#endif
 	{
 	}
 
@@ -63,4 +74,23 @@ struct FDungeonOctreeSemantics
 	}
 };
 
-using FDungeonOctree = TOctree2<FDungeonOctreeElement, FDungeonOctreeSemantics>;
+using FDungeonOctree =
+#if USE_LEGACY_OCTREE
+	TOctree<FDungeonOctreeElement, FDungeonOctreeSemantics>;
+#else
+	TOctree2<FDungeonOctreeElement, FDungeonOctreeSemantics>;
+#endif
+
+template<typename IterateBoundsFunc>
+inline void FindElementsWithBoundsTest(const FDungeonOctree& Octree, const FBoxCenterAndExtent& Bounds, const IterateBoundsFunc& Func)
+{
+#if USE_LEGACY_OCTREE
+	for (FDungeonOctree::TConstElementBoxIterator<> OctreeIt(Octree, Bounds); OctreeIt.HasPendingElements(); OctreeIt.Advance())
+	{
+		const FDungeonOctreeElement& Element = OctreeIt.GetCurrentElement();
+		Func(Element);
+	}
+#else
+	Octree.FindElementsWithBoundsTest(Bounds, Func);
+#endif
+}

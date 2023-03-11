@@ -335,7 +335,7 @@ void ADungeonGenerator::UpdateRoomVisibility()
 
 	TSet<URoom*> RoomsToHide(CurrentPlayerRooms);
 	CurrentPlayerRooms.Empty();
-	Octree->FindElementsWithBoundsTest(WorldPlayerBox, [this, &RoomsToHide](const FDungeonOctreeElement& Element)
+	FindElementsWithBoundsTest(*Octree, WorldPlayerBox, [this, &RoomsToHide](const FDungeonOctreeElement& Element)
 	{
 		RoomsToHide.Remove(Element.Room);
 		CurrentPlayerRooms.Add(Element.Room);
