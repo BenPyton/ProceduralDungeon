@@ -23,7 +23,6 @@
  */
 
 #include "RoomLevel.h"
-#include "CoreUObject.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"

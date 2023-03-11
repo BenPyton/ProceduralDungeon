@@ -2,6 +2,7 @@
 #include "Engine/World.h"
 #include "Engine/Level.h"
 #include "Engine/Engine.h" // GEngine
+#include "Misc/PackageName.h"
 #include "RoomData.h"
 #include "ProceduralDungeon.h"
 
