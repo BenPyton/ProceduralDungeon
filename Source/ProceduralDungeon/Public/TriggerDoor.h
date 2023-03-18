@@ -34,21 +34,28 @@ class PROCEDURALDUNGEON_API ATriggerDoor : public ADoor
 	GENERATED_BODY()
 	
 private:
-	UPROPERTY(EditAnywhere, Category="Door Trigger")
+	UPROPERTY(EditAnywhere, Category = "Door Trigger")
 	class UBoxComponent* BoxComponent;
 
-	UPROPERTY()
-	TArray<class ACharacter*> CharacterList;
+	UPROPERTY(Transient)
+	TSet<class AActor*> ActorList;
 
 public:
 	ATriggerDoor();
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
+protected:
 	UFUNCTION()
 	void OnTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
 	UFUNCTION()
 	void OnTriggerExit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	// Should returns true if the actor can open the door.
+	// Component is the component on the actor that triggered the door.
+	// By default the actor is valid if it's a Character.
+	UFUNCTION(BlueprintNativeEvent, Category = "Door")
+	bool IsValidActor(AActor* Actor, UPrimitiveComponent* Component);
+	
+	FORCEINLINE void UpdateOpenState() { bShouldBeOpen = ActorList.Num() > 0; }
 };

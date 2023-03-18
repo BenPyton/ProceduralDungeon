@@ -33,61 +33,40 @@ ATriggerDoor::ATriggerDoor()
 {
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 
-	if (RootComponent != nullptr)
-	{
+	if (IsValid(RootComponent))
 		BoxComponent->SetupAttachment(RootComponent);
-	}
 }
 
 void ATriggerDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (nullptr != BoxComponent)
-	{
-		BoxComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &ATriggerDoor::OnTriggerEnter);
-		BoxComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &ATriggerDoor::OnTriggerExit);
-	}
-}
-
-void ATriggerDoor::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	if (CharacterList.Num() > 0)
-	{
-		OpenDoor();
-	}
-	else
-	{
-		CloseDoor();
-	}
-}
-
-{
-	{
-	}
+	check(BoxComponent);
+	BoxComponent->OnComponentBeginOverlap.AddUniqueDynamic(this, &ATriggerDoor::OnTriggerEnter);
+	BoxComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &ATriggerDoor::OnTriggerExit);
 }
 
 void ATriggerDoor::OnTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
-	ACharacter* OtherCharacter = Cast<ACharacter>(OtherActor);
-	UCapsuleComponent* OtherCapsule = Cast<UCapsuleComponent>(OtherComp);
-
-	if (OtherCharacter != nullptr && OtherCapsule != nullptr && OtherCapsule == OtherCharacter->GetCapsuleComponent() && !CharacterList.Contains(OtherCharacter))
+	if (!ActorList.Contains(OtherActor) && IsValidActor(OtherActor, OtherComp))
 	{
-		CharacterList.Add(OtherCharacter);
+		ActorList.Add(OtherActor);
+		UpdateOpenState();
 	}
-
 }
 
 void ATriggerDoor::OnTriggerExit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	ACharacter* OtherCharacter = Cast<ACharacter>(OtherActor);
-	UCapsuleComponent* OtherCapsule = Cast<UCapsuleComponent>(OtherComp);
-
-	if (OtherCharacter != nullptr && OtherCapsule != nullptr && OtherCapsule == OtherCharacter->GetCapsuleComponent() && CharacterList.Contains(OtherCharacter))
+	if (ActorList.Contains(OtherActor))
 	{
-		CharacterList.Remove(OtherCharacter);
+		ActorList.Remove(OtherActor);
+		UpdateOpenState();
 	}
+}
+
+bool ATriggerDoor::IsValidActor_Implementation(AActor* Actor, UPrimitiveComponent* Component)
+{
+	ACharacter* Character = Cast<ACharacter>(Actor);
+	UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(Component);
+	return IsValid(Character) && IsValid(Capsule) && Capsule == Character->GetCapsuleComponent();
 }
