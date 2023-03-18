@@ -37,6 +37,7 @@ URoom::URoom()
 	, RoomData(nullptr)
 	, Connections()
 	, GeneratorOwner(nullptr)
+	, Id(-1)
 {
 }
 

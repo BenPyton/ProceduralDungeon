@@ -141,6 +141,7 @@ public:
 	int GetNbRoom() { return RoomList.Num(); }
 
 	URoom* GetRoomAt(FIntVector RoomCell);
+	URoom* GetRoomByIndex(int64 Index);
 
 	// ===== Events =====
 
