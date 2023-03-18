@@ -51,6 +51,4 @@ public:
 	UFUNCTION()
 	void OnTriggerExit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	UFUNCTION(BlueprintCallable, Category = "Door")
-	void SetRoomsAlwaysVisible(bool Visible);
 };

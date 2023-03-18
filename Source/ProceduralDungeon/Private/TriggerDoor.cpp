@@ -64,15 +64,8 @@ void ATriggerDoor::Tick(float DeltaTime)
 	}
 }
 
-void ATriggerDoor::SetRoomsAlwaysVisible(bool _visible)
 {
-	if (nullptr != RoomA && nullptr != RoomA->GetLevelScript())
 	{
-		RoomA->GetLevelScript()->AlwaysVisible = _visible;
-	}
-	if (nullptr != RoomB && nullptr != RoomB->GetLevelScript())
-	{
-		RoomB->GetLevelScript()->AlwaysVisible = _visible;
 	}
 }
 
