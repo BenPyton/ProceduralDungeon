@@ -69,6 +69,8 @@ void ADoor::Tick(float DeltaTime)
 #if WITH_EDITOR
 	// TODO: Place it in an editor module of the plugin
 	DrawDebug(GetWorld());
+	if (GetWorld()->WorldType == EWorldType::EditorPreview)
+		DrawDebug(GetWorld());
 #endif
 }
 
