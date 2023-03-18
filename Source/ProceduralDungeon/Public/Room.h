@@ -70,6 +70,7 @@ public:
 	FORCEINLINE bool IsVisible() const { return bIsVisible; }
 	FORCEINLINE bool IsLocked() const { return bIsLocked; }
 	FORCEINLINE void Lock(bool lock) { bIsLocked = lock; }
+	FORCEINLINE uint64 GetRoomID() const { return Id; }
 
 private:
 	UPROPERTY()

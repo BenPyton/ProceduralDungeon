@@ -40,14 +40,26 @@ public:
 	ADoor();
 
 public:
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
 
 public:
+	void SetConnectingRooms(URoom* RoomA, URoom* RoomB);
+
+	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Locked"))
+	FORCEINLINE bool IsLocked() const { return bLocked; }
+	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Open"))
+	FORCEINLINE bool IsOpen() const { return bIsOpen; }
+
+	// TODO: In next major release, replace OpenDoor() and CloseDoor() with a unique function OpenDoor(bool)
 	UFUNCTION(BlueprintCallable, Category = "Door")
-	void OpenDoor();
+	void OpenDoor() { bShouldBeOpen = true; }
 	UFUNCTION(BlueprintCallable, Category = "Door")
-	void CloseDoor();
+	void CloseDoor() { bShouldBeOpen = false; }
+
+	UFUNCTION(BlueprintCallable, Category = "Door")
+	void Lock(bool lock) { bShouldBeLocked = lock; }
 
 protected:
 	UFUNCTION()
@@ -73,13 +85,23 @@ protected:
 protected:
 	bool bLocked = false;
 	bool bIsOpen = false;
+
+	UPROPERTY(Replicated)
 	bool bShouldBeLocked = false;
+
+	UPROPERTY(Replicated)
+	bool bShouldBeOpen = false;
 
 	// The two connected rooms to this door
 	UPROPERTY()
 	URoom* RoomA;
 	UPROPERTY()
 	URoom* RoomB;
+
+	UPROPERTY(ReplicatedUsing=OnRep_IndexRoomA)
+	int IndexRoomA;
+	UPROPERTY(ReplicatedUsing=OnRep_IndexRoomB)
+	int IndexRoomB;
 
 	UPROPERTY(EditAnywhere, Category = "Door", meta = (DisplayName = "Always Visible"))
 	bool bAlwaysVisible = false;
@@ -88,19 +110,12 @@ protected:
 	bool bAlwaysUnlocked = false;
 
 private:
-	bool bPrevLocked = false;
+	UFUNCTION() // Needed macro for replication to work
+	void OnRep_IndexRoomA();
+
+	UFUNCTION() // Needed macro for replication to work
+	void OnRep_IndexRoomB();
 
 public:
-	void SetConnectingRooms(URoom* RoomA, URoom* RoomB);
-
-	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Locked"))
-	bool IsLocked() { return bLocked; }
-
-	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Open"))
-	bool IsOpen() { return bIsOpen; }
-
-	UFUNCTION(BlueprintCallable, Category = "Door")
-	void Lock(bool lock) { bShouldBeLocked = lock; }
-
 	static void DrawDebug(UWorld* World, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity, bool includeOffset = false, bool isConnected = true);
 };

@@ -179,6 +179,10 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 	// Instantiate room
 	Room->Instantiate(GetWorld());
 
+	// Spawn only doors on server
+	if (!HasAuthority())
+		return;
+
 	for (int i = 0; i < Room->GetConnectionCount(); i++)
 	{
 		// Get next room
@@ -192,13 +196,15 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 		{
 			TSubclassOf<ADoor> DoorClass = ChooseDoor(Room->GetRoomData(), nullptr != r ? r->GetRoomData() : nullptr);
 
-			if (DoorClass != nullptr)
+			if (nullptr != DoorClass)
 			{
 				FVector InstanceDoorPos = GetDungeonRotation().RotateVector(URoom::GetRealDoorPosition(DoorCell, DoorRot)) + GetDungeonOffset();
 				FQuat InstanceDoorRot = GetDungeonRotation() * FRotator(0, -90 * (int8)DoorRot, 0).Quaternion();
-				ADoor* Door = GetWorld()->SpawnActor<ADoor>(DoorClass, InstanceDoorPos, InstanceDoorRot.Rotator());
+				FActorSpawnParameters SpawnParams;
+				SpawnParams.Owner = this;
+				ADoor* Door = GetWorld()->SpawnActor<ADoor>(DoorClass, InstanceDoorPos, InstanceDoorRot.Rotator(), SpawnParams);
 
-				if (nullptr != Door)
+				if (IsValid(Door))
 				{
 					DoorList.Add(Door);
 					Door->SetConnectingRooms(Room, r);
@@ -557,6 +563,16 @@ URoomData* ADungeonGenerator::GetRandomRoomData(TArray<URoomData*> RoomDataArray
 URoom* ADungeonGenerator::GetRoomAt(FIntVector RoomCell)
 {
 	return URoom::GetRoomAt(RoomCell, RoomList);
+}
+
+URoom* ADungeonGenerator::GetRoomByIndex(int64 Index)
+{
+	for (URoom* Room : RoomList)
+	{
+		if (Room->GetRoomID() == Index)
+			return Room;
+	}
+	return nullptr;
 }
 
 bool ADungeonGenerator::HasAlreadyRoomData(URoomData* RoomData)
