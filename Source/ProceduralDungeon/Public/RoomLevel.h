@@ -60,13 +60,13 @@ public:
 	FORCEINLINE bool IsInit() const { return bIsInit; }
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Player Inside"))
-	bool IsPlayerInside() const { return IsValid(Room) ? Room->IsPlayerInside() : false; }
+	FORCEINLINE bool IsPlayerInside() { return IsValid(Room) ? Room->IsPlayerInside() : false; }
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Visible"))
-	bool IsVisible() const { return IsValid(Room) ? Room->IsVisible() : true; }
+	FORCEINLINE bool IsVisible() { return IsValid(Room) ? Room->IsVisible() : true; }
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Locked"))
-	bool IsLocked() const { return IsValid(Room) ? Room->IsLocked() : false; }
+	FORCEINLINE bool IsLocked() { return IsValid(Room) ? Room->IsLocked() : false; }
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon")
 	void Lock(bool lock) { if(IsValid(Room)) Room->Lock(lock); }
