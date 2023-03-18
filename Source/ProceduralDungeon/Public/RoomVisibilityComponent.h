@@ -56,13 +56,13 @@ public:
 	// Returns true if the actor is in a visible room.
 	// Useful with "Custom" visibility.
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is In Visible Room", DisplayName = "Is In Visible Room"))
-	bool IsVisible() const;
+	bool IsVisible();
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon", meta = (DisplayName = "Set Visibility"))
 	void SetVisibilityMode(EVisibilityMode Mode);
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Visibility", DisplayName = "Get Visibility"))
-	FORCEINLINE EVisibilityMode GetVisibilityMode() const { return VisibilityMode; }
+	FORCEINLINE EVisibilityMode GetVisibilityMode() { return VisibilityMode; }
 
 	// Called when the visibility from rooms changed (either by a room visibility change or by this actor moving between rooms).
 	// Useful to update a "Custom" visibility.

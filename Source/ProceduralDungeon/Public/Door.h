@@ -48,9 +48,9 @@ public:
 	void SetConnectingRooms(URoom* RoomA, URoom* RoomB);
 
 	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Locked"))
-	FORCEINLINE bool IsLocked() const { return bLocked; }
+	FORCEINLINE bool IsLocked() { return bLocked; }
 	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Open"))
-	FORCEINLINE bool IsOpen() const { return bIsOpen; }
+	FORCEINLINE bool IsOpen() { return bIsOpen; }
 
 	// TODO: In next major release, replace OpenDoor() and CloseDoor() with a unique function OpenDoor(bool)
 	UFUNCTION(BlueprintCallable, Category = "Door")

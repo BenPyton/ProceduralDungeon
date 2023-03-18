@@ -36,7 +36,7 @@ void URoomVisibilityComponent::BeginPlay()
 	UpdateVisibility();
 }
 
-bool URoomVisibilityComponent::IsVisible() const
+bool URoomVisibilityComponent::IsVisible()
 {
 	return VisibilityEnablers.Num() > 0;
 }
