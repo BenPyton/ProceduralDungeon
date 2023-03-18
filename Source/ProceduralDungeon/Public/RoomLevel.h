@@ -36,15 +36,13 @@ class PROCEDURALDUNGEON_API ARoomLevel : public ALevelScriptActor
 {
 	GENERATED_BODY()
 
+	// TODO: Make those properties protected is public getter instead
 public:
 	UPROPERTY(EditAnywhere, Category = "Data")
 	class URoomData* Data;
 
-	UPROPERTY()
+	UPROPERTY() // Macro is here to mark property to be used by GC
 	URoom* Room = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = "Room Level")
-	bool AlwaysVisible = false;
 
 public:
 	ARoomLevel(const FObjectInitializer& ObjectInitializer);
