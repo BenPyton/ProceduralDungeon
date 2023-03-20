@@ -129,7 +129,7 @@ void ARoomLevel::Tick(float DeltaTime)
 		for (int i = 0; i < Data->GetNbDoor(); i++)
 		{
 			bool isConnected = Room == nullptr || Room->IsConnected(i);
-			ADoor::DrawDebug(GetWorld(), Data->Doors[i].Position, Data->Doors[i].Direction, RoomTransform * DungeonTransform, true, isConnected);
+			ADoor::DrawDebug(GetWorld(), Data->Doors[i].Position, Data->Doors[i].Direction, RoomTransform * DungeonTransform, true, isConnected, Data->IsDoorValid(i));
 		}
 	}
 #endif
