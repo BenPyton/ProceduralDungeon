@@ -117,5 +117,5 @@ private:
 	void OnRep_IndexRoomB();
 
 public:
-	static void DrawDebug(UWorld* World, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity, bool includeOffset = false, bool isConnected = true);
+	static void DrawDebug(UWorld* World, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity, bool includeOffset = false, bool isConnected = true, bool isValid = true);
 };

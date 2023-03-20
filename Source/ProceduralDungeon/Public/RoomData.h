@@ -44,10 +44,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Door")
 	bool RandomDoor;
 
-	UPROPERTY(EditAnywhere, Category = "Doors")
+	UPROPERTY(EditAnywhere, Category = "Doors", meta = (TitleProperty = "EdName"))
 	TArray<FDoorDef> Doors;
 
-	UPROPERTY(EditAnywhere, Category = "Room")
+	UPROPERTY(EditAnywhere, Category = "Room", meta = (ClampMin = 1))
 	FIntVector Size;
 
 public:
@@ -56,4 +56,12 @@ public:
 	int GetNbDoor() const { return Doors.Num(); }
 
 	FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
+
+#if WITH_EDITOR
+	bool IsDoorValid(int DoorIndex) const;
+	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;
+	virtual void PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent) override;
+#endif
+
+	virtual void PostLoad();
 };

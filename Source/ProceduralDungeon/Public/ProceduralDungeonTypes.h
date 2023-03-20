@@ -72,8 +72,31 @@ struct FDoorDef
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY(EditAnywhere, Category = "DoorDef")
 	FIntVector Position;
 	UPROPERTY(EditAnywhere, Category = "DoorDef")
 	EDoorDirection Direction;
+
+#if WITH_EDITORONLY_DATA
+	// Don't take care of it, it is just used to put a name in the editor details panel.
+	UPROPERTY(Transient, VisibleInstanceOnly, meta = (DisplayName = "Name"))
+	FString EdName;
+#endif
+
+public:
+	bool operator==(const FDoorDef& Other) const
+	{
+		return Position == Other.Position && Direction == Other.Direction;
+	}
+
+#if WITH_EDITOR
+	const FString& UpdateEdName()
+	{
+		FText DirectionName;
+		UEnum::GetDisplayValueAsText(Direction, DirectionName);
+		EdName = FString::Printf(TEXT("(%d,%d,%d) [%s]"), Position.X, Position.Y, Position.Z, *DirectionName.ToString());
+		return EdName;
+	}
+#endif
 };

@@ -42,3 +42,92 @@ FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
 
 	return FBoxCenterAndExtent(Center, Extent.GetAbs());
 }
+
+#if WITH_EDITOR
+
+bool URoomData::IsDoorValid(int DoorIndex) const
+{
+	check(DoorIndex >= 0 && DoorIndex < Doors.Num());
+
+	const FDoorDef& DoorDef = Doors[DoorIndex];
+
+	// Check if door is in the room's bounds
+	if ((DoorDef.Position.X < 0 || DoorDef.Position.X >= Size.X)
+		|| (DoorDef.Position.Y < 0 || DoorDef.Position.Y >= Size.Y)
+		|| (DoorDef.Position.Z < 0 || DoorDef.Position.Z >= Size.Z))
+		return false;
+	
+	// Check if the door is on the edge of the room bounds
+	switch (DoorDef.Direction)
+	{
+	case EDoorDirection::South:
+		return DoorDef.Position.X == 0;
+	case EDoorDirection::North:
+		return DoorDef.Position.X == (Size.X - 1);
+	case EDoorDirection::West:
+		return DoorDef.Position.Y == 0;
+	case EDoorDirection::East:
+		return DoorDef.Position.Y == (Size.Y - 1);
+	default:
+		checkNoEntry();
+		return false;
+	}
+}
+
+EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
+{
+	EDataValidationResult Result = Super::IsDataValid(ValidationErrors);
+	if (!IsAsset() || Result == EDataValidationResult::Invalid)
+		return Result;
+
+	// Check the Level validity
+	if (Level.IsNull())
+	{
+		ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has no level set. You have to set up a room level."), *GetName())));
+		Result = EDataValidationResult::Invalid;
+	}
+
+	for (int i = 0; i < Doors.Num(); ++i)
+	{
+		// Check if all doors are valid
+		if (!IsDoorValid(i))
+		{
+			ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has invalid door: %s."), *GetName(), *Doors[i].UpdateEdName())));
+			Result = EDataValidationResult::Invalid;
+		}
+
+		// Check if there are no duplicated doors
+		for (int k = i + 1; k < Doors.Num(); ++k)
+		{
+			if (Doors[i] == Doors[k])
+			{
+				ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has duplicated doors: %s."), *GetName(), *Doors[i].UpdateEdName())));
+				Result = EDataValidationResult::Invalid;
+			}
+		}
+	}
+
+	return Result;
+}
+
+void URoomData::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeChainProperty(PropertyChangedEvent);
+	for (FDoorDef& Door : Doors)
+	{
+		Door.UpdateEdName();
+	}
+}
+
+#endif // WITH_EDITOR
+
+void URoomData::PostLoad()
+{
+	Super::PostLoad();
+#if WITH_EDITOR
+	for (FDoorDef& Door : Doors)
+	{
+		Door.UpdateEdName();
+	}
+#endif // WITH_EDITOR
+}
