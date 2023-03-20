@@ -30,6 +30,7 @@
 #include "GameFramework/GameState.h"
 #include "GameFramework/Pawn.h"
 #include "ProceduralDungeonTypes.h"
+#include "ProceduralDungeonLog.h"
 #include "Room.h"
 #include "RoomData.h"
 #include "Door.h"
@@ -68,6 +69,12 @@ void ARoomLevel::BeginPlay()
 	Super::BeginPlay();
 
 	check(IsValid(Room));
+
+	// Check if the data that spawned this level correspond to the data provided in blueprint
+	if (Data != Room->GetRoomData())
+	{
+		LogError(FString::Printf(TEXT("RoomLevel's Data does not match RoomData's Level [Data \"%s\" | Level \"%s\"]"), *Room->GetRoomData()->GetName(), *GetName()));
+	}
 
 	if (URoom::OccludeDynamicActors())
 	{
