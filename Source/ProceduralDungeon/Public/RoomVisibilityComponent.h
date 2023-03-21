@@ -54,6 +54,7 @@ public:
 	void ResetVisible(UObject* Owner);
 
 	// Returns true if the actor is in a visible room.
+	// Always returns true when "Occlude Dynamic Actors" is unchecked in the plugin's settings
 	// Useful with "Custom" visibility.
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is In Visible Room", DisplayName = "Is In Visible Room"))
 	bool IsVisible();

@@ -23,6 +23,7 @@
 */
 
 #include "RoomVisibilityComponent.h"
+#include "Room.h"
 
 URoomVisibilityComponent::URoomVisibilityComponent()
 	: VisibilityMode(EVisibilityMode::Default)
@@ -38,7 +39,7 @@ void URoomVisibilityComponent::BeginPlay()
 
 bool URoomVisibilityComponent::IsVisible()
 {
-	return VisibilityEnablers.Num() > 0;
+	return URoom::OccludeDynamicActors() ? VisibilityEnablers.Num() > 0: true;
 }
 
 void URoomVisibilityComponent::SetVisible(UObject* Owner, bool Visible)
