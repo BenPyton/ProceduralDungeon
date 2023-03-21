@@ -68,7 +68,11 @@ void ARoomLevel::BeginPlay()
 {
 	Super::BeginPlay();
 
-	check(IsValid(Room));
+	if (!IsValid(Room))
+	{
+		LogWarning(TEXT("RoomLevel was not spawned by a DungeonGenerator. It's fine for testing a room but occlusion will not work properly. Consider unchecking \"Occlude Dynamic Actors\" in the plugin's settings."));
+		return;
+	}
 
 	// Check if the data that spawned this level correspond to the data provided in blueprint
 	if (Data != Room->GetRoomData())
