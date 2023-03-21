@@ -57,5 +57,5 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Door")
 	bool IsValidActor(AActor* Actor, UPrimitiveComponent* Component);
 	
-	FORCEINLINE void UpdateOpenState() { bShouldBeOpen = ActorList.Num() > 0; }
+	FORCEINLINE void UpdateOpenState() { Open(ActorList.Num() > 0); }
 };
