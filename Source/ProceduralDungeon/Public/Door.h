@@ -52,12 +52,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Open"))
 	FORCEINLINE bool IsOpen() { return bIsOpen; }
 
-	// TODO: In next major release, replace OpenDoor() and CloseDoor() with a unique function OpenDoor(bool)
-	UFUNCTION(BlueprintCallable, Category = "Door", meta = (DeprecatedFunction, DeprecationMessage="Use Open(true) instead"))
-	void OpenDoor() { bShouldBeOpen = true; }
-	UFUNCTION(BlueprintCallable, Category = "Door", meta = (DeprecatedFunction, DeprecationMessage="Use Open(false) instead"))
-	void CloseDoor() { bShouldBeOpen = false; }
-
 	UFUNCTION(BlueprintCallable, Category = "Door")
 	void Open(bool open) { bShouldBeOpen = open; }
 
