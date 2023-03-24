@@ -80,7 +80,7 @@ public:
 
 #if WITH_EDITORONLY_DATA
 	// Don't take care of it, it is just used to put a name in the editor details panel.
-	UPROPERTY(Transient, VisibleInstanceOnly, meta = (DisplayName = "Name"))
+	UPROPERTY(Transient, VisibleInstanceOnly, Category = "DoorDef", meta = (DisplayName = "Name"))
 	FString EdName;
 #endif
 
