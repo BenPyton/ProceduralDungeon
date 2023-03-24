@@ -22,6 +22,15 @@
 			"WhitelistPlatforms": [
 				"Win64"
 			]
+		},
+
+		{
+			"Name": "ProceduralDungeonEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"WhitelistPlatforms": [
+				"Win64"
+			]
 		}
 	]
 }
