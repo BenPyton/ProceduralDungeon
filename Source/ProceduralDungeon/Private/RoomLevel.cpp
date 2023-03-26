@@ -87,9 +87,9 @@ void ARoomLevel::BeginPlay()
 		RoomTrigger->RegisterComponent();
 		RoomTrigger->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 		RoomTrigger->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel18); // Ignore line traces using any blueprint object type
-		RoomTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldDynamic, ECollisionResponse::ECR_Overlap);
-		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+		RoomTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Ignore);
+		RoomTrigger->SetCanEverAffectNavigation(false);
 
 		RoomTrigger->OnComponentBeginOverlap.AddDynamic(this, &ARoomLevel::OnTriggerBeginOverlap);
 		RoomTrigger->OnComponentEndOverlap.AddDynamic(this, &ARoomLevel::OnTriggerEndOverlap);
