@@ -5,6 +5,7 @@
 #include "Misc/PackageName.h"
 #include "RoomData.h"
 #include "ProceduralDungeon.h"
+#include "ProceduralDungeonLog.h"
 
 #define LOCTEXT_NAMESPACE "World"
 

@@ -58,16 +58,16 @@ public:
 	FORCEINLINE bool IsInit() const { return bIsInit; }
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Player Inside"))
-	FORCEINLINE bool IsPlayerInside() { return IsValid(Room) ? Room->IsPlayerInside() : false; }
+	bool IsPlayerInside();
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Visible"))
-	FORCEINLINE bool IsVisible() { return IsValid(Room) ? Room->IsVisible() : true; }
+	bool IsVisible();
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Locked"))
-	FORCEINLINE bool IsLocked() { return IsValid(Room) ? Room->IsLocked() : false; }
+	bool IsLocked();
 
 	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon")
-	void Lock(bool lock) { if(IsValid(Room)) Room->Lock(lock); }
+	void Lock(bool lock);
 
 	UFUNCTION()
 	void OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

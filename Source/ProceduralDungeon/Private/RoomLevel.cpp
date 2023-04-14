@@ -139,6 +139,27 @@ void ARoomLevel::Tick(float DeltaTime)
 #endif
 }
 
+bool ARoomLevel::IsPlayerInside()
+{
+	return IsValid(Room) ? Room->IsPlayerInside() : false;
+}
+
+bool ARoomLevel::IsVisible()
+{
+	return IsValid(Room) ? Room->IsVisible() : true;
+}
+
+bool ARoomLevel::IsLocked()
+{
+	return IsValid(Room) ? Room->IsLocked() : false;
+}
+
+void ARoomLevel::Lock(bool lock)
+{
+	if(IsValid(Room))
+		Room->Lock(lock);
+}
+
 void ARoomLevel::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!IsValid(OtherActor))
