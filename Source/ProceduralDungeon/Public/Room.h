@@ -128,12 +128,6 @@ public:
 	// AABB Overlapping
 	static bool Overlap(URoom& A, URoom& B);
 	static bool Overlap(URoom& Room, TArray<URoom*>& RoomList);
-	static EDoorDirection Add(EDoorDirection A, EDoorDirection B);
-	static EDoorDirection Sub(EDoorDirection A, EDoorDirection B);
-	static EDoorDirection Opposite(EDoorDirection O);
-	static FIntVector GetDirection(EDoorDirection O);
-	static FQuat GetRotation(EDoorDirection O);
-	static FIntVector Rotate(FIntVector Pos, EDoorDirection Rot);
 
 	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset = true);
 
