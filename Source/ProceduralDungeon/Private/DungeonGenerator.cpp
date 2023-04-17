@@ -263,8 +263,8 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
 
 			// Place the room at its world position with the correct rotation
 			EDoorDirection parentDoorDir = ParentRoom.GetDoorWorldOrientation(i);
-			FIntVector newRoomPos = ParentRoom.GetDoorWorldPosition(i) + URoom::GetDirection(parentDoorDir);
-			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomPos, URoom::Opposite(parentDoorDir));
+			FIntVector newRoomPos = ParentRoom.GetDoorWorldPosition(i) + ToIntVector(parentDoorDir);
+			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomPos, ~parentDoorDir);
 
 			// Test if it fit in the place
 			if (!URoom::Overlap(*newRoom, RoomList))

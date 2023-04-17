@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,12 +43,29 @@ enum class EGenerationState : uint8
 UENUM(BlueprintType, meta = (DisplayName = "Door Direction"))
 enum class EDoorDirection : uint8
 {
-	North = 0 				UMETA(DisplayName = "North"), // rotation = 0 (world forward)
-	East = 255 				UMETA(DisplayName = "East"),  // rotation = -90 (world right)
-	West = 1 				UMETA(DisplayName = "West"),  // rotation = 90 (world left)
-	South = 2 				UMETA(DisplayName = "South"), // rotation = 180 (world backward)
-	NbDirection = 4 		UMETA(Hidden)
+	North		= 0 		UMETA(DisplayName = "North", ToolTip = "rotation = 0 | positive X (world forward)"),
+	East		= 1 		UMETA(DisplayName = "East", ToolTip = "rotation = 90 | positive Y (world right)"),
+	South		= 2 		UMETA(DisplayName = "South", ToolTip = "rotation = 180 | negative X (world backward)"),
+	West		= 3 		UMETA(DisplayName = "West", ToolTip = "rotation = 270 | negative Y (world left)"),
+	NbDirection	= 4 		UMETA(Hidden)
 };
+
+bool operator!(const EDoorDirection& Direction);
+EDoorDirection operator+(const EDoorDirection& A, const EDoorDirection& B);
+EDoorDirection operator-(const EDoorDirection& A, const EDoorDirection& B);
+EDoorDirection& operator+=(EDoorDirection& A, const EDoorDirection& B);
+EDoorDirection& operator-=(EDoorDirection& A, const EDoorDirection& B);
+EDoorDirection& operator++(EDoorDirection& Direction);
+EDoorDirection& operator--(EDoorDirection& Direction);
+EDoorDirection operator++(EDoorDirection& Direction, int);
+EDoorDirection operator--(EDoorDirection& Direction, int);
+EDoorDirection operator-(const EDoorDirection& Direction);
+EDoorDirection operator~(const EDoorDirection& Direction);
+inline EDoorDirection Opposite(const EDoorDirection& Direction) { return ~Direction; }
+FIntVector ToIntVector(const EDoorDirection& Direction);
+FVector ToVector(const EDoorDirection& Direction);
+FQuat ToQuaternion(const EDoorDirection& Direction);
+FIntVector Rotate(const FIntVector& Pos, const EDoorDirection& Rot);
 
 UENUM(BlueprintType, meta = (DisplayName = "Generation Type"))
 enum class EGenerationType : uint8
@@ -100,3 +117,4 @@ public:
 	}
 #endif
 };
+

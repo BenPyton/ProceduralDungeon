@@ -117,7 +117,7 @@ void URoom::Instantiate(UWorld* World)
 		}
 
 		FVector FinalLocation = rotation.RotateVector(URoom::Unit() * FVector(Position)) + offset;
-		FQuat FinalRotation = rotation * FRotator(0, -90 * (int)Direction, 0).Quaternion();
+		FQuat FinalRotation = rotation * ToQuaternion(Direction);
 		Instance = UProceduralLevelStreaming::Load(World, RoomData, nameSuffix, FinalLocation, FinalRotation.Rotator());
 
 		if (!IsValid(Instance))
@@ -195,7 +195,7 @@ bool URoom::IsInstanceInitialized() const
 EDoorDirection URoom::GetDoorWorldOrientation(int DoorIndex)
 {
 	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
-	return Add(RoomData->Doors[DoorIndex].Direction, Direction);
+	return RoomData->Doors[DoorIndex].Direction + Direction;
 }
 
 FIntVector URoom::GetDoorWorldPosition(int DoorIndex)
@@ -238,7 +238,7 @@ int URoom::GetOtherDoorIndex(int DoorIndex)
 
 FIntVector URoom::WorldToRoom(FIntVector WorldPos)
 {
-	return Rotate(WorldPos - Position, Sub(EDoorDirection::North, Direction));
+	return Rotate(WorldPos - Position, -Direction);
 }
 
 FIntVector URoom::RoomToWorld(FIntVector RoomPos)
@@ -248,18 +248,18 @@ FIntVector URoom::RoomToWorld(FIntVector RoomPos)
 
 EDoorDirection URoom::WorldToRoom(EDoorDirection WorldRot)
 {
-	return Sub(WorldRot, Direction);
+	return WorldRot - Direction;
 }
 
 EDoorDirection URoom::RoomToWorld(EDoorDirection RoomRot)
 {
-	return Add(RoomRot, Direction);
+	return RoomRot + Direction;
 }
 
 void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)
 {
 	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
-	Direction = Add(Sub(WorldRot, RoomData->Doors[DoorIndex].Direction), EDoorDirection::South);
+	Direction = ~(WorldRot - RoomData->Doors[DoorIndex].Direction);
 }
 
 void URoom::SetPositionFromDoor(int DoorIndex, FIntVector WorldPos)
@@ -271,7 +271,7 @@ void URoom::SetPositionFromDoor(int DoorIndex, FIntVector WorldPos)
 void URoom::SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot)
 {
 	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
-	Direction = Sub(WorldRot, RoomData->Doors[DoorIndex].Direction);
+	Direction = WorldRot - RoomData->Doors[DoorIndex].Direction;
 	Position = WorldPos - RoomToWorld(RoomData->Doors[DoorIndex].Position);
 }
 
@@ -288,12 +288,12 @@ void URoom::TryConnectToExistingDoors(TArray<URoom*>& RoomList)
 	for (int i = 0; i < RoomData->GetNbDoor(); ++i)
 	{
 		EDoorDirection dir = GetDoorWorldOrientation(i);
-		FIntVector pos = GetDoorWorldPosition(i) + URoom::GetDirection(dir);
+		FIntVector pos = GetDoorWorldPosition(i) + ToIntVector(dir);
 		URoom* otherRoom = GetRoomAt(pos, RoomList);
 
 		if (IsValid(otherRoom))
 		{
-			int j = otherRoom->GetDoorIndexAt(pos, URoom::Opposite(dir));
+			int j = otherRoom->GetDoorIndexAt(pos, ~dir);
 			if (j >= 0) // -1 if no door
 			{
 				Connect(*this, i, *otherRoom, j);
@@ -318,7 +318,7 @@ FTransform URoom::GetTransform() const
 {
 	FTransform Transform;
 	Transform.SetLocation(FVector(Position) * URoom::Unit());
-	Transform.SetRotation(GetRotation(Direction));
+	Transform.SetRotation(ToQuaternion(Direction));
 	return Transform;
 }
 
@@ -399,80 +399,9 @@ bool URoom::Overlap(URoom& Room, TArray<URoom*>& RoomList)
 	return overlap;
 }
 
-EDoorDirection URoom::Add(EDoorDirection A, EDoorDirection B)
-{
-	int8 D = (int8)A + (int8)B;
-	while (D > 2) D -= 4;
-	while (D <= -2) D += 4;
-	return (EDoorDirection)D;
-}
-
-EDoorDirection URoom::Sub(EDoorDirection A, EDoorDirection B)
-{
-	int8 D = (int8)A - (int8)B;
-	while (D > 2) D -= 4;
-	while (D <= -2) D += 4;
-	return (EDoorDirection)D;
-}
-
-EDoorDirection URoom::Opposite(EDoorDirection O)
-{
-	return Add(O, EDoorDirection::South);
-}
-
-FIntVector URoom::GetDirection(EDoorDirection O)
-{
-	FIntVector Dir = FIntVector::ZeroValue;
-	switch (O)
-	{
-	case EDoorDirection::North:
-		Dir.X = 1;
-		break;
-	case EDoorDirection::East:
-		Dir.Y = 1;
-		break;
-	case EDoorDirection::West:
-		Dir.Y = -1;
-		break;
-	case EDoorDirection::South:
-		Dir.X = -1;
-		break;
-	}
-	return Dir;
-}
-
-FQuat URoom::GetRotation(EDoorDirection O)
-{
-	return FRotator(0.0f, -90.0f * (int8)O, 0.0f).Quaternion();
-}
-
-FIntVector URoom::Rotate(FIntVector Pos, EDoorDirection Rot)
-{
-	FIntVector NewPos = Pos;
-	switch (Rot)
-	{
-	case EDoorDirection::North:
-		NewPos = Pos;
-		break;
-	case EDoorDirection::West:
-		NewPos.Y = -Pos.X;
-		NewPos.X = Pos.Y;
-		break;
-	case EDoorDirection::East:
-		NewPos.Y = Pos.X;
-		NewPos.X = -Pos.Y;
-		break;
-	case EDoorDirection::South:
-		NewPos.Y = -Pos.Y;
-		NewPos.X = -Pos.X;
-		break;
-	}
-	return NewPos;
-}
-
 FVector URoom::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset)
 {
-	return URoom::Unit() * (FVector(DoorCell) + 0.5f * FVector(URoom::GetDirection(DoorRot)) + FVector(0, 0, includeOffset ? URoom::DoorOffset() : 0));
+	return URoom::Unit() * (FVector(DoorCell) + 0.5f * ToVector(DoorRot) + FVector(0, 0, includeOffset ? URoom::DoorOffset() : 0));
 }
 
 void URoom::Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB)

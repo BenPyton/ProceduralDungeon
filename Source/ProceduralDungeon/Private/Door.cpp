@@ -160,7 +160,7 @@ void ADoor::DrawDebug(UWorld* World, FIntVector DoorCell, EDoorDirection DoorRot
 	if (URoom::DrawDebug())
 	{
 		FVector DoorSize = URoom::DoorSize();
-		FQuat DoorRotation = Transform.GetRotation() * URoom::GetRotation(DoorRot == EDoorDirection::NbDirection ? EDoorDirection::North : DoorRot);
+		FQuat DoorRotation = Transform.GetRotation() * ToQuaternion(!DoorRot ? EDoorDirection::North : DoorRot);
 		FVector DoorPosition = Transform.TransformPosition(URoom::GetRealDoorPosition(DoorCell, DoorRot, includeOffset) + FVector(0, 0, DoorSize.Z * 0.5f));
 
 		const FColor& Color = (isValid) ? FColor::Blue : FColor::Orange;
