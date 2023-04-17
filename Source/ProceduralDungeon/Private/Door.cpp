@@ -95,9 +95,12 @@ void ADoor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// Update door visibility
-	SetActorHiddenInGame( !bAlwaysVisible
-		&& (!IsValid(RoomA) || (!RoomA->IsVisible())) 
-		&& (!IsValid(RoomB) || (!RoomB->IsVisible())));
+	if (URoom::OcclusionCulling())
+	{
+		SetActorHiddenInGame(!bAlwaysVisible
+			&& (!IsValid(RoomA) || (!RoomA->IsVisible()))
+			&& (!IsValid(RoomB) || (!RoomB->IsVisible())));
+	}
 
 	// Update door's lock state
 	const bool bPrevLocked = bLocked;

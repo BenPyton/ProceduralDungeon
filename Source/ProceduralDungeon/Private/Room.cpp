@@ -536,7 +536,7 @@ uint32 URoom::OcclusionDistance()
 bool URoom::OccludeDynamicActors()
 {
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	return Settings->OccludeDynamicActors;
+	return Settings->OcclusionCulling && Settings->OccludeDynamicActors;
 }
 
 bool URoom::DrawDebug()

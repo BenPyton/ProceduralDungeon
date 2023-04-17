@@ -200,6 +200,12 @@ void ARoomLevel::UpdateBounds()
 
 void ARoomLevel::SetActorsVisible(bool Visible)
 {
+	if (!URoom::OcclusionCulling())
+	{
+		// TODO? Force visibility? (it will only be a QoL for editor use)
+		return;
+	}
+
 	ULevel* Level = GetLevel();
 	if (IsValid(Level))
 	{

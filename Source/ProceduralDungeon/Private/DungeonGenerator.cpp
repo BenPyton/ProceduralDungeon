@@ -331,6 +331,9 @@ void TraverseRooms(const TSet<URoom*>& inRooms, TSet<URoom*>* outRooms, uint32 d
 
 void ADungeonGenerator::UpdateRoomVisibility()
 {
+	if (!URoom::OcclusionCulling())
+		return;
+
 	APawn* Player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawnOrSpectator();
 	if (!IsValid(Player))
 		return;
