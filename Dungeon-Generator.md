@@ -63,5 +63,8 @@ You can choose how the seed is generated:
 - Fixed: the initial seed is used each time you generate, so you will always get the same dungeon.
 
 **Seed**\
-The initial seed you want to use if the `Seed Type` is not `Random` 
+The initial seed you want to use if the `Seed Type` is not `Random`
 
+**Use Generator Transform**\
+If checked, the dungeon will be offset and rotated using the dungeon generator actor's transform.
+If unchecked, the first room will be placed at world's (0,0,0) and no rotation will be applied.
