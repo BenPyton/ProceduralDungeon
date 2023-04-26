@@ -29,6 +29,8 @@
 #include "Math/GenericOctree.h" // for FBoxCenterAndExtent (required for UE5.0)
 #include "RoomLevel.generated.h"
 
+#define ROOM_TRIGGER_OBJECT_TYPE ECollisionChannel::ECC_EngineTraceChannel6
+
 class URoom;
 
 UCLASS(Blueprintable, ClassGroup="Procedural Dungeon")

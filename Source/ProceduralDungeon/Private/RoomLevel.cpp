@@ -86,10 +86,25 @@ void ARoomLevel::BeginPlay()
 		RoomTrigger = NewObject<UBoxComponent>(this, UBoxComponent::StaticClass(), FName("Room Trigger"));
 		RoomTrigger->RegisterComponent();
 		RoomTrigger->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		RoomTrigger->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel18); // Ignore line traces using any blueprint object type
+		RoomTrigger->SetCanEverAffectNavigation(false);
+		RoomTrigger->SetGenerateOverlapEvents(true);
+		RoomTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		RoomTrigger->SetCollisionObjectType(ROOM_TRIGGER_OBJECT_TYPE);
 		RoomTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Ignore);
-		RoomTrigger->SetCanEverAffectNavigation(false);
+		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
+		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+		static const uint8 FirstChannel = static_cast<uint8>(ECollisionChannel::ECC_GameTraceChannel1);
+		static const uint8 LastChannel = static_cast<uint8>(ECollisionChannel::ECC_GameTraceChannel18);
+		for (uint8 Channel = FirstChannel; Channel <= LastChannel; ++Channel)
+		{
+			ETraceTypeQuery TraceChannel = UEngineTypes::ConvertToTraceType(static_cast<ECollisionChannel>(Channel));
+			if (TraceChannel != ETraceTypeQuery::TraceTypeQuery_MAX)
+			{
+				RoomTrigger->SetCollisionResponseToChannel(static_cast<ECollisionChannel>(Channel), ECollisionResponse::ECR_Ignore);
+			}
+		}
 
 		RoomTrigger->OnComponentBeginOverlap.AddDynamic(this, &ARoomLevel::OnTriggerBeginOverlap);
 		RoomTrigger->OnComponentEndOverlap.AddDynamic(this, &ARoomLevel::OnTriggerEndOverlap);
