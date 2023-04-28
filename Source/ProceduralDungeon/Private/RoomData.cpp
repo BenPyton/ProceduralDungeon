@@ -92,7 +92,7 @@ EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 		// Check if all doors are valid
 		if (!IsDoorValid(i))
 		{
-			ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has invalid door: %s."), *GetName(), *Doors[i].UpdateEdName())));
+			ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has invalid door: %s."), *GetName(), *Doors[i].ToString())));
 			Result = EDataValidationResult::Invalid;
 		}
 
@@ -101,7 +101,7 @@ EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 		{
 			if (Doors[i] == Doors[k])
 			{
-				ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has duplicated doors: %s."), *GetName(), *Doors[i].UpdateEdName())));
+				ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has duplicated doors: %s."), *GetName(), *Doors[i].ToString())));
 				Result = EDataValidationResult::Invalid;
 			}
 		}
@@ -110,24 +110,4 @@ EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 	return Result;
 }
 
-void URoomData::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeChainProperty(PropertyChangedEvent);
-	for (FDoorDef& Door : Doors)
-	{
-		Door.UpdateEdName();
-	}
-}
-
 #endif // WITH_EDITOR
-
-void URoomData::PostLoad()
-{
-	Super::PostLoad();
-#if WITH_EDITOR
-	for (FDoorDef& Door : Doors)
-	{
-		Door.UpdateEdName();
-	}
-#endif // WITH_EDITOR
-}

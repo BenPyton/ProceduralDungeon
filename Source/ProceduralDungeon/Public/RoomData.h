@@ -44,7 +44,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Door")
 	bool RandomDoor;
 
-	UPROPERTY(EditAnywhere, Category = "Doors", meta = (TitleProperty = "EdName"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Doors")
 	TArray<FDoorDef> Doors;
 
 	UPROPERTY(EditAnywhere, Category = "Room", meta = (ClampMin = 1))
@@ -60,8 +60,5 @@ public:
 #if WITH_EDITOR
 	bool IsDoorValid(int DoorIndex) const;
 	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;
-	virtual void PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent) override;
 #endif
-
-	virtual void PostLoad();
 };
