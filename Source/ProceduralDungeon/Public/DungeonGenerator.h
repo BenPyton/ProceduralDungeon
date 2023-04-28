@@ -36,6 +36,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRoomEvent, URoomData*, NewRoom);
 
 class ADoor;
 class URoom;
+class UDoorType;
 
 UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADungeonGenerator : public AActor
@@ -67,11 +68,12 @@ public:
 
 	// Return the RoomData that will be connected to the Current Room
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Next Room"))
-	URoomData* ChooseNextRoomData(URoomData* CurrentRoom);
+	URoomData* ChooseNextRoomData(const URoomData* CurrentRoom, const FDoorDef& DoorData);
 
 	// Return the door which will be spawned between Current Room and Next Room
+	// Use IsDoorOfType function to compare a door class with DoorType.
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Door"))
-	TSubclassOf<ADoor> ChooseDoor(URoomData* CurrentRoom, URoomData* NextRoom);
+	TSubclassOf<ADoor> ChooseDoor(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType);
 
 	// Condition to validate a dungeon Generation
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Is Valid Dungeon"))
@@ -140,6 +142,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle = "Nb Room"))
 	int GetNbRoom() { return RoomList.Num(); }
 
+	// Returns an array of room data with compatible at least one compatible door with the door data provided.
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	void GetCompatibleRoomData(bool& bSuccess, TArray<URoomData*>& CompatibleRooms, const TArray<URoomData*>& RoomDataArray, const FDoorDef& DoorData);
+
 	URoom* GetRoomAt(FIntVector RoomCell);
 	URoom* GetRoomByIndex(int64 Index);
 
@@ -165,10 +171,10 @@ protected:
 	virtual URoomData* ChooseFirstRoomData_Implementation();
 
 	UFUNCTION()
-	virtual URoomData* ChooseNextRoomData_Implementation(URoomData* CurrentRoom);
+	virtual URoomData* ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const FDoorDef& DoorData);
 
 	UFUNCTION()
-	virtual TSubclassOf<ADoor> ChooseDoor_Implementation(URoomData* CurrentRoom, URoomData* NextRoom);
+	virtual TSubclassOf<ADoor> ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType);
 
 	UFUNCTION()
 	virtual bool IsValidDungeon_Implementation();

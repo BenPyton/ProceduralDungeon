@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,43 +25,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataAsset.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "ProceduralDungeonTypes.h"
-#include "RoomData.generated.h"
+#include "Engine/DataTable.h"
+#include "DungeonBlueprintLibrary.generated.h"
 
 UCLASS()
-class PROCEDURALDUNGEON_API URoomData : public UPrimaryDataAsset
+class PROCEDURALDUNGEON_API UDungeonBlueprintLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
-	friend class UProceduralLevelStreaming;
-
-private:
-	UPROPERTY(EditAnywhere, Category = "Level")
-	TSoftObjectPtr<UWorld> Level;
-
 public:
-	UPROPERTY(EditAnywhere, Category = "Door")
-	bool RandomDoor;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Utilities|Procedural Dungeon")
+	static bool IsDoorOfType(const TSubclassOf<class ADoor> DoorClass, const class UDoorType* DoorType);
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Doors")
-	TArray<FDoorDef> Doors;
-
-	UPROPERTY(EditAnywhere, Category = "Room", meta = (ClampMin = 1))
-	FIntVector Size;
-
-public:
-	URoomData();
-
-	int GetNbDoor() const { return Doors.Num(); }
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Room Data")
-	bool HasCompatibleDoor(const FDoorDef& DoorData) const;
-
-	FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
-
-#if WITH_EDITOR
-	bool IsDoorValid(int DoorIndex) const;
-	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;
-#endif
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Utilities", meta = (DisplayName = "Equal (Data Table Row Handle)", CompactNodeTitle = "=="))
+	static bool CompareDataTableRows(const FDataTableRowHandle& A, const FDataTableRowHandle& B);
 };

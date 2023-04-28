@@ -23,6 +23,7 @@
  */
 
 #include "ProceduralDungeonTypes.h"
+#include "Door.h"
 
 bool operator!(const EDoorDirection& Direction)
 {
@@ -165,4 +166,9 @@ FIntVector Rotate(const FIntVector& Pos, const EDoorDirection& Rot)
 		checkNoEntry();
 	}
 	return NewPos;
+}
+
+FVector FDoorDef::GetDoorSize() const
+{
+	return ADoor::GetSize(Type);
 }

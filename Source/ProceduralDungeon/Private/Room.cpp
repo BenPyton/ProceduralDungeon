@@ -287,6 +287,9 @@ void URoom::TryConnectToExistingDoors(TArray<URoom*>& RoomList)
 {
 	for (int i = 0; i < RoomData->GetNbDoor(); ++i)
 	{
+		if (IsConnected(i))
+			continue;
+
 		EDoorDirection dir = GetDoorWorldOrientation(i);
 		FIntVector pos = GetDoorWorldPosition(i) + ToIntVector(dir);
 		URoom* otherRoom = GetRoomAt(pos, RoomList);
@@ -294,7 +297,8 @@ void URoom::TryConnectToExistingDoors(TArray<URoom*>& RoomList)
 		if (IsValid(otherRoom))
 		{
 			int j = otherRoom->GetDoorIndexAt(pos, ~dir);
-			if (j >= 0) // -1 if no door
+			if (j >= 0 // -1 if no door
+				&& FDoorDef::AreCompatible(RoomData->Doors[i], otherRoom->RoomData->Doors[j])) 
 			{
 				Connect(*this, i, *otherRoom, j);
 			}
@@ -401,7 +405,10 @@ bool URoom::Overlap(URoom& Room, TArray<URoom*>& RoomList)
 
 FVector URoom::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset)
 {
-	return URoom::Unit() * (FVector(DoorCell) + 0.5f * ToVector(DoorRot) + FVector(0, 0, includeOffset ? URoom::DoorOffset() : 0));
+	const FVector CellPosition = FVector(DoorCell);
+	const FVector DirectionOffset = !DoorRot ? FVector::ZeroVector : (0.5f * ToVector(DoorRot));
+	const FVector HeightOffset = includeOffset ? FVector(0, 0, URoom::DoorOffset()) : FVector::ZeroVector;
+	return URoom::Unit() * (CellPosition + DirectionOffset + HeightOffset);
 }
 
 void URoom::Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB)
