@@ -41,4 +41,35 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Utilities", meta = (DisplayName = "Equal (Data Table Row Handle)", CompactNodeTitle = "=="))
 	static bool CompareDataTableRows(const FDataTableRowHandle& A, const FDataTableRowHandle& B);
+
+	// ===== DoorDirection Math Utility Functions =====
+
+	// True if the value is set (either North, South, East, West)
+	// False otherwise
+	UFUNCTION(BlueprintCallable, Category = "Math|Door Direction", meta = (DisplayName = "Is Valid", ExpandBoolAsExecs="ReturnValue"))
+	static bool DoorDirection_Valid(const EDoorDirection& A) { return !!A; }
+
+	// Addition (A + B)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Direction + Direction", CompactNodeTitle = "+", AutoCreateRefTerm="A,B"))
+	static EDoorDirection DoorDirection_Add(const EDoorDirection& A, const EDoorDirection& B) { return A + B; }
+
+	// Subtraction (A - B)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Direction - Direction", CompactNodeTitle = "-", AutoCreateRefTerm="A,B"))
+	static EDoorDirection DoorDirection_Sub(const EDoorDirection& A, const EDoorDirection& B) { return A - B; }
+
+	// Increment the direction and set it
+	UFUNCTION(BlueprintCallable, Category = "Math|Door Direction", meta = (DisplayName = "Increment Door Direction", CompactNodeTitle = "++"))
+	static EDoorDirection& DoorDirection_Increment(UPARAM(ref) EDoorDirection& A) { return ++A; }
+
+	// Decrement the direction and set it
+	UFUNCTION(BlueprintCallable, Category = "Math|Door Direction", meta = (DisplayName = "Decrement Door Direction", CompactNodeTitle = "--"))
+	static EDoorDirection& DoorDirection_Decrement(UPARAM(ref) EDoorDirection& A) { return --A; }
+
+	// Negate the direction and set it (same as North - Direction)
+	UFUNCTION(BlueprintCallable, Category = "Math|Door Direction", meta = (DisplayName = "Negate Door Direction", CompactNodeTitle = "-"))
+	static EDoorDirection& DoorDirection_Negate(UPARAM(ref) EDoorDirection& A) { A = -A;  return A; }
+
+	// Transforms North into South and East into West (and vice versa)
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Opposite", CompactNodeTitle = "Opposite", AutoCreateRefTerm="A"))
+	static EDoorDirection DoorDirection_Opposite(const EDoorDirection& A) { return ~A; }
 };
