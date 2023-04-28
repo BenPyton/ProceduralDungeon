@@ -83,31 +83,31 @@ protected:
 	void OnDoorClose_BP();
 
 protected:
-	bool bLocked = false;
-	bool bIsOpen = false;
+	bool bLocked {false};
+	bool bIsOpen {false};
 
 	UPROPERTY(Replicated)
-	bool bShouldBeLocked = false;
+	bool bShouldBeLocked {false};
 
 	UPROPERTY(Replicated)
-	bool bShouldBeOpen = false;
+	bool bShouldBeOpen {false};
 
 	// The two connected rooms to this door
 	UPROPERTY()
-	URoom* RoomA;
+	URoom* RoomA {nullptr};
 	UPROPERTY()
-	URoom* RoomB;
+	URoom* RoomB {nullptr};
 
-	UPROPERTY(ReplicatedUsing=OnRep_IndexRoomA)
+	UPROPERTY(ReplicatedUsing = OnRep_IndexRoomA)
 	int IndexRoomA;
-	UPROPERTY(ReplicatedUsing=OnRep_IndexRoomB)
+	UPROPERTY(ReplicatedUsing = OnRep_IndexRoomB)
 	int IndexRoomB;
 
-	UPROPERTY(EditAnywhere, Category = "Door", meta = (DisplayName = "Always Visible"))
-	bool bAlwaysVisible = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door", meta = (DisplayName = "Always Visible"))
+	bool bAlwaysVisible {false};
 
-	UPROPERTY(EditAnywhere, Category = "Door", meta = (DisplayName = "Always Unlocked"))
-	bool bAlwaysUnlocked = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door", meta = (DisplayName = "Always Unlocked"))
+	bool bAlwaysUnlocked {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door", meta = (DisplayName = "Door Type"))
 	UDoorType* Type;
