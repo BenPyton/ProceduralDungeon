@@ -38,11 +38,11 @@ public:
 
 	// Size of a room unit. Room's size in data assets will express the multiple of this unit size.
 	// For example a room size of (5, 10, 1) with a unit size of (100, 100, 400) will result of a real room size of (500, 1000, 400).
-	UPROPERTY(EditAnywhere, config, Category = "General")
+	UPROPERTY(EditAnywhere, config, Category = "General", meta = (ClampMin = 0))
 	FVector RoomUnit;
 
 	// The bounding size of the doors. It is used only to display the door's blue box when "Draw Debug" is set to true.
-	UPROPERTY(EditAnywhere, config, Category = "General")
+	UPROPERTY(EditAnywhere, config, Category = "General", meta = (DisplayName = "Default Door Size", ClampMin = 0))
 	FVector DoorSize;
 
 	// The height of the door's base from the room's base (in percentage of the room unit Z)

@@ -54,15 +54,15 @@ class PROCEDURALDUNGEON_API URoom : public UObject
 
 public:
 	UPROPERTY()
-	UProceduralLevelStreaming* Instance;
+	UProceduralLevelStreaming* Instance {nullptr};
 	UPROPERTY()
-	FIntVector Position;
-	EDoorDirection Direction;
+	FIntVector Position {0};
+	EDoorDirection Direction {EDoorDirection::NbDirection};
 
 	URoom();
 
-	URoomData* GetRoomData() { return RoomData; }
-	ADungeonGenerator* Generator() const { return GeneratorOwner; }
+	const URoomData* GetRoomData() const { return RoomData; }
+	const ADungeonGenerator* Generator() const { return GeneratorOwner; }
 	void SetPlayerInside(bool PlayerInside);
 	void SetVisible(bool Visible);
 
@@ -74,16 +74,16 @@ public:
 
 private:
 	UPROPERTY()
-	URoomData* RoomData;
+	URoomData* RoomData {nullptr};
 
 	UPROPERTY()
 	TArray<FRoomConnection> Connections;
 
-	ADungeonGenerator* GeneratorOwner;
-	int64 Id;
-	bool bPlayerInside = false;
-	bool bIsVisible = true;
-	bool bIsLocked = false;
+	ADungeonGenerator* GeneratorOwner {nullptr};
+	int64 Id {-1};
+	bool bPlayerInside {false};
+	bool bIsVisible {true};
+	bool bIsLocked {false};
 
 	UFUNCTION() // needed macro for binding to delegate
 	void OnInstanceLoaded();

@@ -90,10 +90,10 @@ struct FDoorDef
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category = "DoorDef")
-	FIntVector Position;
-	UPROPERTY(EditAnywhere, Category = "DoorDef")
-	EDoorDirection Direction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef")
+	FIntVector Position {FIntVector::ZeroValue};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef")
+	EDoorDirection Direction {EDoorDirection::North};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef", meta = (DisplayThumbnail = false))
 	class UDoorType* Type;
 

@@ -30,9 +30,6 @@
 URoomData::URoomData()
 	: Super()
 {
-	Doors.Add(FDoorDef());
-	Size = FIntVector(1, 1, 1);
-	RandomDoor = true;
 }
 
 bool URoomData::HasCompatibleDoor(const FDoorDef& DoorData) const
