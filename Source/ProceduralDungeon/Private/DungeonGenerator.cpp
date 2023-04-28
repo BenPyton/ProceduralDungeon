@@ -588,7 +588,7 @@ void ADungeonGenerator::DispatchGenerationFailed()
 	OnGenerationFailedEvent.Broadcast();
 }
 
-void ADungeonGenerator::DispatchRoomAdded(URoomData* NewRoom)
+void ADungeonGenerator::DispatchRoomAdded(const URoomData* NewRoom)
 {
 	OnRoomAdded(NewRoom);
 	OnRoomAdded_BP(NewRoom);
@@ -692,7 +692,7 @@ int ADungeonGenerator::CountTotalRoomType(TArray<TSubclassOf<URoomData>> RoomTyp
 	int count = 0;
 	for (int i = 0; i < RoomList.Num(); i++)
 	{
-		URoomData* roomData = RoomList[i]->GetRoomData();
+		const URoomData* roomData = RoomList[i]->GetRoomData();
 		if (RoomTypeList.ContainsByPredicate([&roomData](const TSubclassOf<URoomData> roomType) { return roomData->GetClass()->IsChildOf(roomType); }))
 		{
 			count++;

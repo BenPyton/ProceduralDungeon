@@ -37,22 +37,23 @@ class PROCEDURALDUNGEON_API URoomData : public UPrimaryDataAsset
 	friend class UProceduralLevelStreaming;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Level")
-	TSoftObjectPtr<UWorld> Level;
+	UPROPERTY(EditInstanceOnly, Category = "Level")
+	TSoftObjectPtr<UWorld> Level {nullptr};
 
 public:
-	UPROPERTY(EditAnywhere, Category = "Door")
-	bool RandomDoor;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Doors")
+	bool RandomDoor {true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Doors")
-	TArray<FDoorDef> Doors;
+	TArray<FDoorDef> Doors {FDoorDef()};
 
-	UPROPERTY(EditAnywhere, Category = "Room", meta = (ClampMin = 1))
-	FIntVector Size;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Room", meta = (ClampMin = 1))
+	FIntVector Size {1};
 
 public:
 	URoomData();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Room Data", meta = (DisplayName = "Door Count", CompactNodeTitle = "Door Count"))
 	int GetNbDoor() const { return Doors.Num(); }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Room Data")

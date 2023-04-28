@@ -33,11 +33,7 @@
 
 URoom::URoom()
 	: Super()
-	, Instance(nullptr)
-	, RoomData(nullptr)
 	, Connections()
-	, GeneratorOwner(nullptr)
-	, Id(-1)
 {
 }
 
@@ -259,7 +255,7 @@ EDoorDirection URoom::RoomToWorld(EDoorDirection RoomRot)
 void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)
 {
 	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
-	Direction = ~(WorldRot - RoomData->Doors[DoorIndex].Direction);
+	Direction = WorldRot - RoomData->Doors[DoorIndex].Direction;
 }
 
 void URoom::SetPositionFromDoor(int DoorIndex, FIntVector WorldPos)

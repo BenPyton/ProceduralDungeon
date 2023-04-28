@@ -32,7 +32,7 @@
 #include "DungeonGenerator.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGenerationEvent);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRoomEvent, URoomData*, NewRoom);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRoomEvent, const URoomData*, NewRoom);
 
 class ADoor;
 class URoom;
@@ -103,7 +103,7 @@ public:
 
 	// Called when the room NewRoom is added in the generation (but not spawned yet)
 	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "On Room Added"))
-	void OnRoomAdded_BP(URoomData* NewRoom);
+	void OnRoomAdded_BP(const URoomData* NewRoom);
 
 	// ===== Utility functions you can use in blueprint =====
 
@@ -143,7 +143,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	URoomData* GetRandomRoomData(TArray<URoomData*> RoomDataArray);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle = "Nb Room"))
+	// Returns the current number of room in the generated dungeon.
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DisplayName = "Room Count", CompactNodeTitle = "Room Count"))
 	int GetNbRoom() { return RoomList.Num(); }
 
 	// Returns an array of room data with compatible at least one compatible door with the door data provided.
@@ -204,7 +205,7 @@ protected:
 	virtual void OnGenerationFailed() {}
 
 	UFUNCTION()
-	virtual void OnRoomAdded(URoomData* NewRoom) {}
+	virtual void OnRoomAdded(const URoomData* NewRoom) {}
 
 private:
 	// Launch the generation process of the dungeon
@@ -246,7 +247,7 @@ private:
 	void DispatchPostGeneration();
 	void DispatchGenerationInit();
 	void DispatchGenerationFailed();
-	void DispatchRoomAdded(URoomData* NewRoom);
+	void DispatchRoomAdded(const URoomData* NewRoom);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
