@@ -29,6 +29,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Engine/Engine.h"
 #include "DungeonGenerator.h"
+#include "DoorType.h"
 
 // Sets default values
 ADoor::ADoor()
@@ -142,7 +143,7 @@ void ADoor::Tick(float DeltaTime)
 #if WITH_EDITOR
 	// TODO: Place it in an editor module of the plugin
 	if (GetWorld()->WorldType == EWorldType::EditorPreview)
-		DrawDebug(GetWorld());
+		DrawDebug(GetWorld(), GetSize(Type));
 #endif
 }
 
@@ -155,11 +156,15 @@ void ADoor::SetConnectingRooms(URoom* _RoomA, URoom* _RoomB)
 	//UE_LOG(LogTemp, Log, TEXT("[Door %s] Set index room A: %d | B: %d"), *GetName(), IndexRoomA, IndexRoomB);
 }
 
-void ADoor::DrawDebug(UWorld* World, FIntVector DoorCell, EDoorDirection DoorRot, FTransform Transform, bool includeOffset, bool isConnected, bool isValid)
+FVector ADoor::GetSize(const UDoorType* DoorType)
+{
+	return DoorType ? DoorType->GetSize() : URoom::DoorSize();
+}
+
+void ADoor::DrawDebug(UWorld* World, FVector DoorSize, FIntVector DoorCell, EDoorDirection DoorRot, FTransform Transform, bool includeOffset, bool isConnected, bool isValid)
 {
 	if (URoom::DrawDebug())
 	{
-		FVector DoorSize = URoom::DoorSize();
 		FQuat DoorRotation = Transform.GetRotation() * ToQuaternion(!DoorRot ? EDoorDirection::North : DoorRot);
 		FVector DoorPosition = Transform.TransformPosition(URoom::GetRealDoorPosition(DoorCell, DoorRot, includeOffset) + FVector(0, 0, DoorSize.Z * 0.5f));
 

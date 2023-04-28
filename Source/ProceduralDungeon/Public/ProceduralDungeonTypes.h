@@ -84,7 +84,7 @@ enum class ESeedType : uint8
 	NbType = 3 				UMETA(Hidden)
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FDoorDef
 {
 	GENERATED_BODY()
@@ -94,12 +94,21 @@ public:
 	FIntVector Position;
 	UPROPERTY(EditAnywhere, Category = "DoorDef")
 	EDoorDirection Direction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef", meta = (DisplayThumbnail = false))
+	class UDoorType* Type;
 
 public:
 	bool operator==(const FDoorDef& Other) const
 	{
 		return Position == Other.Position && Direction == Other.Direction;
 	}
+
+	static bool AreCompatible(const FDoorDef& A, const FDoorDef& B)
+	{
+		return A.Type == B.Type;
+	}
+
+	FVector GetDoorSize() const;
 
 	FString ToString() const
 	{

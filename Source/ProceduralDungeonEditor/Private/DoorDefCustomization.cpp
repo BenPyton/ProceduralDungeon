@@ -37,6 +37,7 @@ void FDoorDefCustomization::GetSortedChildren(TSharedRef<IPropertyHandle> Struct
 {
 	TSharedPtr<IPropertyHandle> PositionProp = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDoorDef, Position));
 	TSharedPtr<IPropertyHandle> DirectionProp = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDoorDef, Direction));
+	TSharedPtr<IPropertyHandle> TypeProp = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDoorDef, Type));
 
 	// ============= Copied from VectorStructCustomization class (private in engine so can't inherit from it) ============================
 	// Only replaced the StructPropertyHandle to the PositionProp
@@ -77,12 +78,19 @@ void FDoorDefCustomization::GetSortedChildren(TSharedRef<IPropertyHandle> Struct
 	// ================ Add Direction property in the children ===================
 
 	OutChildren.Add(DirectionProp.ToSharedRef());
+	OutChildren.Add(TypeProp.ToSharedRef());
 }
 
 TSharedRef<SWidget> FDoorDefCustomization::MakeChildWidget(TSharedRef<IPropertyHandle>& StructurePropertyHandle, TSharedRef<IPropertyHandle>& PropertyHandle)
 {
 	const FFieldClass* PropertyClass = PropertyHandle->GetPropertyClass();
 	if (PropertyClass == FEnumProperty::StaticClass())
+		return PropertyHandle->CreatePropertyValueWidget();
+
+	if (PropertyClass == FStructProperty::StaticClass())
+		return PropertyHandle->CreatePropertyValueWidget();
+
+	if (PropertyClass == FObjectProperty::StaticClass())
 		return PropertyHandle->CreatePropertyValueWidget();
 
 	return FMathStructCustomization::MakeChildWidget(StructurePropertyHandle, PropertyHandle);

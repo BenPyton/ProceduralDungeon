@@ -35,6 +35,16 @@ URoomData::URoomData()
 	RandomDoor = true;
 }
 
+bool URoomData::HasCompatibleDoor(const FDoorDef& DoorData) const
+{
+	for (int i = 0; i < Doors.Num(); ++i)
+	{
+		if (FDoorDef::AreCompatible(Doors[i], DoorData))
+			return true;
+	}
+	return false;
+}
+
 FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
 {
 	FVector Center = Transform.TransformPosition(0.5f * URoom::Unit() * FVector(Size - FIntVector(1, 1, 0)));

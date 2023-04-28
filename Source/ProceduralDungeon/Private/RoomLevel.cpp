@@ -144,11 +144,12 @@ void ARoomLevel::Tick(float DeltaTime)
 		DrawDebugBox(GetWorld(), DungeonTransform.TransformPosition(Bounds.Center), Bounds.Extent, DungeonTransform.GetRotation(), IsPlayerInside() ? FColor::Green : FColor::Red);
 
 		// Doors
-		FVector DoorSize = URoom::DoorSize();
 		for (int i = 0; i < Data->GetNbDoor(); i++)
 		{
-			bool isConnected = Room == nullptr || Room->IsConnected(i);
-			ADoor::DrawDebug(GetWorld(), Data->Doors[i].Position, Data->Doors[i].Direction, RoomTransform * DungeonTransform, true, isConnected, Data->IsDoorValid(i));
+			const bool isConnected = Room == nullptr || Room->IsConnected(i);
+			const bool isDoorValid = Data->IsDoorValid(i);
+			const FDoorDef& Door = Data->Doors[i];
+			ADoor::DrawDebug(GetWorld(), Door.GetDoorSize(), Door.Position, Door.Direction, RoomTransform * DungeonTransform, true, isConnected, isDoorValid);
 		}
 	}
 #endif

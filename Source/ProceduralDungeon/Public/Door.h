@@ -30,6 +30,7 @@
 #include "Door.generated.h"
 
 class URoom;
+class UDoorType;
 
 UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADoor : public AActor
@@ -57,6 +58,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Door")
 	void Lock(bool lock) { bShouldBeLocked = lock; }
+
+	const UDoorType* GetDoorType() const { return Type; }
 
 protected:
 	UFUNCTION()
@@ -106,6 +109,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Door", meta = (DisplayName = "Always Unlocked"))
 	bool bAlwaysUnlocked = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door", meta = (DisplayName = "Door Type"))
+	UDoorType* Type;
+
 private:
 	UFUNCTION() // Needed macro for replication to work
 	void OnRep_IndexRoomA();
@@ -114,5 +120,8 @@ private:
 	void OnRep_IndexRoomB();
 
 public:
-	static void DrawDebug(UWorld* World, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity, bool includeOffset = false, bool isConnected = true, bool isValid = true);
+	// Returns the door size from the door type asset,
+	// or the default door size in plugin's settings if no door type defined.
+	static FVector GetSize(const UDoorType* DoorType);
+	static void DrawDebug(UWorld* World, FVector DoorSize, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity, bool includeOffset = false, bool isConnected = true, bool isValid = true);
 };

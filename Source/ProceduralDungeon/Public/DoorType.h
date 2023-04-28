@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,42 +26,25 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "ProceduralDungeonTypes.h"
-#include "RoomData.generated.h"
+#include "DoorType.generated.h"
 
-UCLASS()
-class PROCEDURALDUNGEON_API URoomData : public UPrimaryDataAsset
+UCLASS(BlueprintType)
+class PROCEDURALDUNGEON_API UDoorType : public UDataAsset
 {
 	GENERATED_BODY()
-
-	friend class UProceduralLevelStreaming;
-
-private:
-	UPROPERTY(EditAnywhere, Category = "Level")
-	TSoftObjectPtr<UWorld> Level;
-
+	
 public:
-	UPROPERTY(EditAnywhere, Category = "Door")
-	bool RandomDoor;
+	UDoorType();
+	FVector GetSize() const { return Size; }
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Doors")
-	TArray<FDoorDef> Doors;
+protected:
+	// Size of the door bounds, only used by the debug draw as a visual hint for designers and artists.
+	UPROPERTY(EditInstanceOnly, Category = "Door Type", meta = (ClampMin = 0))
+	FVector Size;
 
-	UPROPERTY(EditAnywhere, Category = "Room", meta = (ClampMin = 1))
-	FIntVector Size;
-
-public:
-	URoomData();
-
-	int GetNbDoor() const { return Doors.Num(); }
-
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Room Data")
-	bool HasCompatibleDoor(const FDoorDef& DoorData) const;
-
-	FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
-
-#if WITH_EDITOR
-	bool IsDoorValid(int DoorIndex) const;
-	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;
+#if WITH_EDITORONLY_DATA
+	// Just a description, used nowhere.
+	UPROPERTY(EditInstanceOnly, Category = "Door Type")
+	FText Description;
 #endif
 };
