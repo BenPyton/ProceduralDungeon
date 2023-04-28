@@ -205,7 +205,7 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 		// Don't instantiate door if it's the parent
 		if (!Room->IsDoorInstanced(i))
 		{
-			TSubclassOf<ADoor> DoorClass = ChooseDoor(Room->GetRoomData(), nullptr != r ? r->GetRoomData() : nullptr);
+			TSubclassOf<ADoor> DoorClass = ChooseDoor(Room->GetRoomData(), nullptr != r ? r->GetRoomData() : nullptr, Room->GetRoomData()->Doors[i].Type);
 
 			if (nullptr != DoorClass)
 			{
@@ -244,29 +244,49 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
 		if (ParentRoom.IsConnected(i))
 			continue;
 
+		// Get the door definition in its world position and direction
+		FDoorDef doorDef = ParentRoom.GetRoomData()->Doors[i];
+		doorDef.Position = ParentRoom.RoomToWorld(doorDef.Position);
+		doorDef.Direction = ParentRoom.RoomToWorld(doorDef.Direction);
+		const FIntVector newRoomPos = doorDef.Position + ToIntVector(doorDef.Direction);
+		const EDoorDirection newRoomDoorDir = ~doorDef.Direction;
+
 		int nbTries = MaxRoomTry;
 		// Try to place a new room
 		do
 		{
 			nbTries--;
-			URoomData* def = ChooseNextRoomData(ParentRoom.GetRoomData());
-			if (!IsValid(def))
+			URoomData* roomDef = ChooseNextRoomData(ParentRoom.GetRoomData(), doorDef);
+			if (!IsValid(roomDef))
 			{
 				LogError("ChooseNextRoomData returned null.");
 				continue;
 			}
 
+			// Get all compatible door indices from the chosen room data
+			TArray<int> compatibleDoors;
+			for (int k = 0; k < roomDef->GetNbDoor(); ++k)
+			{
+				if (FDoorDef::AreCompatible(roomDef->Doors[k], doorDef))
+					compatibleDoors.Add(k);
+			}
+
+			if (compatibleDoors.Num() <= 0)
+			{
+				LogError("ChooseNextRoomData returned a room with no compatible door.");
+				continue;
+			}
+
 			// Create room from roomdef and set connections with current room
 			newRoom = NewObject<URoom>();
-			newRoom->Init(def, this, RoomList.Num());
-			int doorIndex = def->RandomDoor ? Random.RandRange(0, newRoom->GetRoomData()->GetNbDoor() - 1) : 0;
+			newRoom->Init(roomDef, this, RoomList.Num());
 
-			// Place the room at its world position with the correct rotation
-			EDoorDirection parentDoorDir = ParentRoom.GetDoorWorldOrientation(i);
-			FIntVector newRoomPos = ParentRoom.GetDoorWorldPosition(i) + ToIntVector(parentDoorDir);
-			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomPos, ~parentDoorDir);
+			int doorIndex = compatibleDoors[(roomDef->RandomDoor && compatibleDoors.Num() > 1) ? Random.RandRange(0, compatibleDoors.Num() - 1) : 0];
 
-			// Test if it fit in the place
+			// Place the room at its new position with the correct rotation
+			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomPos, newRoomDoorDir);
+
+			// Test if it fits in the place
 			if (!URoom::Overlap(*newRoom, RoomList))
 			{
 				// connect the doors to all possible existing rooms
@@ -516,13 +536,13 @@ URoomData* ADungeonGenerator::ChooseFirstRoomData_Implementation()
 	return nullptr;
 }
 
-URoomData* ADungeonGenerator::ChooseNextRoomData_Implementation(URoomData* CurrentRoom)
+URoomData* ADungeonGenerator::ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const FDoorDef& DoorData)
 {
 	LogError("Error: ChooseNextRoomData not implemented");
 	return nullptr;
 }
 
-TSubclassOf<ADoor> ADungeonGenerator::ChooseDoor_Implementation(URoomData* CurrentRoom, URoomData* NextRoom)
+TSubclassOf<ADoor> ADungeonGenerator::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType)
 {
 	LogError("Error: ChooseDoor not implemented");
 	return nullptr;
@@ -579,6 +599,18 @@ URoomData* ADungeonGenerator::GetRandomRoomData(TArray<URoomData*> RoomDataArray
 {
 	int n = Random.RandRange(0, RoomDataArray.Num() - 1);
 	return RoomDataArray[n];
+}
+
+void ADungeonGenerator::GetCompatibleRoomData(bool& bSuccess, TArray<URoomData*>& CompatibleRooms, const TArray<URoomData*>& RoomDataArray, const FDoorDef& DoorData)
+{
+	for (URoomData* RoomData : RoomDataArray)
+	{
+		if (RoomData->HasCompatibleDoor(DoorData))
+		{
+			CompatibleRooms.Add(RoomData);
+			bSuccess = true;
+		}
+	}
 }
 
 URoom* ADungeonGenerator::GetRoomAt(FIntVector RoomCell)
