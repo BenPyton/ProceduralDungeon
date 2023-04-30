@@ -44,10 +44,20 @@ bool URoomData::HasCompatibleDoor(const FDoorDef& DoorData) const
 
 FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
 {
-	FVector Center = Transform.TransformPosition(0.5f * URoom::Unit() * FVector(Size - FIntVector(1, 1, 0)));
-	FVector Extent = Transform.TransformVector(0.5f * URoom::Unit() * FVector(Size));
-
+	FBoxMinAndMax LocalBounds = GetIntBounds();
+	FVector Center = Transform.TransformPosition(0.5f * URoom::Unit() * FVector(LocalBounds.Min + LocalBounds.Max - FIntVector(1, 1, 0)));
+	FVector Extent = Transform.TransformVector(0.5f * URoom::Unit() * FVector(LocalBounds.GetSize()));
 	return FBoxCenterAndExtent(Center, Extent.GetAbs());
+}
+
+FIntVector URoomData::GetSize() const
+{
+	return GetIntBounds().GetSize();
+}
+
+FBoxMinAndMax URoomData::GetIntBounds() const
+{
+	return FBoxMinAndMax(FirstPoint, SecondPoint);
 }
 
 #if WITH_EDITOR
@@ -58,23 +68,26 @@ bool URoomData::IsDoorValid(int DoorIndex) const
 
 	const FDoorDef& DoorDef = Doors[DoorIndex];
 
+	FIntVector Min = IntVector::Min(FirstPoint, SecondPoint);
+	FIntVector Max = IntVector::Max(FirstPoint, SecondPoint);
+
 	// Check if door is in the room's bounds
-	if ((DoorDef.Position.X < 0 || DoorDef.Position.X >= Size.X)
-		|| (DoorDef.Position.Y < 0 || DoorDef.Position.Y >= Size.Y)
-		|| (DoorDef.Position.Z < 0 || DoorDef.Position.Z >= Size.Z))
+	if ((DoorDef.Position.X < Min.X || DoorDef.Position.X >= Max.X)
+		|| (DoorDef.Position.Y < Min.Y || DoorDef.Position.Y >= Max.Y)
+		|| (DoorDef.Position.Z < Min.Z || DoorDef.Position.Z >= Max.Z))
 		return false;
 	
 	// Check if the door is on the edge of the room bounds
 	switch (DoorDef.Direction)
 	{
 	case EDoorDirection::South:
-		return DoorDef.Position.X == 0;
+		return DoorDef.Position.X == Min.X;
 	case EDoorDirection::North:
-		return DoorDef.Position.X == (Size.X - 1);
+		return DoorDef.Position.X == (Max.X - 1);
 	case EDoorDirection::West:
-		return DoorDef.Position.Y == 0;
+		return DoorDef.Position.Y == Min.Y;
 	case EDoorDirection::East:
-		return DoorDef.Position.Y == (Size.Y - 1);
+		return DoorDef.Position.Y == (Max.Y - 1);
 	default:
 		checkNoEntry();
 		return false;
@@ -94,22 +107,39 @@ EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 		Result = EDataValidationResult::Invalid;
 	}
 
-	for (int i = 0; i < Doors.Num(); ++i)
+	// Check if no room size is 0 on any axis
+	if (FirstPoint.X == SecondPoint.X 
+		|| FirstPoint.Y == SecondPoint.Y 
+		|| FirstPoint.Z == SecondPoint.Z)
 	{
-		// Check if all doors are valid
-		if (!IsDoorValid(i))
-		{
-			ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has invalid door: %s."), *GetName(), *Doors[i].ToString())));
-			Result = EDataValidationResult::Invalid;
-		}
+		ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has a size of 0 on at least one axis."), *GetName())));
+		Result = EDataValidationResult::Invalid;
+	}
 
-		// Check if there are no duplicated doors
-		for (int k = i + 1; k < Doors.Num(); ++k)
+	if (Doors.Num() <= 0)
+	{
+		ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" should have at least one door."), *GetName())));
+		Result = EDataValidationResult::Invalid;
+	}
+	else
+	{
+		for (int i = 0; i < Doors.Num(); ++i)
 		{
-			if (Doors[i] == Doors[k])
+			// Check if all doors are valid
+			if (!IsDoorValid(i))
 			{
-				ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has duplicated doors: %s."), *GetName(), *Doors[i].ToString())));
+				ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has invalid door: %s."), *GetName(), *Doors[i].ToString())));
 				Result = EDataValidationResult::Invalid;
+			}
+
+			// Check if there are no duplicated doors
+			for (int k = i + 1; k < Doors.Num(); ++k)
+			{
+				if (Doors[i] == Doors[k])
+				{
+					ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has duplicated doors: %s."), *GetName(), *Doors[i].ToString())));
+					Result = EDataValidationResult::Invalid;
+				}
 			}
 		}
 	}
