@@ -172,3 +172,48 @@ FVector FDoorDef::GetDoorSize() const
 {
 	return ADoor::GetSize(Type);
 }
+
+FIntVector IntVector::Min(const FIntVector& A, const FIntVector& B)
+{
+	return FIntVector(FMath::Min(A.X, B.X), FMath::Min(A.Y, B.Y), FMath::Min(A.Z, B.Z));
+}
+
+FIntVector IntVector::Max(const FIntVector& A, const FIntVector& B)
+{
+	return FIntVector(FMath::Max(A.X, B.X), FMath::Max(A.Y, B.Y), FMath::Max(A.Z, B.Z));
+}
+
+FBoxMinAndMax operator+(const FBoxMinAndMax& Box, const FIntVector& X)
+{
+	FBoxMinAndMax NewBox(Box);
+	NewBox += X;
+	return NewBox;
+}
+
+FBoxMinAndMax operator-(const FBoxMinAndMax& Box, const FIntVector& X)
+{
+	FBoxMinAndMax NewBox(Box);
+	NewBox -= X;
+	return NewBox;
+}
+
+FBoxMinAndMax Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot)
+{
+	FIntVector Compensation = FIntVector::ZeroValue;
+	switch (Rot)
+	{
+	case EDoorDirection::East:
+		Compensation.X = 1;
+		break;
+	case EDoorDirection::West:
+		Compensation.Y = 1;
+		break;
+	case EDoorDirection::South:
+		Compensation.X = 1;
+		Compensation.Y = 1;
+		break;
+	default:
+		break;
+	}
+	return FBoxMinAndMax(Rotate(Box.Min, Rot) + Compensation, Rotate(Box.Max, Rot) + Compensation);
+}
