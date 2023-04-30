@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2021, 2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,8 +47,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Doors")
 	TArray<FDoorDef> Doors {FDoorDef()};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Room", meta = (ClampMin = 1))
-	FIntVector Size {1};
+	UPROPERTY(EditAnywhere, Category = "Room")
+	FIntVector FirstPoint {0};
+
+	UPROPERTY(EditAnywhere, Category = "Room")
+	FIntVector SecondPoint {1};
+
 
 public:
 	URoomData();
@@ -59,7 +63,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Room Data")
 	bool HasCompatibleDoor(const FDoorDef& DoorData) const;
 
+	FIntVector GetSize() const;
 	FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
+	FBoxMinAndMax GetIntBounds() const;
 
 #if WITH_EDITOR
 	bool IsDoorValid(int DoorIndex) const;

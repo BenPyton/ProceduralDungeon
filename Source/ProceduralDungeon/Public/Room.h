@@ -112,18 +112,21 @@ public:
 	int GetOtherDoorIndex(int DoorIndex);
 	void TryConnectToExistingDoors(TArray<URoom*>& RoomList);
 
-	FIntVector WorldToRoom(FIntVector WorldPos);
-	FIntVector RoomToWorld(FIntVector RoomPos);
-	EDoorDirection WorldToRoom(EDoorDirection WorldRot);
-	EDoorDirection RoomToWorld(EDoorDirection RoomRot);
+	FIntVector WorldToRoom(const FIntVector& WorldPos) const;
+	FIntVector RoomToWorld(const FIntVector& RoomPos) const;
+	EDoorDirection WorldToRoom(const EDoorDirection& WorldRot) const;
+	EDoorDirection RoomToWorld(const EDoorDirection& RoomRot) const;
+	FBoxMinAndMax WorldToRoom(const FBoxMinAndMax& WorldBox) const;
+	FBoxMinAndMax RoomToWorld(const FBoxMinAndMax& RoomBox) const;
 	void SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot);
 	void SetPositionFromDoor(int DoorIndex, FIntVector WorldPos);
 	void SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot);
 	bool IsOccupied(FIntVector Cell);
 
+	FTransform GetTransform() const;
 	FBoxCenterAndExtent GetBounds() const;
 	FBoxCenterAndExtent GetLocalBounds() const;
-	FTransform GetTransform() const;
+	FBoxMinAndMax GetIntBounds() const;
 
 	// AABB Overlapping
 	static bool Overlap(URoom& A, URoom& B);

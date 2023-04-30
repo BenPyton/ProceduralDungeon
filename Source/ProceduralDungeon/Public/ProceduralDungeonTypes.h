@@ -118,3 +118,56 @@ public:
 	}
 };
 
+namespace IntVector
+{
+	// Returns the component-wise minimum of A and B
+	FIntVector Min(const FIntVector& A, const FIntVector& B);
+
+	// Returns the component-wise maximum of A and B
+	FIntVector Max(const FIntVector& A, const FIntVector& B);
+}
+
+struct FBoxMinAndMax
+{
+public:
+	FIntVector Min {0};
+	FIntVector Max {0};
+
+public:
+	FBoxMinAndMax() = default;
+	FBoxMinAndMax(const FIntVector& A, const FIntVector& B)
+	{
+		Min = IntVector::Min(A, B);
+		Max = IntVector::Max(A, B);
+	}
+
+	FIntVector GetSize() const
+	{
+		return Max - Min;
+	}
+
+	static bool Overlap(const FBoxMinAndMax& A, const FBoxMinAndMax& B)
+	{
+		return (A.Max.X > B.Min.X && A.Min.X < B.Max.X)
+			&& (A.Max.Y > B.Min.Y && A.Min.Y < B.Max.Y)
+			&& (A.Max.Z > B.Min.Z && A.Min.Z < B.Max.Z);
+	}
+
+	FBoxMinAndMax& operator+=(const FIntVector& X)
+	{
+		Min += X;
+		Max += X;
+		return *this;
+	}
+
+	FBoxMinAndMax& operator-=(const FIntVector& X)
+	{
+		Min -= X;
+		Max -= X;
+		return *this;
+	}
+
+	friend static FBoxMinAndMax operator+(const FBoxMinAndMax& Box, const FIntVector& X);
+	friend static FBoxMinAndMax operator-(const FBoxMinAndMax& Box, const FIntVector& X);
+	friend static FBoxMinAndMax Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot);
+};

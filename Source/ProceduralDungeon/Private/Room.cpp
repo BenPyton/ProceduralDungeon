@@ -232,24 +232,34 @@ int URoom::GetOtherDoorIndex(int DoorIndex)
 	return Connections[DoorIndex].OtherDoorIndex;
 }
 
-FIntVector URoom::WorldToRoom(FIntVector WorldPos)
+FIntVector URoom::WorldToRoom(const FIntVector& WorldPos) const
 {
 	return Rotate(WorldPos - Position, -Direction);
 }
 
-FIntVector URoom::RoomToWorld(FIntVector RoomPos)
+FIntVector URoom::RoomToWorld(const FIntVector& RoomPos) const
 {
 	return Rotate(RoomPos, Direction) + Position;
 }
 
-EDoorDirection URoom::WorldToRoom(EDoorDirection WorldRot)
+EDoorDirection URoom::WorldToRoom(const EDoorDirection& WorldRot) const
 {
 	return WorldRot - Direction;
 }
 
-EDoorDirection URoom::RoomToWorld(EDoorDirection RoomRot)
+EDoorDirection URoom::RoomToWorld(const EDoorDirection& RoomRot) const
 {
 	return RoomRot + Direction;
+}
+
+FBoxMinAndMax URoom::WorldToRoom(const FBoxMinAndMax& WorldBox) const
+{
+	return Rotate(WorldBox - Position, -Direction);
+}
+
+FBoxMinAndMax URoom::RoomToWorld(const FBoxMinAndMax& RoomBox) const
+{
+	return Rotate(RoomBox, Direction) + Position;
 }
 
 void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)
@@ -261,22 +271,23 @@ void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)
 void URoom::SetPositionFromDoor(int DoorIndex, FIntVector WorldPos)
 {
 	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
-	Position = WorldPos - RoomToWorld(RoomData->Doors[DoorIndex].Position);
+	Position = WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction);
 }
 
 void URoom::SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot)
 {
 	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
 	Direction = WorldRot - RoomData->Doors[DoorIndex].Direction;
-	Position = WorldPos - RoomToWorld(RoomData->Doors[DoorIndex].Position);
+	Position = WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction);
 }
 
 bool URoom::IsOccupied(FIntVector Cell)
 {
 	FIntVector local = WorldToRoom(Cell);
-	return local.X >= 0 && local.X < RoomData->Size.X
-		&& local.Y >= 0 && local.Y < RoomData->Size.Y
-		&& local.Z >= 0 && local.Z < RoomData->Size.Z;
+	FBoxMinAndMax Bounds = RoomData->GetIntBounds();
+	return local.X >= Bounds.Min.X && local.X < Bounds.Max.X
+		&& local.Y >= Bounds.Min.Y && local.Y < Bounds.Max.Y
+		&& local.Z >= Bounds.Min.Z && local.Z < Bounds.Max.Z;
 }
 
 void URoom::TryConnectToExistingDoors(TArray<URoom*>& RoomList)
@@ -312,6 +323,12 @@ FBoxCenterAndExtent URoom::GetLocalBounds() const
 {
 	check(IsValid(RoomData));
 	return RoomData->GetBounds();
+}
+
+FBoxMinAndMax URoom::GetIntBounds() const
+{
+	check(IsValid(RoomData));
+	return RoomToWorld(RoomData->GetIntBounds());
 }
 
 FTransform URoom::GetTransform() const
@@ -354,36 +371,12 @@ void URoom::SetPlayerInside(bool PlayerInside)
 	bPlayerInside = PlayerInside;
 }
 
-FIntVector Max(const FIntVector& A, const FIntVector& B)
-{
-	return FIntVector(FMath::Max(A.X, B.X), FMath::Max(A.Y, B.Y), FMath::Max(A.Z, B.Z));
-}
-
-FIntVector Min(const FIntVector& A, const FIntVector& B)
-{
-	return FIntVector(FMath::Min(A.X, B.X), FMath::Min(A.Y, B.Y), FMath::Min(A.Z, B.Z));
-}
-
 // AABB Overlapping
 bool URoom::Overlap(URoom& A, URoom& B)
 {
-	FIntVector A_firstPoint = A.Position;
-	FIntVector B_firstPoint = B.Position;
-	FIntVector A_secondPoint = A.RoomToWorld(A.RoomData->Size - FIntVector(1, 1, 1));
-	FIntVector B_secondPoint = B.RoomToWorld(B.RoomData->Size - FIntVector(1, 1, 1));
-
-	FIntVector A_min = Min(A_firstPoint, A_secondPoint);
-	FIntVector A_max = Max(A_firstPoint, A_secondPoint);
-	FIntVector B_min = Min(B_firstPoint, B_secondPoint);
-	FIntVector B_max = Max(B_firstPoint, B_secondPoint);
-
-	if (A_min.X > B_max.X) return false;
-	if (A_max.X < B_min.X) return false;
-	if (A_min.Y > B_max.Y) return false;
-	if (A_max.Y < B_min.Y) return false;
-	if (A_min.Z > B_max.Z) return false;
-	if (A_max.Z < B_min.Z) return false;
-	return true;
+	FBoxMinAndMax BoxA = A.GetIntBounds();
+	FBoxMinAndMax BoxB = B.GetIntBounds();
+	return FBoxMinAndMax::Overlap(BoxA, BoxB);
 }
 
 bool URoom::Overlap(URoom& Room, TArray<URoom*>& RoomList)
