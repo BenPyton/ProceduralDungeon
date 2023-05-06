@@ -22,27 +22,40 @@
  * SOFTWARE.
  */
 
-#pragma once
-
-#include "CoreMinimal.h"
+#include "AssetTypeActions_RoomData.h"
+#include "RoomData.h"
 #include "Modules/ModuleManager.h"
-#include "AssetTypeCategories.h"
+#include "ProceduralDungeonEditor.h"
 
-class FProceduralDungeonEditorModule : public IModuleInterface
+#define LOCTEXT_NAMESPACE "ProceduralDungeonEditor"
+
+FAssetTypeActions_RoomData::FAssetTypeActions_RoomData()
 {
-public:
-	// ~BEGIN IModuleInterface
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-	// ~END IModuleInterface
+}
 
-	FORCEINLINE EAssetTypeCategories::Type GetAssetTypeCategory() const { return AssetTypeCategory; }
+FText FAssetTypeActions_RoomData::GetName() const
+{
+	return NSLOCTEXT("AssetTypeActions", "AssetTypeActions_RoomData", "Room Data");
+}
 
-private:
-	void RegisterSettings();
-	void UnregisterSettings();
-	bool HandleSettingsSaved();
+UClass* FAssetTypeActions_RoomData::GetSupportedClass() const
+{
+	return URoomData::StaticClass();
+}
 
-private:
-	EAssetTypeCategories::Type AssetTypeCategory {EAssetTypeCategories::Type::None};
-};
+FColor FAssetTypeActions_RoomData::GetTypeColor() const
+{
+	return FColor(255, 50, 128);
+}
+
+uint32 FAssetTypeActions_RoomData::GetCategories()
+{
+	return EAssetTypeCategories::None; // Defined in the Factory
+}
+
+bool FAssetTypeActions_RoomData::HasActions(const TArray<UObject*>& InObjects) const
+{
+	return false;
+}
+
+#undef LOCTEXT_NAMESPACE

@@ -26,11 +26,30 @@
 #include "ProceduralDungeonEdLog.h"
 #include "DoorDefCustomization.h"
 #include "ProceduralDungeonTypes.h"
+#include "IAssetTools.h"
+#include "AssetToolsModule.h"
+#include "AssetTypeActions/AssetTypeActions_RoomData.h"
+#include "AssetTypeActions/AssetTypeActions_DoorType.h"
+#include "Developer/Settings/Public/ISettingsModule.h"
+#include "Developer/Settings/Public/ISettingsSection.h"
+#include "ProceduralDungeonEditorSettings.h"
 
 #define LOCTEXT_NAMESPACE "FProceduralDungeonEditorModule"
 
 void FProceduralDungeonEditorModule::StartupModule()
 {
+	RegisterSettings();
+
+	// Register assets in the "Procedural Dungeon" category
+	{
+		IAssetTools& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+		AssetTypeCategory = AssetToolsModule.RegisterAdvancedAssetCategory(FName(TEXT("ProceduralDungeon")), LOCTEXT("ProceduralDungeonCategory", "Procedural Dungeon"));
+		TSharedPtr<FAssetTypeActions_RoomData> RoomDataAction = MakeShareable(new FAssetTypeActions_RoomData());
+		AssetToolsModule.RegisterAssetTypeActions(RoomDataAction.ToSharedRef());
+		TSharedPtr<FAssetTypeActions_DoorType> DoorTypeAction = MakeShareable(new FAssetTypeActions_DoorType());
+		AssetToolsModule.RegisterAssetTypeActions(DoorTypeAction.ToSharedRef());
+	}
+
 	// Register detail customizations
 	{
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
@@ -47,6 +66,52 @@ void FProceduralDungeonEditorModule::ShutdownModule()
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 		PropertyModule.UnregisterCustomPropertyTypeLayout(FDoorDef::StaticStruct()->GetFName());
 	}
+	
+	if (UObjectInitialized())
+	{
+		UnregisterSettings();
+	}
+}
+
+void FProceduralDungeonEditorModule::RegisterSettings()
+{
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		// Register the settings
+		ISettingsSectionPtr SettingsSection = SettingsModule->RegisterSettings("Project", "Editor", "Procedural Dungeon",
+			LOCTEXT("ProceduralDungeonEditorSettingsName", "Procedural Dungeon"),
+			LOCTEXT("ProceduralDungeonEditorSettingsDescription", "Configuration for the Procedural Dungeon plugin"),
+			GetMutableDefault<UProceduralDungeonEditorSettings>()
+		);
+
+		if (SettingsSection.IsValid())
+		{
+			SettingsSection->OnModified().BindRaw(this, &FProceduralDungeonEditorModule::HandleSettingsSaved);
+		}
+	}
+}
+
+void FProceduralDungeonEditorModule::UnregisterSettings()
+{
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->UnregisterSettings("Project", "Plugins", "Procedural Dungeon");
+	}
+}
+
+bool FProceduralDungeonEditorModule::HandleSettingsSaved()
+{
+	UProceduralDungeonEditorSettings* Settings = GetMutableDefault<UProceduralDungeonEditorSettings>();
+	bool ResaveSettings = false;
+
+	// Here check and resave if any changes have been made
+
+	if (ResaveSettings)
+	{
+		Settings->SaveConfig();
+	}
+
+	return true;
 }
 
 #undef LOCTEXT_NAMESPACE

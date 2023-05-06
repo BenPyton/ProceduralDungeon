@@ -25,24 +25,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
-#include "AssetTypeCategories.h"
+#include "Factories/Factory.h"
+#include "RoomDataFactory.generated.h"
 
-class FProceduralDungeonEditorModule : public IModuleInterface
+UCLASS()
+class URoomDataFactory : public UFactory
 {
+	GENERATED_BODY()
+	
 public:
-	// ~BEGIN IModuleInterface
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-	// ~END IModuleInterface
+	URoomDataFactory();
 
-	FORCEINLINE EAssetTypeCategories::Type GetAssetTypeCategory() const { return AssetTypeCategory; }
+	virtual uint32 GetMenuCategories() const override;
+	virtual bool ConfigureProperties() override;
+	virtual UObject* FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn);
 
-private:
-	void RegisterSettings();
-	void UnregisterSettings();
-	bool HandleSettingsSaved();
-
-private:
-	EAssetTypeCategories::Type AssetTypeCategory {EAssetTypeCategories::Type::None};
+protected:
+	TSubclassOf<class URoomData> RoomDataClass;
 };

@@ -64,7 +64,7 @@ public:
 	bool HasCompatibleDoor(const FDoorDef& DoorData) const;
 
 	FIntVector GetSize() const;
-	FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
+	class FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
 	FBoxMinAndMax GetIntBounds() const;
 
 #if WITH_EDITOR

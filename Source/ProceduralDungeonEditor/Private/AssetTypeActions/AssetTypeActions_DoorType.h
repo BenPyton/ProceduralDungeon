@@ -25,24 +25,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
-#include "AssetTypeCategories.h"
+#include "AssetTypeActions_Base.h"
 
-class FProceduralDungeonEditorModule : public IModuleInterface
+class FAssetTypeActions_DoorType : public FAssetTypeActions_Base
 {
 public:
-	// ~BEGIN IModuleInterface
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-	// ~END IModuleInterface
+	FAssetTypeActions_DoorType();
 
-	FORCEINLINE EAssetTypeCategories::Type GetAssetTypeCategory() const { return AssetTypeCategory; }
-
-private:
-	void RegisterSettings();
-	void UnregisterSettings();
-	bool HandleSettingsSaved();
-
-private:
-	EAssetTypeCategories::Type AssetTypeCategory {EAssetTypeCategories::Type::None};
+	// ~BEGIN FAssetTypeActions_Base
+	virtual FText GetName() const override;
+	virtual UClass * GetSupportedClass() const override;
+	virtual FColor GetTypeColor() const override;
+	virtual uint32 GetCategories() override;
+	virtual bool HasActions(const TArray<UObject*>& InObjects) const override;
+	// ~END FAssetTypeActions_Base
 };
