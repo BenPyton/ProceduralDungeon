@@ -25,6 +25,7 @@
 #include "RoomData.h"
 #include "RoomLevel.h"
 #include "ProceduralDungeonTypes.h"
+#include "Math/GenericOctree.h" // FBoxCenterAndExtent
 #include "Room.h" // Access to URoom static values (like URoom::Unit)
 
 URoomData::URoomData()

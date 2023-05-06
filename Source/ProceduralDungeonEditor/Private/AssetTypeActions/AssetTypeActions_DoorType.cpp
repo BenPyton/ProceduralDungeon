@@ -22,27 +22,40 @@
  * SOFTWARE.
  */
 
-#pragma once
-
-#include "CoreMinimal.h"
+#include "AssetTypeActions_DoorType.h"
+#include "DoorType.h"
 #include "Modules/ModuleManager.h"
-#include "AssetTypeCategories.h"
+#include "ProceduralDungeonEditor.h"
 
-class FProceduralDungeonEditorModule : public IModuleInterface
+#define LOCTEXT_NAMESPACE "ProceduralDungeonEditor"
+
+FAssetTypeActions_DoorType::FAssetTypeActions_DoorType()
 {
-public:
-	// ~BEGIN IModuleInterface
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-	// ~END IModuleInterface
+}
 
-	FORCEINLINE EAssetTypeCategories::Type GetAssetTypeCategory() const { return AssetTypeCategory; }
+FText FAssetTypeActions_DoorType::GetName() const
+{
+	return NSLOCTEXT("AssetTypeActions", "AssetTypeActions_DoorType", "Door Type");
+}
 
-private:
-	void RegisterSettings();
-	void UnregisterSettings();
-	bool HandleSettingsSaved();
+UClass* FAssetTypeActions_DoorType::GetSupportedClass() const
+{
+	return UDoorType::StaticClass();
+}
 
-private:
-	EAssetTypeCategories::Type AssetTypeCategory {EAssetTypeCategories::Type::None};
-};
+FColor FAssetTypeActions_DoorType::GetTypeColor() const
+{
+	return FColor(255, 50, 128);
+}
+
+uint32 FAssetTypeActions_DoorType::GetCategories()
+{
+	return EAssetTypeCategories::None; // Defined in the Factory
+}
+
+bool FAssetTypeActions_DoorType::HasActions(const TArray<UObject*>& InObjects) const
+{
+	return false;
+}
+
+#undef LOCTEXT_NAMESPACE
