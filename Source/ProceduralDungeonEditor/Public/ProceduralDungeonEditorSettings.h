@@ -25,24 +25,27 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
-#include "AssetTypeCategories.h"
+#include "UObject/NoExportTypes.h"
+#include "RoomData.h"
+#include "ProceduralDungeonEditorSettings.generated.h"
 
-class FProceduralDungeonEditorModule : public IModuleInterface
+UCLASS(Config = Editor, DefaultConfig)
+class PROCEDURALDUNGEONEDITOR_API UProceduralDungeonEditorSettings : public UObject
 {
+	GENERATED_BODY()
+	
 public:
-	// ~BEGIN IModuleInterface
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-	// ~END IModuleInterface
+	UProceduralDungeonEditorSettings(const FObjectInitializer& ObjectInitializer);
 
-	FORCEINLINE EAssetTypeCategories::Type GetAssetTypeCategory() const { return AssetTypeCategory; }
+	// The default RoomData class to use in the class picker when creating a new RoomData asset.
+	UPROPERTY(Config, EditAnywhere, Category = "General", NoClear, meta = (AllowAbstract=false))
+	TSubclassOf<URoomData> DefaultRoomDataClass;
 
-private:
-	void RegisterSettings();
-	void UnregisterSettings();
-	bool HandleSettingsSaved();
+	// The class picker will not show if the default RoomData class has no child classes
+	UPROPERTY(Config, EditAnywhere, Category = "General", meta = (DisplayName = "Use Automatically Default Class If No Child"))
+	bool bUseDefaultIfNoChild;
 
-private:
-	EAssetTypeCategories::Type AssetTypeCategory {EAssetTypeCategories::Type::None};
+	// The class picker will show only the default RoomData and its children
+	//UPROPERTY(Config, EditAnywhere, Category = "General")
+	//bool bShowOnlyDefaultAndChildren;
 };

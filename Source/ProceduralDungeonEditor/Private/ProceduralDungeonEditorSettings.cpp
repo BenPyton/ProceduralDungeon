@@ -22,27 +22,12 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include "ProceduralDungeonEditorSettings.h"
 
-#include "CoreMinimal.h"
-#include "Modules/ModuleManager.h"
-#include "AssetTypeCategories.h"
-
-class FProceduralDungeonEditorModule : public IModuleInterface
+UProceduralDungeonEditorSettings::UProceduralDungeonEditorSettings(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-public:
-	// ~BEGIN IModuleInterface
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-	// ~END IModuleInterface
-
-	FORCEINLINE EAssetTypeCategories::Type GetAssetTypeCategory() const { return AssetTypeCategory; }
-
-private:
-	void RegisterSettings();
-	void UnregisterSettings();
-	bool HandleSettingsSaved();
-
-private:
-	EAssetTypeCategories::Type AssetTypeCategory {EAssetTypeCategories::Type::None};
-};
+	DefaultRoomDataClass = URoomData::StaticClass();
+	bUseDefaultIfNoChild = true;
+	//bShowOnlyDefaultAndChildren = false;
+}

@@ -14,7 +14,10 @@ public class ProceduralDungeonEditor : ModuleRules
 				"ProceduralDungeon",
 				"CoreUObject",
 				"PropertyEditor",
-				"DetailCustomizations"
+				"DetailCustomizations",
+				"UnrealEd",
+				"AssetTools",
+				"ClassViewer"
 			}
 		);
 	}
