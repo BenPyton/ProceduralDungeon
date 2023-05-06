@@ -95,6 +95,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "Generation Init"))
 	void OnGenerationInit_BP();
 
+	// Called when dungeon failed to generate a valid dungeon after exhausting all tries
+	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "Generation Failed"))
+	void OnGenerationFailed_BP();
+
 	// Called when the room NewRoom is added in the generation (but not spawned yet)
 	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "On Room Added"))
 	void OnRoomAdded_BP(URoomData* NewRoom);
@@ -155,6 +159,9 @@ public:
 	FGenerationEvent OnGenerationInitEvent;
 
 	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
+	FGenerationEvent OnGenerationFailedEvent;
+
+	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FRoomEvent OnRoomAddedEvent;
 
 protected:
@@ -186,6 +193,9 @@ protected:
 
 	UFUNCTION()
 	virtual void OnGenerationInit() {}
+
+	UFUNCTION()
+	virtual void OnGenerationFailed() {}
 
 	UFUNCTION()
 	virtual void OnRoomAdded(URoomData* NewRoom) {}
@@ -229,6 +239,7 @@ private:
 	void DispatchPreGeneration();
 	void DispatchPostGeneration();
 	void DispatchGenerationInit();
+	void DispatchGenerationFailed();
 	void DispatchRoomAdded(URoomData* NewRoom);
 
 public:

@@ -110,6 +110,7 @@ void ADungeonGenerator::BeginGeneration_Implementation(uint32 GenerationSeed)
 void ADungeonGenerator::CreateDungeon()
 {
 	int TriesLeft = MaxTry;
+	bool ValidDungeon = false;
 
 	// generate level until there IsValidDungeon return true
 	do {
@@ -161,7 +162,16 @@ void ADungeonGenerator::CreateDungeon()
 				roomStack.Push(room);
 			}
 		}
-	} while (TriesLeft > 0 && !IsValidDungeon());
+
+		ValidDungeon = IsValidDungeon();
+	} while (TriesLeft > 0 && !ValidDungeon);
+
+	if (!ValidDungeon)
+	{
+		LogError(FString::Printf(TEXT("Generated dungeon is not valid after %d tries. Make sure your IsValidDungeon function is correct."), MaxTry));
+		RoomList.Empty();
+		DispatchGenerationFailed();
+	}
 
 	// Update Octree
 	Octree->Destroy();
@@ -428,7 +438,7 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 			SetState(EGenerationState::Generation);
 		break;
 	case EGenerationState::Generation:
-		SetState(EGenerationState::Load);
+		SetState((RoomList.Num() > 0) ? EGenerationState::Load : EGenerationState::None);
 		break;
 	case EGenerationState::Load:
 		for (URoom* Room : RoomList)
@@ -548,6 +558,13 @@ void ADungeonGenerator::DispatchGenerationInit()
 	OnGenerationInit();
 	OnGenerationInit_BP();
 	OnGenerationInitEvent.Broadcast();
+}
+
+void ADungeonGenerator::DispatchGenerationFailed()
+{
+	OnGenerationFailed();
+	OnGenerationFailed_BP();
+	OnGenerationFailedEvent.Broadcast();
 }
 
 void ADungeonGenerator::DispatchRoomAdded(URoomData* NewRoom)
