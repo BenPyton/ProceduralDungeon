@@ -84,6 +84,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Continue To Add Room"))
 	bool ContinueToAddRoom();
 
+	// Initialize the room instances during the generation step
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator")
+	void InitializeDungeon(const class UDungeonGraph* Rooms);
+
 	// ===== Optional events =====
 
 	// Called after unloading previous dungeon but before generating next dungeon.

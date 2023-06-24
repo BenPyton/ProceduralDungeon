@@ -36,6 +36,17 @@ void UDungeonGraph::AddRoom(URoom* Room)
 	Rooms.Add(Room);
 }
 
+void UDungeonGraph::InitRooms()
+{
+	for (URoom* Room : Rooms)
+	{
+		check(IsValid(Room));
+		const URoomData* Data = Room->GetRoomData();
+		check(IsValid(Data));
+		Data->InitializeRoom(Room, this);
+	}
+}
+
 void UDungeonGraph::GetAllRoomsFromData(const URoomData* Data, TArray<URoom*>& OutRooms)
 {
 	GetRoomsByPredicate(OutRooms, [Data](const URoom* Room) { return Room->GetRoomData() == Data; });

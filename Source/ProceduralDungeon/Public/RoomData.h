@@ -29,6 +29,9 @@
 #include "ProceduralDungeonTypes.h"
 #include "RoomData.generated.h"
 
+class URoom;
+class UDungeonGraph;
+
 UCLASS()
 class PROCEDURALDUNGEON_API URoomData : public UPrimaryDataAsset
 {
@@ -62,6 +65,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Room Data")
 	bool HasCompatibleDoor(const FDoorDef& DoorData) const;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Room Data")
+	bool InitializeRoom(URoom* Room, UDungeonGraph* Dungeon) const;
 
 	FIntVector GetSize() const;
 	class FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;

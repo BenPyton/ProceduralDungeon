@@ -166,6 +166,10 @@ void ADungeonGenerator::CreateDungeon()
 			}
 		}
 
+		// Initialize the dungeon by eg. altering the room instances
+		Graph->InitRooms();
+		InitializeDungeon(Graph);
+
 		ValidDungeon = IsValidDungeon();
 	} while (TriesLeft > 0 && !ValidDungeon);
 
@@ -532,6 +536,10 @@ bool ADungeonGenerator::ContinueToAddRoom_Implementation()
 {
 	LogError("Error: ContinueToAddRoom not implemented");
 	return false;
+}
+
+void ADungeonGenerator::InitializeDungeon_Implementation(const UDungeonGraph* Rooms)
+{
 }
 
 void ADungeonGenerator::DispatchPreGeneration()

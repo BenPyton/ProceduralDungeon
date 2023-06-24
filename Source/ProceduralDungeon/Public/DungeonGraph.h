@@ -41,6 +41,7 @@ class PROCEDURALDUNGEON_API UDungeonGraph : public UObject
 public:
 	UDungeonGraph();
 	void AddRoom(URoom* Room);
+	void InitRooms();
 
 	// Returns all rooms
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")

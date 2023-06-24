@@ -47,7 +47,7 @@ struct FRoomConnection
 	ADoor* DoorInstance {nullptr};
 };
 
-UCLASS()
+UCLASS(BlueprintType)
 class PROCEDURALDUNGEON_API URoom : public UObject
 {
 	GENERATED_BODY()
@@ -67,10 +67,18 @@ public:
 	void SetPlayerInside(bool PlayerInside);
 	void SetVisible(bool Visible);
 
+	UFUNCTION(BlueprintPure, Category = "Room")
 	FORCEINLINE bool IsPlayerInside() const { return bPlayerInside; }
+
+	UFUNCTION(BlueprintPure, Category = "Room", meta = (CompactNodeTitle = "Is Visible"))
 	FORCEINLINE bool IsVisible() const { return bIsVisible; }
+
+	UFUNCTION(BlueprintPure, Category = "Room", meta = (CompactNodeTitle = "Is Locked"))
 	FORCEINLINE bool IsLocked() const { return bIsLocked; }
-	FORCEINLINE void Lock(bool lock) { bIsLocked = lock; }
+
+	UFUNCTION(BlueprintCallable, Category = "Room")
+	void Lock(bool lock) { bIsLocked = lock; }
+
 	FORCEINLINE uint64 GetRoomID() const { return Id; }
 
 private:
