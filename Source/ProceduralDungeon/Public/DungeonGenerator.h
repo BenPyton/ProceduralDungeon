@@ -37,6 +37,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRoomEvent, const URoomData*, NewRoo
 class ADoor;
 class URoom;
 class UDoorType;
+class UDungeonGraph;
 
 UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADungeonGenerator : public AActor
@@ -108,35 +109,35 @@ public:
 	// ===== Utility functions you can use in blueprint =====
 
 	// Return true if a specific RoomData is already in the dungeon
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
 	bool HasAlreadyRoomData(URoomData* RoomData);
 
 	// Return true if at least one of the RoomData from the list provided is already in the dungeon
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
 	bool HasAlreadyOneRoomDataFrom(TArray<URoomData*> RoomDataList);
 
 	// Return the number of a specific RoomData in the dungeon
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
 	int CountRoomData(URoomData* RoomData);
 
 	// Return the total number of RoomData in the dungeon from the list provided
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
 	int CountTotalRoomData(TArray<URoomData*> RoomDataList);
 
 	// Return true if a specific RoomData type is already in the dungeon
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
 	bool HasAlreadyRoomType(TSubclassOf<URoomData> RoomType);
 
 	// Return true if at least one of the RoomData type from the list provided is already in the dungeon
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
 	bool HasAlreadyOneRoomTypeFrom(TArray<TSubclassOf<URoomData>> RoomTypeList);
 
 	// Return the number of a specific RoomData type in the dungeon
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
 	int CountRoomType(TSubclassOf<URoomData> RoomType);
 
 	// Return the total number of RoomData type in the dungeon from the list provided
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
 	int CountTotalRoomType(TArray<TSubclassOf<URoomData>> RoomTypeList);
 
 	// Return a random RoomData from the array provided
@@ -145,14 +146,13 @@ public:
 
 	// Returns the current number of room in the generated dungeon.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DisplayName = "Room Count", CompactNodeTitle = "Room Count"))
-	int GetNbRoom() { return RoomList.Num(); }
+	int GetNbRoom();
 
 	// Returns an array of room data with compatible at least one compatible door with the door data provided.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
 	void GetCompatibleRoomData(bool& bSuccess, TArray<URoomData*>& CompatibleRooms, const TArray<URoomData*>& RoomDataArray, const FDoorDef& DoorData);
 
-	URoom* GetRoomAt(FIntVector RoomCell);
-	URoom* GetRoomByIndex(int64 Index);
+	URoom* GetRoomByIndex(int64 Index) const;
 
 	// ===== Events =====
 
@@ -217,7 +217,7 @@ private:
 	void CreateDungeon();
 
 	// That add a room function to generate all rooms
-	TArray<URoom*> AddNewRooms(URoom& ParentRoom);
+	TArray<URoom*> AddNewRooms(URoom& ParentRoom, TArray<URoom*>& Rooms);
 
 	// Instantiate a room in the scene
 	void InstantiateRoom(URoom* Room);
@@ -269,6 +269,10 @@ public:
 	FVector GetDungeonOffset() const;
 	FQuat GetDungeonRotation() const;
 
+protected:
+	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "Rooms"))
+	UDungeonGraph* Graph;
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Procedural Generation")
 	uint32 Seed;
@@ -278,8 +282,6 @@ private:
 	static const int MaxRoomTry = 10;
 	FRandomStream Random;
 
-	UPROPERTY()
-	TArray<URoom*> RoomList;
 	UPROPERTY()
 	TArray<class ADoor*> DoorList;
 

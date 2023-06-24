@@ -37,6 +37,7 @@
 #include "ProceduralDungeonSettings.h"
 #include "ProceduralDungeonLog.h"
 #include "QueueOrStack.h"
+#include "DungeonGraph.h"
 #include <functional>
 
 int32 ADungeonGenerator::GeneratorCount = 0;
@@ -58,6 +59,7 @@ ADungeonGenerator::ADungeonGenerator()
 	NetPriority = 10.0f;
 	NetUpdateFrequency = 10;
 
+	Graph = CreateDefaultSubobject<UDungeonGraph>(TEXT("Dungeon Rooms"));
 	Octree = MakeUnique<FDungeonOctree>(FVector::ZeroVector, HALF_WORLD_MAX);
 }
 
@@ -121,7 +123,7 @@ void ADungeonGenerator::CreateDungeon()
 		DispatchGenerationInit();
 
 		// Create the first room
-		RoomList.Empty();
+		Graph->Clear();
 
 		URoomData* def = ChooseFirstRoomData();
 		if (!IsValid(def))
@@ -132,7 +134,7 @@ void ADungeonGenerator::CreateDungeon()
 
 		URoom* root = NewObject<URoom>();
 		root->Init(def, this, 0);
-		RoomList.Add(root);
+		Graph->AddRoom(root);
 
 		// Create the list with the correct mode (depth or breadth)
 		TQueueOrStack<URoom*>::EMode listMode;
@@ -158,7 +160,7 @@ void ADungeonGenerator::CreateDungeon()
 		{
 			currentRoom = roomStack.Pop();
 			check(IsValid(currentRoom)); // currentRoom should always be valid
-			for (URoom* room : AddNewRooms(*currentRoom))
+			for (URoom* room : AddNewRooms(*currentRoom, Graph->Rooms))
 			{
 				roomStack.Push(room);
 			}
@@ -176,7 +178,7 @@ void ADungeonGenerator::CreateDungeon()
 
 	// Update Octree
 	Octree->Destroy();
-	for (URoom* r : RoomList)
+	for (URoom* r : Graph->Rooms)
 	{
 		check(IsValid(r))
 		FBoxCenterAndExtent bounds = r->GetBounds();
@@ -234,7 +236,7 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 	}
 }
 
-TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
+TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& InOutRoomList)
 {
 	TArray<URoom*> newRooms;
 	int nbDoor = ParentRoom.GetRoomData()->GetNbDoor();
@@ -279,7 +281,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
 
 			// Create room from roomdef and set connections with current room
 			newRoom = NewObject<URoom>();
-			newRoom->Init(roomDef, this, RoomList.Num());
+			newRoom->Init(roomDef, this, InOutRoomList.Num());
 
 			int doorIndex = compatibleDoors[(roomDef->RandomDoor && compatibleDoors.Num() > 1) ? Random.RandRange(0, compatibleDoors.Num() - 1) : 0];
 
@@ -287,15 +289,15 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
 			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomPos, newRoomDoorDir);
 
 			// Test if it fits in the place
-			if (!URoom::Overlap(*newRoom, RoomList))
+			if (!URoom::Overlap(*newRoom, InOutRoomList))
 			{
 				// connect the doors to all possible existing rooms
 				URoom::Connect(*newRoom, doorIndex, ParentRoom, i);
 				if (URoom::CanLoop())
 				{
-					newRoom->TryConnectToExistingDoors(RoomList);
+					newRoom->TryConnectToExistingDoors(InOutRoomList);
 				}
-				RoomList.Add(newRoom);
+				InOutRoomList.Add(newRoom);
 				newRooms.Add(newRoom);
 				DispatchRoomAdded(newRoom->GetRoomData());
 			}
@@ -312,9 +314,9 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom)
 void ADungeonGenerator::LoadAllRooms()
 {
 	// When a level is correct, load all rooms
-	for (int i = 0; i < RoomList.Num(); i++)
+	for (URoom* Room : Graph->GetAllRooms())
 	{
-		InstantiateRoom(RoomList[i]);
+		InstantiateRoom(Room);
 	}
 }
 
@@ -326,38 +328,10 @@ void ADungeonGenerator::UnloadAllRooms()
 	}
 	DoorList.Empty();
 
-	for (int i = 0; i < RoomList.Num(); i++)
+	for (URoom* Room : Graph->GetAllRooms())
 	{
-		RoomList[i]->Destroy(GetWorld());
+		Room->Destroy(GetWorld());
 	}
-}
-
-void TraverseRooms(const TSet<URoom*>& inRooms, TSet<URoom*>* outRooms, uint32 distance, std::function<void(URoom*)> lambda)
-{
-	TSet<URoom*> openList(inRooms);
-	TSet<URoom*> closedList, currentList;
-	while (distance > 0 && openList.Num() > 0)
-	{
-		for (URoom* openRoom : openList)
-			closedList.Add(openRoom);
-
-		std::swap(currentList, openList);
-		openList.Empty();
-		for (URoom* currentRoom : currentList)
-		{
-			lambda(currentRoom);
-			for (int i = 0; i < currentRoom->GetConnectionCount(); ++i)
-			{
-				URoom* nextRoom = currentRoom->GetConnection(i).Get();
-				if(IsValid(nextRoom) && !closedList.Contains(nextRoom))
-					openList.Add(nextRoom);
-			}
-		}
-		distance--;
-	}
-
-	if (outRooms != nullptr)
-		std::swap(*outRooms, closedList);
 }
 
 void ADungeonGenerator::UpdateRoomVisibility()
@@ -389,8 +363,8 @@ void ADungeonGenerator::UpdateRoomVisibility()
 
 	uint32 OcclusionDistance = URoom::OcclusionDistance();
 	TSet<URoom*> VisibleRooms;
-	TraverseRooms(CurrentPlayerRooms, &VisibleRooms, OcclusionDistance, [](URoom* room) { room->SetVisible(true); });
-	TraverseRooms(RoomsToHide, nullptr, OcclusionDistance, [&VisibleRooms](URoom* room) { room->SetVisible(VisibleRooms.Contains(room)); });
+	UDungeonGraph::TraverseRooms(CurrentPlayerRooms, &VisibleRooms, OcclusionDistance, [](URoom* room) { room->SetVisible(true); });
+	UDungeonGraph::TraverseRooms(RoomsToHide, nullptr, OcclusionDistance, [&VisibleRooms](URoom* room) { room->SetVisible(VisibleRooms.Contains(room)); });
 }
 
 void ADungeonGenerator::Reset()
@@ -418,7 +392,7 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 	case EGenerationState::Unload:
 		LogInfo("======= Begin Unload All Levels =======");
 		Reset();
-		LogInfo(FString::Printf(TEXT("Nb Room To Unload: %d"), RoomList.Num()));
+		LogInfo(FString::Printf(TEXT("Nb Room To Unload: %d"), Graph->Count()));
 		UnloadAllRooms();
 		break;
 	case EGenerationState::Generation:
@@ -428,12 +402,12 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 		break;
 	case EGenerationState::Load:
 		LogInfo("======= Begin Load All Levels =======");
-		LogInfo(FString::Printf(TEXT("Nb Room To Load: %d"), RoomList.Num()));
+		LogInfo(FString::Printf(TEXT("Nb Room To Load: %d"), Graph->Count()));
 		LoadAllRooms();
 		break;
 	case EGenerationState::Initialization:
 		LogInfo("======= Begin Init All Levels =======");
-		LogInfo(FString::Printf(TEXT("Nb Room To Initialize: %d"), RoomList.Num()));
+		LogInfo(FString::Printf(TEXT("Nb Room To Initialize: %d"), Graph->Count()));
 		break;
 	case EGenerationState::Play:
 		LogInfo("======= Ready To Play =======");
@@ -449,36 +423,36 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 	switch (State)
 	{
 	case EGenerationState::Unload:
-		for (URoom* Room : RoomList)
+		for (URoom* Room : Graph->GetAllRooms())
 		{
 			if (Room->IsInstanceUnloaded())
 				RoomCount++;
 		}
 
-		if (RoomCount == RoomList.Num())
+		if (RoomCount == Graph->Count())
 			SetState(EGenerationState::Generation);
 		break;
 	case EGenerationState::Generation:
 		SetState((RoomList.Num() > 0) ? EGenerationState::Load : EGenerationState::None);
 		break;
 	case EGenerationState::Load:
-		for (URoom* Room : RoomList)
+		for (URoom* Room : Graph->GetAllRooms())
 		{
 			if (Room->IsInstanceLoaded())
 				RoomCount++;
 		}
 
-		if (RoomCount == RoomList.Num())
+		if (RoomCount == Graph->Count())
 			SetState(EGenerationState::Initialization);
 		break;
 	case EGenerationState::Initialization:
-		for (URoom* Room : RoomList)
+		for (URoom* Room : Graph->GetAllRooms())
 		{
 			if (Room->IsInstanceInitialized())
 				RoomCount++;
 		}
 
-		if (RoomCount == RoomList.Num())
+		if (RoomCount == Graph->Count())
 			SetState(EGenerationState::Play);
 		break;
 	case EGenerationState::Play:
@@ -496,7 +470,7 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 	switch (State)
 	{
 	case EGenerationState::Unload:
-		RoomList.Empty();
+		Graph->Clear();
 		GetWorld()->FlushLevelStreaming();
 		GEngine->ForceGarbageCollection(true);
 		LogInfo("======= End Unload All Levels =======");
@@ -613,92 +587,54 @@ void ADungeonGenerator::GetCompatibleRoomData(bool& bSuccess, TArray<URoomData*>
 	}
 }
 
-URoom* ADungeonGenerator::GetRoomAt(FIntVector RoomCell)
-{
-	return URoom::GetRoomAt(RoomCell, RoomList);
-}
-
-URoom* ADungeonGenerator::GetRoomByIndex(int64 Index)
-{
-	for (URoom* Room : RoomList)
-	{
-		if (Room->GetRoomID() == Index)
-			return Room;
-	}
-	return nullptr;
-}
-
 bool ADungeonGenerator::HasAlreadyRoomData(URoomData* RoomData)
 {
-	return CountRoomData(RoomData) > 0;
+	return Graph->HasAlreadyRoomData(RoomData);
 }
 
 bool ADungeonGenerator::HasAlreadyOneRoomDataFrom(TArray<URoomData*> RoomDataList)
 {
-	return CountTotalRoomData(RoomDataList) > 0;
+	return Graph->HasAlreadyOneRoomDataFrom(RoomDataList);
 }
 
 int ADungeonGenerator::CountRoomData(URoomData* RoomData)
 {
-	int count = 0;
-	for (int i = 0; i < RoomList.Num(); i++)
-	{
-		if (RoomList[i]->GetRoomData() == RoomData)
-		{
-			count++;
-		}
-	}
-	return  count;
+	return Graph->CountRoomData(RoomData);
 }
 
 int ADungeonGenerator::CountTotalRoomData(TArray<URoomData*> RoomDataList)
 {
-	int count = 0;
-	for (int i = 0; i < RoomList.Num(); i++)
-	{
-		if (RoomDataList.Contains(RoomList[i]->GetRoomData()))
-		{
-			count++;
-		}
-	}
-	return  count;
+	return Graph->CountTotalRoomData(RoomDataList);
 }
 
 bool ADungeonGenerator::HasAlreadyRoomType(TSubclassOf<URoomData> RoomType)
 {
-	return CountRoomType(RoomType) > 0;
+	return Graph->HasAlreadyRoomType(RoomType);
 }
 
 bool ADungeonGenerator::HasAlreadyOneRoomTypeFrom(TArray<TSubclassOf<URoomData>> RoomTypeList)
 {
-	return CountTotalRoomType(RoomTypeList) > 0;
+	return Graph->HasAlreadyOneRoomTypeFrom(RoomTypeList);
 }
 
 int ADungeonGenerator::CountRoomType(TSubclassOf<URoomData> RoomType)
 {
-	int count = 0;
-	for (int i = 0; i < RoomList.Num(); i++)
-	{
-		if (RoomList[i]->GetRoomData()->GetClass()->IsChildOf(RoomType))
-		{
-			count++;
-		}
-	}
-	return  count;
+	return Graph->CountRoomType(RoomType);
 }
 
 int ADungeonGenerator::CountTotalRoomType(TArray<TSubclassOf<URoomData>> RoomTypeList)
 {
-	int count = 0;
-	for (int i = 0; i < RoomList.Num(); i++)
-	{
-		const URoomData* roomData = RoomList[i]->GetRoomData();
-		if (RoomTypeList.ContainsByPredicate([&roomData](const TSubclassOf<URoomData> roomType) { return roomData->GetClass()->IsChildOf(roomType); }))
-		{
-			count++;
-		}
-	}
-	return  count;
+	return Graph->CountTotalRoomType(RoomTypeList);
+}
+
+int ADungeonGenerator::GetNbRoom() 
+{ 
+	return Graph->Count();
+}
+
+URoom* ADungeonGenerator::GetRoomByIndex(int64 Index) const
+{
+	return Graph->GetRoomByIndex(Index);
 }
 
 void ADungeonGenerator::SetSeed(int32 NewSeed)
