@@ -30,6 +30,7 @@
 #include "ProceduralDungeonSettings.h"
 #include "ProceduralDungeonLog.h"
 #include "DungeonGenerator.h"
+#include "RoomCustomData.h"
 
 URoom::URoom()
 	: Super()
@@ -369,6 +370,31 @@ void URoom::SetPlayerInside(bool PlayerInside)
 		return;
 
 	bPlayerInside = PlayerInside;
+}
+
+bool URoom::CreateCustomData(const TSubclassOf<URoomCustomData>& DataType)
+{
+	if (DataType == nullptr)
+		return false;
+
+	if (CustomData.Find(DataType))
+		return false;
+
+	CustomData.Add(DataType, NewObject<URoomCustomData>(this, DataType));
+	return true;
+}
+
+bool URoom::GetCustomData(TSubclassOf<URoomCustomData> DataType, URoomCustomData*& Data)
+{
+	URoomCustomData** Datum = CustomData.Find(DataType);
+	if (!Datum && !IsValid(*Datum))
+		return false;
+
+	if (!(*Datum)->IsA(DataType))
+		return false;
+
+	Data = *Datum;
+	return true;
 }
 
 // AABB Overlapping

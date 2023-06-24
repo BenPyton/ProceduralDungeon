@@ -43,6 +43,8 @@ void UDungeonGraph::InitRooms()
 		check(IsValid(Room));
 		const URoomData* Data = Room->GetRoomData();
 		check(IsValid(Data));
+		for(auto Datum : Data->CustomData)
+			Room->CreateCustomData(Datum);
 		Data->InitializeRoom(Room, this);
 	}
 }

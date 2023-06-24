@@ -35,6 +35,7 @@ class ADungeonGenerator;
 class ARoomLevel;
 class URoomData;
 class ADoor;
+class URoomCustomData;
 
 USTRUCT()
 struct FRoomConnection
@@ -81,9 +82,17 @@ public:
 
 	FORCEINLINE uint64 GetRoomID() const { return Id; }
 
+	bool CreateCustomData(const TSubclassOf<URoomCustomData>& DataType);
+
+	UFUNCTION(BlueprintCallable, meta = (ExpandBoolAsExecs = "ReturnValue", DeterminesOutputType = "DataType", DynamicOutputParam = "Data"))
+	bool GetCustomData(TSubclassOf<URoomCustomData> DataType, URoomCustomData*& Data);
+
 private:
 	UPROPERTY()
 	URoomData* RoomData {nullptr};
+
+	UPROPERTY()
+	TMap<UClass*, URoomCustomData*> CustomData;
 
 	UPROPERTY()
 	TArray<FRoomConnection> Connections;
