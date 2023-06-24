@@ -42,9 +42,9 @@ struct FRoomConnection
 	GENERATED_BODY()
 
 	UPROPERTY()
-	TWeakObjectPtr<URoom> OtherRoom = nullptr;
-	int OtherDoorIndex = -1;
-	ADoor* DoorInstance = nullptr;
+	TWeakObjectPtr<URoom> OtherRoom {nullptr};
+	int OtherDoorIndex {-1};
+	ADoor* DoorInstance {nullptr};
 };
 
 UCLASS()
@@ -53,6 +53,7 @@ class PROCEDURALDUNGEON_API URoom : public UObject
 	GENERATED_BODY()
 
 public:
+	// TODO: Make them private
 	UPROPERTY()
 	UProceduralLevelStreaming* Instance {nullptr};
 	UPROPERTY()
@@ -91,10 +92,10 @@ private:
 public:
 	void Init(URoomData* RoomData, ADungeonGenerator* Generator, int32 RoomId);
 
-	bool IsConnected(int Index);
+	bool IsConnected(int Index) const;
 	void SetConnection(int Index, URoom* Room, int OtherDoorIndex);
-	TWeakObjectPtr<URoom> GetConnection(int Index);
-	int GetFirstEmptyConnection();
+	TWeakObjectPtr<URoom> GetConnection(int Index) const;
+	int GetFirstEmptyConnection() const;
 
 	void Instantiate(UWorld* World);
 	void Destroy(UWorld* World);
@@ -105,7 +106,7 @@ public:
 
 	EDoorDirection GetDoorWorldOrientation(int DoorIndex);
 	FIntVector GetDoorWorldPosition(int DoorIndex);
-	int GetConnectionCount() { return Connections.Num(); }
+	int GetConnectionCount() const { return Connections.Num(); }
 	int GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot);
 	bool IsDoorInstanced(int DoorIndex);
 	void SetDoorInstance(int DoorIndex, ADoor* Door);
@@ -129,13 +130,13 @@ public:
 	FBoxMinAndMax GetIntBounds() const;
 
 	// AABB Overlapping
-	static bool Overlap(URoom& A, URoom& B);
-	static bool Overlap(URoom& Room, TArray<URoom*>& RoomList);
+	static bool Overlap(const URoom& A, const URoom& B);
+	static bool Overlap(const URoom& Room, const TArray<URoom*>& RoomList);
 
 	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset = true);
 
 	static void Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB);
-	static URoom* GetRoomAt(FIntVector RoomCell, TArray<URoom*>& RoomList);
+	static URoom* GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList);
 
 	// Plugin Settings
 	static FVector Unit();
