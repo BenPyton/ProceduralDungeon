@@ -59,17 +59,20 @@ public:
 
 	FORCEINLINE bool IsInit() const { return bIsInit; }
 
-	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Player Inside"))
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Player Inside", DeprecatedFunction, DeprecationMessage="Use GetRoom() instead to access directly the room functions."))
 	bool IsPlayerInside();
 
-	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Visible"))
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Visible", DeprecatedFunction, DeprecationMessage="Use GetRoom() instead to access directly the room functions."))
 	bool IsVisible();
 
-	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Locked"))
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Locked", DeprecatedFunction, DeprecationMessage="Use GetRoom() instead to access directly the room functions."))
 	bool IsLocked();
 
-	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon")
+	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon", meta = (DeprecatedFunction, DeprecationMessage="Use GetRoom() instead to access directly the room functions."))
 	void Lock(bool lock);
+
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Room"))
+	URoom* GetRoom() { return Room; }
 
 	UFUNCTION()
 	void OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

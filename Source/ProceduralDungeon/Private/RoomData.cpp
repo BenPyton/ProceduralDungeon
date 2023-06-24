@@ -43,6 +43,11 @@ bool URoomData::HasCompatibleDoor(const FDoorDef& DoorData) const
 	return false;
 }
 
+bool URoomData::InitializeRoom_Implementation(URoom* Room, UDungeonGraph* Dungeon) const
+{
+	return true;
+}
+
 FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
 {
 	FBoxMinAndMax LocalBounds = GetIntBounds();
