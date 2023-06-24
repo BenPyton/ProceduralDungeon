@@ -61,7 +61,7 @@ void URoom::Init(URoomData* Data, ADungeonGenerator* Generator, int32 RoomId)
 	SetVisible(false);
 }
 
-bool URoom::IsConnected(int Index)
+bool URoom::IsConnected(int Index) const
 {
 	check(Index >= 0 && Index < Connections.Num());
 	return Connections[Index].OtherRoom != nullptr;
@@ -74,13 +74,13 @@ void URoom::SetConnection(int Index, URoom* Room, int OtherIndex)
 	Connections[Index].OtherDoorIndex = OtherIndex;
 }
 
-TWeakObjectPtr<URoom> URoom::GetConnection(int Index)
+TWeakObjectPtr<URoom> URoom::GetConnection(int Index) const
 {
 	check(Index >= 0 && Index < Connections.Num());
 	return Connections[Index].OtherRoom;
 }
 
-int URoom::GetFirstEmptyConnection()
+int URoom::GetFirstEmptyConnection() const
 {
 	for (int i = 0; i < Connections.Num(); ++i)
 	{
@@ -372,14 +372,14 @@ void URoom::SetPlayerInside(bool PlayerInside)
 }
 
 // AABB Overlapping
-bool URoom::Overlap(URoom& A, URoom& B)
+bool URoom::Overlap(const URoom& A, const URoom& B)
 {
 	FBoxMinAndMax BoxA = A.GetIntBounds();
 	FBoxMinAndMax BoxB = B.GetIntBounds();
 	return FBoxMinAndMax::Overlap(BoxA, BoxB);
 }
 
-bool URoom::Overlap(URoom& Room, TArray<URoom*>& RoomList)
+bool URoom::Overlap(const URoom& Room, const TArray<URoom*>& RoomList)
 {
 	bool overlap = false;
 	for (int i = 0; i < RoomList.Num() && !overlap; i++)
@@ -406,13 +406,13 @@ void URoom::Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB)
 	RoomB.SetConnection(DoorB, &RoomA, DoorA);
 }
 
-URoom* URoom::GetRoomAt(FIntVector RoomCell, TArray<URoom*>& RoomList)
+URoom* URoom::GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList)
 {
-	for (auto it = RoomList.begin(); it != RoomList.end(); ++it)
+	for (URoom* Room : RoomList)
 	{
-		if (IsValid(*it) && (*it)->IsOccupied(RoomCell))
+		if (IsValid(Room) && Room->IsOccupied(RoomCell))
 		{
-			return *it;
+			return Room;
 		}
 	}
 	return nullptr;
