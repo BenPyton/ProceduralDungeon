@@ -56,6 +56,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Room")
 	FIntVector SecondPoint {1};
 
+	UPROPERTY(EditDefaultsOnly, Category = "Room")
+	TSet<TSubclassOf<class URoomCustomData>> CustomData;
 
 public:
 	URoomData();

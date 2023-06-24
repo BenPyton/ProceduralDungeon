@@ -150,6 +150,13 @@ EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 		}
 	}
 
+	// Check if CustomData Set does not have null value
+	if (CustomData.Contains(nullptr))
+	{
+		ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has value None in CustomData."), *GetName())));
+		Result = EDataValidationResult::Invalid;
+	}
+
 	return Result;
 }
 
