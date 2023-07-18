@@ -26,6 +26,7 @@
 #include "Engine/World.h"
 #include "Engine/Engine.h" // GEngine
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/Pawn.h"
 #include "NavigationSystem.h"
 #include "ProceduralLevelStreaming.h"
 #include "RoomData.h"
