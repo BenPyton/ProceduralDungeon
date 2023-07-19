@@ -59,8 +59,14 @@ void UDungeonGraph::GetAllRoomsFromDataList(const TArray<URoomData*>& Data, TArr
 	GetRoomsByPredicate(OutRooms, [&Data](const URoom* Room) { return Data.Contains(Room->GetRoomData()); });
 }
 
+const URoom* UDungeonGraph::GetFirstRoomFromData(const URoomData* Data)
+{
+	return FindFirstRoomByPredicate([Data](const URoom* Room) { return Room->GetRoomData() == Data; });
+}
+
 URoom* UDungeonGraph::GetRandomRoom()
 {
+	// TODO: get random stream from dungeon generator
 	return nullptr;
 }
 
@@ -151,10 +157,19 @@ void UDungeonGraph::GetRoomsByPredicate(TArray<URoom*>& OutRooms, TFunction<bool
 	{
 		check(IsValid(Room));
 		if (Predicate(Room))
-		{
 			OutRooms.Add(Room);
-		}
 	}
+}
+
+const URoom* UDungeonGraph::FindFirstRoomByPredicate(TFunction<bool(const URoom*)> Predicate) const
+{
+	for (URoom* Room : Rooms)
+	{
+		check(IsValid(Room));
+		if (Predicate(Room))
+			return Room;
+	}
+	return nullptr;
 }
 
 void UDungeonGraph::TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* OutRooms, uint32 Distance, TFunction<void(URoom*)> Func)

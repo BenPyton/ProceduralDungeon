@@ -55,6 +55,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph")
 	void GetAllRoomsFromDataList(const TArray<URoomData*>& Data, TArray<URoom*>& Rooms);
 
+	// Returns the first found room instance of the provided room data
+	// (no defined order, so could be any room of the dungeon)
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph")
+	const URoom* GetFirstRoomFromData(const URoomData* Data);
+
 	// Returns a random room from all the dungeon
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph")
 	URoom* GetRandomRoom();
@@ -63,35 +68,35 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	int32 Count() const { return Rooms.Num(); }
 
-	// Return true if a specific RoomData is already in the dungeon
+	// Returns true if a specific RoomData is already in the dungeon
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	bool HasAlreadyRoomData(const URoomData* RoomData) const;
 
-	// Return true if at least one of the RoomData from the list provided is already in the dungeon
+	// Returns true if at least one of the RoomData from the list provided is already in the dungeon
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	bool HasAlreadyOneRoomDataFrom(const TArray<URoomData*>& RoomDataList) const;
 
-	// Return the number of a specific RoomData in the dungeon
+	// Returns the number of a specific RoomData in the dungeon
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	int CountRoomData(const URoomData* RoomData) const;
 
-	// Return the total number of RoomData in the dungeon from the list provided
+	// Returns the total number of RoomData in the dungeon from the list provided
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	int CountTotalRoomData(const TArray<URoomData*>& RoomDataList) const;
 
-	// Return true if a specific RoomData type is already in the dungeon
+	// Returns true if a specific RoomData type is already in the dungeon
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph", meta = (AutoCreateRefTerm = "RoomType"))
 	bool HasAlreadyRoomType(const TSubclassOf<URoomData>& RoomType) const;
 
-	// Return true if at least one of the RoomData type from the list provided is already in the dungeon
+	// Returns true if at least one of the RoomData type from the list provided is already in the dungeon
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	bool HasAlreadyOneRoomTypeFrom(const TArray<TSubclassOf<URoomData>>& RoomTypeList) const;
 
-	// Return the number of a specific RoomData type in the dungeon
+	// Returns the number of a specific RoomData type in the dungeon
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph", meta = (AutoCreateRefTerm = "RoomType"))
 	int CountRoomType(const TSubclassOf<URoomData>& RoomType) const;
 
-	// Return the total number of RoomData type in the dungeon from the list provided
+	// Returns the total number of RoomData type in the dungeon from the list provided
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	int CountTotalRoomType(const TArray<TSubclassOf<URoomData>>& RoomTypeList) const;
 
@@ -114,7 +119,7 @@ protected:
 
 	int CountRoomByPredicate(TFunction<bool(const URoom*)> Predicate) const;
 	void GetRoomsByPredicate(TArray<URoom*>& OutRooms, TFunction<bool(const URoom*)> Predicate) const;
-
+	const URoom* FindFirstRoomByPredicate(TFunction<bool(const URoom*)> Predicate) const;
 
 private:
 	UPROPERTY()
