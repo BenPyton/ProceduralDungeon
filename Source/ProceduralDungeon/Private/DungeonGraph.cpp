@@ -108,6 +108,11 @@ int UDungeonGraph::CountTotalRoomType(const TArray<TSubclassOf<URoomData>>& Room
 	});
 }
 
+bool UDungeonGraph::HasValidPath(const URoom* From, const URoom* To, bool IgnoreLockedRooms)
+{
+	return FindPath(From, To, nullptr, IgnoreLockedRooms);
+}
+
 URoom* UDungeonGraph::GetRoomAt(FIntVector RoomCell) const
 {
 	return URoom::GetRoomAt(RoomCell, Rooms);
@@ -178,4 +183,114 @@ void UDungeonGraph::TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* Out
 
 	if (OutRooms != nullptr)
 		Swap(*OutRooms, closedList);
+}
+
+// Do one cycle of BFS (dequeue one room from Queue, then check all its connections to add them in MarkedThis and filling ParentMap)
+// Fills OutCommon  if a connection has been found in MarkedOther
+// Returns true if OutCommon had been filled
+bool BFS_Cycle(TQueue<const URoom*>& Queue, TSet<const URoom*>& MarkedThis, const TSet<const URoom*>& MarkedOther, TMap<const URoom*, const URoom*>& ParentMap, const URoom*& OutCommon, bool IgnoreLocked)
+{
+	const URoom* Current = nullptr;
+	const URoom* Next = nullptr;
+
+	Queue.Dequeue(Current);
+	// for each neighbor, if not locked or marked, add it to queue and mark it
+	for (int i = 0; OutCommon == nullptr && i < Current->GetConnectionCount(); ++i)
+	{
+		Next = Current->GetConnection(i).Get();
+		if (Next && (IgnoreLocked || !Next->IsLocked()) && !MarkedThis.Contains(Next))
+		{
+			ParentMap.Add(Next, Current);
+
+			// Check intersection with other side
+			if (MarkedOther.Contains(Next))
+			{
+				OutCommon = Next;
+			}
+			else
+			{
+				Queue.Enqueue(Next);
+				MarkedThis.Add(Next);
+			}
+		}
+	}
+
+	return OutCommon != nullptr;
+}
+
+void ReconstructPath(const URoom* Common, const TMap<const URoom*, const URoom*>& ParentsForward, const TMap<const URoom*, const URoom*>& ParentsReverse, TArray<const URoom*>& OutPath)
+{
+	OutPath.Empty();
+
+	if (Common == nullptr)
+		return;
+
+	// Adds the first part of the path (From -> Common)
+	const URoom* const* Current = &Common;
+	while ((Current = ParentsForward.Find(*Current)) != nullptr)
+	{
+		OutPath.EmplaceAt(0, *Current);
+	}
+
+	// Common room between
+	OutPath.Add(Common);
+
+	// Adds the second part of the path (Common -> To)
+	Current = &Common;
+	while ((Current = ParentsReverse.Find(*Current)) != nullptr)
+	{
+		OutPath.Add(*Current);
+	}
+}
+
+// Uses Bidirectional BFS to find a path between A and B
+bool UDungeonGraph::FindPath(const URoom* From, const URoom* To, TArray<const URoom*>* OutPath, bool IgnoreLocked)
+{
+	if (OutPath)
+		OutPath->Empty();
+
+	if (!IsValid(From) || !IsValid(To))
+		return false;
+
+	// Always path between a room and itself
+	if (From == To)
+	{
+		if (OutPath)
+			OutPath->Add(From);
+		return true;
+	}
+
+	if(!IgnoreLocked && (From->IsLocked() || To->IsLocked()))
+		return false;
+
+	// Bidirectional BFS initialization
+	TMap<const URoom*, const URoom*> ParentsForward, ParentsReverse;
+	TSet<const URoom*> MarkedForward, MarkedReverse; // (visited rooms)
+	TQueue<const URoom*> QueueForward, QueueReverse; // (rooms to visit)
+	QueueForward.Enqueue(From);
+	QueueReverse.Enqueue(To);
+	MarkedForward.Add(From);
+	MarkedReverse.Add(To);
+
+	// Both are filled when during either cycle an intersection is found
+	const URoom* Common = nullptr;
+
+	// Bidirectional BFS
+	while (Common == nullptr && !QueueForward.IsEmpty() && !QueueReverse.IsEmpty())
+	{
+		// BFS from A
+		if (!BFS_Cycle(QueueForward, MarkedForward, MarkedReverse, ParentsForward, Common, IgnoreLocked))
+		{
+			// BFS from B if no common found
+			BFS_Cycle(QueueReverse, MarkedReverse, MarkedForward, ParentsReverse, Common, IgnoreLocked);
+		}
+	}
+
+	// Intersection has been found between MarkedForward and MarkedReverse
+	if (Common != nullptr && OutPath != nullptr)
+	{
+		ReconstructPath(Common, ParentsForward, ParentsReverse, *OutPath);
+	}
+
+	return Common != nullptr;
 }
