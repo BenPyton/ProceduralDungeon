@@ -95,12 +95,19 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	int CountTotalRoomType(const TArray<TSubclassOf<URoomData>>& RoomTypeList) const;
 
+	// Returns wether a path is valid between 2 rooms (no locked room blocking the way)
+	// Note: Could be pure, but since it can be heavy duty for large dungeons, keep it impure to avoid duplicate calls.
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph", meta = (ReturnDisplayName = "Yes"))
+	bool HasValidPath(const URoom* From, const URoom* To, bool IgnoreLockedRooms = false);
+
 	URoom* GetRoomAt(FIntVector RoomCell) const;
 	URoom* GetRoomByIndex(int64 Index) const;
 
 	// Returns in OutRooms all the rooms in the Distance from each InRooms and optionally apply Func on each rooms.
 	// Distance is the number of room connection between 2 rooms, not the distance in any unit.
 	static void TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* OutRooms, uint32 Distance, TFunction<void(URoom*)> Func);
+
+	static bool FindPath(const URoom* From, const URoom* To, TArray<const URoom*>* OutPath = nullptr, bool IgnoreLocked = false);
 
 protected:
 	void Clear();
