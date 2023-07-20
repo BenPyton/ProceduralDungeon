@@ -28,6 +28,8 @@
 #include "Modules/ModuleManager.h"
 #include "AssetTypeCategories.h"
 
+class FSlateStyleSet;
+
 class FProceduralDungeonEditorModule : public IModuleInterface
 {
 public:
@@ -45,4 +47,5 @@ private:
 
 private:
 	EAssetTypeCategories::Type AssetTypeCategory {EAssetTypeCategories::Type::None};
+	TSharedPtr<FSlateStyleSet> StyleSet;
 };

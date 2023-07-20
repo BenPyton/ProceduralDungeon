@@ -27,14 +27,20 @@
 #include "DoorDefCustomization.h"
 #include "ProceduralDungeonTypes.h"
 #include "IAssetTools.h"
+#include "Interfaces/IPluginManager.h"
 #include "AssetToolsModule.h"
 #include "AssetTypeActions/AssetTypeActions_RoomData.h"
 #include "AssetTypeActions/AssetTypeActions_DoorType.h"
 #include "Developer/Settings/Public/ISettingsModule.h"
 #include "Developer/Settings/Public/ISettingsSection.h"
+#include "Styling/SlateStyle.h"
+#include "Styling/SlateStyleRegistry.h"
 #include "ProceduralDungeonEditorSettings.h"
+#include "EditorMode/ProceduralDungeonEdMode.h"
 
 #define LOCTEXT_NAMESPACE "FProceduralDungeonEditorModule"
+
+#define IMAGE_BRUSH( RelativePath, ... ) FSlateImageBrush( StyleSet->RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
 
 void FProceduralDungeonEditorModule::StartupModule()
 {
@@ -56,6 +62,24 @@ void FProceduralDungeonEditorModule::StartupModule()
 		PropertyModule.RegisterCustomPropertyTypeLayout(FDoorDef::StaticStruct()->GetFName(), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDoorDefCustomization::MakeInstance));
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
+
+	// Register slate style set
+	{
+		StyleSet = MakeShareable(new FSlateStyleSet("ProceduralDungeonStyle"));
+		FString ContentDir = IPluginManager::Get().FindPlugin("ProceduralDungeon")->GetBaseDir();
+		StyleSet->SetContentRoot(ContentDir);
+
+		const FVector2D Icon20x20(20.0f, 20.0f);
+		const FVector2D Icon40x40(40.0f, 40.0f);
+
+		StyleSet->Set("ProceduralDungeon.Icon", new IMAGE_BRUSH("Resources/IconEditorMode", Icon40x40));
+		StyleSet->Set("ProceduralDungeon.Icon.Small", new IMAGE_BRUSH("Resources/IconEditorMode", Icon20x20));
+
+		FSlateStyleRegistry::RegisterSlateStyle(*StyleSet);
+	}
+
+	FSlateIcon ModeIcon = FSlateIcon("ProceduralDungeonStyle", "ProceduralDungeon.Icon", "ProceduralDungeon.Icon.Small");
+	FEditorModeRegistry::Get().RegisterMode<FProceduralDungeonEdMode>(FProceduralDungeonEdMode::EM_ProceduralDungeon, LOCTEXT("ProceduralDungeonEdModeName", "Dungeon Room"), ModeIcon, true);
 }
 
 void FProceduralDungeonEditorModule::ShutdownModule()
@@ -66,6 +90,9 @@ void FProceduralDungeonEditorModule::ShutdownModule()
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 		PropertyModule.UnregisterCustomPropertyTypeLayout(FDoorDef::StaticStruct()->GetFName());
 	}
+
+	// Unregister editor mode
+	FEditorModeRegistry::Get().UnregisterMode(FProceduralDungeonEdMode::EM_ProceduralDungeon);
 	
 	if (UObjectInitialized())
 	{
