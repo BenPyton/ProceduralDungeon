@@ -160,4 +160,11 @@ EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 	return Result;
 }
 
+void URoomData::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	UE_LOG(LogTemp, Log, TEXT("Room Data Post Change Properties"));
+	OnPropertiesChanged.Broadcast(this);
+}
+
 #endif // WITH_EDITOR

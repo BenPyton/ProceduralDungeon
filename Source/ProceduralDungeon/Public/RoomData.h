@@ -32,6 +32,11 @@
 class URoom;
 class UDungeonGraph;
 
+#if WITH_EDITOR
+class URoomData;
+DECLARE_MULTICAST_DELEGATE_OneParam(FRoomDataEditorEvent, URoomData*)
+#endif
+
 UCLASS()
 class PROCEDURALDUNGEON_API URoomData : public UPrimaryDataAsset
 {
@@ -39,7 +44,7 @@ class PROCEDURALDUNGEON_API URoomData : public UPrimaryDataAsset
 
 	friend class UProceduralLevelStreaming;
 
-private:
+public:
 	UPROPERTY(EditInstanceOnly, Category = "Level")
 	TSoftObjectPtr<UWorld> Level {nullptr};
 
@@ -78,5 +83,8 @@ public:
 #if WITH_EDITOR
 	bool IsDoorValid(int DoorIndex) const;
 	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;
+
+	FRoomDataEditorEvent OnPropertiesChanged;
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 };
