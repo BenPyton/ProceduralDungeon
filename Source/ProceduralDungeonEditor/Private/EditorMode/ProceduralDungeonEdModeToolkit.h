@@ -1,21 +1,47 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 Benoit Pelletier
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 #pragma once
 
 #include "Toolkits/BaseToolkit.h"
 #include "ProceduralDungeonEdMode.h"
 #include "SProceduralDungeonEdModeWidget.h"
 
-class FExampleEdModeToolkit : public FModeToolkit
+class FProceduralDungeonEdModeToolkit : public FModeToolkit
 {
 public:
-    FExampleEdModeToolkit()
+
+    virtual void Init(const TSharedPtr< class IToolkitHost >& InitToolkitHost) override
     {
-        SAssignNew(EdModeWidget, SProceduralDungeonEdModeWidget);
+        SAssignNew(EdModeWidget, SProceduralDungeonEdModeWidget, SharedThis(this));
+        FModeToolkit::Init(InitToolkitHost);
     }
 
     /** IToolkit interface */
     virtual FName GetToolkitFName() const override { return FName("ProceduralDungeonEdMode"); }
     virtual FText GetBaseToolkitName() const override { return NSLOCTEXT("ProceduralDungeonEdModeToolkit", "DisplayName", "ProceduralDungeonEdMode Tool"); }
-    virtual class FEdMode* GetEditorMode() const override { return GLevelEditorModeTools().GetActiveMode(FProceduralDungeonEdMode::EM_ProceduralDungeon); }
+    virtual class FProceduralDungeonEdMode* GetEditorMode() const override { return (FProceduralDungeonEdMode*)GLevelEditorModeTools().GetActiveMode(FProceduralDungeonEdMode::EM_ProceduralDungeon); }
     virtual TSharedPtr<class SWidget> GetInlineContent() const override { return EdModeWidget; }
 
 private:

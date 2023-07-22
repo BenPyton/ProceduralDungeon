@@ -20,8 +20,8 @@ public class ProceduralDungeonEditor : ModuleRules
 				"ClassViewer",
 				"SlateCore",
 				"Slate",
-				"EditorWidgets",
-				"ToolMenus"
+				"EditorStyle",
+				"Engine"
 			}
 		);
 	}
