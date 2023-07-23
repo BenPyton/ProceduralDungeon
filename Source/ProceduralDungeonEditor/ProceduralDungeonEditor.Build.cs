@@ -13,6 +13,7 @@ public class ProceduralDungeonEditor : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[] {
 				"ProceduralDungeon",
 				"CoreUObject",
+				"InputCore",
 				"PropertyEditor",
 				"DetailCustomizations",
 				"UnrealEd",
