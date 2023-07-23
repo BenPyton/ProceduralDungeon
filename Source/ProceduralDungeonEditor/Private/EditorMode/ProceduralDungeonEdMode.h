@@ -28,6 +28,53 @@
 
 class ARoomLevel;
 
+struct HRoomPointProxy : public HHitProxy
+{
+    DECLARE_HIT_PROXY();
+
+    HRoomPointProxy(int32 InIndex)
+        : HHitProxy(HPP_UI), Index(InIndex)
+    {}
+
+    int32 Index {-1};
+};
+
+EAxisList::Type operator~(const EAxisList::Type& This)
+{
+    return static_cast<EAxisList::Type>(EAxisList::All - This);
+}
+
+EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other)
+{
+    This = static_cast<EAxisList::Type>(This & Other);
+    return This;
+}
+
+struct FRoomPoint
+{
+    struct FLink
+    {
+        FRoomPoint* Point;
+        EAxisList::Type Axis;
+    };
+
+    void AddLinkedPoint(FRoomPoint& Point, EAxisList::Type Axis);
+    FVector GetLocation() const { return Location; }
+    void SetLocation(FVector InLocation);
+    FVector* operator->() { return &Location; }
+
+private:
+    void SetDirty();
+    void UpdateWithPropagation();
+    void UpdateLinkedPoints(TQueue<FRoomPoint*>& PendingNodes);
+    void UpdateFrom(FRoomPoint& From, EAxisList::Type Axis);
+
+private:
+    EAxisList::Type bDirty {EAxisList::None};
+    FVector Location {0};
+    TArray<FLink> LinkedPoints {};
+};
+
 class FProceduralDungeonEdMode : public FEdMode
 {
 public:
@@ -36,7 +83,22 @@ public:
     // FEdMode interface
     virtual void Enter() override;
     virtual void Exit() override;
+    virtual void Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI) override;
+    virtual bool HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click) override;
+    virtual bool InputDelta(FEditorViewportClient* InViewportClient, FViewport* InViewport, FVector& InDrag, FRotator& InRot, FVector& InScale) override;
+    virtual bool ShowModeWidgets() const override;
+    virtual bool ShouldDrawWidget() const override;
+    virtual bool UsesTransformWidget() const override;
+    virtual bool UsesTransformWidget(FWidget::EWidgetMode CheckMode) const;
+    virtual FVector GetWidgetLocation() const override;
+    virtual bool AllowWidgetMove() override { return true; }
+
+    bool HasValidSelection() const;
+    void UpdateDataAsset() const;
 
     TWeakObjectPtr<ARoomLevel> Level = nullptr;
     TWeakObjectPtr<UWorld> World = nullptr;
+    int32 SelectedPoint {-1};
+    TArray<FRoomPoint> Points;
+    FVector DragPoint;
 };
