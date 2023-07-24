@@ -84,7 +84,7 @@ public:
 
 	bool CreateCustomData(const TSubclassOf<URoomCustomData>& DataType);
 
-	UFUNCTION(BlueprintCallable, meta = (ExpandBoolAsExecs = "ReturnValue", DeterminesOutputType = "DataType", DynamicOutputParam = "Data"))
+	UFUNCTION(BlueprintCallable, Category = "Room", meta = (ExpandBoolAsExecs = "ReturnValue", DeterminesOutputType = "DataType", DynamicOutputParam = "Data"))
 	bool GetCustomData(TSubclassOf<URoomCustomData> DataType, URoomCustomData*& Data);
 
 private:

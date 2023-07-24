@@ -274,7 +274,7 @@ public:
 	FQuat GetDungeonRotation() const;
 
 protected:
-	UPROPERTY(BlueprintReadOnly, meta = (DisplayName = "Rooms"))
+	UPROPERTY(BlueprintReadOnly, Category = "Dungeon Generator", meta = (DisplayName = "Rooms"))
 	UDungeonGraph* Graph;
 
 private:

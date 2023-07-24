@@ -37,7 +37,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonGraphTest, "ProceduralDungeon.Types.Dun
 static UDungeonGraph* s_graph {nullptr};
 
 #define INIT_TEST(Graph) \
-	TStrongObjectPtr<UDungeonGraph> Graph = TStrongObjectPtr<UDungeonGraph>(NewObject<UDungeonGraph>()); \
+	TStrongObjectPtr<UDungeonGraph> Graph(NewObject<UDungeonGraph>(GetTransientPackage(), #Graph)); \
 	s_graph = Graph.Get();
 
 #define CLEAN_TEST() \
@@ -51,7 +51,7 @@ static UDungeonGraph* s_graph {nullptr};
 
 // Utility to create room data
 #define CREATE_ROOM_DATA(Data) \
-	TStrongObjectPtr<URoomData> Data = TStrongObjectPtr<URoomData>(NewObject<URoomData>()); \
+	TStrongObjectPtr<URoomData> Data(NewObject<URoomData>(GetTransientPackage(), #Data)); \
 	Data->Doors.Empty();
 
 // Utility to create a non-empty path
