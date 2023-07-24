@@ -22,6 +22,9 @@ public class ProceduralDungeonEditor : ModuleRules
 				"SlateCore",
 				"Slate",
 				"EditorStyle",
+#if UE_5_0_OR_LATER
+				"EditorFramework",
+#endif
 				"Engine"
 			}
 		);

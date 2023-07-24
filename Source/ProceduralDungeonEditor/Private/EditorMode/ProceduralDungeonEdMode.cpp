@@ -286,9 +286,9 @@ bool FProceduralDungeonEdMode::UsesTransformWidget() const
     return true;
 }
 
-bool FProceduralDungeonEdMode::UsesTransformWidget(FWidget::EWidgetMode CheckMode) const
+bool FProceduralDungeonEdMode::UsesTransformWidget(WidgetMode CheckMode) const
 {
-    return CheckMode == FWidget::EWidgetMode::WM_Translate;
+    return CheckMode == WidgetMode::WM_Translate;
 }
 
 FVector FProceduralDungeonEdMode::GetWidgetLocation() const
