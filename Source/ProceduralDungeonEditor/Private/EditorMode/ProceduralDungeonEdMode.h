@@ -24,7 +24,22 @@
 
 #pragma once
 
+#if ENGINE_MAJOR_VERSION <= 4
+#define COMPATIBILITY 1
+#else
+#define COMPATIBILITY 0
+#endif
+
 #include "EdMode.h"
+#if !COMPATIBILITY
+#include "UnrealWidgetFwd.h"
+#endif
+
+#if COMPATIBILITY
+using WidgetMode = FWidget::EWidgetMode;
+#else
+using WidgetMode = UE::Widget::EWidgetMode;
+#endif
 
 class ARoomLevel;
 
@@ -89,7 +104,7 @@ public:
     virtual bool ShowModeWidgets() const override;
     virtual bool ShouldDrawWidget() const override;
     virtual bool UsesTransformWidget() const override;
-    virtual bool UsesTransformWidget(FWidget::EWidgetMode CheckMode) const;
+    virtual bool UsesTransformWidget(WidgetMode CheckMode) const;
     virtual FVector GetWidgetLocation() const override;
     virtual bool AllowWidgetMove() override { return true; }
 
