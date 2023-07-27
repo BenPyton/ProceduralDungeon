@@ -23,6 +23,7 @@
  */
 
 #include "ProceduralDungeonTypes.h"
+#include "ProceduralDungeonUtils.h"
 #include "Door.h"
 
 bool operator!(const EDoorDirection& Direction)
@@ -168,19 +169,62 @@ FIntVector Rotate(const FIntVector& Pos, const EDoorDirection& Rot)
 	return NewPos;
 }
 
+// ############ FDoorDef ##############
+
+bool FDoorDef::operator==(const FDoorDef& Other) const
+{
+	return Position == Other.Position && Direction == Other.Direction;
+}
+
+bool FDoorDef::AreCompatible(const FDoorDef& A, const FDoorDef& B)
+{
+	return A.Type == B.Type;
+}
+
 FVector FDoorDef::GetDoorSize() const
 {
 	return ADoor::GetSize(Type);
 }
 
-FIntVector IntVector::Min(const FIntVector& A, const FIntVector& B)
+FString FDoorDef::ToString() const
 {
-	return FIntVector(FMath::Min(A.X, B.X), FMath::Min(A.Y, B.Y), FMath::Min(A.Z, B.Z));
+	FText DirectionName;
+	UEnum::GetDisplayValueAsText(Direction, DirectionName);
+	return FString::Printf(TEXT("(%d,%d,%d) [%s]"), Position.X, Position.Y, Position.Z, *DirectionName.ToString());
 }
 
-FIntVector IntVector::Max(const FIntVector& A, const FIntVector& B)
+// ############ FBoxMinAndMax ##############
+
+FBoxMinAndMax::FBoxMinAndMax(const FIntVector& A, const FIntVector& B)
 {
-	return FIntVector(FMath::Max(A.X, B.X), FMath::Max(A.Y, B.Y), FMath::Max(A.Z, B.Z));
+	Min = IntVector::Min(A, B);
+	Max = IntVector::Max(A, B);
+}
+
+FIntVector FBoxMinAndMax::GetSize() const
+{
+	return Max - Min;
+}
+
+bool FBoxMinAndMax::Overlap(const FBoxMinAndMax& A, const FBoxMinAndMax& B)
+{
+	return (A.Max.X > B.Min.X && A.Min.X < B.Max.X)
+		&& (A.Max.Y > B.Min.Y && A.Min.Y < B.Max.Y)
+		&& (A.Max.Z > B.Min.Z && A.Min.Z < B.Max.Z);
+}
+
+FBoxMinAndMax& FBoxMinAndMax::operator+=(const FIntVector& X)
+{
+	Min += X;
+	Max += X;
+	return *this;
+}
+
+FBoxMinAndMax& FBoxMinAndMax::operator-=(const FIntVector& X)
+{
+	Min -= X;
+	Max -= X;
+	return *this;
 }
 
 FBoxMinAndMax operator+(const FBoxMinAndMax& Box, const FIntVector& X)
