@@ -24,27 +24,25 @@
 
 #pragma once
 
-#include "Toolkits/BaseToolkit.h"
+#include "CoreMinimal.h"
+#include "Framework/Commands/Commands.h"
+#include "EditorStyleSet.h"
 
-class FProceduralDungeonEdModeToolkit : public FModeToolkit
+class FProceduralDungeonEditorCommands : public TCommands<FProceduralDungeonEditorCommands>
 {
+
 public:
-    /** FModeToolkit interface */
-    virtual void Init(const TSharedPtr< class IToolkitHost >& InitToolkitHost) override;
-    virtual void GetToolPaletteNames(TArray<FName>& InPaletteName) const override;
-    virtual FText GetToolPaletteDisplayName(FName PaletteName) const override;
-    virtual void BuildToolPalette(FName Palette, class FToolBarBuilder& ToolbarBuilder) override;
+	FProceduralDungeonEditorCommands();
 
-    /** IToolkit interface */
-    virtual FName GetToolkitFName() const override { return FName("ProceduralDungeonEdMode"); }
-    virtual FText GetBaseToolkitName() const override { return NSLOCTEXT("ProceduralDungeonEdModeToolkit", "DisplayName", "ProceduralDungeonEdMode Tool"); }
-    virtual class FProceduralDungeonEdMode* GetEditorMode() const override;
-    virtual TSharedPtr<class SWidget> GetInlineContent() const override;
+	virtual void RegisterCommands() override;
 
-    void OnChangeTool(FName ToolName) const;
-    bool IsToolEnabled(FName ToolName) const;
-    bool IsToolActive(FName ToolName) const;
+public:
+	static FName ProceduralDungeonContext;
 
-private:
-    TSharedPtr<class SProceduralDungeonEdModeWidget> EdModeWidget;
+	// Tools
+	TSharedPtr<FUICommandInfo> SizeTool = nullptr;
+	TSharedPtr<FUICommandInfo> DoorTool = nullptr;
+
+	// Map
+	TMap<FName, TSharedPtr<FUICommandInfo>> NameToCommandMap;
 };
