@@ -50,22 +50,23 @@ enum class EDoorDirection : uint8
 	NbDirection	= 4 		UMETA(Hidden)
 };
 
-bool operator!(const EDoorDirection& Direction);
-EDoorDirection operator+(const EDoorDirection& A, const EDoorDirection& B);
-EDoorDirection operator-(const EDoorDirection& A, const EDoorDirection& B);
+bool PROCEDURALDUNGEON_API operator!(const EDoorDirection& Direction);
+EDoorDirection PROCEDURALDUNGEON_API operator+(const EDoorDirection& A, const EDoorDirection& B);
+EDoorDirection PROCEDURALDUNGEON_API operator-(const EDoorDirection& A, const EDoorDirection& B);
+// TODO: Don't know how to export these...
 EDoorDirection& operator+=(EDoorDirection& A, const EDoorDirection& B);
 EDoorDirection& operator-=(EDoorDirection& A, const EDoorDirection& B);
 EDoorDirection& operator++(EDoorDirection& Direction);
 EDoorDirection& operator--(EDoorDirection& Direction);
-EDoorDirection operator++(EDoorDirection& Direction, int);
-EDoorDirection operator--(EDoorDirection& Direction, int);
-EDoorDirection operator-(const EDoorDirection& Direction);
-EDoorDirection operator~(const EDoorDirection& Direction);
-inline EDoorDirection Opposite(const EDoorDirection& Direction) { return ~Direction; }
-FIntVector ToIntVector(const EDoorDirection& Direction);
-FVector ToVector(const EDoorDirection& Direction);
-FQuat ToQuaternion(const EDoorDirection& Direction);
-FIntVector Rotate(const FIntVector& Pos, const EDoorDirection& Rot);
+EDoorDirection PROCEDURALDUNGEON_API operator++(EDoorDirection& Direction, int);
+EDoorDirection PROCEDURALDUNGEON_API operator--(EDoorDirection& Direction, int);
+EDoorDirection PROCEDURALDUNGEON_API operator-(const EDoorDirection& Direction);
+EDoorDirection PROCEDURALDUNGEON_API operator~(const EDoorDirection& Direction);
+inline EDoorDirection PROCEDURALDUNGEON_API Opposite(const EDoorDirection& Direction) { return ~Direction; }
+FIntVector PROCEDURALDUNGEON_API ToIntVector(const EDoorDirection& Direction);
+FVector PROCEDURALDUNGEON_API ToVector(const EDoorDirection& Direction);
+FQuat PROCEDURALDUNGEON_API ToQuaternion(const EDoorDirection& Direction);
+FIntVector PROCEDURALDUNGEON_API Rotate(const FIntVector& Pos, const EDoorDirection& Rot);
 
 UENUM(BlueprintType, meta = (DisplayName = "Generation Type"))
 enum class EGenerationType : uint8
@@ -98,34 +99,13 @@ public:
 	class UDoorType* Type {nullptr};
 
 public:
-	bool operator==(const FDoorDef& Other) const
-	{
-		return Position == Other.Position && Direction == Other.Direction;
-	}
+	bool operator==(const FDoorDef& Other) const;
 
-	static bool AreCompatible(const FDoorDef& A, const FDoorDef& B)
-	{
-		return A.Type == B.Type;
-	}
+	static bool AreCompatible(const FDoorDef& A, const FDoorDef& B);
 
 	FVector GetDoorSize() const;
-
-	FString ToString() const
-	{
-		FText DirectionName;
-		UEnum::GetDisplayValueAsText(Direction, DirectionName);
-		return FString::Printf(TEXT("(%d,%d,%d) [%s]"), Position.X, Position.Y, Position.Z, *DirectionName.ToString());
-	}
+	FString ToString() const;
 };
-
-namespace IntVector
-{
-	// Returns the component-wise minimum of A and B
-	FIntVector Min(const FIntVector& A, const FIntVector& B);
-
-	// Returns the component-wise maximum of A and B
-	FIntVector Max(const FIntVector& A, const FIntVector& B);
-}
 
 struct FBoxMinAndMax
 {
@@ -135,37 +115,14 @@ public:
 
 public:
 	FBoxMinAndMax() = default;
-	FBoxMinAndMax(const FIntVector& A, const FIntVector& B)
-	{
-		Min = IntVector::Min(A, B);
-		Max = IntVector::Max(A, B);
-	}
+	FBoxMinAndMax(const FIntVector& A, const FIntVector& B);
 
-	FIntVector GetSize() const
-	{
-		return Max - Min;
-	}
+	FIntVector GetSize() const;
 
-	static bool Overlap(const FBoxMinAndMax& A, const FBoxMinAndMax& B)
-	{
-		return (A.Max.X > B.Min.X && A.Min.X < B.Max.X)
-			&& (A.Max.Y > B.Min.Y && A.Min.Y < B.Max.Y)
-			&& (A.Max.Z > B.Min.Z && A.Min.Z < B.Max.Z);
-	}
+	static bool Overlap(const FBoxMinAndMax& A, const FBoxMinAndMax& B);
 
-	FBoxMinAndMax& operator+=(const FIntVector& X)
-	{
-		Min += X;
-		Max += X;
-		return *this;
-	}
-
-	FBoxMinAndMax& operator-=(const FIntVector& X)
-	{
-		Min -= X;
-		Max -= X;
-		return *this;
-	}
+	FBoxMinAndMax& operator+=(const FIntVector& X);
+	FBoxMinAndMax& operator-=(const FIntVector& X);
 
 	friend static FBoxMinAndMax operator+(const FBoxMinAndMax& Box, const FIntVector& X);
 	friend static FBoxMinAndMax operator-(const FBoxMinAndMax& Box, const FIntVector& X);
