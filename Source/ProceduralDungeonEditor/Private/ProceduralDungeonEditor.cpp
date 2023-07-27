@@ -37,6 +37,7 @@
 #include "Styling/SlateStyleRegistry.h"
 #include "ProceduralDungeonEditorSettings.h"
 #include "EditorMode/ProceduralDungeonEdMode.h"
+#include "EditorMode/ProceduralDungeonEditorCommands.h"
 
 #define LOCTEXT_NAMESPACE "FProceduralDungeonEditorModule"
 
@@ -45,6 +46,8 @@
 void FProceduralDungeonEditorModule::StartupModule()
 {
 	RegisterSettings();
+
+	FProceduralDungeonEditorCommands::Register();
 
 	// Register assets in the "Procedural Dungeon" category
 	{
@@ -74,6 +77,10 @@ void FProceduralDungeonEditorModule::StartupModule()
 
 		StyleSet->Set("ProceduralDungeon.Icon", new IMAGE_BRUSH("Resources/IconEditorMode", Icon40x40));
 		StyleSet->Set("ProceduralDungeon.Icon.Small", new IMAGE_BRUSH("Resources/IconEditorMode", Icon20x20));
+		StyleSet->Set("ProceduralDungeonEditor.SizeTool", new IMAGE_BRUSH("Resources/IconSizeTool", Icon20x20));
+		StyleSet->Set("ProceduralDungeonEditor.SizeTool.Small", new IMAGE_BRUSH("Resources/IconSizeTool", Icon20x20));
+		StyleSet->Set("ProceduralDungeonEditor.DoorTool", new IMAGE_BRUSH("Resources/IconDoorTool", Icon20x20));
+		StyleSet->Set("ProceduralDungeonEditor.DoorTool.Small", new IMAGE_BRUSH("Resources/IconDoorTool", Icon20x20));
 
 		FSlateStyleRegistry::RegisterSlateStyle(*StyleSet);
 	}
@@ -84,6 +91,8 @@ void FProceduralDungeonEditorModule::StartupModule()
 
 void FProceduralDungeonEditorModule::ShutdownModule()
 {
+	FProceduralDungeonEditorCommands::Unregister();
+
 	// Unregister detail customizations
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
 	{

@@ -28,113 +28,22 @@
 #include "EditorModeManager.h"
 #include "ProceduralDungeonEdModeToolkit.h"
 #include "ProceduralDungeonEdLog.h"
+#include "Tools/ProceduralDungeonEditorTool_Size.h"
+#include "Tools/ProceduralDungeonEditorTool_Door.h"
 #include "Room.h"
 #include "RoomLevel.h"
 #include "RoomData.h"
 
-IMPLEMENT_HIT_PROXY(HRoomPointProxy, HHitProxy);
-
-FVector ToWorldLocation(FIntVector RoomPoint)
-{
-    return URoom::Unit() * (FVector(RoomPoint) - FVector(0.5f, 0.5f, 0.0f));
-}
-
-FIntVector ToRoomLocation(FVector WorldPoint)
-{
-    const FVector Unit = URoom::Unit();
-    const int X = FMath::RoundToInt(0.5f + (WorldPoint.X) / Unit.X);
-    const int Y = FMath::RoundToInt(0.5f + (WorldPoint.Y) / Unit.Y);
-    const int Z = FMath::RoundToInt((WorldPoint.Z) / Unit.Z);
-    return FIntVector(X, Y, Z);
-}
-
-FIntVector ToRoomVector(FVector WorldVector)
-{
-    const FVector Unit = URoom::Unit();
-    const int X = FMath::RoundToInt(WorldVector.X / Unit.X);
-    const int Y = FMath::RoundToInt(WorldVector.Y / Unit.Y);
-    const int Z = FMath::RoundToInt(WorldVector.Z / Unit.Z);
-    return FIntVector(X, Y, Z);
-}
-
-FVector SnapPoint(FVector Point)
-{
-    return ToWorldLocation(ToRoomLocation(Point));
-}
-
-void FRoomPoint::AddLinkedPoint(FRoomPoint& Point, EAxisList::Type Axis)
-{
-    LinkedPoints.Add({ &Point, Axis });
-    Point.LinkedPoints.Add({ this, Axis });
-}
-
-void FRoomPoint::SetLocation(FVector InLocation)
-{
-    SetDirty();
-    Location = InLocation;
-    UpdateWithPropagation();
-}
-
-void FRoomPoint::SetDirty()
-{
-    if (bDirty)
-        return;
-
-    bDirty = EAxisList::XYZ;
-    for (FLink& Link : LinkedPoints)
-    {
-        check(Link.Point);
-        Link.Point->SetDirty();
-    }
-}
-
-void FRoomPoint::UpdateWithPropagation()
-{
-    TQueue<FRoomPoint*> PendingNodes;
-    PendingNodes.Enqueue(this);
-    FRoomPoint* Node = nullptr;
-    while (PendingNodes.Dequeue(Node))
-    {
-        Node->UpdateLinkedPoints(PendingNodes);
-    }
-}
-
-void FRoomPoint::UpdateLinkedPoints(TQueue<FRoomPoint*>& PendingNodes)
-{
-    for (FLink& Link : LinkedPoints)
-    {
-        check(Link.Point);
-        if (Link.Point->bDirty)
-        {
-            Link.Point->UpdateFrom(*this, Link.Axis);
-            PendingNodes.Enqueue(Link.Point);
-        }
-    }
-}
-
-void FRoomPoint::UpdateFrom(FRoomPoint& From, EAxisList::Type Axis)
-{
-    if (bDirty & Axis & EAxisList::X)
-    {
-        bDirty &= ~EAxisList::X;
-        From.bDirty &= ~EAxisList::X;
-        Location.X = From.Location.X;
-    }
-    if (bDirty & Axis & EAxisList::Y)
-    {
-        bDirty &= ~EAxisList::Y;
-        From.bDirty &= ~EAxisList::Y;
-        Location.Y = From.Location.Y;
-    }
-    if (bDirty & Axis & EAxisList::Z)
-    {
-        bDirty &= ~EAxisList::Z;
-        From.bDirty &= ~EAxisList::Z;
-        Location.Z = From.Location.Z;
-    }
-}
+#define ROUTE_TO_TOOL(FuncCall) ActiveTool ? ActiveTool->FuncCall : FEdMode::FuncCall
 
 const FEditorModeID FProceduralDungeonEdMode::EM_ProceduralDungeon(TEXT("EM_ProceduralDungeon"));
+
+FProceduralDungeonEdMode::FProceduralDungeonEdMode()
+    : FEdMode()
+{
+    Tools.Add(MakeUnique<FProceduralDungeonEditorTool_Size>(this));
+    Tools.Add(MakeUnique<FProceduralDungeonEditorTool_Door>(this));
+}
 
 void FProceduralDungeonEdMode::Enter()
 {
@@ -148,39 +57,9 @@ void FProceduralDungeonEdMode::Enter()
     Level = Cast<ARoomLevel>(World->GetLevelScriptActor());
     DungeonEd_LogInfo("Room Level: %s", *GetNameSafe(Level.Get()));
 
-    if (Level.IsValid() && IsValid(Level.Get()->Data))
-    {
-        FIntVector P1 = Level.Get()->Data->FirstPoint;
-        FIntVector P2 = Level.Get()->Data->SecondPoint;
-
-        //        6    1
-        //      2    7
-        //        4    5
-        //      0    3
-
-        Points.Empty();
-        Points.AddDefaulted(8); 
-        
-        Points[0].AddLinkedPoint(Points[2], EAxisList::XY);
-        Points[0].AddLinkedPoint(Points[3], EAxisList::XZ);
-        Points[0].AddLinkedPoint(Points[4], EAxisList::YZ);
-
-        Points[1].AddLinkedPoint(Points[5], EAxisList::XY);
-        Points[1].AddLinkedPoint(Points[6], EAxisList::XZ);
-        Points[1].AddLinkedPoint(Points[7], EAxisList::YZ);
-
-        Points[2].AddLinkedPoint(Points[6], EAxisList::YZ);
-        Points[2].AddLinkedPoint(Points[7], EAxisList::XZ);
-
-        Points[3].AddLinkedPoint(Points[5], EAxisList::YZ);
-        Points[3].AddLinkedPoint(Points[7], EAxisList::XY);
-
-        Points[4].AddLinkedPoint(Points[5], EAxisList::XZ);
-        Points[4].AddLinkedPoint(Points[6], EAxisList::XY);
-
-        Points[0].SetLocation(ToWorldLocation(P1));
-        Points[1].SetLocation(ToWorldLocation(P2));
-    }
+    // Set default tool
+    if (IsToolEnabled("Tool_Size"))
+        SetActiveTool("Tool_Size");
 
     if (!Toolkit.IsValid())
     {
@@ -194,6 +73,9 @@ void FProceduralDungeonEdMode::Exit()
     FToolkitManager::Get().CloseToolkit(Toolkit.ToSharedRef());
     Toolkit.Reset();
 
+    if (ActiveTool)
+        ActiveTool->ExitTool();
+
     Level.Reset();
 
     FEdMode::Exit();
@@ -201,74 +83,30 @@ void FProceduralDungeonEdMode::Exit()
 
 void FProceduralDungeonEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
 {
-    const FColor NormalColor(200, 200, 200);
-    const FColor SelectedColor(255, 128, 0);
-
-    if (Level.IsValid())
-    {
-        const URoomData* Data = Level.Get()->Data;
-        if (IsValid(Data))
-        {
-            for (int i = 0; i < Points.Num(); ++i)
-            {
-                const bool bSelected = (SelectedPoint == i);
-                const FColor& Color = bSelected ? SelectedColor : NormalColor;
-
-                PDI->SetHitProxy(new HRoomPointProxy(i));
-                PDI->DrawPoint(Points[i].GetLocation(), Color, 15.0f, SDPG_Foreground);
-                PDI->SetHitProxy(nullptr);
-            }
-        }
-    }
+    if (ActiveTool)
+        ActiveTool->Render(View, Viewport, PDI);
 
     FEdMode::Render(View, Viewport, PDI);
 }
 
 bool FProceduralDungeonEdMode::HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click)
 {
-    bool bIsHandled = false;
-
-    if (HitProxy)
-    {
-        if (HitProxy->IsA(HRoomPointProxy::StaticGetType()))
-        {
-            bIsHandled = true;
-            const HRoomPointProxy* RoomProxy = (HRoomPointProxy*)HitProxy;
-            if (RoomProxy->Index >= 0 && RoomProxy->Index < Points.Num())
-            {
-                DungeonEd_LogInfo("Selected Point: %d", RoomProxy->Index);
-                SelectedPoint = RoomProxy->Index;
-                DragPoint = Points[SelectedPoint].GetLocation();
-            }
-        }
-    }
-    else if(SelectedPoint >= 0)
-    {
-        SelectedPoint = -1;
-    }
-
-    return bIsHandled;
+    return ROUTE_TO_TOOL(HandleClick(InViewportClient, HitProxy, Click));
 }
 
 bool FProceduralDungeonEdMode::InputDelta(FEditorViewportClient* InViewportClient, FViewport* InViewport, FVector& InDrag, FRotator& InRot, FVector& InScale)
 {
-    if (InViewportClient->GetCurrentWidgetAxis() == EAxisList::None)
-        return false;
+    return ROUTE_TO_TOOL(InputDelta(InViewportClient, InViewport, InDrag, InRot, InScale));
+}
 
-    if (HasValidSelection())
-    {
-        if (!InDrag.IsNearlyZero())
-        {
-            DragPoint += InDrag;
-            FVector OldPoint = Points[SelectedPoint].GetLocation();
-            Points[SelectedPoint].SetLocation(SnapPoint(DragPoint));
-            if(OldPoint != Points[SelectedPoint].GetLocation())
-                UpdateDataAsset();
-        }
-        return true;
-    }
+bool FProceduralDungeonEdMode::InputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event)
+{
+    return ROUTE_TO_TOOL(InputKey(ViewportClient, Viewport, Key, Event));
+}
 
-    return false;
+bool FProceduralDungeonEdMode::MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 MouseX, int32 MouseY)
+{
+    return ROUTE_TO_TOOL(MouseMove(ViewportClient, Viewport, MouseX, MouseY));
 }
 
 bool FProceduralDungeonEdMode::ShowModeWidgets() const
@@ -283,36 +121,62 @@ bool FProceduralDungeonEdMode::ShouldDrawWidget() const
 
 bool FProceduralDungeonEdMode::UsesTransformWidget() const
 {
-    return true;
+    return ROUTE_TO_TOOL(UsesTransformWidget());
 }
 
 bool FProceduralDungeonEdMode::UsesTransformWidget(WidgetMode CheckMode) const
 {
-    return CheckMode == WidgetMode::WM_Translate;
+    return ROUTE_TO_TOOL(UsesTransformWidget(CheckMode));
 }
 
 FVector FProceduralDungeonEdMode::GetWidgetLocation() const
 {
-    if (HasValidSelection())
-        return DragPoint;
-    return FEdMode::GetWidgetLocation();
+    return ROUTE_TO_TOOL(GetWidgetLocation());
 }
 
-bool FProceduralDungeonEdMode::HasValidSelection() const
+bool FProceduralDungeonEdMode::GetTool(FName ToolName, FProceduralDungeonEditorTool*& OutTool) const
 {
-    return SelectedPoint >= 0 && SelectedPoint < Points.Num();
+    for (auto& Tool : Tools)
+    {
+        if (Tool.IsValid() && Tool->GetToolName() == ToolName)
+        {
+            OutTool = Tool.Get();
+            return true;
+        }
+    }
+    return false;
 }
 
-void FProceduralDungeonEdMode::UpdateDataAsset() const
+FProceduralDungeonEditorTool* FProceduralDungeonEdMode::GetActiveTool() const
 {
-    if (!Level.IsValid())
+    return ActiveTool;
+}
+
+void FProceduralDungeonEdMode::SetActiveTool(FName ToolName)
+{
+    if (ActiveTool && ActiveTool->GetToolName() == ToolName)
         return;
 
-    URoomData* Data = Level.Get()->Data;
-    if (!IsValid(Data))
+    FProceduralDungeonEditorTool* NewTool = nullptr;
+    if (!GetTool(ToolName, NewTool))
+    {
+        DungeonEd_LogError("Tool '%s' is not a valid tool.", *ToolName.ToString());
         return;
+    }
 
-    Data->Modify();
-    Data->FirstPoint = ToRoomLocation(Points[0].GetLocation());
-    Data->SecondPoint = ToRoomLocation(Points[1].GetLocation());
+    check(NewTool);
+
+    if (ActiveTool)
+        ActiveTool->ExitTool();
+
+    DungeonEd_LogInfo("Set active tool to '%s'.", NewTool->GetToolName());
+    ActiveTool = NewTool;
+
+    if (ActiveTool)
+        ActiveTool->EnterTool();
+}
+
+bool FProceduralDungeonEdMode::IsToolEnabled(FName ToolName) const
+{
+    return Level.IsValid() && IsValid(Level.Get()->Data);
 }

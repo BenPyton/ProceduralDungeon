@@ -24,27 +24,31 @@
 
 #pragma once
 
-#include "Toolkits/BaseToolkit.h"
+#if ENGINE_MAJOR_VERSION <= 4
+#define COMPATIBILITY 1
+#else
+#define COMPATIBILITY 0
+#endif
 
-class FProceduralDungeonEdModeToolkit : public FModeToolkit
+#include "ProceduralDungeonTypes.h"
+
+#if !COMPATIBILITY
+#include "UnrealWidgetFwd.h"
+#endif
+
+#if COMPATIBILITY
+using WidgetMode = FWidget::EWidgetMode;
+#else
+using WidgetMode = UE::Widget::EWidgetMode;
+#endif
+
+EAxisList::Type operator~(const EAxisList::Type& This)
 {
-public:
-    /** FModeToolkit interface */
-    virtual void Init(const TSharedPtr< class IToolkitHost >& InitToolkitHost) override;
-    virtual void GetToolPaletteNames(TArray<FName>& InPaletteName) const override;
-    virtual FText GetToolPaletteDisplayName(FName PaletteName) const override;
-    virtual void BuildToolPalette(FName Palette, class FToolBarBuilder& ToolbarBuilder) override;
+    return static_cast<EAxisList::Type>(EAxisList::All - This);
+}
 
-    /** IToolkit interface */
-    virtual FName GetToolkitFName() const override { return FName("ProceduralDungeonEdMode"); }
-    virtual FText GetBaseToolkitName() const override { return NSLOCTEXT("ProceduralDungeonEdModeToolkit", "DisplayName", "ProceduralDungeonEdMode Tool"); }
-    virtual class FProceduralDungeonEdMode* GetEditorMode() const override;
-    virtual TSharedPtr<class SWidget> GetInlineContent() const override;
-
-    void OnChangeTool(FName ToolName) const;
-    bool IsToolEnabled(FName ToolName) const;
-    bool IsToolActive(FName ToolName) const;
-
-private:
-    TSharedPtr<class SProceduralDungeonEdModeWidget> EdModeWidget;
-};
+EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other)
+{
+    This = static_cast<EAxisList::Type>(This & Other);
+    return This;
+}

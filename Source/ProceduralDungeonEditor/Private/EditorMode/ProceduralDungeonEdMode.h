@@ -24,76 +24,18 @@
 
 #pragma once
 
-#if ENGINE_MAJOR_VERSION <= 4
-#define COMPATIBILITY 1
-#else
-#define COMPATIBILITY 0
-#endif
-
 #include "EdMode.h"
-#if !COMPATIBILITY
-#include "UnrealWidgetFwd.h"
-#endif
-
-#if COMPATIBILITY
-using WidgetMode = FWidget::EWidgetMode;
-#else
-using WidgetMode = UE::Widget::EWidgetMode;
-#endif
+#include "ProceduralDungeonEdTypes.h"
 
 class ARoomLevel;
-
-struct HRoomPointProxy : public HHitProxy
-{
-    DECLARE_HIT_PROXY();
-
-    HRoomPointProxy(int32 InIndex)
-        : HHitProxy(HPP_UI), Index(InIndex)
-    {}
-
-    int32 Index {-1};
-};
-
-EAxisList::Type operator~(const EAxisList::Type& This)
-{
-    return static_cast<EAxisList::Type>(EAxisList::All - This);
-}
-
-EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other)
-{
-    This = static_cast<EAxisList::Type>(This & Other);
-    return This;
-}
-
-struct FRoomPoint
-{
-    struct FLink
-    {
-        FRoomPoint* Point;
-        EAxisList::Type Axis;
-    };
-
-    void AddLinkedPoint(FRoomPoint& Point, EAxisList::Type Axis);
-    FVector GetLocation() const { return Location; }
-    void SetLocation(FVector InLocation);
-    FVector* operator->() { return &Location; }
-
-private:
-    void SetDirty();
-    void UpdateWithPropagation();
-    void UpdateLinkedPoints(TQueue<FRoomPoint*>& PendingNodes);
-    void UpdateFrom(FRoomPoint& From, EAxisList::Type Axis);
-
-private:
-    EAxisList::Type bDirty {EAxisList::None};
-    FVector Location {0};
-    TArray<FLink> LinkedPoints {};
-};
+class FProceduralDungeonEditorTool;
 
 class FProceduralDungeonEdMode : public FEdMode
 {
 public:
     const static FEditorModeID EM_ProceduralDungeon;
+
+    FProceduralDungeonEdMode();
 
     // FEdMode interface
     virtual void Enter() override;
@@ -101,6 +43,8 @@ public:
     virtual void Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI) override;
     virtual bool HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click) override;
     virtual bool InputDelta(FEditorViewportClient* InViewportClient, FViewport* InViewport, FVector& InDrag, FRotator& InRot, FVector& InScale) override;
+    virtual bool InputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event) override;
+    virtual bool MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y) override;
     virtual bool ShowModeWidgets() const override;
     virtual bool ShouldDrawWidget() const override;
     virtual bool UsesTransformWidget() const override;
@@ -108,12 +52,15 @@ public:
     virtual FVector GetWidgetLocation() const override;
     virtual bool AllowWidgetMove() override { return true; }
 
-    bool HasValidSelection() const;
-    void UpdateDataAsset() const;
+    bool GetTool(FName ToolName, FProceduralDungeonEditorTool*& OutTool) const;
+    FProceduralDungeonEditorTool* GetActiveTool() const;
+    void SetActiveTool(FName ToolName);
+    bool IsToolEnabled(FName ToolName) const;
 
     TWeakObjectPtr<ARoomLevel> Level = nullptr;
     TWeakObjectPtr<UWorld> World = nullptr;
-    int32 SelectedPoint {-1};
-    TArray<FRoomPoint> Points;
-    FVector DragPoint;
+
+private:
+    TArray<TUniquePtr<FProceduralDungeonEditorTool>> Tools;
+    FProceduralDungeonEditorTool* ActiveTool = nullptr;
 };
