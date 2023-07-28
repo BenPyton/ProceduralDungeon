@@ -150,8 +150,6 @@ public:
 	static bool Overlap(const URoom& A, const URoom& B);
 	static bool Overlap(const URoom& Room, const TArray<URoom*>& RoomList);
 
-	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset = true);
-
 	static void Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB);
 	static URoom* GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList);
 

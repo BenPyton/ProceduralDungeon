@@ -23,8 +23,10 @@
  */
 
 #include "ProceduralDungeonTypes.h"
+#include "DrawDebugHelpers.h"
 #include "ProceduralDungeonUtils.h"
-#include "Door.h"
+#include "DoorType.h"
+#include "Room.h"
 
 bool operator!(const EDoorDirection& Direction)
 {
@@ -183,7 +185,7 @@ bool FDoorDef::AreCompatible(const FDoorDef& A, const FDoorDef& B)
 
 FVector FDoorDef::GetDoorSize() const
 {
-	return ADoor::GetSize(Type);
+	return UDoorType::GetSize(Type);
 }
 
 FString FDoorDef::ToString() const
@@ -191,6 +193,43 @@ FString FDoorDef::ToString() const
 	FText DirectionName;
 	UEnum::GetDisplayValueAsText(Direction, DirectionName);
 	return FString::Printf(TEXT("(%d,%d,%d) [%s]"), Position.X, Position.Y, Position.Z, *DirectionName.ToString());
+}
+
+FVector FDoorDef::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset)
+{
+	const FVector CellPosition = FVector(DoorCell);
+	const FVector DirectionOffset = !DoorRot ? FVector::ZeroVector : (0.5f * ToVector(DoorRot));
+	const FVector HeightOffset = includeOffset ? FVector(0, 0, URoom::DoorOffset()) : FVector::ZeroVector;
+	return URoom::Unit() * (CellPosition + DirectionOffset + HeightOffset);
+}
+
+
+void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FDoorDef& DoorDef, const FTransform& Transform, bool includeOffset, bool isConnected)
+{
+	DrawDebug(World, Color, DoorDef.GetDoorSize(), DoorDef.Position, DoorDef.Direction, Transform, includeOffset, isConnected);
+}
+
+void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector& DoorSize, const FIntVector& DoorCell, const EDoorDirection& DoorRot, const FTransform& Transform, bool includeOffset, bool isConnected)
+{
+	FQuat DoorRotation = Transform.GetRotation() * ToQuaternion(!DoorRot ? EDoorDirection::North : DoorRot);
+	FVector DoorPosition = Transform.TransformPosition(GetRealDoorPosition(DoorCell, DoorRot, includeOffset) + FVector(0, 0, DoorSize.Z * 0.5f));
+
+	// Door frame
+	DrawDebugBox(World, DoorPosition, DoorSize * 0.5f, DoorRotation, Color);
+
+	if (isConnected)
+	{
+		// Arrow (there is a room on the other side OR in the editor preview)
+		DrawDebugDirectionalArrow(World, DoorPosition, DoorPosition + DoorRotation * FVector(300, 0, 0), 300, Color);
+	}
+	else
+	{
+		// Cross (there is no room on the other side AND NOT in the editor preview)
+		FVector HalfSize = DoorRotation * FVector(0, DoorSize.Y, DoorSize.Z) * 0.5f;
+		FVector HalfSizeConjugate = DoorRotation * FVector(0, DoorSize.Y, -DoorSize.Z) * 0.5f;
+		DrawDebugLine(World, DoorPosition - HalfSize, DoorPosition + HalfSize, Color);
+		DrawDebugLine(World, DoorPosition - HalfSizeConjugate, DoorPosition + HalfSizeConjugate, Color);
+	}
 }
 
 // ############ FBoxMinAndMax ##############
