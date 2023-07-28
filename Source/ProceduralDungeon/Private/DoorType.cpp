@@ -33,3 +33,8 @@ UDoorType::UDoorType()
 	Description = FText::FromString(TEXT("No Description"));
 #endif
 }
+
+FVector UDoorType::GetSize(const UDoorType* DoorType)
+{
+	return IsValid(DoorType) ? DoorType->Size : URoom::DoorSize();
+}

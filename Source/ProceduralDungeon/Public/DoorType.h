@@ -35,7 +35,10 @@ class PROCEDURALDUNGEON_API UDoorType : public UDataAsset
 	
 public:
 	UDoorType();
-	FVector GetSize() const { return Size; }
+
+	// Returns the door size from the door type asset,
+	// or the default door size in plugin's settings if no door type defined.
+	static FVector GetSize(const UDoorType* DoorType);
 
 protected:
 	// Size of the door bounds, only used by the debug draw as a visual hint for designers and artists.

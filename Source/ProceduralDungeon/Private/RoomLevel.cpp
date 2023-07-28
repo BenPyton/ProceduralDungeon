@@ -137,6 +137,7 @@ void ARoomLevel::Tick(float DeltaTime)
 		FTransform RoomTransform = (Room != nullptr) ? Room->GetTransform() : FTransform::Identity;
 		UpdateBounds();
 
+		// TODO: is it still needed now?
 		// Pivot
 		DrawDebugSphere(GetWorld(), DungeonTransform.TransformPosition(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
 
@@ -148,8 +149,7 @@ void ARoomLevel::Tick(float DeltaTime)
 		{
 			const bool isConnected = Room == nullptr || Room->IsConnected(i);
 			const bool isDoorValid = Data->IsDoorValid(i);
-			const FDoorDef& Door = Data->Doors[i];
-			ADoor::DrawDebug(GetWorld(), Door.GetDoorSize(), Door.Position, Door.Direction, RoomTransform * DungeonTransform, true, isConnected, isDoorValid);
+			FDoorDef::DrawDebug(GetWorld(), isDoorValid ? FColor::Blue : FColor::Orange, Data->Doors[i], RoomTransform * DungeonTransform, true, isConnected);
 		}
 	}
 #endif

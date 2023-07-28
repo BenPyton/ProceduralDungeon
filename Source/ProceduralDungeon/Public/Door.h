@@ -118,10 +118,4 @@ private:
 
 	UFUNCTION() // Needed macro for replication to work
 	void OnRep_IndexRoomB();
-
-public:
-	// Returns the door size from the door type asset,
-	// or the default door size in plugin's settings if no door type defined.
-	static FVector GetSize(const UDoorType* DoorType);
-	static void DrawDebug(UWorld* World, FVector DoorSize, FIntVector DoorCell = FIntVector::ZeroValue, EDoorDirection DoorRot = EDoorDirection::NbDirection, FTransform Transform = FTransform::Identity, bool includeOffset = false, bool isConnected = true, bool isValid = true);
 };

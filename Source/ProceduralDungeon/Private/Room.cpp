@@ -418,14 +418,6 @@ bool URoom::Overlap(const URoom& Room, const TArray<URoom*>& RoomList)
 	return overlap;
 }
 
-FVector URoom::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset)
-{
-	const FVector CellPosition = FVector(DoorCell);
-	const FVector DirectionOffset = !DoorRot ? FVector::ZeroVector : (0.5f * ToVector(DoorRot));
-	const FVector HeightOffset = includeOffset ? FVector(0, 0, URoom::DoorOffset()) : FVector::ZeroVector;
-	return URoom::Unit() * (CellPosition + DirectionOffset + HeightOffset);
-}
-
 void URoom::Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB)
 {
 	RoomA.SetConnection(DoorA, &RoomB, DoorB);

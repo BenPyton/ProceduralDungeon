@@ -142,8 +142,8 @@ void ADoor::Tick(float DeltaTime)
 
 #if WITH_EDITOR
 	// TODO: Place it in an editor module of the plugin
-	if (GetWorld()->WorldType == EWorldType::EditorPreview)
-		DrawDebug(GetWorld(), GetSize(Type));
+	if (URoom::DrawDebug() && GetWorld()->WorldType == EWorldType::EditorPreview)
+		FDoorDef::DrawDebug(GetWorld(), FColor::Blue, UDoorType::GetSize(Type));
 #endif
 }
 
@@ -154,37 +154,4 @@ void ADoor::SetConnectingRooms(URoom* _RoomA, URoom* _RoomB)
 	IndexRoomA = IsValid(_RoomA) ? _RoomA->GetRoomID() : -1;
 	IndexRoomB = IsValid(_RoomB) ? _RoomB->GetRoomID() : -1;
 	//UE_LOG(LogTemp, Log, TEXT("[Door %s] Set index room A: %d | B: %d"), *GetName(), IndexRoomA, IndexRoomB);
-}
-
-FVector ADoor::GetSize(const UDoorType* DoorType)
-{
-	return DoorType ? DoorType->GetSize() : URoom::DoorSize();
-}
-
-void ADoor::DrawDebug(UWorld* World, FVector DoorSize, FIntVector DoorCell, EDoorDirection DoorRot, FTransform Transform, bool includeOffset, bool isConnected, bool isValid)
-{
-	if (URoom::DrawDebug())
-	{
-		FQuat DoorRotation = Transform.GetRotation() * ToQuaternion(!DoorRot ? EDoorDirection::North : DoorRot);
-		FVector DoorPosition = Transform.TransformPosition(URoom::GetRealDoorPosition(DoorCell, DoorRot, includeOffset) + FVector(0, 0, DoorSize.Z * 0.5f));
-
-		const FColor& Color = (isValid) ? FColor::Blue : FColor::Orange;
-
-		// Door frame
-		DrawDebugBox(World, DoorPosition, DoorSize * 0.5f, DoorRotation, Color);
-
-		if (isConnected)
-		{
-			// Arrow (there is a room on the other side OR in the editor preview)
-			DrawDebugDirectionalArrow(World, DoorPosition, DoorPosition + DoorRotation * FVector(300, 0, 0), 300, Color);
-		}
-		else
-		{
-			// Cross (there is no room on the other side)
-			FVector HalfSize = DoorRotation * FVector(0, DoorSize.Y, DoorSize.Z) * 0.5f;
-			FVector HalfSizeConjugate = DoorRotation * FVector(0, DoorSize.Y, -DoorSize.Z) * 0.5f;
-			DrawDebugLine(World, DoorPosition - HalfSize, DoorPosition + HalfSize, Color);
-			DrawDebugLine(World, DoorPosition - HalfSizeConjugate, DoorPosition + HalfSizeConjugate, Color);
-		}
-	}
 }
