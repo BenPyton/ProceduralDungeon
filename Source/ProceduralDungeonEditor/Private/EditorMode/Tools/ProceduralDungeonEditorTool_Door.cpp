@@ -238,7 +238,7 @@ bool FProceduralDungeonEditorTool_Door::GetRoomCellFromHit(const FHitResult& Hit
         OutDirection = (DirY > 0) ? EDoorDirection::East : EDoorDirection::West;
 
     // Determine the room cell
-    FVector RoomSpacePoint = Hit.ImpactPoint / URoom::Unit();
+    FVector RoomSpacePoint = Hit.ImpactPoint / Dungeon::RoomUnit();
     RoomSpacePoint -= 0.5f * (ToVector(OutDirection) + FVector::UpVector);
     OutCell = FIntVector(FMath::RoundToInt(RoomSpacePoint.X), FMath::RoundToInt(RoomSpacePoint.Y), FMath::RoundToInt(RoomSpacePoint.Z));
     return true;

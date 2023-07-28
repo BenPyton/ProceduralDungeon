@@ -23,12 +23,12 @@
  */
 
 #include "DoorType.h"
-#include "Room.h"
+#include "ProceduralDungeonUtils.h"
 
 UDoorType::UDoorType()
 	: UDataAsset()
 {
-	Size = URoom::DoorSize();
+	Size = Dungeon::DefaultDoorSize();
 #if WITH_EDITOR
 	Description = FText::FromString(TEXT("No Description"));
 #endif
@@ -36,5 +36,5 @@ UDoorType::UDoorType()
 
 FVector UDoorType::GetSize(const UDoorType* DoorType)
 {
-	return IsValid(DoorType) ? DoorType->Size : URoom::DoorSize();
+	return IsValid(DoorType) ? DoorType->Size : Dungeon::DefaultDoorSize();
 }

@@ -30,6 +30,7 @@
 #include "GameFramework/GameState.h"
 #include "GameFramework/Pawn.h"
 #include "ProceduralDungeonTypes.h"
+#include "ProceduralDungeonUtils.h"
 #include "ProceduralDungeonLog.h"
 #include "Room.h"
 #include "RoomData.h"
@@ -80,7 +81,7 @@ void ARoomLevel::BeginPlay()
 		LogError(FString::Printf(TEXT("RoomLevel's Data does not match RoomData's Level [Data \"%s\" | Level \"%s\"]"), *Room->GetRoomData()->GetName(), *GetName()));
 	}
 
-	if (URoom::OccludeDynamicActors())
+	if (Dungeon::OccludeDynamicActors())
 	{
 		// Create trigger box to track dynamic actors inside the room
 		RoomTrigger = NewObject<UBoxComponent>(this, UBoxComponent::StaticClass(), FName("Room Trigger"));
@@ -132,7 +133,7 @@ void ARoomLevel::Tick(float DeltaTime)
 
 #if WITH_EDITOR
 	// TODO: Place the debug draw in an editor module of the plugin
-	if (URoom::DrawDebug() && IsValid(Data))
+	if (Dungeon::DrawDebug() && IsValid(Data))
 	{
 		FTransform RoomTransform = (Room != nullptr) ? Room->GetTransform() : FTransform::Identity;
 		UpdateBounds();

@@ -55,4 +55,15 @@ namespace Dungeon
 
 	// Returns the real world snapped location to the nearest point in room units from a real world point
 	FVector PROCEDURALDUNGEON_API SnapPoint(FVector Point);
+
+	// ===== Plugin's Settings =====
+	FVector PROCEDURALDUNGEON_API RoomUnit();
+	FVector PROCEDURALDUNGEON_API DefaultDoorSize();
+	float PROCEDURALDUNGEON_API DoorOffset();
+	bool PROCEDURALDUNGEON_API OcclusionCulling();
+	bool PROCEDURALDUNGEON_API UseLegacyOcclusion();
+	uint32 PROCEDURALDUNGEON_API OcclusionDistance();
+	bool PROCEDURALDUNGEON_API OccludeDynamicActors();
+	bool PROCEDURALDUNGEON_API DrawDebug();
+	bool PROCEDURALDUNGEON_API CanLoop();
 }
