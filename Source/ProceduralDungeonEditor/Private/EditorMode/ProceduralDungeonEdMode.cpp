@@ -28,6 +28,7 @@
 #include "EditorModeManager.h"
 #include "ProceduralDungeonEdModeToolkit.h"
 #include "ProceduralDungeonEdLog.h"
+#include "ProceduralDungeonEditorObject.h"
 #include "Tools/ProceduralDungeonEditorTool_Size.h"
 #include "Tools/ProceduralDungeonEditorTool_Door.h"
 #include "Room.h"
@@ -43,6 +44,14 @@ FProceduralDungeonEdMode::FProceduralDungeonEdMode()
 {
     Tools.Add(MakeUnique<FProceduralDungeonEditorTool_Size>(this));
     Tools.Add(MakeUnique<FProceduralDungeonEditorTool_Door>(this));
+
+    Settings = NewObject<UProceduralDungeonEditorObject>(GetTransientPackage(), TEXT("Editor Settings"), RF_Transactional);
+}
+
+void FProceduralDungeonEdMode::AddReferencedObjects(FReferenceCollector& Collector)
+{
+    FEdMode::AddReferencedObjects(Collector);
+    Collector.AddReferencedObject(Settings);
 }
 
 void FProceduralDungeonEdMode::Enter()
@@ -74,7 +83,10 @@ void FProceduralDungeonEdMode::Exit()
     Toolkit.Reset();
 
     if (ActiveTool)
+    {
         ActiveTool->ExitTool();
+        ActiveTool = nullptr;
+    }
 
     Level.Reset();
 
@@ -89,19 +101,32 @@ void FProceduralDungeonEdMode::Render(const FSceneView* View, FViewport* Viewpor
     FEdMode::Render(View, Viewport, PDI);
 }
 
+void FProceduralDungeonEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTime)
+{
+    FEdMode::Tick(ViewportClient, DeltaTime);
+
+    if (ActiveTool)
+        ActiveTool->Tick(ViewportClient, DeltaTime);
+}
+
 bool FProceduralDungeonEdMode::HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click)
 {
     return ROUTE_TO_TOOL(HandleClick(InViewportClient, HitProxy, Click));
 }
 
-bool FProceduralDungeonEdMode::InputDelta(FEditorViewportClient* InViewportClient, FViewport* InViewport, FVector& InDrag, FRotator& InRot, FVector& InScale)
-{
-    return ROUTE_TO_TOOL(InputDelta(InViewportClient, InViewport, InDrag, InRot, InScale));
-}
-
 bool FProceduralDungeonEdMode::InputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event)
 {
     return ROUTE_TO_TOOL(InputKey(ViewportClient, Viewport, Key, Event));
+}
+
+bool FProceduralDungeonEdMode::InputAxis(FEditorViewportClient* InViewportClient, FViewport* Viewport, int32 ControllerId, FKey Key, float Delta, float DeltaTime)
+{
+    return ROUTE_TO_TOOL(InputAxis(InViewportClient, Viewport, ControllerId, Key, Delta, DeltaTime));
+}
+
+bool FProceduralDungeonEdMode::InputDelta(FEditorViewportClient* InViewportClient, FViewport* InViewport, FVector& InDrag, FRotator& InRot, FVector& InScale)
+{
+    return ROUTE_TO_TOOL(InputDelta(InViewportClient, InViewport, InDrag, InRot, InScale));
 }
 
 bool FProceduralDungeonEdMode::MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 MouseX, int32 MouseY)

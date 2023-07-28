@@ -42,6 +42,8 @@ public:
 	virtual void EnterTool() override;
 	virtual void ExitTool() override;
 	virtual void Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI) override;
+	virtual void Tick(FEditorViewportClient* ViewportClient, float DeltaTime) override;
+	virtual bool HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click) override;
 	virtual bool MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 MouseX, int32 MouseY) override;
 
 	bool RoomTraceFromMouse(FHitResult& OutHit, FEditorViewportClient* ViewportClient) const;

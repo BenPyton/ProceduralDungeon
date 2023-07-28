@@ -25,12 +25,24 @@
 #include "ProceduralDungeonEditorTool_Door.h"
 #include "Components/BoxComponent.h"
 #include "EditorMode/ProceduralDungeonEdMode.h"
+#include "EditorMode/ProceduralDungeonEditorObject.h"
 #include "ProceduralDungeonEdLog.h"
 #include "ProceduralDungeonUtils.h"
 #include "Room.h"
 #include "RoomLevel.h"
 #include "RoomData.h"
 #include "Door.h"
+
+bool IsDoorValid(const URoomData* Data, const FDoorDef& Door)
+{
+    check(IsValid(Data));
+    for (const FDoorDef& DoorDef : Data->Doors)
+    {
+        if (DoorDef == Door)
+            return false;
+    }
+    return true;
+}
 
 void FProceduralDungeonEditorTool_Door::EnterTool()
 {
@@ -56,21 +68,25 @@ void FProceduralDungeonEditorTool_Door::EnterTool()
 void FProceduralDungeonEditorTool_Door::ExitTool()
 {
     DungeonEd_LogInfo("Exit Door Tool.");
-    RoomBox->DestroyComponent();
-    RoomBox.Reset();
+    if(RoomBox.IsValid())
+    { 
+        RoomBox->DestroyComponent();
+        RoomBox.Reset();
+    }
 }
 
 void FProceduralDungeonEditorTool_Door::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
 {
-    auto Level = EdMode->Level;
+    FProceduralDungeonEditorTool::Render(View, Viewport, PDI);
 
+    auto Level = EdMode->Level;
     if (!Level.IsValid() || !IsValid(Level->Data))
         return;
 
     FIntVector Min, Max;
     IntVector::MinMax(Level->Data->FirstPoint, Level->Data->SecondPoint, Min, Max);
 
-    const FColor LineColor(200, 200, 0, 128);
+    const FColor LineColor(100, 20, 0);
 
     // Vertical Lines on X
     for (int32 i = Min.X + 1; i < Max.X; ++i)
@@ -106,31 +122,71 @@ void FProceduralDungeonEditorTool_Door::Render(const FSceneView* View, FViewport
         PDI->DrawLine(Dungeon::ToWorldLocation(C), Dungeon::ToWorldLocation(D), LineColor, SDPG_World);
         PDI->DrawLine(Dungeon::ToWorldLocation(D), Dungeon::ToWorldLocation(A), LineColor, SDPG_World);
     }
+}
+
+void FProceduralDungeonEditorTool_Door::Tick(FEditorViewportClient* ViewportClient, float DeltaTime)
+{
+    FProceduralDungeonEditorTool::Tick(ViewportClient, DeltaTime);
 
     if (ShowDoorPreview)
     {
-        FColor PreviewColor(0, 255, 0);
-        FVector Start = Dungeon::ToWorldLocation(DoorPreview.Position) + 0.5f * URoom::Unit();
-        FVector End = Start + ToVector(DoorPreview.Direction) * URoom::Unit();
-        PDI->DrawLine(Start, End, PreviewColor, SDPG_World);
+        URoomData* Data = EdMode->Level->Data;
+        check(IsValid(Data));
+
+        UWorld* World = ViewportClient->GetWorld();
+        FColor Color = IsDoorValid(Data, DoorPreview) ? FColor::Green : FColor::Orange;
+        FDoorDef::DrawDebug(World, Color, DoorPreview, FTransform::Identity, /*includeOffset = */true);
     }
+}
+
+bool FProceduralDungeonEditorTool_Door::HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click)
+{
+    if (Click.IsAltDown() || Click.IsControlDown() || Click.IsShiftDown())
+        return false;
+
+    if (!ShowDoorPreview)
+        return false;
+
+    URoomData* Data = EdMode->Level->Data;
+    check(IsValid(Data));
+
+    if (Click.GetKey() == EKeys::LeftMouseButton)
+    {
+        if (IsDoorValid(Data, DoorPreview))
+        {
+            Data->Modify();
+            Data->Doors.Add(DoorPreview);
+            return true;
+        }
+    }
+
+    if (Click.GetKey() == EKeys::RightMouseButton)
+    {
+        DungeonEd_LogInfo("TODO: Delete existing door");
+        return true;
+    }
+
+    return false;
 }
 
 bool FProceduralDungeonEditorTool_Door::MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 MouseX, int32 MouseY)
 {
     ShowDoorPreview = false;
+
     FHitResult Hit;
-    if (RoomTraceFromMouse(Hit, ViewportClient))
-    {
-        FIntVector RoomCell;
-        EDoorDirection DoorDirection;
-        if (GetRoomCellFromHit(Hit, RoomCell, DoorDirection))
-        {
-            ShowDoorPreview = true;
-            DoorPreview.Position = RoomCell;
-            DoorPreview.Direction = DoorDirection;
-        }
-    }
+    if (!RoomTraceFromMouse(Hit, ViewportClient))
+        return false;
+
+    FIntVector RoomCell;
+    EDoorDirection DoorDirection;
+    if (!GetRoomCellFromHit(Hit, RoomCell, DoorDirection))
+        return false;
+
+    ShowDoorPreview = true;
+    DoorPreview.Position = RoomCell;
+    DoorPreview.Direction = DoorDirection;
+    DoorPreview.Type = EdMode->Settings->DoorType;
+
     return false;
 }
 
@@ -161,7 +217,6 @@ bool FProceduralDungeonEditorTool_Door::RoomTraceFromMouse(FHitResult& OutHit, F
 
 bool FProceduralDungeonEditorTool_Door::RoomTrace(FHitResult& OutHit, const FVector& RayOrigin, const FVector& RayEnd) const
 {
-    //DungeonEd_LogInfo("[RoomTrace] RoomBox: %s", *GetNameSafe(RoomBox.Get()));
     if (!RoomBox.IsValid())
         return false;
 

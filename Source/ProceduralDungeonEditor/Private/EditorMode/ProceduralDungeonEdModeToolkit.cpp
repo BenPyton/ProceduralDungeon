@@ -26,7 +26,9 @@
 #include "ProceduralDungeonEdMode.h"
 #include "SProceduralDungeonEdModeWidget.h"
 #include "EditorModeManager.h"
+#include "ISinglePropertyView.h"
 #include "ProceduralDungeonEditorCommands.h"
+#include "ProceduralDungeonEditorObject.h"
 #include "ProceduralDungeonEdLog.h"
 #include "Tools/ProceduralDungeonEditorTool.h"
 
@@ -70,9 +72,17 @@ FText FProceduralDungeonEdModeToolkit::GetToolPaletteDisplayName(FName PaletteNa
 void FProceduralDungeonEdModeToolkit::BuildToolPalette(FName Palette, FToolBarBuilder& ToolbarBuilder)
 {
     auto CommandList = FProceduralDungeonEditorCommands::Get();
+
+    // DoorType property from Settings
+    UProceduralDungeonEditorObject* EditorSettings = GetEditorMode()->Settings;
+    FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    TSharedPtr<ISinglePropertyView> SinglePropView = PropertyEditorModule.CreateSingleProperty(EditorSettings, "DoorType", {});
+
     ToolbarBuilder.BeginSection("Default");
     ToolbarBuilder.AddToolBarButton(CommandList.SizeTool);
+    ToolbarBuilder.AddSeparator();
     ToolbarBuilder.AddToolBarButton(CommandList.DoorTool);
+    ToolbarBuilder.AddToolBarWidget(SinglePropView.ToSharedRef());
     ToolbarBuilder.EndSection();
 }
 
