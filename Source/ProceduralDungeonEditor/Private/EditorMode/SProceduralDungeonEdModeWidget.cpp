@@ -31,6 +31,7 @@
 #include "Widgets/Notifications/SErrorText.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/SOverlay.h"
+#include "FileHelpers.h"
 #include "ProceduralDungeonEdLog.h"
 #include "ProceduralDungeonEditor.h"
 #include "ProceduralDungeonEdMode.h"
@@ -118,6 +119,17 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
                         .IsEnabled(this, &SProceduralDungeonEdModeWidget::IsValidRoomData)
                         .HAlign(EHorizontalAlignment::HAlign_Center)
                     ]
+                    + SOverlay::Slot()
+                    .HAlign(EHorizontalAlignment::HAlign_Right)
+                    .VAlign(EVerticalAlignment::VAlign_Center)
+                    [
+                        SNew(SButton)
+                        .ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetSaveButtonColor)
+                        .Text(FText::FromString(TEXT("Save")))
+                        .OnClicked(this, &SProceduralDungeonEdModeWidget::SaveData)
+                        .IsEnabled(this, &SProceduralDungeonEdModeWidget::IsDataDirty)
+                        .HAlign(EHorizontalAlignment::HAlign_Center)
+                    ]
                 ]
                 + SVerticalBox::Slot()
                 .FillHeight(1.0f)
@@ -197,10 +209,30 @@ FReply SProceduralDungeonEdModeWidget::EditData()
     return FReply::Handled();
 }
 
+FReply SProceduralDungeonEdModeWidget::SaveData()
+{
+    if(!IsValidRoomData())
+        return FReply::Unhandled();
+
+    auto Result = FEditorFileUtils::PromptForCheckoutAndSave({ Level->Data->GetPackage() }, /*bCheckDirty = */true, /*bPromptToSave = */false);
+    if(Result == FEditorFileUtils::EPromptReturnCode::PR_Success)
+        DungeonEd_LogInfo("Successfully Saved Data Asset: '%s'", *GetNameSafe(Level->Data));
+    return FReply::Handled();
+}
+
+FSlateColor SProceduralDungeonEdModeWidget::GetSaveButtonColor() const
+{
+    const FLinearColor& Default = FLinearColor::White;
+    const FLinearColor& Highlight = FLinearColor::Green;
+
+    uint32 ticks = FDateTime::Now().GetTicks(); // needs this line to avoid compiler optimization that prevent getting Now() each frame.
+    float seconds = static_cast<float>(ticks) / ETimespan::TicksPerSecond;
+    float t = FMath::Cos(3.0f * seconds);
+    return IsDataDirty() ? FMath::Lerp(Default, Highlight, t) : Default;
+}
+
 void SProceduralDungeonEdModeWidget::UpdateErrorText()
 {
-    DungeonEd_LogInfo("Update Error Text!");
-
     if (!IsValidRoomLevel())
         Error->SetError(TEXT("Persistent Level is not a Room Level."));
     else if (!IsValidRoomData())
@@ -230,6 +262,14 @@ bool SProceduralDungeonEdModeWidget::MatchingDataLevel() const
     return Level.Get()->Data->Level.GetUniqueID() == Level.Get()->GetWorld()->GetPathName();
 }
 
+bool SProceduralDungeonEdModeWidget::IsDataDirty() const
+{
+    if (!IsValidRoomData())
+        return false;
+
+    return Level->Data->GetPackage()->IsDirty();
+}
+
 EVisibility SProceduralDungeonEdModeWidget::ShowDetails() const
 {
     return IsValidRoomLevel() ? EVisibility::Visible : EVisibility::Collapsed;
@@ -247,9 +287,11 @@ EVisibility SProceduralDungeonEdModeWidget::ShowNote() const
 
 FText SProceduralDungeonEdModeWidget::GetDataAssetName() const
 {
-    return IsValidRoomLevel() 
-        ? FText::FromString(GetNameSafe(Level.Get()->Data))
-        : FText::GetEmpty();
+    if (!IsValidRoomData())
+        return FText::GetEmpty();
+
+    FString Dirty = IsDataDirty() ? "*" : "";
+    return FText::FromString(GetNameSafe(Level->Data) + Dirty);
 }
 
 FText SProceduralDungeonEdModeWidget::GetNoteText()
