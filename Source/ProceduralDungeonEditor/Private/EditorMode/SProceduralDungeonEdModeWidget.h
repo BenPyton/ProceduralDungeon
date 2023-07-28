@@ -41,12 +41,15 @@ protected:
     bool IsValidRoomLevel() const;
     bool IsValidRoomData() const;
     bool MatchingDataLevel() const;
+    bool IsDataDirty() const;
     EVisibility ShowDetails() const;
     EVisibility ShowDataDetails() const;
     EVisibility ShowNote() const;
     FText GetDataAssetName() const;
     void OnDataAssetChanged();
     FReply EditData();
+    FReply SaveData();
+    FSlateColor GetSaveButtonColor() const;
     void UpdateErrorText();
 
     static FText GetNoteText();
