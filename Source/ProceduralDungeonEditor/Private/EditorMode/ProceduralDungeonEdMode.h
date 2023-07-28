@@ -37,13 +37,18 @@ public:
 
     FProceduralDungeonEdMode();
 
+    /** FGCObject interface */
+    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+
     // FEdMode interface
     virtual void Enter() override;
     virtual void Exit() override;
     virtual void Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI) override;
+    virtual void Tick(FEditorViewportClient* ViewportClient, float DeltaTime) override;
     virtual bool HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click) override;
-    virtual bool InputDelta(FEditorViewportClient* InViewportClient, FViewport* InViewport, FVector& InDrag, FRotator& InRot, FVector& InScale) override;
     virtual bool InputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event) override;
+    virtual bool InputAxis(FEditorViewportClient* InViewportClient, FViewport* Viewport, int32 ControllerId, FKey Key, float Delta, float DeltaTime) override;
+    virtual bool InputDelta(FEditorViewportClient* InViewportClient, FViewport* InViewport, FVector& InDrag, FRotator& InRot, FVector& InScale) override;
     virtual bool MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y) override;
     virtual bool ShowModeWidgets() const override;
     virtual bool ShouldDrawWidget() const override;
@@ -59,6 +64,7 @@ public:
 
     TWeakObjectPtr<ARoomLevel> Level = nullptr;
     TWeakObjectPtr<UWorld> World = nullptr;
+    class UProceduralDungeonEditorObject* Settings {nullptr};
 
 private:
     TArray<TUniquePtr<FProceduralDungeonEditorTool>> Tools;
