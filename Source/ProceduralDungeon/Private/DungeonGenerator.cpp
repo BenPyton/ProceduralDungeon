@@ -34,7 +34,7 @@
 #include "Door.h"
 #include "RoomLevel.h"
 #include "ProceduralDungeon.h"
-#include "ProceduralDungeonSettings.h"
+#include "ProceduralDungeonUtils.h"
 #include "ProceduralDungeonLog.h"
 #include "QueueOrStack.h"
 #include "DungeonGraph.h"
@@ -297,7 +297,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>&
 			{
 				// connect the doors to all possible existing rooms
 				URoom::Connect(*newRoom, doorIndex, ParentRoom, i);
-				if (URoom::CanLoop())
+				if (Dungeon::CanLoop())
 				{
 					newRoom->TryConnectToExistingDoors(InOutRoomList);
 				}
@@ -365,7 +365,7 @@ void ADungeonGenerator::UpdateRoomVisibility()
 		room->SetPlayerInside(false);
 	}
 
-	uint32 OcclusionDistance = URoom::OcclusionDistance();
+	uint32 OcclusionDistance = Dungeon::OcclusionDistance();
 	TSet<URoom*> VisibleRooms;
 	UDungeonGraph::TraverseRooms(CurrentPlayerRooms, &VisibleRooms, OcclusionDistance, [](URoom* room) { room->SetVisible(true); });
 	UDungeonGraph::TraverseRooms(RoomsToHide, nullptr, OcclusionDistance, [&VisibleRooms](URoom* room) { room->SetVisible(VisibleRooms.Contains(room)); });

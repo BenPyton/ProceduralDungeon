@@ -152,15 +152,4 @@ public:
 
 	static void Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB);
 	static URoom* GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList);
-
-	// Plugin Settings
-	static FVector Unit();
-	static FVector DoorSize();
-	static float DoorOffset();
-	static bool OcclusionCulling();
-	static bool UseLegacyOcclusion();
-	static uint32 OcclusionDistance();
-	static bool OccludeDynamicActors();
-	static bool DrawDebug();
-	static bool CanLoop();
 };

@@ -23,7 +23,7 @@
 */
 
 #include "RoomVisibilityComponent.h"
-#include "Room.h"
+#include "ProceduralDungeonUtils.h"
 
 URoomVisibilityComponent::URoomVisibilityComponent()
 	: VisibilityMode(EVisibilityMode::Default)
@@ -39,7 +39,7 @@ void URoomVisibilityComponent::BeginPlay()
 
 bool URoomVisibilityComponent::IsVisible()
 {
-	return URoom::OccludeDynamicActors() ? VisibilityEnablers.Num() > 0: true;
+	return Dungeon::OccludeDynamicActors() ? VisibilityEnablers.Num() > 0: true;
 }
 
 void URoomVisibilityComponent::SetVisible(UObject* Owner, bool Visible)

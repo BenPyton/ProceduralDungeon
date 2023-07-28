@@ -25,8 +25,8 @@
 #include "RoomData.h"
 #include "RoomLevel.h"
 #include "ProceduralDungeonTypes.h"
+#include "ProceduralDungeonUtils.h"
 #include "Math/GenericOctree.h" // FBoxCenterAndExtent
-#include "Room.h" // Access to URoom static values (like URoom::Unit)
 
 URoomData::URoomData()
 	: Super()
@@ -51,8 +51,8 @@ bool URoomData::InitializeRoom_Implementation(URoom* Room, UDungeonGraph* Dungeo
 FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
 {
 	FBoxMinAndMax LocalBounds = GetIntBounds();
-	FVector Center = Transform.TransformPosition(0.5f * URoom::Unit() * FVector(LocalBounds.Min + LocalBounds.Max - FIntVector(1, 1, 0)));
-	FVector Extent = Transform.TransformVector(0.5f * URoom::Unit() * FVector(LocalBounds.GetSize()));
+	FVector Center = Transform.TransformPosition(0.5f * Dungeon::RoomUnit() * FVector(LocalBounds.Min + LocalBounds.Max - FIntVector(1, 1, 0)));
+	FVector Extent = Transform.TransformVector(0.5f * Dungeon::RoomUnit() * FVector(LocalBounds.GetSize()));
 	return FBoxCenterAndExtent(Center, Extent.GetAbs());
 }
 

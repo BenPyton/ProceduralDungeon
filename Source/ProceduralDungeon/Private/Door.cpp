@@ -30,6 +30,7 @@
 #include "Engine/Engine.h"
 #include "DungeonGenerator.h"
 #include "DoorType.h"
+#include "ProceduralDungeonUtils.h"
 
 // Sets default values
 ADoor::ADoor()
@@ -142,7 +143,7 @@ void ADoor::Tick(float DeltaTime)
 
 #if WITH_EDITOR
 	// TODO: Place it in an editor module of the plugin
-	if (URoom::DrawDebug() && GetWorld()->WorldType == EWorldType::EditorPreview)
+	if (Dungeon::DrawDebug() && GetWorld()->WorldType == EWorldType::EditorPreview)
 		FDoorDef::DrawDebug(GetWorld(), FColor::Blue, UDoorType::GetSize(Type));
 #endif
 }

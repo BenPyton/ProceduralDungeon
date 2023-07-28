@@ -27,7 +27,7 @@
 #include "Engine/World.h"
 #include "RoomData.h"
 #include "RoomLevel.h"
-#include "ProceduralDungeonSettings.h"
+#include "ProceduralDungeonUtils.h"
 #include "ProceduralDungeonLog.h"
 #include "DungeonGenerator.h"
 #include "RoomCustomData.h"
@@ -113,7 +113,7 @@ void URoom::Instantiate(UWorld* World)
 			nameSuffix = FString::FromInt(GeneratorOwner->GetUniqueId()) + TEXT("_") + nameSuffix;
 		}
 
-		FVector FinalLocation = rotation.RotateVector(URoom::Unit() * FVector(Position)) + offset;
+		FVector FinalLocation = rotation.RotateVector(Dungeon::RoomUnit() * FVector(Position)) + offset;
 		FQuat FinalRotation = rotation * ToQuaternion(Direction);
 		Instance = UProceduralLevelStreaming::Load(World, RoomData, nameSuffix, FinalLocation, FinalRotation.Rotator());
 
@@ -335,7 +335,7 @@ FBoxMinAndMax URoom::GetIntBounds() const
 FTransform URoom::GetTransform() const
 {
 	FTransform Transform;
-	Transform.SetLocation(FVector(Position) * URoom::Unit());
+	Transform.SetLocation(FVector(Position) * Dungeon::RoomUnit());
 	Transform.SetRotation(ToQuaternion(Direction));
 	return Transform;
 }
@@ -347,7 +347,7 @@ void URoom::SetVisible(bool Visible)
 
 	bIsVisible = Visible;
 
-	if (URoom::UseLegacyOcclusion())
+	if (Dungeon::UseLegacyOcclusion())
 	{
 		ARoomLevel* LevelScript = GetLevelScript();
 		if(IsValid(LevelScript))
@@ -434,62 +434,4 @@ URoom* URoom::GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList)
 		}
 	}
 	return nullptr;
-}
-
-// =================== Plugin's Settings ========================
-// TODO: move them in UProceduralDungeonSettings instead?
-
-FVector URoom::Unit()
-{
-	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	return Settings->RoomUnit;
-}
-
-FVector URoom::DoorSize()
-{
-	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	return Settings->DoorSize;
-}
-
-float URoom::DoorOffset()
-{
-	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	return Settings->DoorOffset;
-}
-
-bool URoom::OcclusionCulling()
-{
-	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	return Settings->OcclusionCulling;
-}
-
-bool URoom::UseLegacyOcclusion()
-{
-	//UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	//return Settings->LegacyOcclusion;
-	return true;
-}
-
-uint32 URoom::OcclusionDistance()
-{
-	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	return Settings->OcclusionDistance;
-}
-
-bool URoom::OccludeDynamicActors()
-{
-	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	return Settings->OcclusionCulling && Settings->OccludeDynamicActors;
-}
-
-bool URoom::DrawDebug()
-{
-	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	return Settings->DrawDebug;
-}
-
-bool URoom::CanLoop()
-{
-	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	return Settings->CanLoop;
 }

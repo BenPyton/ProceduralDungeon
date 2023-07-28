@@ -26,7 +26,6 @@
 #include "DrawDebugHelpers.h"
 #include "ProceduralDungeonUtils.h"
 #include "DoorType.h"
-#include "Room.h"
 
 bool operator!(const EDoorDirection& Direction)
 {
@@ -199,8 +198,8 @@ FVector FDoorDef::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRo
 {
 	const FVector CellPosition = FVector(DoorCell);
 	const FVector DirectionOffset = !DoorRot ? FVector::ZeroVector : (0.5f * ToVector(DoorRot));
-	const FVector HeightOffset = includeOffset ? FVector(0, 0, URoom::DoorOffset()) : FVector::ZeroVector;
-	return URoom::Unit() * (CellPosition + DirectionOffset + HeightOffset);
+	const FVector HeightOffset = includeOffset ? FVector(0, 0, Dungeon::DoorOffset()) : FVector::ZeroVector;
+	return Dungeon::RoomUnit() * (CellPosition + DirectionOffset + HeightOffset);
 }
 
 
