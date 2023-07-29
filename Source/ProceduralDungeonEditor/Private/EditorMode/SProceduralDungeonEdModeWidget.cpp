@@ -32,6 +32,8 @@
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/SOverlay.h"
 #include "FileHelpers.h"
+#include "Engine/LevelScriptBlueprint.h"
+#include "Kismet2/KismetEditorUtilities.h"
 #include "ProceduralDungeonEdLog.h"
 #include "ProceduralDungeonEditor.h"
 #include "ProceduralDungeonEdMode.h"
@@ -43,10 +45,8 @@
 void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TSharedRef<FProceduralDungeonEdModeToolkit> InParentToolkit)
 {
     ParentToolkit = InParentToolkit;
-    Level = InParentToolkit->GetEditorMode()->Level;
-    DungeonEd_LogInfo("Slate Editor Level: %s", *GetNameSafe(Level.Get()));
-
-    FText LevelName = FText::FromString(GetNameSafe(InParentToolkit->GetEditorMode()->World.Get()));
+    FProceduralDungeonEdMode* EdMode = InParentToolkit->GetEditorMode();
+    FText LevelName = FText::FromString(GetNameSafe(EdMode->World.Get()));
 
     FSlateFontInfo TitleFont = FEditorStyle::GetFontStyle("DetailsView.CategoryFontStyle");
     TitleFont.Size = 24;
@@ -55,7 +55,6 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
     SubTitleFont.Size = 16;
 
     TSharedPtr<SScrollBox> DataScrollBox = nullptr;
-    TSharedPtr<SBorder> LevelPropertyContainer = nullptr;
 
     ChildSlot
     [
@@ -124,10 +123,10 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
                     .VAlign(EVerticalAlignment::VAlign_Center)
                     [
                         SNew(SButton)
-                        .ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetSaveButtonColor)
                         .Text(FText::FromString(TEXT("Save")))
                         .OnClicked(this, &SProceduralDungeonEdModeWidget::SaveData)
                         .IsEnabled(this, &SProceduralDungeonEdModeWidget::IsDataDirty)
+                        .ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetSaveButtonColor)
                         .HAlign(EHorizontalAlignment::HAlign_Center)
                     ]
                 ]
@@ -142,39 +141,24 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
         ]
         + SVerticalBox::Slot()
         .Padding(5.0f)
+        .AutoHeight()
         [
-            SNew(STextBlock)
-            .Text_Static(&SProceduralDungeonEdModeWidget::GetNoteText)
-            .AutoWrapText(true)
+            SNew(SBorder)
+            .HAlign(EHorizontalAlignment::HAlign_Center)
             .Visibility(this, &SProceduralDungeonEdModeWidget::ShowNote)
+            .BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f))
+            .Padding(0.0f)
+            [
+                SNew(SButton)
+                .Text(FText::FromString(TEXT("Reparent Level Blueprint")))
+                .OnClicked(this, &SProceduralDungeonEdModeWidget::ReparentLevelActor)
+                .ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetReparentButtonColor)
+                .HAlign(EHorizontalAlignment::HAlign_Center)
+            ]
         ]
     ];
 
-    // Check Level script actor validity
-    if (!IsValidRoomLevel())
-    {
-        UpdateErrorText();
-        return;
-    }
-
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-    // RoomLevel Data property
-    TSharedPtr<ISinglePropertyView> SinglePropView = PropertyEditorModule.CreateSingleProperty(Level.Get(), "Data", {});
-    FSimpleDelegate PropertyChangedDelegate = FSimpleDelegate::CreateSP(this, &SProceduralDungeonEdModeWidget::OnDataAssetChanged);
-    SinglePropView->SetOnPropertyValueChanged(PropertyChangedDelegate);
-    LevelPropertyContainer->SetContent(SinglePropView.ToSharedRef());
-
-    // Check Data asset validity
-    URoomData* Data = Level.Get()->Data;
-    if (!IsValid(Data))
-    {
-        UpdateErrorText();
-        return;
-    }
-
-    // Update the error if the data asset is edited externally
-    Data->OnPropertiesChanged.AddLambda([this](URoomData* Data) { UpdateErrorText(); });
 
     // RoomData details view
     FDetailsViewArgs DetailsViewArgs;
@@ -183,20 +167,77 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
     DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
 
     DataContentWidget = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    DataContentWidget->SetObject(Data);
     DataContentWidget->OnFinishedChangingProperties().AddLambda([this](const FPropertyChangedEvent& Event) { UpdateErrorText(); });
     DataScrollBox->AddSlot()
     [
         DataContentWidget.ToSharedRef()
     ];
+
+    UpdateFromLevel();
+}
+
+void SProceduralDungeonEdModeWidget::UpdateFromLevel()
+{
+    FProceduralDungeonEdMode* EdMode = ParentToolkit.Pin()->GetEditorMode();
+    Level = EdMode->Level;
+    DungeonEd_LogInfo("Slate Editor Level: %s", *GetNameSafe(Level.Get()));
+
+    // Check Level script actor validity
+    if (!IsValidRoomLevel())
+    {
+        UpdateErrorText();
+        return;
+    }
+
+    // RoomLevel Data property
+    FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+    TSharedPtr<ISinglePropertyView> SinglePropView = PropertyEditorModule.CreateSingleProperty(Level.Get(), "Data", {});
+    FSimpleDelegate PropertyChangedDelegate = FSimpleDelegate::CreateSP(this, &SProceduralDungeonEdModeWidget::OnDataAssetChanged);
+    SinglePropView->SetOnPropertyValueChanged(PropertyChangedDelegate);
+    LevelPropertyContainer->SetContent(SinglePropView.ToSharedRef());
+
+    OnDataAssetChanged();
 }
 
 void SProceduralDungeonEdModeWidget::OnDataAssetChanged()
 {
+    if (CurrentRoomData.IsValid())
+        CurrentRoomData->OnPropertiesChanged.Remove(DataDelegateHandle);
+
+    CurrentRoomData = Level.IsValid() ? Level->Data : nullptr;
     if (IsValidRoomData())
-        DataContentWidget->SetObject(Level.Get()->Data);
+    {
+        DataContentWidget->SetObject(CurrentRoomData.Get());
+        DataDelegateHandle = CurrentRoomData.Get()->OnPropertiesChanged.AddLambda([this](URoomData* Data) { UpdateErrorText(); });
+    }
+
+    auto EdMode = ParentToolkit.Pin()->GetEditorMode();
+    check(EdMode);
+    EdMode->SetDefaultTool();
 
     UpdateErrorText();
+}
+
+FReply SProceduralDungeonEdModeWidget::ReparentLevelActor()
+{
+    auto EdMode = ParentToolkit.Pin()->GetEditorMode();
+    auto World = EdMode->World;
+    ULevelScriptBlueprint* LevelBlueprint = World->PersistentLevel->GetLevelScriptBlueprint();
+    if (!IsValid(LevelBlueprint))
+    {
+        DungeonEd_LogInfo("ERROR: Can't Reparent Level Blueprint for an unknown reason.");
+        return FReply::Unhandled();
+    }
+
+    LevelBlueprint->ParentClass = ARoomLevel::StaticClass();
+    FKismetEditorUtilities::CompileBlueprint(LevelBlueprint);
+
+    DungeonEd_LogInfo("Level Blueprint '%s' successfully reparented!", *LevelBlueprint->GetName());
+
+    EdMode->UpdateLevel();
+    UpdateFromLevel();
+
+    return FReply::Unhandled();
 }
 
 FReply SProceduralDungeonEdModeWidget::EditData()
@@ -224,11 +265,12 @@ FSlateColor SProceduralDungeonEdModeWidget::GetSaveButtonColor() const
 {
     const FLinearColor& Default = FLinearColor::White;
     const FLinearColor& Highlight = FLinearColor::Green;
+    return IsDataDirty() ? GetHighlightButtonColor(Highlight, Default) : Default;
+}
 
-    uint32 ticks = FDateTime::Now().GetTicks(); // needs this line to avoid compiler optimization that prevent getting Now() each frame.
-    float seconds = static_cast<float>(ticks) / ETimespan::TicksPerSecond;
-    float t = FMath::Cos(3.0f * seconds);
-    return IsDataDirty() ? FMath::Lerp(Default, Highlight, t) : Default;
+FSlateColor SProceduralDungeonEdModeWidget::GetReparentButtonColor() const
+{
+    return GetHighlightButtonColor(FLinearColor::Green);
 }
 
 void SProceduralDungeonEdModeWidget::UpdateErrorText()
@@ -252,14 +294,14 @@ bool SProceduralDungeonEdModeWidget::IsValidRoomData() const
 {
     if (!IsValidRoomLevel())
         return false;
-    return IsValid(Level.Get()->Data);
+    return IsValid(Level->Data);
 }
 
 bool SProceduralDungeonEdModeWidget::MatchingDataLevel() const
 {
     if (!IsValidRoomData())
         return false;
-    return Level.Get()->Data->Level.GetUniqueID() == Level.Get()->GetWorld()->GetPathName();
+    return Level->Data->Level.GetUniqueID() == Level->GetWorld()->GetPathName();
 }
 
 bool SProceduralDungeonEdModeWidget::IsDataDirty() const
@@ -294,13 +336,10 @@ FText SProceduralDungeonEdModeWidget::GetDataAssetName() const
     return FText::FromString(GetNameSafe(Level->Data) + Dirty);
 }
 
-FText SProceduralDungeonEdModeWidget::GetNoteText()
+FLinearColor SProceduralDungeonEdModeWidget::GetHighlightButtonColor(const FLinearColor& HighlightColor, const FLinearColor& NormalColor, float Speed)
 {
-    // TODO: Create a button to automatically reparent the level blueprint to ARoomLevel
-    // (see FBlueprintEditor::ReparentBlueprint_NewParentChosen for how it is implemented)
-    return FText::FromString(
-        TEXT("You have to reparent your level blueprint.")\
-        TEXT("\nGo to the level blueprint (Blueprints -> \"Open Level Blueprint\") then reparent the blueprint to \"RoomLevel\".")\
-        TEXT("\n(If you want to create a lot of rooms, you can go to \"Project Settings->Engine->General Settings\"")\
-        TEXT(" and set the \"Level Script Actor Class\" to \"RoomLevel\" thus you don't have to reparent each level)"));
+    uint32 ticks = FDateTime::Now().GetTicks(); // needs this line to avoid compiler optimization that prevent getting Now() each frame.
+    float seconds = static_cast<float>(ticks) / ETimespan::TicksPerSecond;
+    float t = FMath::Cos(Speed * seconds);
+    return FMath::Lerp(NormalColor, HighlightColor, t);
 }

@@ -60,8 +60,17 @@ public:
     bool GetTool(FName ToolName, FProceduralDungeonEditorTool*& OutTool) const;
     FProceduralDungeonEditorTool* GetActiveTool() const;
     void SetActiveTool(FName ToolName);
+    void ResetActiveTool();
+    void SetDefaultTool();
     bool IsToolEnabled(FName ToolName) const;
 
+    // Set Level and World pointers from 
+    void UpdateLevel();
+
+private:
+    void SetActiveTool(FProceduralDungeonEditorTool* NewTool);
+
+public:
     TWeakObjectPtr<ARoomLevel> Level = nullptr;
     TWeakObjectPtr<UWorld> World = nullptr;
     class UProceduralDungeonEditorObject* Settings {nullptr};
