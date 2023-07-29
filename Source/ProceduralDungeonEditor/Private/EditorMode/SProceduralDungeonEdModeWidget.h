@@ -38,6 +38,7 @@ public:
     void Construct(const FArguments& InArgs, TSharedRef<FProceduralDungeonEdModeToolkit> InParentToolkit);
 
 protected:
+    void UpdateFromLevel();
     bool IsValidRoomLevel() const;
     bool IsValidRoomData() const;
     bool MatchingDataLevel() const;
@@ -47,16 +48,22 @@ protected:
     EVisibility ShowNote() const;
     FText GetDataAssetName() const;
     void OnDataAssetChanged();
+    FReply ReparentLevelActor();
     FReply EditData();
     FReply SaveData();
     FSlateColor GetSaveButtonColor() const;
+    FSlateColor GetReparentButtonColor() const;
     void UpdateErrorText();
 
-    static FText GetNoteText();
+    static FLinearColor GetHighlightButtonColor(const FLinearColor& HighlightColor, const FLinearColor& NormalColor = FLinearColor::White, float Speed = 3.0f);
 
 private:
     TWeakObjectPtr<ARoomLevel> Level = nullptr;
     TSharedPtr<class SErrorText> Error = nullptr;
     TSharedPtr<class IDetailsView> DataContentWidget = nullptr;
     TWeakPtr<FProceduralDungeonEdModeToolkit> ParentToolkit = nullptr;
+
+    TSharedPtr<class SBorder> LevelPropertyContainer = nullptr;
+    TWeakObjectPtr<class URoomData> CurrentRoomData = nullptr;
+    FDelegateHandle DataDelegateHandle;
 };

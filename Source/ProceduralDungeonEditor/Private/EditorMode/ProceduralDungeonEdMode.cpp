@@ -58,17 +58,7 @@ void FProceduralDungeonEdMode::Enter()
 {
     FEdMode::Enter();
 
-    // Get Current Level Actor
-    FWorldContext WorldContext = GEditor->GetEditorWorldContext();
-    World = WorldContext.World();
-    DungeonEd_LogInfo("World Context: %s", *GetNameSafe(World.Get()));
-
-    Level = Cast<ARoomLevel>(World->GetLevelScriptActor());
-    DungeonEd_LogInfo("Room Level: %s", *GetNameSafe(Level.Get()));
-
-    // Set default tool
-    if (IsToolEnabled("Tool_Size"))
-        SetActiveTool("Tool_Size");
+    UpdateLevel();
 
     if (!Toolkit.IsValid())
     {
@@ -190,18 +180,50 @@ void FProceduralDungeonEdMode::SetActiveTool(FName ToolName)
     }
 
     check(NewTool);
+    SetActiveTool(NewTool);
+}
 
+void FProceduralDungeonEdMode::ResetActiveTool()
+{
+    SetActiveTool(nullptr);
+}
+
+void FProceduralDungeonEdMode::SetActiveTool(FProceduralDungeonEditorTool* NewTool)
+{
     if (ActiveTool)
         ActiveTool->ExitTool();
 
-    DungeonEd_LogInfo("Set active tool to '%s'.", NewTool->GetToolName());
+    DungeonEd_LogInfo("Set active tool to '%s'.", NewTool ? NewTool->GetToolName() : TEXT("None"));
     ActiveTool = NewTool;
 
     if (ActiveTool)
         ActiveTool->EnterTool();
 }
 
+void FProceduralDungeonEdMode::SetDefaultTool()
+{
+    if (!ActiveTool && IsToolEnabled("Tool_Size"))
+        SetActiveTool("Tool_Size");
+}
+
 bool FProceduralDungeonEdMode::IsToolEnabled(FName ToolName) const
 {
     return Level.IsValid() && IsValid(Level.Get()->Data);
 }
+
+void FProceduralDungeonEdMode::UpdateLevel()
+{
+    // Get Current Level Actor
+    FWorldContext WorldContext = GEditor->GetEditorWorldContext();
+    World = WorldContext.World();
+    DungeonEd_LogInfo("World Context: %s", *GetNameSafe(World.Get()));
+
+    Level = Cast<ARoomLevel>(World->GetLevelScriptActor());
+    DungeonEd_LogInfo("Room Level: %s", *GetNameSafe(Level.Get()));
+
+    if (Level.IsValid())
+        SetDefaultTool();
+    else
+        ResetActiveTool();
+}
+
