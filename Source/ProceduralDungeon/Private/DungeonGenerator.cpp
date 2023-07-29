@@ -67,6 +67,7 @@ ADungeonGenerator::ADungeonGenerator()
 void ADungeonGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+	Graph->Generator = this;
 }
 
 void ADungeonGenerator::EndPlay(EEndPlayReason::Type EndPlayReason)

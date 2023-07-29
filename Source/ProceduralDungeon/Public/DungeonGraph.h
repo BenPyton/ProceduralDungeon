@@ -30,13 +30,14 @@
 
 class URoom;
 class URoomData;
+class ADungeonGenerator;
 
 UCLASS(BlueprintType)
 class PROCEDURALDUNGEON_API UDungeonGraph : public UObject
 {
 	GENERATED_BODY()
 
-	friend class ADungeonGenerator;
+	friend ADungeonGenerator;
 
 public:
 	UDungeonGraph();
@@ -124,4 +125,6 @@ protected:
 private:
 	UPROPERTY()
 	TArray<URoom*> Rooms;
+
+	TWeakObjectPtr<ADungeonGenerator> Generator {nullptr};
 };
