@@ -149,12 +149,15 @@ public:
 	URoomData* GetRandomRoomData(TArray<URoomData*> RoomDataArray);
 
 	// Returns the current number of room in the generated dungeon.
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DisplayName = "Room Count", CompactNodeTitle = "Room Count"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DisplayName = "Room Count", CompactNodeTitle = "Room Count", DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
 	int GetNbRoom();
 
 	// Returns an array of room data with compatible at least one compatible door with the door data provided.
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
 	void GetCompatibleRoomData(bool& bSuccess, TArray<URoomData*>& CompatibleRooms, const TArray<URoomData*>& RoomDataArray, const FDoorDef& DoorData);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	const FRandomStream& GetRandomStream() { return Random; }
 
 	URoom* GetRoomByIndex(int64 Index) const;
 

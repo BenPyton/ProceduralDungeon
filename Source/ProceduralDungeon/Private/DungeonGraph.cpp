@@ -23,6 +23,8 @@
  */
 
 #include "DungeonGraph.h"
+#include "ProceduralDungeonLog.h"
+#include "DungeonGenerator.h"
 #include "Room.h"
 #include "RoomData.h"
 
@@ -66,8 +68,14 @@ const URoom* UDungeonGraph::GetFirstRoomFromData(const URoomData* Data)
 
 URoom* UDungeonGraph::GetRandomRoom()
 {
-	// TODO: get random stream from dungeon generator
-	return nullptr;
+	if (!Generator.IsValid())
+	{
+		LogError(TEXT("DungeonGraph has no Generator set."));
+		return nullptr;
+	}
+
+	int32 rand = Generator->GetRandomStream().FRandRange(0, Rooms.Num() - 1);
+	return Rooms[rand];
 }
 
 bool UDungeonGraph::HasAlreadyRoomData(const URoomData* RoomData) const

@@ -132,25 +132,39 @@ void ARoomLevel::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 #if WITH_EDITOR
-	// TODO: Place the debug draw in an editor module of the plugin
+	// TODO: Place the debug draw in an editor module of the plugin?
 	if (Dungeon::DrawDebug() && IsValid(Data))
 	{
-		FTransform RoomTransform = (Room != nullptr) ? Room->GetTransform() : FTransform::Identity;
+		const FTransform& RoomTransform = (Room != nullptr) ? Room->GetTransform() : FTransform::Identity;
+		const bool bIsRoomLocked = Room != nullptr && Room->IsLocked();
 		UpdateBounds();
+
+		// Cache world
+		const UWorld* World = GetWorld();
 
 		// TODO: is it still needed now?
 		// Pivot
-		DrawDebugSphere(GetWorld(), DungeonTransform.TransformPosition(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
+		DrawDebugSphere(World, DungeonTransform.TransformPosition(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
 
 		// Room bounds
-		DrawDebugBox(GetWorld(), DungeonTransform.TransformPosition(Bounds.Center), Bounds.Extent, DungeonTransform.GetRotation(), IsPlayerInside() ? FColor::Green : FColor::Red);
+		DrawDebugBox(World, DungeonTransform.TransformPosition(Bounds.Center), Bounds.Extent, DungeonTransform.GetRotation(), IsPlayerInside() ? FColor::Green : FColor::Red);
+
+		if (bIsRoomLocked)
+		{
+			FBox Box = Bounds.GetBox().TransformBy(DungeonTransform);
+
+			DrawDebugLine(World, Box.Min, Box.Max, FColor::Red);
+			DrawDebugLine(World, FVector(Box.Min.X, Box.Min.Y, Box.Max.Z), FVector(Box.Max.X, Box.Max.Y, Box.Min.Z), FColor::Red);
+			DrawDebugLine(World, FVector(Box.Min.X, Box.Max.Y, Box.Max.Z), FVector(Box.Max.X, Box.Min.Y, Box.Min.Z), FColor::Red);
+			DrawDebugLine(World, FVector(Box.Min.X, Box.Max.Y, Box.Min.Z), FVector(Box.Max.X, Box.Min.Y, Box.Max.Z), FColor::Red);
+		}
 
 		// Doors
 		for (int i = 0; i < Data->GetNbDoor(); i++)
 		{
-			const bool isConnected = Room == nullptr || Room->IsConnected(i);
-			const bool isDoorValid = Data->IsDoorValid(i);
-			FDoorDef::DrawDebug(GetWorld(), isDoorValid ? FColor::Blue : FColor::Orange, Data->Doors[i], RoomTransform * DungeonTransform, true, isConnected);
+			const bool bIsConnected = Room == nullptr || Room->IsConnected(i);
+			const bool bIsDoorValid = Data->IsDoorValid(i);
+			FDoorDef::DrawDebug(World, bIsDoorValid ? FColor::Blue : FColor::Orange, Data->Doors[i], RoomTransform * DungeonTransform, true, bIsConnected);
 		}
 	}
 #endif
