@@ -384,9 +384,19 @@ bool URoom::CreateCustomData(const TSubclassOf<URoomCustomData>& DataType)
 	return true;
 }
 
-bool URoom::GetCustomData(TSubclassOf<URoomCustomData> DataType, URoomCustomData*& Data)
+bool URoom::GetCustomData_BP(TSubclassOf<URoomCustomData> DataType, URoomCustomData*& Data)
 {
-	URoomCustomData** Datum = CustomData.Find(DataType);
+	return GetCustomData(DataType, Data);
+}
+
+bool URoom::HasCustomData_BP(const TSubclassOf<URoomCustomData>& DataType)
+{
+	return HasCustomData(DataType);
+}
+
+bool URoom::GetCustomData(const TSubclassOf<URoomCustomData>& DataType, URoomCustomData*& Data) const
+{
+	URoomCustomData* const* Datum = CustomData.Find(DataType);
 	if (!Datum && !IsValid(*Datum))
 		return false;
 
@@ -395,6 +405,11 @@ bool URoom::GetCustomData(TSubclassOf<URoomCustomData> DataType, URoomCustomData
 
 	Data = *Datum;
 	return true;
+}
+
+bool URoom::HasCustomData(const TSubclassOf<URoomCustomData>& DataType) const
+{
+	return CustomData.Contains(DataType);
 }
 
 // AABB Overlapping

@@ -61,12 +61,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph")
 	const URoom* GetFirstRoomFromData(const URoomData* Data);
 
-	// Returns a random room from all the dungeon
+	// Returns all room instances having the provided custom data
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph", meta = (AutoCreateRefTerm="CustomData"))
+	void GetAllRoomsWithCustomData(const TSubclassOf<URoomCustomData>& CustomData, TArray<URoom*>& Rooms);
+
+	// Returns all room instances having ALL the provided custom data
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph")
-	URoom* GetRandomRoom();
+	void GetAllRoomsWithAllCustomData(const TArray<TSubclassOf<URoomCustomData>>& CustomData, TArray<URoom*>& Rooms);
+
+	// Returns all room instances having at least one of the provided custom data
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph")
+	void GetAllRoomsWithAnyCustomData(const TArray<TSubclassOf<URoomCustomData>>& CustomData, TArray<URoom*>& Rooms);
+
+	// Returns a random room from an array of room
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph")
+	URoom* GetRandomRoom(const TArray<URoom*>& RoomList) const;
 
 	// Returns the total number of room
-	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
+	UFUNCTION(BlueprintPure, Category = "Dungeon Graph", meta = (CompactNodeTitle = "Count"))
 	int32 Count() const { return Rooms.Num(); }
 
 	// Returns true if a specific RoomData is already in the dungeon

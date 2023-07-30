@@ -66,7 +66,38 @@ const URoom* UDungeonGraph::GetFirstRoomFromData(const URoomData* Data)
 	return FindFirstRoomByPredicate([Data](const URoom* Room) { return Room->GetRoomData() == Data; });
 }
 
-URoom* UDungeonGraph::GetRandomRoom()
+void UDungeonGraph::GetAllRoomsWithCustomData(const TSubclassOf<URoomCustomData>& CustomData, TArray<URoom*>& OutRooms)
+{
+	GetRoomsByPredicate(OutRooms, [&CustomData](const URoom* Room) { return Room->HasCustomData(CustomData); });
+}
+
+void UDungeonGraph::GetAllRoomsWithAllCustomData(const TArray<TSubclassOf<URoomCustomData>>& CustomData, TArray<URoom*>& OutRooms)
+{
+	GetRoomsByPredicate(OutRooms, [&CustomData](const URoom* Room)
+		{
+			for (auto Datum : CustomData)
+			{
+				if (!Room->HasCustomData(Datum))
+					return false;
+			}
+			return true;
+		});
+}
+
+void UDungeonGraph::GetAllRoomsWithAnyCustomData(const TArray<TSubclassOf<URoomCustomData>>& CustomData, TArray<URoom*>& OutRooms)
+{
+	GetRoomsByPredicate(OutRooms, [&CustomData](const URoom* Room)
+		{
+			for (auto Datum : CustomData)
+			{
+				if (Room->HasCustomData(Datum))
+					return true;
+			}
+			return false;
+		});
+}
+
+URoom* UDungeonGraph::GetRandomRoom(const TArray<URoom*>& RoomList) const
 {
 	if (!Generator.IsValid())
 	{
@@ -74,8 +105,8 @@ URoom* UDungeonGraph::GetRandomRoom()
 		return nullptr;
 	}
 
-	int32 rand = Generator->GetRandomStream().FRandRange(0, Rooms.Num() - 1);
-	return Rooms[rand];
+	int32 rand = Generator->GetRandomStream().FRandRange(0, RoomList.Num() - 1);
+	return RoomList[rand];
 }
 
 bool UDungeonGraph::HasAlreadyRoomData(const URoomData* RoomData) const
