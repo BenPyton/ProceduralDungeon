@@ -76,17 +76,32 @@ void FProceduralDungeonEdModeToolkit::BuildToolPalette(FName Palette, FToolBarBu
     // DoorType property from Settings
     UProceduralDungeonEditorObject* EditorSettings = GetEditorMode()->Settings;
     FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    TSharedPtr<ISinglePropertyView> SinglePropView = PropertyEditorModule.CreateSingleProperty(EditorSettings, "DoorType", {});
+    FSinglePropertyParams Params;
+#if !COMPATIBILITY
+    Params.bHideAssetThumbnail = true;
+#endif
+    Params.NamePlacement = EPropertyNamePlacement::Hidden;
+    TSharedPtr<ISinglePropertyView> SinglePropView = PropertyEditorModule.CreateSingleProperty(EditorSettings, "DoorType", Params);
+
+    TSharedPtr<SWidget> Widget =
+        SNew(SHorizontalBox)
+        .IsEnabled(this, &FProceduralDungeonEdModeToolkit::IsDoorTypeEnabled)
+        + SHorizontalBox::Slot()
+        .VAlign(EVerticalAlignment::VAlign_Center)
+        .AutoWidth()
+        [
+            SinglePropView.ToSharedRef()
+        ];
 
     ToolbarBuilder.BeginSection("Default");
     ToolbarBuilder.AddToolBarButton(CommandList.SizeTool);
     ToolbarBuilder.AddSeparator();
     ToolbarBuilder.AddToolBarButton(CommandList.DoorTool);
-    ToolbarBuilder.AddToolBarWidget(SinglePropView.ToSharedRef());
+    ToolbarBuilder.AddWidget(Widget.ToSharedRef());
     ToolbarBuilder.EndSection();
 }
 
-FProceduralDungeonEdMode* FProceduralDungeonEdModeToolkit::GetEditorMode() const 
+FProceduralDungeonEdMode* FProceduralDungeonEdModeToolkit::GetEditorMode() const
 {
     return (FProceduralDungeonEdMode*)GLevelEditorModeTools().GetActiveMode(FProceduralDungeonEdMode::EM_ProceduralDungeon);
 }
@@ -110,9 +125,9 @@ void FProceduralDungeonEdModeToolkit::OnChangeTool(FName ToolName) const
 }
 
 bool FProceduralDungeonEdModeToolkit::IsToolEnabled(FName ToolName) const
-{ 
+{
     FProceduralDungeonEdMode* EdMode = GetEditorMode();
-    return EdMode && EdMode->IsToolEnabled(ToolName); 
+    return EdMode && EdMode->IsToolEnabled(ToolName);
 }
 
 bool FProceduralDungeonEdModeToolkit::IsToolActive(FName ToolName) const
@@ -121,10 +136,15 @@ bool FProceduralDungeonEdModeToolkit::IsToolActive(FName ToolName) const
     if (EdMode)
     {
         FProceduralDungeonEditorTool* Tool = nullptr;
-        if(EdMode->GetTool(ToolName, Tool))
+        if (EdMode->GetTool(ToolName, Tool))
             return EdMode->GetActiveTool() == Tool;
     }
-    return false; 
+    return false;
+}
+
+bool FProceduralDungeonEdModeToolkit::IsDoorTypeEnabled() const
+{
+    return IsToolEnabled("Tool_Door");
 }
 
 #undef LOCTEXT_NAMESPACE
