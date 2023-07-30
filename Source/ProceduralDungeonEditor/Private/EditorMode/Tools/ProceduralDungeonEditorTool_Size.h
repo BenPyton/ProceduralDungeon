@@ -86,7 +86,10 @@ public:
 	virtual bool UsesTransformWidget(WidgetMode CheckMode) const override;
 	virtual FVector GetWidgetLocation() const override;
 
+	virtual void OnDataChanged(const URoomData* NewData = nullptr) override;
+
 	bool HasValidSelection() const;
+	void ResetDragPoint();
 	void UpdateDataAsset() const;
 
 private:

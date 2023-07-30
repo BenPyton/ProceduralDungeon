@@ -60,6 +60,8 @@ public:
 	/** FGCObject interface */
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override {}
 
+	virtual void OnDataChanged(const class URoomData* NewData) {}
+
 protected:
 	FProceduralDungeonEdMode* EdMode = nullptr;
 };
