@@ -44,6 +44,7 @@ public:
     void OnChangeTool(FName ToolName) const;
     bool IsToolEnabled(FName ToolName) const;
     bool IsToolActive(FName ToolName) const;
+    bool IsDoorTypeEnabled() const;
 
 private:
     TSharedPtr<class SProceduralDungeonEdModeWidget> EdModeWidget;
