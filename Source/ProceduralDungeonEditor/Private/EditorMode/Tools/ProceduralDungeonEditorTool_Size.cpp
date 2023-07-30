@@ -106,14 +106,14 @@ void FRoomPoint::UpdateFrom(FRoomPoint& From, EAxisList::Type Axis)
 
 void FProceduralDungeonEditorTool_Size::EnterTool()
 {
-    DungeonEd_LogInfo("Enter Size Tool.");
-
-    TWeakObjectPtr<ARoomLevel> Level = EdMode->Level;
-    if (!Level.IsValid() || !IsValid(Level->Data))
-        return;
-
-    FIntVector P1 = Level->Data->FirstPoint;
-    FIntVector P2 = Level->Data->SecondPoint;
+    //DungeonEd_LogInfo("Enter Size Tool.");
+    //
+    //TWeakObjectPtr<ARoomLevel> Level = EdMode->Level;
+    //if (!Level.IsValid() || !IsValid(Level->Data))
+    //    return;
+    //
+    //FIntVector P1 = Level->Data->FirstPoint;
+    //FIntVector P2 = Level->Data->SecondPoint;
 
     //        6    1
     //      2    7
@@ -140,8 +140,10 @@ void FProceduralDungeonEditorTool_Size::EnterTool()
     Points[4].AddLinkedPoint(Points[5], EAxisList::XZ);
     Points[4].AddLinkedPoint(Points[6], EAxisList::XY);
 
-    Points[0].SetLocation(Dungeon::ToWorldLocation(P1));
-    Points[1].SetLocation(Dungeon::ToWorldLocation(P2));
+    //Points[0].SetLocation(Dungeon::ToWorldLocation(P1));
+    //Points[1].SetLocation(Dungeon::ToWorldLocation(P2));
+
+    OnDataChanged();
 }
 
 void FProceduralDungeonEditorTool_Size::ExitTool()
@@ -201,10 +203,7 @@ bool FProceduralDungeonEditorTool_Size::HandleClick(FEditorViewportClient* InVie
 bool FProceduralDungeonEditorTool_Size::InputKey(FEditorViewportClient* InViewportClient, FViewport* InViewport, FKey InKey, EInputEvent InEvent)
 {
     if (InKey == EKeys::LeftMouseButton && InEvent == IE_Released)
-    {
-        if (HasValidSelection())
-            DragPoint = Points[SelectedPoint].GetLocation();
-    }
+        ResetDragPoint();
     return false;
 }
 
@@ -244,9 +243,27 @@ FVector FProceduralDungeonEditorTool_Size::GetWidgetLocation() const
     return HasValidSelection() ? DragPoint : FVector::ZeroVector;
 }
 
+void FProceduralDungeonEditorTool_Size::OnDataChanged(const URoomData* NewData)
+{
+    TWeakObjectPtr<ARoomLevel> Level = EdMode->Level;
+    if (!Level.IsValid() || !IsValid(Level->Data))
+        return;
+
+    Points[0].SetLocation(Dungeon::ToWorldLocation(Level->Data->FirstPoint));
+    Points[1].SetLocation(Dungeon::ToWorldLocation(Level->Data->SecondPoint));
+
+    ResetDragPoint();
+}
+
 bool FProceduralDungeonEditorTool_Size::HasValidSelection() const
 {
     return SelectedPoint >= 0 && SelectedPoint < Points.Num();
+}
+
+void FProceduralDungeonEditorTool_Size::ResetDragPoint()
+{
+    if (HasValidSelection())
+        DragPoint = Points[SelectedPoint].GetLocation();
 }
 
 void FProceduralDungeonEditorTool_Size::UpdateDataAsset() const

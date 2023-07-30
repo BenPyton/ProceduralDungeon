@@ -38,6 +38,7 @@
 #include "ProceduralDungeonEditor.h"
 #include "ProceduralDungeonEdMode.h"
 #include "ProceduralDungeonEdModeToolkit.h"
+#include "Tools/ProceduralDungeonEditorTool.h"
 #include "Room.h" // TODO: remove the need to include Room.h when including RoomLevel.h
 #include "RoomLevel.h"
 #include "RoomData.h"
@@ -214,6 +215,10 @@ void SProceduralDungeonEdModeWidget::OnDataAssetChanged()
     auto EdMode = ParentToolkit.Pin()->GetEditorMode();
     check(EdMode);
     EdMode->SetDefaultTool();
+
+    FProceduralDungeonEditorTool* ActiveTool = EdMode->GetActiveTool();
+    if (ActiveTool)
+        ActiveTool->OnDataChanged(CurrentRoomData.Get());
 
     UpdateErrorText();
 }
