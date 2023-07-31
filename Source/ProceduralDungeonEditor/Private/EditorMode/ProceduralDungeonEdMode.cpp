@@ -26,6 +26,7 @@
 #include "ProceduralDungeonEditor.h"
 #include "Toolkits/ToolkitManager.h"
 #include "EditorModeManager.h"
+#include "Engine/LevelScriptBlueprint.h"
 #include "ProceduralDungeonEdModeToolkit.h"
 #include "ProceduralDungeonEdLog.h"
 #include "ProceduralDungeonEditorObject.h"
@@ -58,13 +59,13 @@ void FProceduralDungeonEdMode::Enter()
 {
     FEdMode::Enter();
 
-    UpdateLevel();
-
     if (!Toolkit.IsValid())
     {
         Toolkit = MakeShareable(new FProceduralDungeonEdModeToolkit);
         Toolkit->Init(Owner->GetToolkitHost());
     }
+
+    UpdateLevelBlueprint();
 }
 
 void FProceduralDungeonEdMode::Exit()
@@ -78,7 +79,9 @@ void FProceduralDungeonEdMode::Exit()
         ActiveTool = nullptr;
     }
 
-    Level.Reset();
+    CachedLevelInstance.Reset();
+    CachedLevelBlueprint.Reset();
+    LevelBlueprintDelegateHandle.Reset();
 
     FEdMode::Exit();
 }
@@ -208,22 +211,64 @@ void FProceduralDungeonEdMode::SetDefaultTool()
 
 bool FProceduralDungeonEdMode::IsToolEnabled(FName ToolName) const
 {
-    return Level.IsValid() && IsValid(Level.Get()->Data);
+    auto Level = GetLevel();
+    return Level.IsValid() && IsValid(Level->Data);
 }
 
-void FProceduralDungeonEdMode::UpdateLevel()
+ULevelScriptBlueprint* FProceduralDungeonEdMode::GetLevelBlueprint(bool bCreate) const
 {
-    // Get Current Level Actor
-    FWorldContext WorldContext = GEditor->GetEditorWorldContext();
-    World = WorldContext.World();
-    DungeonEd_LogInfo("World Context: %s", *GetNameSafe(World.Get()));
+    UWorld* World = GetWorld();
+    check(World);
+    ULevelScriptBlueprint* LevelBlueprint = World->PersistentLevel->GetLevelScriptBlueprint(/*bDontCreate = */!bCreate);
+    return LevelBlueprint;
+}
 
-    Level = Cast<ARoomLevel>(World->GetLevelScriptActor());
+TWeakObjectPtr<ARoomLevel> FProceduralDungeonEdMode::GetLevel() const
+{
+    ULevelScriptBlueprint* LevelBlueprint = GetLevelBlueprint();
+    if (!IsValid(LevelBlueprint))
+        return nullptr;
+    return Cast<ARoomLevel>(LevelBlueprint->GeneratedClass->GetDefaultObject());
+}
+
+void FProceduralDungeonEdMode::UpdateLevelBlueprint()
+{
+    ULevelScriptBlueprint* LevelBlueprint = GetLevelBlueprint();
+    if (CachedLevelBlueprint == LevelBlueprint)
+        return;
+
+    if (CachedLevelBlueprint.IsValid())
+    {
+        CachedLevelBlueprint->OnCompiled().Remove(LevelBlueprintDelegateHandle);
+    }
+
+    LevelBlueprintDelegateHandle.Reset();
+    CachedLevelBlueprint = LevelBlueprint;
+
+    if (CachedLevelBlueprint.IsValid())
+    {
+        LevelBlueprintDelegateHandle = CachedLevelBlueprint->OnCompiled().AddRaw(this, &FProceduralDungeonEdMode::OnLevelBlueprintCompiled);
+    }
+
+    OnLevelBlueprintCompiled();
+}
+
+void FProceduralDungeonEdMode::OnLevelBlueprintCompiled(UBlueprint* Blueprint)
+{
+    CachedLevelInstance = Cast<ARoomLevel>(GetWorld()->GetLevelScriptActor());
+    
+    auto Level = GetLevel();
     DungeonEd_LogInfo("Room Level: %s", *GetNameSafe(Level.Get()));
 
     if (Level.IsValid())
         SetDefaultTool();
     else
         ResetActiveTool();
-}
 
+    auto RoomToolkit = (FProceduralDungeonEdModeToolkit*)Toolkit.Get();
+    check(RoomToolkit);
+    RoomToolkit->OnLevelChanged();
+
+    if (ActiveTool)
+        ActiveTool->OnLevelChanged(Level.Get());
+}

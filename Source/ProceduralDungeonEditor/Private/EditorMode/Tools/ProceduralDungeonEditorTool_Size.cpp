@@ -156,9 +156,10 @@ void FProceduralDungeonEditorTool_Size::Render(const FSceneView* View, FViewport
     const FColor NormalColor(200, 200, 200);
     const FColor SelectedColor(255, 128, 0);
 
-    if (EdMode->Level.IsValid())
+    auto Level = EdMode->GetLevel();
+    if (Level.IsValid())
     {
-        const URoomData* Data = EdMode->Level.Get()->Data;
+        const URoomData* Data = Level->Data;
         if (IsValid(Data))
         {
             for (int i = 0; i < Points.Num(); ++i)
@@ -245,7 +246,7 @@ FVector FProceduralDungeonEditorTool_Size::GetWidgetLocation() const
 
 void FProceduralDungeonEditorTool_Size::OnDataChanged(const URoomData* NewData)
 {
-    TWeakObjectPtr<ARoomLevel> Level = EdMode->Level;
+    TWeakObjectPtr<ARoomLevel> Level = EdMode->GetLevel();
     if (!Level.IsValid() || !IsValid(Level->Data))
         return;
 
@@ -268,7 +269,7 @@ void FProceduralDungeonEditorTool_Size::ResetDragPoint()
 
 void FProceduralDungeonEditorTool_Size::UpdateDataAsset() const
 {
-    auto Level = EdMode->Level;
+    auto Level = EdMode->GetLevel();
     if (!Level.IsValid())
         return;
 

@@ -47,39 +47,20 @@ bool IsDoorValid(const URoomData* Data, const FDoorDef& Door)
 void FProceduralDungeonEditorTool_Door::EnterTool()
 {
     DungeonEd_LogInfo("Enter Door Tool.");
-    auto Level = EdMode->Level;
-
-    if (!Level.IsValid() || !IsValid(Level->Data))
-        return;
-
-    RoomBox = NewObject<UBoxComponent>(Level.Get(), TEXT("Editor Room Collision"), RF_Transient);
-    RoomBox->SetupAttachment(Level.Get()->GetRootComponent());
-    RoomBox->RegisterComponent();
-    RoomBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-    RoomBox->SetCollisionObjectType(ECollisionChannel::ECC_MAX);
-
-    FBoxCenterAndExtent Box = Level->Data->GetBounds();
-    RoomBox->SetRelativeLocation(Box.Center);
-    RoomBox->SetBoxExtent(Box.Extent);
-
-    DungeonEd_LogInfo("[Enter] RoomBox: %s", *GetNameSafe(RoomBox.Get()));
+    UpdateRoomBox();
 }
 
 void FProceduralDungeonEditorTool_Door::ExitTool()
 {
     DungeonEd_LogInfo("Exit Door Tool.");
-    if(RoomBox.IsValid())
-    { 
-        RoomBox->DestroyComponent();
-        RoomBox.Reset();
-    }
+    DestroyRoomBox();
 }
 
 void FProceduralDungeonEditorTool_Door::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
 {
     FProceduralDungeonEditorTool::Render(View, Viewport, PDI);
 
-    auto Level = EdMode->Level;
+    auto Level = EdMode->GetLevel();
     if (!Level.IsValid() || !IsValid(Level->Data))
         return;
 
@@ -130,7 +111,11 @@ void FProceduralDungeonEditorTool_Door::Tick(FEditorViewportClient* ViewportClie
 
     if (ShowDoorPreview)
     {
-        URoomData* Data = EdMode->Level->Data;
+        auto Level = EdMode->GetLevel();
+        if (!Level.IsValid())
+            return;
+
+        URoomData* Data = Level->Data;
         check(IsValid(Data));
 
         UWorld* World = ViewportClient->GetWorld();
@@ -147,7 +132,11 @@ bool FProceduralDungeonEditorTool_Door::HandleClick(FEditorViewportClient* InVie
     if (!ShowDoorPreview)
         return false;
 
-    URoomData* Data = EdMode->Level->Data;
+    auto Level = EdMode->GetLevel();
+    if (!Level.IsValid())
+        return false;
+
+    URoomData* Data = Level->Data;
     check(IsValid(Data));
 
     if (Click.GetKey() == EKeys::LeftMouseButton)
@@ -188,6 +177,56 @@ bool FProceduralDungeonEditorTool_Door::MouseMove(FEditorViewportClient* Viewpor
     DoorPreview.Type = EdMode->Settings->DoorType;
 
     return false;
+}
+
+void FProceduralDungeonEditorTool_Door::OnLevelChanged(const ARoomLevel* NewLevel)
+{
+    UpdateRoomBox();
+}
+
+void FProceduralDungeonEditorTool_Door::OnDataChanged(const URoomData* NewData)
+{
+    UpdateRoomBox();
+}
+
+void FProceduralDungeonEditorTool_Door::UpdateRoomBox()
+{
+    auto Level = EdMode->GetLevelInstance();
+    if (Level != CachedLevel)
+    {
+        DestroyRoomBox();
+
+        if (Level.IsValid())
+        {
+            check(IsValid(Level->GetWorld()));
+            RoomBox = NewObject<UBoxComponent>(Level.Get(), TEXT("Editor Room Collision"), RF_Transient);
+            RoomBox->SetupAttachment(Level->GetRootComponent());
+            RoomBox->RegisterComponent();
+            RoomBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+            RoomBox->SetCollisionObjectType(ECollisionChannel::ECC_MAX);
+            DungeonEd_LogInfo("Create RoomBox: %s", *GetNameSafe(RoomBox.Get()));
+        }
+
+        CachedLevel = Level;
+    }
+
+    if (!CachedLevel.IsValid())
+        return;
+
+    FBoxCenterAndExtent Box = CachedLevel->Data->GetBounds();
+    RoomBox->SetRelativeLocation(Box.Center);
+    RoomBox->SetBoxExtent(Box.Extent);
+
+    DungeonEd_LogInfo("Update RoomBox: %s", *GetNameSafe(RoomBox.Get()));
+}
+
+void FProceduralDungeonEditorTool_Door::DestroyRoomBox()
+{
+    if (RoomBox.IsValid())
+    {
+        RoomBox->DestroyComponent();
+        RoomBox.Reset();
+    }
 }
 
 bool FProceduralDungeonEditorTool_Door::RoomTraceFromMouse(FHitResult& OutHit, FEditorViewportClient* ViewportClient) const

@@ -147,4 +147,9 @@ bool FProceduralDungeonEdModeToolkit::IsDoorTypeEnabled() const
     return IsToolEnabled("Tool_Door");
 }
 
+void FProceduralDungeonEdModeToolkit::OnLevelChanged()
+{
+    EdModeWidget->OnLevelChanged();
+}
+
 #undef LOCTEXT_NAMESPACE
