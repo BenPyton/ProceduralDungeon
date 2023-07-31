@@ -29,6 +29,7 @@
 
 class ARoomLevel;
 class FProceduralDungeonEditorTool;
+class ULevelScriptBlueprint;
 
 class FProceduralDungeonEdMode : public FEdMode
 {
@@ -64,18 +65,22 @@ public:
     void SetDefaultTool();
     bool IsToolEnabled(FName ToolName) const;
 
-    // Set Level and World pointers from 
-    void UpdateLevel();
+    ULevelScriptBlueprint* GetLevelBlueprint(bool bCreate = false) const;
+    TWeakObjectPtr<ARoomLevel> GetLevel() const;
+    TWeakObjectPtr<ARoomLevel> GetLevelInstance() const { return CachedLevelInstance; }
+    void UpdateLevelBlueprint();
 
-private:
+protected:
     void SetActiveTool(FProceduralDungeonEditorTool* NewTool);
+    void OnLevelBlueprintCompiled(UBlueprint* Blueprint = nullptr);
 
 public:
-    TWeakObjectPtr<ARoomLevel> Level = nullptr;
-    TWeakObjectPtr<UWorld> World = nullptr;
     class UProceduralDungeonEditorObject* Settings {nullptr};
 
 private:
     TArray<TUniquePtr<FProceduralDungeonEditorTool>> Tools;
     FProceduralDungeonEditorTool* ActiveTool = nullptr;
+    TWeakObjectPtr<ARoomLevel> CachedLevelInstance = nullptr;
+    TWeakObjectPtr<ULevelScriptBlueprint> CachedLevelBlueprint = nullptr;
+    FDelegateHandle LevelBlueprintDelegateHandle;
 };

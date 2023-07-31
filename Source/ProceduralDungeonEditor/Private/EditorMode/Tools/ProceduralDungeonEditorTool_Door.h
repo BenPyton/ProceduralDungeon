@@ -46,11 +46,18 @@ public:
 	virtual bool HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click) override;
 	virtual bool MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 MouseX, int32 MouseY) override;
 
+	virtual void OnLevelChanged(const class ARoomLevel* NewLevel) override;
+	virtual void OnDataChanged(const URoomData* NewData = nullptr) override;
+
+protected:
+	void UpdateRoomBox();
+	void DestroyRoomBox();
 	bool RoomTraceFromMouse(FHitResult& OutHit, FEditorViewportClient* ViewportClient) const;
 	bool RoomTrace(FHitResult& OutHit, const FVector& RayOrigin, const FVector& RayEnd) const;
 	bool GetRoomCellFromHit(const FHitResult& Hit, FIntVector& OutCell, EDoorDirection& OutDirection) const;
 
 private:
+	TWeakObjectPtr<class ARoomLevel> CachedLevel = nullptr;
 	TWeakObjectPtr<class UBoxComponent> RoomBox = nullptr;
 	FDoorDef DoorPreview;
 	bool ShowDoorPreview {false};

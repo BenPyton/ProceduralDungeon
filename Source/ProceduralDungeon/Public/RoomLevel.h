@@ -31,6 +31,11 @@
 
 #define ROOM_TRIGGER_OBJECT_TYPE ECollisionChannel::ECC_EngineTraceChannel6
 
+#if WITH_EDITOR
+class ARoomLevel;
+DECLARE_MULTICAST_DELEGATE_OneParam(FRoomLevelEditorEvent, ARoomLevel*)
+#endif
+
 class URoom;
 
 UCLASS(Blueprintable, ClassGroup="Procedural Dungeon")
@@ -93,6 +98,8 @@ private:
 	virtual void PostInitProperties() override;
 
 #if WITH_EDITOR
+public:
+	FRoomLevelEditorEvent OnPropertiesChanged;
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 };

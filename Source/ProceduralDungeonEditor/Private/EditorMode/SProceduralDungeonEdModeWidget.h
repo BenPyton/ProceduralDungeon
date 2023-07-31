@@ -27,6 +27,7 @@
 #include "Framework/Application/SlateApplication.h"
 
 class ARoomLevel;
+class FProceduralDungeonEdMode;
 class FProceduralDungeonEdModeToolkit;
 
 class SProceduralDungeonEdModeWidget : public SCompoundWidget
@@ -36,13 +37,15 @@ public:
     SLATE_END_ARGS();
 
     void Construct(const FArguments& InArgs, TSharedRef<FProceduralDungeonEdModeToolkit> InParentToolkit);
+    void OnLevelChanged();
 
 protected:
-    void UpdateFromLevel();
-    bool IsValidRoomLevel() const;
-    bool IsValidRoomData() const;
-    bool MatchingDataLevel() const;
-    bool IsDataDirty() const;
+    bool IsValidRoomLevel(FProceduralDungeonEdMode* EdMode = nullptr, TWeakObjectPtr<ARoomLevel>* OutLevel = nullptr) const;
+    bool IsValidRoomData(FProceduralDungeonEdMode* EdMode, TWeakObjectPtr<class URoomData>* OutData = nullptr, TWeakObjectPtr<ARoomLevel>* OutLevel = nullptr) const;
+    bool IsValidRoomData() const { return IsValidRoomData(nullptr); }
+    bool MatchingDataLevel(FProceduralDungeonEdMode* EdMode = nullptr) const;
+    bool IsDataDirty(FProceduralDungeonEdMode* EdMode) const;
+    bool IsDataDirty() const { return IsDataDirty(nullptr); }
     EVisibility ShowDetails() const;
     EVisibility ShowDataDetails() const;
     EVisibility ShowNote() const;
@@ -58,7 +61,6 @@ protected:
     static FLinearColor GetHighlightButtonColor(const FLinearColor& HighlightColor, const FLinearColor& NormalColor = FLinearColor::White, float Speed = 3.0f);
 
 private:
-    TWeakObjectPtr<ARoomLevel> Level = nullptr;
     TSharedPtr<class SErrorText> Error = nullptr;
     TSharedPtr<class IDetailsView> DataContentWidget = nullptr;
     TWeakPtr<FProceduralDungeonEdModeToolkit> ParentToolkit = nullptr;

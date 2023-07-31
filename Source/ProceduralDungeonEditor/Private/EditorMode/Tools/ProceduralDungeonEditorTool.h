@@ -60,6 +60,7 @@ public:
 	/** FGCObject interface */
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override {}
 
+	virtual void OnLevelChanged(const class ARoomLevel* NewLevel) {}
 	virtual void OnDataChanged(const class URoomData* NewData) {}
 
 protected:

@@ -267,5 +267,6 @@ void ARoomLevel::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	UpdateBounds();
+	OnPropertiesChanged.Broadcast(this);
 }
 #endif
