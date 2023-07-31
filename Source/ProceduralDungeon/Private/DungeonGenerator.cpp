@@ -177,7 +177,7 @@ void ADungeonGenerator::CreateDungeon()
 	if (!ValidDungeon)
 	{
 		LogError(FString::Printf(TEXT("Generated dungeon is not valid after %d tries. Make sure your IsValidDungeon function is correct."), MaxTry));
-		RoomList.Empty();
+		Graph->Clear();
 		DispatchGenerationFailed();
 	}
 
@@ -341,7 +341,7 @@ void ADungeonGenerator::UnloadAllRooms()
 
 void ADungeonGenerator::UpdateRoomVisibility()
 {
-	if (!URoom::OcclusionCulling())
+	if (!Dungeon::OcclusionCulling())
 		return;
 
 	APawn* Player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawnOrSpectator();
@@ -438,7 +438,7 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 			SetState(EGenerationState::Generation);
 		break;
 	case EGenerationState::Generation:
-		SetState((RoomList.Num() > 0) ? EGenerationState::Load : EGenerationState::None);
+		SetState((Graph->Count() > 0) ? EGenerationState::Load : EGenerationState::None);
 		break;
 	case EGenerationState::Load:
 		for (URoom* Room : Graph->GetAllRooms())

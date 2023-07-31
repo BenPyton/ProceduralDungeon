@@ -231,7 +231,7 @@ void ARoomLevel::UpdateBounds()
 
 void ARoomLevel::SetActorsVisible(bool Visible)
 {
-	if (!URoom::OcclusionCulling())
+	if (!Dungeon::OcclusionCulling())
 	{
 		// TODO? Force visibility? (it will only be a QoL for editor use)
 		return;

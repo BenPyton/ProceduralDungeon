@@ -97,7 +97,7 @@ void ADoor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// Update door visibility
-	if (URoom::OcclusionCulling())
+	if (Dungeon::OcclusionCulling())
 	{
 		SetActorHiddenInGame(!bAlwaysVisible
 			&& (!IsValid(RoomA) || (!RoomA->IsVisible()))
