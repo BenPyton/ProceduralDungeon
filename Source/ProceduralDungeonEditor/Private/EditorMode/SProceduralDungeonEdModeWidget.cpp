@@ -379,6 +379,6 @@ FLinearColor SProceduralDungeonEdModeWidget::GetHighlightButtonColor(const FLine
 {
 	uint32 ticks = FDateTime::Now().GetTicks(); // needs this line to avoid compiler optimization that prevent getting Now() each frame.
 	float seconds = static_cast<float>(ticks) / ETimespan::TicksPerSecond;
-	float t = FMath::Cos(Speed * seconds);
+	float t = FMath::Clamp(FMath::Cos(Speed * seconds), 0.0f, 1.0f);
 	return FMath::Lerp(NormalColor, HighlightColor, t);
 }
