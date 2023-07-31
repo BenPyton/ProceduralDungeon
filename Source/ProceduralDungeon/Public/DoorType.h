@@ -32,7 +32,7 @@ UCLASS(BlueprintType)
 class PROCEDURALDUNGEON_API UDoorType : public UDataAsset
 {
 	GENERATED_BODY()
-	
+
 public:
 	UDoorType();
 

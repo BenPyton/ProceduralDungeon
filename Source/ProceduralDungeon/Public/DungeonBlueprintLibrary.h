@@ -46,15 +46,15 @@ public:
 
 	// True if the value is set (either North, South, East, West)
 	// False otherwise
-	UFUNCTION(BlueprintCallable, Category = "Math|Door Direction", meta = (DisplayName = "Is Valid", ExpandBoolAsExecs="ReturnValue"))
+	UFUNCTION(BlueprintCallable, Category = "Math|Door Direction", meta = (DisplayName = "Is Valid", ExpandBoolAsExecs = "ReturnValue"))
 	static bool DoorDirection_Valid(const EDoorDirection& A) { return !!A; }
 
 	// Addition (A + B)
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Direction + Direction", CompactNodeTitle = "+", AutoCreateRefTerm="A,B"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Direction + Direction", CompactNodeTitle = "+", AutoCreateRefTerm = "A,B"))
 	static EDoorDirection DoorDirection_Add(const EDoorDirection& A, const EDoorDirection& B) { return A + B; }
 
 	// Subtraction (A - B)
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Direction - Direction", CompactNodeTitle = "-", AutoCreateRefTerm="A,B"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Direction - Direction", CompactNodeTitle = "-", AutoCreateRefTerm = "A,B"))
 	static EDoorDirection DoorDirection_Sub(const EDoorDirection& A, const EDoorDirection& B) { return A - B; }
 
 	// Increment the direction and set it
@@ -70,6 +70,6 @@ public:
 	static EDoorDirection& DoorDirection_Negate(UPARAM(ref) EDoorDirection& A) { A = -A;  return A; }
 
 	// Transforms North into South and East into West (and vice versa)
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Opposite", CompactNodeTitle = "Opposite", AutoCreateRefTerm="A"))
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Opposite", CompactNodeTitle = "Opposite", AutoCreateRefTerm = "A"))
 	static EDoorDirection DoorDirection_Opposite(const EDoorDirection& A) { return ~A; }
 };

@@ -45,7 +45,7 @@ void UDungeonGraph::InitRooms()
 		check(IsValid(Room));
 		const URoomData* Data = Room->GetRoomData();
 		check(IsValid(Data));
-		for(auto Datum : Data->CustomData)
+		for (auto Datum : Data->CustomData)
 			Room->CreateCustomData(Datum);
 		Data->InitializeRoom(Room, this);
 	}
@@ -149,7 +149,7 @@ int UDungeonGraph::CountTotalRoomType(const TArray<TSubclassOf<URoomData>>& Room
 	return CountRoomByPredicate([&RoomTypeList](const URoom* Room) {
 		return RoomTypeList.ContainsByPredicate([Room](const TSubclassOf<URoomData> RoomType) {
 			return Room->GetRoomData()->GetClass()->IsChildOf(RoomType);
-		}); 
+		});
 	});
 }
 
@@ -228,7 +228,7 @@ void UDungeonGraph::TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* Out
 			for (int i = 0; i < currentRoom->GetConnectionCount(); ++i)
 			{
 				URoom* nextRoom = currentRoom->GetConnection(i).Get();
-				if(IsValid(nextRoom) && !closedList.Contains(nextRoom))
+				if (IsValid(nextRoom) && !closedList.Contains(nextRoom))
 					openList.Add(nextRoom);
 			}
 		}
@@ -314,7 +314,7 @@ bool UDungeonGraph::FindPath(const URoom* From, const URoom* To, TArray<const UR
 		return true;
 	}
 
-	if(!IgnoreLocked && (From->IsLocked() || To->IsLocked()))
+	if (!IgnoreLocked && (From->IsLocked() || To->IsLocked()))
 		return false;
 
 	// Bidirectional BFS initialization

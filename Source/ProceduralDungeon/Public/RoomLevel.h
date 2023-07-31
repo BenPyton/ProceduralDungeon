@@ -38,7 +38,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FRoomLevelEditorEvent, ARoomLevel*)
 
 class URoom;
 
-UCLASS(Blueprintable, ClassGroup="Procedural Dungeon")
+UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ARoomLevel : public ALevelScriptActor
 {
 	GENERATED_BODY()
@@ -64,16 +64,16 @@ public:
 
 	FORCEINLINE bool IsInit() const { return bIsInit; }
 
-	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Player Inside", DeprecatedFunction, DeprecationMessage="Use GetRoom() instead to access directly the room functions."))
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Player Inside", DeprecatedFunction, DeprecationMessage = "Use GetRoom() instead to access directly the room functions."))
 	bool IsPlayerInside();
 
-	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Visible", DeprecatedFunction, DeprecationMessage="Use GetRoom() instead to access directly the room functions."))
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Visible", DeprecatedFunction, DeprecationMessage = "Use GetRoom() instead to access directly the room functions."))
 	bool IsVisible();
 
-	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Locked", DeprecatedFunction, DeprecationMessage="Use GetRoom() instead to access directly the room functions."))
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Locked", DeprecatedFunction, DeprecationMessage = "Use GetRoom() instead to access directly the room functions."))
 	bool IsLocked();
 
-	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon", meta = (DeprecatedFunction, DeprecationMessage="Use GetRoom() instead to access directly the room functions."))
+	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon", meta = (DeprecatedFunction, DeprecationMessage = "Use GetRoom() instead to access directly the room functions."))
 	void Lock(bool lock);
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Room"))

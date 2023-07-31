@@ -39,7 +39,7 @@ void LogInfo(FString message, bool showOnScreen)
 {
 	UE_LOG(LogProceduralDungeon, Log, TEXT("%s"), *message);
 	float duration;
-	if(showOnScreen && ShowLogsOnScreen(duration))
+	if (showOnScreen && ShowLogsOnScreen(duration))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::White, message);
 	}
@@ -49,7 +49,7 @@ void LogWarning(FString message, bool showOnScreen)
 {
 	UE_LOG(LogProceduralDungeon, Warning, TEXT("%s"), *message);
 	float duration;
-	if(showOnScreen && ShowLogsOnScreen(duration))
+	if (showOnScreen && ShowLogsOnScreen(duration))
 	{
 		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Yellow, message);
 	}

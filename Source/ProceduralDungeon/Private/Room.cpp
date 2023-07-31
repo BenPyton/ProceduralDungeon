@@ -306,7 +306,7 @@ void URoom::TryConnectToExistingDoors(TArray<URoom*>& RoomList)
 		{
 			int j = otherRoom->GetDoorIndexAt(pos, ~dir);
 			if (j >= 0 // -1 if no door
-				&& FDoorDef::AreCompatible(RoomData->Doors[i], otherRoom->RoomData->Doors[j])) 
+				&& FDoorDef::AreCompatible(RoomData->Doors[i], otherRoom->RoomData->Doors[j]))
 			{
 				Connect(*this, i, *otherRoom, j);
 			}
@@ -350,10 +350,10 @@ void URoom::SetVisible(bool Visible)
 	if (Dungeon::UseLegacyOcclusion())
 	{
 		ARoomLevel* LevelScript = GetLevelScript();
-		if(IsValid(LevelScript))
+		if (IsValid(LevelScript))
 			LevelScript->SetActorsVisible(Visible);
 	}
-	else if(IsValid(Instance))
+	else if (IsValid(Instance))
 	{
 		// TODO: make the level be visible again, I don't know why it is not visible although
 		// the Visible and Loaded of StreamingLevel are correctly set to true 

@@ -41,234 +41,234 @@
 const FEditorModeID FProceduralDungeonEdMode::EM_ProceduralDungeon(TEXT("EM_ProceduralDungeon"));
 
 FProceduralDungeonEdMode::FProceduralDungeonEdMode()
-    : FEdMode()
+	: FEdMode()
 {
-    Tools.Add(MakeUnique<FProceduralDungeonEditorTool_Size>(this));
-    Tools.Add(MakeUnique<FProceduralDungeonEditorTool_Door>(this));
+	Tools.Add(MakeUnique<FProceduralDungeonEditorTool_Size>(this));
+	Tools.Add(MakeUnique<FProceduralDungeonEditorTool_Door>(this));
 
-    Settings = NewObject<UProceduralDungeonEditorObject>(GetTransientPackage(), TEXT("Editor Settings"), RF_Transactional);
+	Settings = NewObject<UProceduralDungeonEditorObject>(GetTransientPackage(), TEXT("Editor Settings"), RF_Transactional);
 }
 
 void FProceduralDungeonEdMode::AddReferencedObjects(FReferenceCollector& Collector)
 {
-    FEdMode::AddReferencedObjects(Collector);
-    Collector.AddReferencedObject(Settings);
+	FEdMode::AddReferencedObjects(Collector);
+	Collector.AddReferencedObject(Settings);
 }
 
 void FProceduralDungeonEdMode::Enter()
 {
-    FEdMode::Enter();
+	FEdMode::Enter();
 
-    if (!Toolkit.IsValid())
-    {
-        Toolkit = MakeShareable(new FProceduralDungeonEdModeToolkit);
-        Toolkit->Init(Owner->GetToolkitHost());
-    }
+	if (!Toolkit.IsValid())
+	{
+		Toolkit = MakeShareable(new FProceduralDungeonEdModeToolkit);
+		Toolkit->Init(Owner->GetToolkitHost());
+	}
 
-    UpdateLevelBlueprint();
+	UpdateLevelBlueprint();
 }
 
 void FProceduralDungeonEdMode::Exit()
 {
-    FToolkitManager::Get().CloseToolkit(Toolkit.ToSharedRef());
-    Toolkit.Reset();
+	FToolkitManager::Get().CloseToolkit(Toolkit.ToSharedRef());
+	Toolkit.Reset();
 
-    if (ActiveTool)
-    {
-        ActiveTool->ExitTool();
-        ActiveTool = nullptr;
-    }
+	if (ActiveTool)
+	{
+		ActiveTool->ExitTool();
+		ActiveTool = nullptr;
+	}
 
-    CachedLevelInstance.Reset();
-    CachedLevelBlueprint.Reset();
-    LevelBlueprintDelegateHandle.Reset();
+	CachedLevelInstance.Reset();
+	CachedLevelBlueprint.Reset();
+	LevelBlueprintDelegateHandle.Reset();
 
-    FEdMode::Exit();
+	FEdMode::Exit();
 }
 
 void FProceduralDungeonEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
 {
-    if (ActiveTool)
-        ActiveTool->Render(View, Viewport, PDI);
+	if (ActiveTool)
+		ActiveTool->Render(View, Viewport, PDI);
 
-    FEdMode::Render(View, Viewport, PDI);
+	FEdMode::Render(View, Viewport, PDI);
 }
 
 void FProceduralDungeonEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTime)
 {
-    FEdMode::Tick(ViewportClient, DeltaTime);
+	FEdMode::Tick(ViewportClient, DeltaTime);
 
-    if (ActiveTool)
-        ActiveTool->Tick(ViewportClient, DeltaTime);
+	if (ActiveTool)
+		ActiveTool->Tick(ViewportClient, DeltaTime);
 }
 
 bool FProceduralDungeonEdMode::HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click)
 {
-    return ROUTE_TO_TOOL(HandleClick(InViewportClient, HitProxy, Click));
+	return ROUTE_TO_TOOL(HandleClick(InViewportClient, HitProxy, Click));
 }
 
 bool FProceduralDungeonEdMode::InputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event)
 {
-    return ROUTE_TO_TOOL(InputKey(ViewportClient, Viewport, Key, Event));
+	return ROUTE_TO_TOOL(InputKey(ViewportClient, Viewport, Key, Event));
 }
 
 bool FProceduralDungeonEdMode::InputAxis(FEditorViewportClient* InViewportClient, FViewport* Viewport, int32 ControllerId, FKey Key, float Delta, float DeltaTime)
 {
-    return ROUTE_TO_TOOL(InputAxis(InViewportClient, Viewport, ControllerId, Key, Delta, DeltaTime));
+	return ROUTE_TO_TOOL(InputAxis(InViewportClient, Viewport, ControllerId, Key, Delta, DeltaTime));
 }
 
 bool FProceduralDungeonEdMode::InputDelta(FEditorViewportClient* InViewportClient, FViewport* InViewport, FVector& InDrag, FRotator& InRot, FVector& InScale)
 {
-    return ROUTE_TO_TOOL(InputDelta(InViewportClient, InViewport, InDrag, InRot, InScale));
+	return ROUTE_TO_TOOL(InputDelta(InViewportClient, InViewport, InDrag, InRot, InScale));
 }
 
 bool FProceduralDungeonEdMode::MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 MouseX, int32 MouseY)
 {
-    return ROUTE_TO_TOOL(MouseMove(ViewportClient, Viewport, MouseX, MouseY));
+	return ROUTE_TO_TOOL(MouseMove(ViewportClient, Viewport, MouseX, MouseY));
 }
 
 bool FProceduralDungeonEdMode::ShowModeWidgets() const
 {
-    return true;
+	return true;
 }
 
 bool FProceduralDungeonEdMode::ShouldDrawWidget() const
 {
-    return true;
+	return true;
 }
 
 bool FProceduralDungeonEdMode::UsesTransformWidget() const
 {
-    return ROUTE_TO_TOOL(UsesTransformWidget());
+	return ROUTE_TO_TOOL(UsesTransformWidget());
 }
 
 bool FProceduralDungeonEdMode::UsesTransformWidget(WidgetMode CheckMode) const
 {
-    return ROUTE_TO_TOOL(UsesTransformWidget(CheckMode));
+	return ROUTE_TO_TOOL(UsesTransformWidget(CheckMode));
 }
 
 FVector FProceduralDungeonEdMode::GetWidgetLocation() const
 {
-    return ROUTE_TO_TOOL(GetWidgetLocation());
+	return ROUTE_TO_TOOL(GetWidgetLocation());
 }
 
 bool FProceduralDungeonEdMode::GetTool(FName ToolName, FProceduralDungeonEditorTool*& OutTool) const
 {
-    for (auto& Tool : Tools)
-    {
-        if (Tool.IsValid() && Tool->GetToolName() == ToolName)
-        {
-            OutTool = Tool.Get();
-            return true;
-        }
-    }
-    return false;
+	for (auto& Tool : Tools)
+	{
+		if (Tool.IsValid() && Tool->GetToolName() == ToolName)
+		{
+			OutTool = Tool.Get();
+			return true;
+		}
+	}
+	return false;
 }
 
 FProceduralDungeonEditorTool* FProceduralDungeonEdMode::GetActiveTool() const
 {
-    return ActiveTool;
+	return ActiveTool;
 }
 
 void FProceduralDungeonEdMode::SetActiveTool(FName ToolName)
 {
-    if (ActiveTool && ActiveTool->GetToolName() == ToolName)
-        return;
+	if (ActiveTool && ActiveTool->GetToolName() == ToolName)
+		return;
 
-    FProceduralDungeonEditorTool* NewTool = nullptr;
-    if (!GetTool(ToolName, NewTool))
-    {
-        DungeonEd_LogError("Tool '%s' is not a valid tool.", *ToolName.ToString());
-        return;
-    }
+	FProceduralDungeonEditorTool* NewTool = nullptr;
+	if (!GetTool(ToolName, NewTool))
+	{
+		DungeonEd_LogError("Tool '%s' is not a valid tool.", *ToolName.ToString());
+		return;
+	}
 
-    check(NewTool);
-    SetActiveTool(NewTool);
+	check(NewTool);
+	SetActiveTool(NewTool);
 }
 
 void FProceduralDungeonEdMode::ResetActiveTool()
 {
-    SetActiveTool(nullptr);
+	SetActiveTool(nullptr);
 }
 
 void FProceduralDungeonEdMode::SetActiveTool(FProceduralDungeonEditorTool* NewTool)
 {
-    if (ActiveTool)
-        ActiveTool->ExitTool();
+	if (ActiveTool)
+		ActiveTool->ExitTool();
 
-    DungeonEd_LogInfo("Set active tool to '%s'.", NewTool ? NewTool->GetToolName() : TEXT("None"));
-    ActiveTool = NewTool;
+	DungeonEd_LogInfo("Set active tool to '%s'.", NewTool ? NewTool->GetToolName() : TEXT("None"));
+	ActiveTool = NewTool;
 
-    if (ActiveTool)
-        ActiveTool->EnterTool();
+	if (ActiveTool)
+		ActiveTool->EnterTool();
 }
 
 void FProceduralDungeonEdMode::SetDefaultTool()
 {
-    if (!ActiveTool && IsToolEnabled("Tool_Size"))
-        SetActiveTool("Tool_Size");
+	if (!ActiveTool && IsToolEnabled("Tool_Size"))
+		SetActiveTool("Tool_Size");
 }
 
 bool FProceduralDungeonEdMode::IsToolEnabled(FName ToolName) const
 {
-    auto Level = GetLevel();
-    return Level.IsValid() && IsValid(Level->Data);
+	auto Level = GetLevel();
+	return Level.IsValid() && IsValid(Level->Data);
 }
 
 ULevelScriptBlueprint* FProceduralDungeonEdMode::GetLevelBlueprint(bool bCreate) const
 {
-    UWorld* World = GetWorld();
-    check(World);
-    ULevelScriptBlueprint* LevelBlueprint = World->PersistentLevel->GetLevelScriptBlueprint(/*bDontCreate = */!bCreate);
-    return LevelBlueprint;
+	UWorld* World = GetWorld();
+	check(World);
+	ULevelScriptBlueprint* LevelBlueprint = World->PersistentLevel->GetLevelScriptBlueprint(/*bDontCreate = */!bCreate);
+	return LevelBlueprint;
 }
 
 TWeakObjectPtr<ARoomLevel> FProceduralDungeonEdMode::GetLevel() const
 {
-    ULevelScriptBlueprint* LevelBlueprint = GetLevelBlueprint();
-    if (!IsValid(LevelBlueprint))
-        return nullptr;
-    return Cast<ARoomLevel>(LevelBlueprint->GeneratedClass->GetDefaultObject());
+	ULevelScriptBlueprint* LevelBlueprint = GetLevelBlueprint();
+	if (!IsValid(LevelBlueprint))
+		return nullptr;
+	return Cast<ARoomLevel>(LevelBlueprint->GeneratedClass->GetDefaultObject());
 }
 
 void FProceduralDungeonEdMode::UpdateLevelBlueprint()
 {
-    ULevelScriptBlueprint* LevelBlueprint = GetLevelBlueprint();
-    if (CachedLevelBlueprint == LevelBlueprint)
-        return;
+	ULevelScriptBlueprint* LevelBlueprint = GetLevelBlueprint();
+	if (CachedLevelBlueprint == LevelBlueprint)
+		return;
 
-    if (CachedLevelBlueprint.IsValid())
-    {
-        CachedLevelBlueprint->OnCompiled().Remove(LevelBlueprintDelegateHandle);
-    }
+	if (CachedLevelBlueprint.IsValid())
+	{
+		CachedLevelBlueprint->OnCompiled().Remove(LevelBlueprintDelegateHandle);
+	}
 
-    LevelBlueprintDelegateHandle.Reset();
-    CachedLevelBlueprint = LevelBlueprint;
+	LevelBlueprintDelegateHandle.Reset();
+	CachedLevelBlueprint = LevelBlueprint;
 
-    if (CachedLevelBlueprint.IsValid())
-    {
-        LevelBlueprintDelegateHandle = CachedLevelBlueprint->OnCompiled().AddRaw(this, &FProceduralDungeonEdMode::OnLevelBlueprintCompiled);
-    }
+	if (CachedLevelBlueprint.IsValid())
+	{
+		LevelBlueprintDelegateHandle = CachedLevelBlueprint->OnCompiled().AddRaw(this, &FProceduralDungeonEdMode::OnLevelBlueprintCompiled);
+	}
 
-    OnLevelBlueprintCompiled();
+	OnLevelBlueprintCompiled();
 }
 
 void FProceduralDungeonEdMode::OnLevelBlueprintCompiled(UBlueprint* Blueprint)
 {
-    CachedLevelInstance = Cast<ARoomLevel>(GetWorld()->GetLevelScriptActor());
-    
-    auto Level = GetLevel();
-    DungeonEd_LogInfo("Room Level: %s", *GetNameSafe(Level.Get()));
+	CachedLevelInstance = Cast<ARoomLevel>(GetWorld()->GetLevelScriptActor());
 
-    if (Level.IsValid())
-        SetDefaultTool();
-    else
-        ResetActiveTool();
+	auto Level = GetLevel();
+	DungeonEd_LogInfo("Room Level: %s", *GetNameSafe(Level.Get()));
 
-    auto RoomToolkit = (FProceduralDungeonEdModeToolkit*)Toolkit.Get();
-    check(RoomToolkit);
-    RoomToolkit->OnLevelChanged();
+	if (Level.IsValid())
+		SetDefaultTool();
+	else
+		ResetActiveTool();
 
-    if (ActiveTool)
-        ActiveTool->OnLevelChanged(Level.Get());
+	auto RoomToolkit = (FProceduralDungeonEdModeToolkit*)Toolkit.Get();
+	check(RoomToolkit);
+	RoomToolkit->OnLevelChanged();
+
+	if (ActiveTool)
+		ActiveTool->OnLevelChanged(Level.Get());
 }

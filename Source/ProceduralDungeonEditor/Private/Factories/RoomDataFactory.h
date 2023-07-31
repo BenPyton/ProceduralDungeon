@@ -32,7 +32,7 @@ UCLASS()
 class URoomDataFactory : public UFactory
 {
 	GENERATED_BODY()
-	
+
 public:
 	URoomDataFactory();
 

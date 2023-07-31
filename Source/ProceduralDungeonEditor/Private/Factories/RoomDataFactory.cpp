@@ -39,14 +39,15 @@ class FRoomDataClassFilter : public IClassViewerFilter
 public:
 	FRoomDataClassFilter()
 		: DisallowedClassFlags(CLASS_Abstract | CLASS_Deprecated | CLASS_NewerVersionExists | CLASS_HideDropDown)
-	{}
+	{
+	}
 
-	/** Disallowed class flags. */
+   /** Disallowed class flags. */
 	EClassFlags DisallowedClassFlags;
 
 	virtual bool IsClassAllowed(const FClassViewerInitializationOptions& InInitOptions, const UClass* InClass, TSharedRef< FClassViewerFilterFuncs > InFilterFuncs) override
 	{
-		bool bAllowed= !InClass->HasAnyClassFlags(DisallowedClassFlags)
+		bool bAllowed = !InClass->HasAnyClassFlags(DisallowedClassFlags)
 			&& InFilterFuncs->IfInChildOfClassesSet(ParentClasses, InClass) != EFilterReturn::Failed;
 
 		return bAllowed;

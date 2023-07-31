@@ -32,7 +32,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTriggerEvent, AActor*, Actor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTriggerArrayEvent, TArray<AActor*>, Actor);
 
-UCLASS(BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROCEDURALDUNGEON_API UTriggerType : public UBoxComponent
 {
 	GENERATED_BODY()
@@ -88,7 +88,7 @@ private:
 	FTimerHandle ActivationTimer;
 
 	UFUNCTION()
-	void OnTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	void OnTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 	void OnTriggerExit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 

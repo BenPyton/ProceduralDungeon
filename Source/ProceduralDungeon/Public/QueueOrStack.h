@@ -23,7 +23,7 @@
  */
 
 #pragma once
- 	
+
 #include "Containers/Queue.h" 	
 #include "Containers/Array.h"
 
@@ -33,14 +33,14 @@ class TQueueOrStack
 public:
 	enum class EMode { QUEUE, STACK };
 
-	TQueueOrStack(EMode _Mode) 
-		: Mode(_Mode), Queue(), Stack() 
+	TQueueOrStack(EMode _Mode)
+		: Mode(_Mode), Queue(), Stack()
 	{
 	}
 
 	void Push(T& Element)
 	{
-		switch(Mode)
+		switch (Mode)
 		{
 		case EMode::QUEUE:
 			Queue.Enqueue(Element);
@@ -55,7 +55,7 @@ public:
 	{
 		check(!IsEmpty());
 		T item = T();
-		switch(Mode)
+		switch (Mode)
 		{
 		case EMode::QUEUE:
 			Queue.Dequeue(item);
@@ -69,7 +69,7 @@ public:
 
 	int Num()
 	{
-		switch(Mode)
+		switch (Mode)
 		{
 		case EMode::QUEUE:
 			return Queue.Num();
@@ -80,7 +80,7 @@ public:
 
 	bool IsEmpty()
 	{
-		switch(Mode)
+		switch (Mode)
 		{
 		case EMode::QUEUE:
 			return Queue.IsEmpty();

@@ -46,7 +46,7 @@ void ATriggerDoor::BeginPlay()
 	BoxComponent->OnComponentEndOverlap.AddUniqueDynamic(this, &ATriggerDoor::OnTriggerExit);
 }
 
-void ATriggerDoor::OnTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+void ATriggerDoor::OnTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (!ActorList.Contains(OtherActor) && IsValidActor(OtherActor, OtherComp))
 	{

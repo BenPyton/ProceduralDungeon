@@ -33,9 +33,10 @@ struct HRoomPointProxy : public HHitProxy
 
 	HRoomPointProxy(int32 InIndex)
 		: HHitProxy(HPP_UI), Index(InIndex)
-	{}
+	{
+	}
 
-	int32 Index{ -1 };
+	int32 Index {-1};
 };
 
 struct FRoomPoint
@@ -58,8 +59,8 @@ private:
 	void UpdateFrom(FRoomPoint& From, EAxisList::Type Axis);
 
 private:
-	EAxisList::Type bDirty{ EAxisList::None };
-	FVector Location{ 0 };
+	EAxisList::Type bDirty {EAxisList::None};
+	FVector Location {0};
 	TArray<FLink> LinkedPoints{};
 };
 

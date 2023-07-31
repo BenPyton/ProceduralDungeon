@@ -185,7 +185,7 @@ void ADungeonGenerator::CreateDungeon()
 	Octree->Destroy();
 	for (URoom* r : Graph->Rooms)
 	{
-		check(IsValid(r))
+		check(IsValid(r));
 		FBoxCenterAndExtent bounds = r->GetBounds();
 		FDungeonOctreeElement octreeElement(r);
 		Octree->AddElement(octreeElement);
@@ -636,8 +636,8 @@ int ADungeonGenerator::CountTotalRoomType(TArray<TSubclassOf<URoomData>> RoomTyp
 	return Graph->CountTotalRoomType(RoomTypeList);
 }
 
-int ADungeonGenerator::GetNbRoom() 
-{ 
+int ADungeonGenerator::GetNbRoom()
+{
 	return Graph->Count();
 }
 

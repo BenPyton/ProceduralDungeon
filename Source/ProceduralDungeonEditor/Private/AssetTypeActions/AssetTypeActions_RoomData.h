@@ -34,7 +34,7 @@ public:
 
 	// ~BEGIN FAssetTypeActions_Base
 	virtual FText GetName() const override;
-	virtual UClass * GetSupportedClass() const override;
+	virtual UClass* GetSupportedClass() const override;
 	virtual FColor GetTypeColor() const override;
 	virtual uint32 GetCategories() override;
 	virtual bool HasActions(const TArray<UObject*>& InObjects) const override;

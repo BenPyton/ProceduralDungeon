@@ -89,7 +89,7 @@ UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstanceBySoftObj
 	return LoadLevelInstance_Internal(World, Level.GetLongPackageName(), InstanceNameSuffix, Location, Rotation, bOutSuccess);
 }
 
-UProceduralLevelStreaming * UProceduralLevelStreaming::Load(UObject* WorldContextObject, URoomData* Data, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation)
+UProceduralLevelStreaming* UProceduralLevelStreaming::Load(UObject* WorldContextObject, URoomData* Data, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation)
 {
 	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 	if (nullptr == World)
@@ -115,7 +115,7 @@ UProceduralLevelStreaming * UProceduralLevelStreaming::Load(UObject* WorldContex
 	return Instance;
 }
 
-void UProceduralLevelStreaming::Unload(UObject * WorldContextObject, UProceduralLevelStreaming * Instance)
+void UProceduralLevelStreaming::Unload(UObject* WorldContextObject, UProceduralLevelStreaming* Instance)
 {
 	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 	if (nullptr == World)

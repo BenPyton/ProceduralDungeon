@@ -98,5 +98,5 @@ bool FProceduralDungeonModule::HandleSettingsSaved()
 }
 
 #undef LOCTEXT_NAMESPACE
-	
+
 IMPLEMENT_MODULE(FProceduralDungeonModule, ProceduralDungeon)

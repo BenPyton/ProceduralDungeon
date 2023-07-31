@@ -45,340 +45,340 @@
 
 void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TSharedRef<FProceduralDungeonEdModeToolkit> InParentToolkit)
 {
-    ParentToolkit = InParentToolkit;
-    FProceduralDungeonEdMode* EdMode = InParentToolkit->GetEditorMode();
-    FText LevelName = FText::FromString(GetNameSafe(EdMode->GetWorld()));
+	ParentToolkit = InParentToolkit;
+	FProceduralDungeonEdMode* EdMode = InParentToolkit->GetEditorMode();
+	FText LevelName = FText::FromString(GetNameSafe(EdMode->GetWorld()));
 
-    FSlateFontInfo TitleFont = FEditorStyle::GetFontStyle("DetailsView.CategoryFontStyle");
-    TitleFont.Size = 24;
+	FSlateFontInfo TitleFont = FEditorStyle::GetFontStyle("DetailsView.CategoryFontStyle");
+	TitleFont.Size = 24;
 
-    FSlateFontInfo SubTitleFont = FEditorStyle::GetFontStyle("DetailsView.CategoryFontStyle");
-    SubTitleFont.Size = 16;
+	FSlateFontInfo SubTitleFont = FEditorStyle::GetFontStyle("DetailsView.CategoryFontStyle");
+	SubTitleFont.Size = 16;
 
-    TSharedPtr<SScrollBox> DataScrollBox = nullptr;
+	TSharedPtr<SScrollBox> DataScrollBox = nullptr;
 
-    ChildSlot
-    [
-        SNew(SVerticalBox)
-        + SVerticalBox::Slot()
-        .VAlign(VAlign_Top)
-        .Padding(5.f)
-        .AutoHeight()
-        [
-            SNew(STextBlock)
-            .Text(LevelName)
-            .Justification(ETextJustify::Center)
-            .AutoWrapText(true)
-            .WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
-            .Font(TitleFont)
-        ]
-        + SVerticalBox::Slot()
-        .AutoHeight()
-        .Padding(5.0f)
-        [
-            SAssignNew(LevelPropertyContainer, SBorder)
-            .Visibility(this, &SProceduralDungeonEdModeWidget::ShowDetails)
-            .BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f))
-        ]
-        + SVerticalBox::Slot()
-        .Padding(5.0f)
-        .AutoHeight()
-        [
-            SAssignNew(Error, SErrorText)
-        ]
-        + SVerticalBox::Slot()
-        .Padding(5.0f)
-        [
-            SNew(SBorder)
-            .BorderImage(FEditorStyle::GetBrush("DetailsView.CollapsedCategory"))
-            .BorderBackgroundColor(FLinearColor(0.2f, 0.2f, 0.2f, 1.0f))
-            .Padding(5.0f)
-            .Visibility(this, &SProceduralDungeonEdModeWidget::ShowDataDetails)
-            [
-                SNew(SVerticalBox)
-                + SVerticalBox::Slot()
-                .VAlign(VAlign_Top)
-                .AutoHeight()
-                [
-                    SNew(SOverlay)
-                    + SOverlay::Slot()
-                    .HAlign(EHorizontalAlignment::HAlign_Fill)
-                    [
-                        SNew(STextBlock)
-                        .Text(this, &SProceduralDungeonEdModeWidget::GetDataAssetName)
-                        .Justification(ETextJustify::Center)
-                        .Font(SubTitleFont)
-                    ]
-                    + SOverlay::Slot()
-                    .HAlign(EHorizontalAlignment::HAlign_Left)
-                    .VAlign(EVerticalAlignment::VAlign_Center)
-                    [
-                        SNew(SButton)
-                        .Text(FText::FromString(TEXT("Edit")))
-                        .OnClicked(this, &SProceduralDungeonEdModeWidget::EditData)
-                        .IsEnabled(this, &SProceduralDungeonEdModeWidget::IsValidRoomData)
-                        .HAlign(EHorizontalAlignment::HAlign_Center)
-                    ]
-                    + SOverlay::Slot()
-                    .HAlign(EHorizontalAlignment::HAlign_Right)
-                    .VAlign(EVerticalAlignment::VAlign_Center)
-                    [
-                        SNew(SButton)
-                        .Text(FText::FromString(TEXT("Save")))
-                        .OnClicked(this, &SProceduralDungeonEdModeWidget::SaveData)
-                        .IsEnabled(this, &SProceduralDungeonEdModeWidget::IsDataDirty)
-                        .ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetSaveButtonColor)
-                        .HAlign(EHorizontalAlignment::HAlign_Center)
-                    ]
-                ]
-                + SVerticalBox::Slot()
-                .FillHeight(1.0f)
-                .Padding(0.0f, 5.0f, 0.0f, 0.0f)
-                [
-                    SAssignNew(DataScrollBox, SScrollBox)
-                    //.IsEnabled(this, &SProceduralDungeonEdModeWidget::MatchingDataLevel)
-                ]
-            ]
-        ]
-        + SVerticalBox::Slot()
-        .Padding(5.0f)
-        .AutoHeight()
-        [
-            SNew(SBorder)
-            .HAlign(EHorizontalAlignment::HAlign_Center)
-            .Visibility(this, &SProceduralDungeonEdModeWidget::ShowNote)
-            .BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f))
-            .Padding(0.0f)
-            [
-                SNew(SButton)
-                .Text(FText::FromString(TEXT("Reparent Level Blueprint")))
-                .OnClicked(this, &SProceduralDungeonEdModeWidget::ReparentLevelActor)
-                .ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetReparentButtonColor)
-                .HAlign(EHorizontalAlignment::HAlign_Center)
-            ]
-        ]
-    ];
+	ChildSlot
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+		.VAlign(VAlign_Top)
+		.Padding(5.f)
+		.AutoHeight()
+		[
+			SNew(STextBlock)
+			.Text(LevelName)
+		.Justification(ETextJustify::Center)
+		.AutoWrapText(true)
+		.WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
+		.Font(TitleFont)
+		]
+	+ SVerticalBox::Slot()
+		.AutoHeight()
+		.Padding(5.0f)
+		[
+			SAssignNew(LevelPropertyContainer, SBorder)
+			.Visibility(this, &SProceduralDungeonEdModeWidget::ShowDetails)
+		.BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f))
+		]
+	+ SVerticalBox::Slot()
+		.Padding(5.0f)
+		.AutoHeight()
+		[
+			SAssignNew(Error, SErrorText)
+		]
+	+ SVerticalBox::Slot()
+		.Padding(5.0f)
+		[
+			SNew(SBorder)
+			.BorderImage(FEditorStyle::GetBrush("DetailsView.CollapsedCategory"))
+		.BorderBackgroundColor(FLinearColor(0.2f, 0.2f, 0.2f, 1.0f))
+		.Padding(5.0f)
+		.Visibility(this, &SProceduralDungeonEdModeWidget::ShowDataDetails)
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot()
+		.VAlign(VAlign_Top)
+		.AutoHeight()
+		[
+			SNew(SOverlay)
+			+ SOverlay::Slot()
+		.HAlign(EHorizontalAlignment::HAlign_Fill)
+		[
+			SNew(STextBlock)
+			.Text(this, &SProceduralDungeonEdModeWidget::GetDataAssetName)
+		.Justification(ETextJustify::Center)
+		.Font(SubTitleFont)
+		]
+	+ SOverlay::Slot()
+		.HAlign(EHorizontalAlignment::HAlign_Left)
+		.VAlign(EVerticalAlignment::VAlign_Center)
+		[
+			SNew(SButton)
+			.Text(FText::FromString(TEXT("Edit")))
+		.OnClicked(this, &SProceduralDungeonEdModeWidget::EditData)
+		.IsEnabled(this, &SProceduralDungeonEdModeWidget::IsValidRoomData)
+		.HAlign(EHorizontalAlignment::HAlign_Center)
+		]
+	+ SOverlay::Slot()
+		.HAlign(EHorizontalAlignment::HAlign_Right)
+		.VAlign(EVerticalAlignment::VAlign_Center)
+		[
+			SNew(SButton)
+			.Text(FText::FromString(TEXT("Save")))
+		.OnClicked(this, &SProceduralDungeonEdModeWidget::SaveData)
+		.IsEnabled(this, &SProceduralDungeonEdModeWidget::IsDataDirty)
+		.ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetSaveButtonColor)
+		.HAlign(EHorizontalAlignment::HAlign_Center)
+		]
+		]
+	+ SVerticalBox::Slot()
+		.FillHeight(1.0f)
+		.Padding(0.0f, 5.0f, 0.0f, 0.0f)
+		[
+			SAssignNew(DataScrollBox, SScrollBox)
+			//.IsEnabled(this, &SProceduralDungeonEdModeWidget::MatchingDataLevel)
+		]
+		]
+		]
+	+ SVerticalBox::Slot()
+		.Padding(5.0f)
+		.AutoHeight()
+		[
+			SNew(SBorder)
+			.HAlign(EHorizontalAlignment::HAlign_Center)
+		.Visibility(this, &SProceduralDungeonEdModeWidget::ShowNote)
+		.BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f))
+		.Padding(0.0f)
+		[
+			SNew(SButton)
+			.Text(FText::FromString(TEXT("Reparent Level Blueprint")))
+		.OnClicked(this, &SProceduralDungeonEdModeWidget::ReparentLevelActor)
+		.ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetReparentButtonColor)
+		.HAlign(EHorizontalAlignment::HAlign_Center)
+		]
+		]
+		];
 
-    FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
-    // RoomData details view
-    FDetailsViewArgs DetailsViewArgs;
-    DetailsViewArgs.bAllowSearch = false;
-    DetailsViewArgs.bLockable = false;
-    DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
+	// RoomData details view
+	FDetailsViewArgs DetailsViewArgs;
+	DetailsViewArgs.bAllowSearch = false;
+	DetailsViewArgs.bLockable = false;
+	DetailsViewArgs.NameAreaSettings = FDetailsViewArgs::HideNameArea;
 
-    DataContentWidget = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
-    DataContentWidget->OnFinishedChangingProperties().AddLambda([this](const FPropertyChangedEvent& Event) { UpdateErrorText(); });
-    DataScrollBox->AddSlot()
-    [
-        DataContentWidget.ToSharedRef()
-    ];
+	DataContentWidget = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
+	DataContentWidget->OnFinishedChangingProperties().AddLambda([this](const FPropertyChangedEvent& Event) { UpdateErrorText(); });
+	DataScrollBox->AddSlot()
+		[
+			DataContentWidget.ToSharedRef()
+		];
 
-    OnLevelChanged();
+	OnLevelChanged();
 }
 
 void SProceduralDungeonEdModeWidget::OnLevelChanged()
 {
-    FProceduralDungeonEdMode* EdMode = ParentToolkit.Pin()->GetEditorMode();
-    auto Level = EdMode->GetLevel();
-    DungeonEd_LogInfo("Slate Editor Level: %s", *GetNameSafe(Level.Get()));
+	FProceduralDungeonEdMode* EdMode = ParentToolkit.Pin()->GetEditorMode();
+	auto Level = EdMode->GetLevel();
+	DungeonEd_LogInfo("Slate Editor Level: %s", *GetNameSafe(Level.Get()));
 
-    // Check Level script actor validity
-    if (!Level.IsValid())
-    {
-        UpdateErrorText();
-        return;
-    }
+	// Check Level script actor validity
+	if (!Level.IsValid())
+	{
+		UpdateErrorText();
+		return;
+	}
 
-    Level->OnPropertiesChanged.AddLambda([this](ARoomLevel* RoomLevel) { OnDataAssetChanged(); });
+	Level->OnPropertiesChanged.AddLambda([this](ARoomLevel* RoomLevel) { OnDataAssetChanged(); });
 
-    // RoomLevel Data property
-    FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-    TSharedPtr<ISinglePropertyView> SinglePropView = PropertyEditorModule.CreateSingleProperty(Level.Get(), "Data", {});
-    FSimpleDelegate PropertyChangedDelegate = FSimpleDelegate::CreateSP(this, &SProceduralDungeonEdModeWidget::OnDataAssetChanged);
-    SinglePropView->SetOnPropertyValueChanged(PropertyChangedDelegate);
-    LevelPropertyContainer->SetContent(SinglePropView.ToSharedRef());
+	// RoomLevel Data property
+	FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	TSharedPtr<ISinglePropertyView> SinglePropView = PropertyEditorModule.CreateSingleProperty(Level.Get(), "Data", {});
+	FSimpleDelegate PropertyChangedDelegate = FSimpleDelegate::CreateSP(this, &SProceduralDungeonEdModeWidget::OnDataAssetChanged);
+	SinglePropView->SetOnPropertyValueChanged(PropertyChangedDelegate);
+	LevelPropertyContainer->SetContent(SinglePropView.ToSharedRef());
 
-    OnDataAssetChanged();
+	OnDataAssetChanged();
 }
 
 void SProceduralDungeonEdModeWidget::OnDataAssetChanged()
 {
-    auto EdMode = ParentToolkit.Pin()->GetEditorMode();
-    check(EdMode);
+	auto EdMode = ParentToolkit.Pin()->GetEditorMode();
+	check(EdMode);
 
-    if (CurrentRoomData.IsValid())
-        CurrentRoomData->OnPropertiesChanged.Remove(DataDelegateHandle);
+	if (CurrentRoomData.IsValid())
+		CurrentRoomData->OnPropertiesChanged.Remove(DataDelegateHandle);
 
-    CurrentRoomData.Reset();
-    if (IsValidRoomData(EdMode, &CurrentRoomData))
-    {
-        DataContentWidget->SetObject(CurrentRoomData.Get());
-        DataDelegateHandle = CurrentRoomData.Get()->OnPropertiesChanged.AddLambda([this](URoomData* Data) { UpdateErrorText(); });
-    }
+	CurrentRoomData.Reset();
+	if (IsValidRoomData(EdMode, &CurrentRoomData))
+	{
+		DataContentWidget->SetObject(CurrentRoomData.Get());
+		DataDelegateHandle = CurrentRoomData.Get()->OnPropertiesChanged.AddLambda([this](URoomData* Data) { UpdateErrorText(); });
+	}
 
-    UpdateErrorText();
+	UpdateErrorText();
 
-    EdMode->SetDefaultTool();
+	EdMode->SetDefaultTool();
 
-    FProceduralDungeonEditorTool* ActiveTool = EdMode->GetActiveTool();
-    if (ActiveTool)
-        ActiveTool->OnDataChanged(CurrentRoomData.Get());
+	FProceduralDungeonEditorTool* ActiveTool = EdMode->GetActiveTool();
+	if (ActiveTool)
+		ActiveTool->OnDataChanged(CurrentRoomData.Get());
 }
 
 FReply SProceduralDungeonEdModeWidget::ReparentLevelActor()
 {
-    auto EdMode = ParentToolkit.Pin()->GetEditorMode();
-    auto World = EdMode->GetWorld();
-    ULevelScriptBlueprint* LevelBlueprint = World->PersistentLevel->GetLevelScriptBlueprint();
-    if (!IsValid(LevelBlueprint))
-    {
-        DungeonEd_LogInfo("ERROR: Can't Reparent Level Blueprint for an unknown reason.");
-        return FReply::Unhandled();
-    }
+	auto EdMode = ParentToolkit.Pin()->GetEditorMode();
+	auto World = EdMode->GetWorld();
+	ULevelScriptBlueprint* LevelBlueprint = World->PersistentLevel->GetLevelScriptBlueprint();
+	if (!IsValid(LevelBlueprint))
+	{
+		DungeonEd_LogInfo("ERROR: Can't Reparent Level Blueprint for an unknown reason.");
+		return FReply::Unhandled();
+	}
 
-    LevelBlueprint->ParentClass = ARoomLevel::StaticClass();
-    FKismetEditorUtilities::CompileBlueprint(LevelBlueprint);
+	LevelBlueprint->ParentClass = ARoomLevel::StaticClass();
+	FKismetEditorUtilities::CompileBlueprint(LevelBlueprint);
 
-    DungeonEd_LogInfo("Level Blueprint '%s' successfully reparented!", *LevelBlueprint->GetName());
+	DungeonEd_LogInfo("Level Blueprint '%s' successfully reparented!", *LevelBlueprint->GetName());
 
-    EdMode->UpdateLevelBlueprint();
+	EdMode->UpdateLevelBlueprint();
 
-    return FReply::Unhandled();
+	return FReply::Unhandled();
 }
 
 FReply SProceduralDungeonEdModeWidget::EditData()
 {
-    UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-    if (!IsValid(AssetEditorSubsystem))
-        return FReply::Unhandled();
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+	if (!IsValid(AssetEditorSubsystem))
+		return FReply::Unhandled();
 
-    TWeakObjectPtr<URoomData> Data;
-    if (!IsValidRoomData(nullptr, &Data))
-        return FReply::Unhandled();
+	TWeakObjectPtr<URoomData> Data;
+	if (!IsValidRoomData(nullptr, &Data))
+		return FReply::Unhandled();
 
-    AssetEditorSubsystem->OpenEditorForAsset(Data.Get());
-    return FReply::Handled();
+	AssetEditorSubsystem->OpenEditorForAsset(Data.Get());
+	return FReply::Handled();
 }
 
 FReply SProceduralDungeonEdModeWidget::SaveData()
 {
-    TWeakObjectPtr<URoomData> Data;
-    if(!IsValidRoomData(nullptr, &Data))
-        return FReply::Unhandled();
+	TWeakObjectPtr<URoomData> Data;
+	if (!IsValidRoomData(nullptr, &Data))
+		return FReply::Unhandled();
 
-    auto Result = FEditorFileUtils::PromptForCheckoutAndSave({ Data->GetPackage() }, /*bCheckDirty = */true, /*bPromptToSave = */false);
-    if(Result == FEditorFileUtils::EPromptReturnCode::PR_Success)
-        DungeonEd_LogInfo("Successfully Saved Data Asset: '%s'", *GetNameSafe(Data.Get()));
-    return FReply::Handled();
+	auto Result = FEditorFileUtils::PromptForCheckoutAndSave({Data->GetPackage()}, /*bCheckDirty = */true, /*bPromptToSave = */false);
+	if (Result == FEditorFileUtils::EPromptReturnCode::PR_Success)
+		DungeonEd_LogInfo("Successfully Saved Data Asset: '%s'", *GetNameSafe(Data.Get()));
+	return FReply::Handled();
 }
 
 FSlateColor SProceduralDungeonEdModeWidget::GetSaveButtonColor() const
 {
-    const FLinearColor& Default = FLinearColor::White;
-    const FLinearColor& Highlight = FLinearColor::Green;
-    return IsDataDirty() ? GetHighlightButtonColor(Highlight, Default) : Default;
+	const FLinearColor& Default = FLinearColor::White;
+	const FLinearColor& Highlight = FLinearColor::Green;
+	return IsDataDirty() ? GetHighlightButtonColor(Highlight, Default) : Default;
 }
 
 FSlateColor SProceduralDungeonEdModeWidget::GetReparentButtonColor() const
 {
-    return GetHighlightButtonColor(FLinearColor::Green);
+	return GetHighlightButtonColor(FLinearColor::Green);
 }
 
 void SProceduralDungeonEdModeWidget::UpdateErrorText()
 {
-    auto EdMode = ParentToolkit.Pin()->GetEditorMode();
-    if (!IsValidRoomLevel(EdMode))
-        Error->SetError(TEXT("Persistent Level is not a Room Level."));
-    else if (!IsValidRoomData(EdMode))
-        Error->SetError(TEXT("Room Level has no Room Data set."));
-    else if (!MatchingDataLevel(EdMode))
-        Error->SetError(TEXT("Level's Data and Data's Level do not match."));
-    else 
-        Error->SetError(FText::GetEmpty());
+	auto EdMode = ParentToolkit.Pin()->GetEditorMode();
+	if (!IsValidRoomLevel(EdMode))
+		Error->SetError(TEXT("Persistent Level is not a Room Level."));
+	else if (!IsValidRoomData(EdMode))
+		Error->SetError(TEXT("Room Level has no Room Data set."));
+	else if (!MatchingDataLevel(EdMode))
+		Error->SetError(TEXT("Level's Data and Data's Level do not match."));
+	else
+		Error->SetError(FText::GetEmpty());
 }
 
 bool SProceduralDungeonEdModeWidget::IsValidRoomLevel(FProceduralDungeonEdMode* EdMode, TWeakObjectPtr<ARoomLevel>* OutLevel) const
 {
-    if (!EdMode)
-        EdMode = ParentToolkit.Pin()->GetEditorMode();
+	if (!EdMode)
+		EdMode = ParentToolkit.Pin()->GetEditorMode();
 
-    auto Level = EdMode->GetLevel();
-    if (OutLevel)
-        *OutLevel = Level;
+	auto Level = EdMode->GetLevel();
+	if (OutLevel)
+		*OutLevel = Level;
 
-    return Level.IsValid();
+	return Level.IsValid();
 }
 
 bool SProceduralDungeonEdModeWidget::IsValidRoomData(FProceduralDungeonEdMode* EdMode, TWeakObjectPtr<URoomData>* OutData, TWeakObjectPtr<ARoomLevel>* OutLevel) const
 {
-    if (!EdMode)
-        EdMode = ParentToolkit.Pin()->GetEditorMode();
+	if (!EdMode)
+		EdMode = ParentToolkit.Pin()->GetEditorMode();
 
-    TWeakObjectPtr<ARoomLevel> Level;
-    if (!IsValidRoomLevel(EdMode, &Level))
-        return false;
+	TWeakObjectPtr<ARoomLevel> Level;
+	if (!IsValidRoomLevel(EdMode, &Level))
+		return false;
 
-    if (OutLevel)
-        *OutLevel = Level;
+	if (OutLevel)
+		*OutLevel = Level;
 
-    if (OutData)
-        *OutData = Level->Data;
+	if (OutData)
+		*OutData = Level->Data;
 
-    return IsValid(Level->Data);
+	return IsValid(Level->Data);
 }
 
 bool SProceduralDungeonEdModeWidget::MatchingDataLevel(FProceduralDungeonEdMode* EdMode) const
 {
-    if (!EdMode)
-        EdMode = ParentToolkit.Pin()->GetEditorMode();
+	if (!EdMode)
+		EdMode = ParentToolkit.Pin()->GetEditorMode();
 
-    TWeakObjectPtr<URoomData> Data;
-    if (!IsValidRoomData(EdMode, &Data))
-        return false;
+	TWeakObjectPtr<URoomData> Data;
+	if (!IsValidRoomData(EdMode, &Data))
+		return false;
 
-    return Data->Level.GetUniqueID() == EdMode->GetWorld()->GetPathName();
+	return Data->Level.GetUniqueID() == EdMode->GetWorld()->GetPathName();
 }
 
 bool SProceduralDungeonEdModeWidget::IsDataDirty(FProceduralDungeonEdMode* EdMode) const
 {
-    TWeakObjectPtr<URoomData> Data;
-    if (!IsValidRoomData(EdMode, &Data))
-        return false;
+	TWeakObjectPtr<URoomData> Data;
+	if (!IsValidRoomData(EdMode, &Data))
+		return false;
 
-    return Data->GetPackage()->IsDirty();
+	return Data->GetPackage()->IsDirty();
 }
 
 EVisibility SProceduralDungeonEdModeWidget::ShowDetails() const
 {
-    return IsValidRoomLevel() ? EVisibility::Visible : EVisibility::Collapsed;
+	return IsValidRoomLevel() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility SProceduralDungeonEdModeWidget::ShowDataDetails() const
 {
-    return IsValidRoomData() ? EVisibility::Visible : EVisibility::Collapsed;
+	return IsValidRoomData() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 EVisibility SProceduralDungeonEdModeWidget::ShowNote() const
 {
-    return IsValidRoomLevel() ? EVisibility::Collapsed : EVisibility::Visible;
+	return IsValidRoomLevel() ? EVisibility::Collapsed : EVisibility::Visible;
 }
 
 FText SProceduralDungeonEdModeWidget::GetDataAssetName() const
 {
-    auto EdMode = ParentToolkit.Pin()->GetEditorMode();
-    TWeakObjectPtr<URoomData> Data;
-    if (!IsValidRoomData(EdMode, &Data))
-        return FText::GetEmpty();
+	auto EdMode = ParentToolkit.Pin()->GetEditorMode();
+	TWeakObjectPtr<URoomData> Data;
+	if (!IsValidRoomData(EdMode, &Data))
+		return FText::GetEmpty();
 
-    FString Dirty = IsDataDirty(EdMode) ? "*" : "";
-    return FText::FromString(GetNameSafe(Data.Get()) + Dirty);
+	FString Dirty = IsDataDirty(EdMode) ? "*" : "";
+	return FText::FromString(GetNameSafe(Data.Get()) + Dirty);
 }
 
 FLinearColor SProceduralDungeonEdModeWidget::GetHighlightButtonColor(const FLinearColor& HighlightColor, const FLinearColor& NormalColor, float Speed)
 {
-    uint32 ticks = FDateTime::Now().GetTicks(); // needs this line to avoid compiler optimization that prevent getting Now() each frame.
-    float seconds = static_cast<float>(ticks) / ETimespan::TicksPerSecond;
-    float t = FMath::Cos(Speed * seconds);
-    return FMath::Lerp(NormalColor, HighlightColor, t);
+	uint32 ticks = FDateTime::Now().GetTicks(); // needs this line to avoid compiler optimization that prevent getting Now() each frame.
+	float seconds = static_cast<float>(ticks) / ETimespan::TicksPerSecond;
+	float t = FMath::Cos(Speed * seconds);
+	return FMath::Lerp(NormalColor, HighlightColor, t);
 }
