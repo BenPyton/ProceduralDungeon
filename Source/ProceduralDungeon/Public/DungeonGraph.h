@@ -43,6 +43,7 @@ public:
 	UDungeonGraph();
 	void AddRoom(URoom* Room);
 	void InitRooms();
+	void Clear();
 
 	// Returns all rooms
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
@@ -128,8 +129,6 @@ public:
 	static bool FindPath(const URoom* From, const URoom* To, TArray<const URoom*>* OutPath = nullptr, bool IgnoreLocked = false);
 
 protected:
-	void Clear();
-
 	int CountRoomByPredicate(TFunction<bool(const URoom*)> Predicate) const;
 	void GetRoomsByPredicate(TArray<URoom*>& OutRooms, TFunction<bool(const URoom*)> Predicate) const;
 	const URoom* FindFirstRoomByPredicate(TFunction<bool(const URoom*)> Predicate) const;
