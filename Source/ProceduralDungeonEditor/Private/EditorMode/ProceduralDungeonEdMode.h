@@ -34,53 +34,53 @@ class ULevelScriptBlueprint;
 class FProceduralDungeonEdMode : public FEdMode
 {
 public:
-    const static FEditorModeID EM_ProceduralDungeon;
+	const static FEditorModeID EM_ProceduralDungeon;
 
-    FProceduralDungeonEdMode();
+	FProceduralDungeonEdMode();
 
-    /** FGCObject interface */
-    virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
+	/** FGCObject interface */
+	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
-    // FEdMode interface
-    virtual void Enter() override;
-    virtual void Exit() override;
-    virtual void Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI) override;
-    virtual void Tick(FEditorViewportClient* ViewportClient, float DeltaTime) override;
-    virtual bool HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click) override;
-    virtual bool InputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event) override;
-    virtual bool InputAxis(FEditorViewportClient* InViewportClient, FViewport* Viewport, int32 ControllerId, FKey Key, float Delta, float DeltaTime) override;
-    virtual bool InputDelta(FEditorViewportClient* InViewportClient, FViewport* InViewport, FVector& InDrag, FRotator& InRot, FVector& InScale) override;
-    virtual bool MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y) override;
-    virtual bool ShowModeWidgets() const override;
-    virtual bool ShouldDrawWidget() const override;
-    virtual bool UsesTransformWidget() const override;
-    virtual bool UsesTransformWidget(WidgetMode CheckMode) const;
-    virtual FVector GetWidgetLocation() const override;
-    virtual bool AllowWidgetMove() override { return true; }
+	// FEdMode interface
+	virtual void Enter() override;
+	virtual void Exit() override;
+	virtual void Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI) override;
+	virtual void Tick(FEditorViewportClient* ViewportClient, float DeltaTime) override;
+	virtual bool HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click) override;
+	virtual bool InputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event) override;
+	virtual bool InputAxis(FEditorViewportClient* InViewportClient, FViewport* Viewport, int32 ControllerId, FKey Key, float Delta, float DeltaTime) override;
+	virtual bool InputDelta(FEditorViewportClient* InViewportClient, FViewport* InViewport, FVector& InDrag, FRotator& InRot, FVector& InScale) override;
+	virtual bool MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 x, int32 y) override;
+	virtual bool ShowModeWidgets() const override;
+	virtual bool ShouldDrawWidget() const override;
+	virtual bool UsesTransformWidget() const override;
+	virtual bool UsesTransformWidget(WidgetMode CheckMode) const;
+	virtual FVector GetWidgetLocation() const override;
+	virtual bool AllowWidgetMove() override { return true; }
 
-    bool GetTool(FName ToolName, FProceduralDungeonEditorTool*& OutTool) const;
-    FProceduralDungeonEditorTool* GetActiveTool() const;
-    void SetActiveTool(FName ToolName);
-    void ResetActiveTool();
-    void SetDefaultTool();
-    bool IsToolEnabled(FName ToolName) const;
+	bool GetTool(FName ToolName, FProceduralDungeonEditorTool*& OutTool) const;
+	FProceduralDungeonEditorTool* GetActiveTool() const;
+	void SetActiveTool(FName ToolName);
+	void ResetActiveTool();
+	void SetDefaultTool();
+	bool IsToolEnabled(FName ToolName) const;
 
-    ULevelScriptBlueprint* GetLevelBlueprint(bool bCreate = false) const;
-    TWeakObjectPtr<ARoomLevel> GetLevel() const;
-    TWeakObjectPtr<ARoomLevel> GetLevelInstance() const { return CachedLevelInstance; }
-    void UpdateLevelBlueprint();
+	ULevelScriptBlueprint* GetLevelBlueprint(bool bCreate = false) const;
+	TWeakObjectPtr<ARoomLevel> GetLevel() const;
+	TWeakObjectPtr<ARoomLevel> GetLevelInstance() const { return CachedLevelInstance; }
+	void UpdateLevelBlueprint();
 
 protected:
-    void SetActiveTool(FProceduralDungeonEditorTool* NewTool);
-    void OnLevelBlueprintCompiled(UBlueprint* Blueprint = nullptr);
+	void SetActiveTool(FProceduralDungeonEditorTool* NewTool);
+	void OnLevelBlueprintCompiled(UBlueprint* Blueprint = nullptr);
 
 public:
-    class UProceduralDungeonEditorObject* Settings {nullptr};
+	class UProceduralDungeonEditorObject* Settings {nullptr};
 
 private:
-    TArray<TUniquePtr<FProceduralDungeonEditorTool>> Tools;
-    FProceduralDungeonEditorTool* ActiveTool = nullptr;
-    TWeakObjectPtr<ARoomLevel> CachedLevelInstance = nullptr;
-    TWeakObjectPtr<ULevelScriptBlueprint> CachedLevelBlueprint = nullptr;
-    FDelegateHandle LevelBlueprintDelegateHandle;
+	TArray<TUniquePtr<FProceduralDungeonEditorTool>> Tools;
+	FProceduralDungeonEditorTool* ActiveTool = nullptr;
+	TWeakObjectPtr<ARoomLevel> CachedLevelInstance = nullptr;
+	TWeakObjectPtr<ULevelScriptBlueprint> CachedLevelBlueprint = nullptr;
+	FDelegateHandle LevelBlueprintDelegateHandle;
 };

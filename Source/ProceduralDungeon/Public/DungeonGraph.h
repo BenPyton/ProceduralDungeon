@@ -62,7 +62,7 @@ public:
 	const URoom* GetFirstRoomFromData(const URoomData* Data);
 
 	// Returns all room instances having the provided custom data
-	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph", meta = (AutoCreateRefTerm="CustomData"))
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph", meta = (AutoCreateRefTerm = "CustomData"))
 	void GetAllRoomsWithCustomData(const TSubclassOf<URoomCustomData>& CustomData, TArray<URoom*>& Rooms);
 
 	// Returns all room instances having ALL the provided custom data

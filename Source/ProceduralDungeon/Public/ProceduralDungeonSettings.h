@@ -32,7 +32,7 @@ UCLASS(config = Game, defaultconfig)
 class PROCEDURALDUNGEON_API UProceduralDungeonSettings : public UObject
 {
 	GENERATED_BODY()
-	
+
 public:
 	UProceduralDungeonSettings(const FObjectInitializer& ObjectInitializer);
 
@@ -59,11 +59,11 @@ public:
 	//bool LegacyOcclusion;
 
 	// Defines the number of connected rooms are visible from the player's room (1 means only the room where the player is).
-	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta=(EditCondition="OcclusionCulling"))
+	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta = (EditCondition = "OcclusionCulling"))
 	uint32 OcclusionDistance;
 
 	// Keep track of dynamic actors entering and leaving the room to be able to show/hide them with the room.
-	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta=(EditCondition="OcclusionCulling"))
+	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta = (EditCondition = "OcclusionCulling"))
 	bool OccludeDynamicActors;
 
 	// When true, doors will be connected as long they are at the same place.
@@ -80,6 +80,6 @@ public:
 	bool OnScreenPrintDebug;
 
 	// Duration of the screen logs
-	UPROPERTY(EditAnywhere, config, Category = "Debug", meta=(EditCondition="OnScreenPrintDebug"))
+	UPROPERTY(EditAnywhere, config, Category = "Debug", meta = (EditCondition = "OnScreenPrintDebug"))
 	float PrintDebugDuration;
 };

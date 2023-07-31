@@ -32,7 +32,7 @@ UCLASS()
 class PROCEDURALDUNGEON_API ATriggerDoor : public ADoor
 {
 	GENERATED_BODY()
-	
+
 private:
 	UPROPERTY(EditAnywhere, Category = "Door Trigger")
 	class UBoxComponent* BoxComponent;
@@ -46,7 +46,7 @@ public:
 
 protected:
 	UFUNCTION()
-	void OnTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	void OnTriggerEnter(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
 	void OnTriggerExit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
@@ -56,6 +56,6 @@ protected:
 	// By default the actor is valid if it's a Character.
 	UFUNCTION(BlueprintNativeEvent, Category = "Door")
 	bool IsValidActor(AActor* Actor, UPrimitiveComponent* Component);
-	
+
 	FORCEINLINE void UpdateOpenState() { Open(ActorList.Num() > 0); }
 };

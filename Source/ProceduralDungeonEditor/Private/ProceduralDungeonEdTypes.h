@@ -44,11 +44,11 @@ using WidgetMode = UE::Widget::EWidgetMode;
 
 EAxisList::Type operator~(const EAxisList::Type& This)
 {
-    return static_cast<EAxisList::Type>(EAxisList::All - This);
+	return static_cast<EAxisList::Type>(EAxisList::All - This);
 }
 
 EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other)
 {
-    This = static_cast<EAxisList::Type>(This & Other);
-    return This;
+	This = static_cast<EAxisList::Type>(This & Other);
+	return This;
 }

@@ -33,39 +33,39 @@ class FProceduralDungeonEdModeToolkit;
 class SProceduralDungeonEdModeWidget : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SProceduralDungeonEdModeWidget) {}
-    SLATE_END_ARGS();
+	SLATE_BEGIN_ARGS(SProceduralDungeonEdModeWidget) {}
+	SLATE_END_ARGS();
 
-    void Construct(const FArguments& InArgs, TSharedRef<FProceduralDungeonEdModeToolkit> InParentToolkit);
-    void OnLevelChanged();
+	void Construct(const FArguments& InArgs, TSharedRef<FProceduralDungeonEdModeToolkit> InParentToolkit);
+	void OnLevelChanged();
 
 protected:
-    bool IsValidRoomLevel(FProceduralDungeonEdMode* EdMode = nullptr, TWeakObjectPtr<ARoomLevel>* OutLevel = nullptr) const;
-    bool IsValidRoomData(FProceduralDungeonEdMode* EdMode, TWeakObjectPtr<class URoomData>* OutData = nullptr, TWeakObjectPtr<ARoomLevel>* OutLevel = nullptr) const;
-    bool IsValidRoomData() const { return IsValidRoomData(nullptr); }
-    bool MatchingDataLevel(FProceduralDungeonEdMode* EdMode = nullptr) const;
-    bool IsDataDirty(FProceduralDungeonEdMode* EdMode) const;
-    bool IsDataDirty() const { return IsDataDirty(nullptr); }
-    EVisibility ShowDetails() const;
-    EVisibility ShowDataDetails() const;
-    EVisibility ShowNote() const;
-    FText GetDataAssetName() const;
-    void OnDataAssetChanged();
-    FReply ReparentLevelActor();
-    FReply EditData();
-    FReply SaveData();
-    FSlateColor GetSaveButtonColor() const;
-    FSlateColor GetReparentButtonColor() const;
-    void UpdateErrorText();
+	bool IsValidRoomLevel(FProceduralDungeonEdMode* EdMode = nullptr, TWeakObjectPtr<ARoomLevel>* OutLevel = nullptr) const;
+	bool IsValidRoomData(FProceduralDungeonEdMode* EdMode, TWeakObjectPtr<class URoomData>* OutData = nullptr, TWeakObjectPtr<ARoomLevel>* OutLevel = nullptr) const;
+	bool IsValidRoomData() const { return IsValidRoomData(nullptr); }
+	bool MatchingDataLevel(FProceduralDungeonEdMode* EdMode = nullptr) const;
+	bool IsDataDirty(FProceduralDungeonEdMode* EdMode) const;
+	bool IsDataDirty() const { return IsDataDirty(nullptr); }
+	EVisibility ShowDetails() const;
+	EVisibility ShowDataDetails() const;
+	EVisibility ShowNote() const;
+	FText GetDataAssetName() const;
+	void OnDataAssetChanged();
+	FReply ReparentLevelActor();
+	FReply EditData();
+	FReply SaveData();
+	FSlateColor GetSaveButtonColor() const;
+	FSlateColor GetReparentButtonColor() const;
+	void UpdateErrorText();
 
-    static FLinearColor GetHighlightButtonColor(const FLinearColor& HighlightColor, const FLinearColor& NormalColor = FLinearColor::White, float Speed = 3.0f);
+	static FLinearColor GetHighlightButtonColor(const FLinearColor& HighlightColor, const FLinearColor& NormalColor = FLinearColor::White, float Speed = 3.0f);
 
 private:
-    TSharedPtr<class SErrorText> Error = nullptr;
-    TSharedPtr<class IDetailsView> DataContentWidget = nullptr;
-    TWeakPtr<FProceduralDungeonEdModeToolkit> ParentToolkit = nullptr;
+	TSharedPtr<class SErrorText> Error = nullptr;
+	TSharedPtr<class IDetailsView> DataContentWidget = nullptr;
+	TWeakPtr<FProceduralDungeonEdModeToolkit> ParentToolkit = nullptr;
 
-    TSharedPtr<class SBorder> LevelPropertyContainer = nullptr;
-    TWeakObjectPtr<class URoomData> CurrentRoomData = nullptr;
-    FDelegateHandle DataDelegateHandle;
+	TSharedPtr<class SBorder> LevelPropertyContainer = nullptr;
+	TWeakObjectPtr<class URoomData> CurrentRoomData = nullptr;
+	FDelegateHandle DataDelegateHandle;
 };

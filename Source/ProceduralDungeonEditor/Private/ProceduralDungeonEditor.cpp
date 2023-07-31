@@ -102,7 +102,7 @@ void FProceduralDungeonEditorModule::ShutdownModule()
 
 	// Unregister editor mode
 	FEditorModeRegistry::Get().UnregisterMode(FProceduralDungeonEdMode::EM_ProceduralDungeon);
-	
+
 	if (UObjectInitialized())
 	{
 		UnregisterSettings();
@@ -151,5 +151,5 @@ bool FProceduralDungeonEditorModule::HandleSettingsSaved()
 }
 
 #undef LOCTEXT_NAMESPACE
-	
+
 IMPLEMENT_MODULE(FProceduralDungeonEditorModule, ProceduralDungeonEditor)

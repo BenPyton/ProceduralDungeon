@@ -58,7 +58,6 @@ static UDungeonGraph* s_graph {nullptr};
 #define DUMMY_PATH(Path) \
 	Path.Empty(); \
 	Path.Add(nullptr);
-	
 
 bool FDungeonGraphTest::RunTest(const FString& Parameters)
 {
@@ -68,15 +67,15 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 		CREATE_ROOM_DATA(DA_B);
 		CREATE_ROOM_DATA(DA_C);
 
-		DA_A->Doors.Add({ {0,0,0}, EDoorDirection::South });
+		DA_A->Doors.Add({{0,0,0}, EDoorDirection::South});
 
-		DA_B->Doors.Add({ {0,0,0}, EDoorDirection::East });
-		DA_B->Doors.Add({ {0,0,0}, EDoorDirection::West });
+		DA_B->Doors.Add({{0,0,0}, EDoorDirection::East});
+		DA_B->Doors.Add({{0,0,0}, EDoorDirection::West});
 
-		DA_C->Doors.Add({ {0,0,0}, EDoorDirection::North });
-		DA_C->Doors.Add({ {0,0,0}, EDoorDirection::South });
-		DA_C->Doors.Add({ {0,0,0}, EDoorDirection::East });
-		DA_C->Doors.Add({ {0,0,0}, EDoorDirection::West });
+		DA_C->Doors.Add({{0,0,0}, EDoorDirection::North});
+		DA_C->Doors.Add({{0,0,0}, EDoorDirection::South});
+		DA_C->Doors.Add({{0,0,0}, EDoorDirection::East});
+		DA_C->Doors.Add({{0,0,0}, EDoorDirection::West});
 
 		// Test pathfind
 		{

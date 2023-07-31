@@ -82,7 +82,7 @@ bool URoomData::IsDoorValid(int DoorIndex) const
 		|| (DoorDef.Position.Y < Min.Y || DoorDef.Position.Y >= Max.Y)
 		|| (DoorDef.Position.Z < Min.Z || DoorDef.Position.Z >= Max.Z))
 		return false;
-	
+
 	// Check if the door is on the edge of the room bounds
 	switch (DoorDef.Direction)
 	{
@@ -114,8 +114,8 @@ EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 	}
 
 	// Check if no room size is 0 on any axis
-	if (FirstPoint.X == SecondPoint.X 
-		|| FirstPoint.Y == SecondPoint.Y 
+	if (FirstPoint.X == SecondPoint.X
+		|| FirstPoint.Y == SecondPoint.Y
 		|| FirstPoint.Z == SecondPoint.Z)
 	{
 		ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has a size of 0 on at least one axis."), *GetName())));

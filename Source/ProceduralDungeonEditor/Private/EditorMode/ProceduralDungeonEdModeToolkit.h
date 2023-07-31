@@ -29,24 +29,24 @@
 class FProceduralDungeonEdModeToolkit : public FModeToolkit
 {
 public:
-    /** FModeToolkit interface */
-    virtual void Init(const TSharedPtr< class IToolkitHost >& InitToolkitHost) override;
-    virtual void GetToolPaletteNames(TArray<FName>& InPaletteName) const override;
-    virtual FText GetToolPaletteDisplayName(FName PaletteName) const override;
-    virtual void BuildToolPalette(FName Palette, class FToolBarBuilder& ToolbarBuilder) override;
+	/** FModeToolkit interface */
+	virtual void Init(const TSharedPtr< class IToolkitHost >& InitToolkitHost) override;
+	virtual void GetToolPaletteNames(TArray<FName>& InPaletteName) const override;
+	virtual FText GetToolPaletteDisplayName(FName PaletteName) const override;
+	virtual void BuildToolPalette(FName Palette, class FToolBarBuilder& ToolbarBuilder) override;
 
-    /** IToolkit interface */
-    virtual FName GetToolkitFName() const override { return FName("ProceduralDungeonEdMode"); }
-    virtual FText GetBaseToolkitName() const override { return NSLOCTEXT("ProceduralDungeonEdModeToolkit", "DisplayName", "ProceduralDungeonEdMode Tool"); }
-    virtual class FProceduralDungeonEdMode* GetEditorMode() const override;
-    virtual TSharedPtr<class SWidget> GetInlineContent() const override;
+	/** IToolkit interface */
+	virtual FName GetToolkitFName() const override { return FName("ProceduralDungeonEdMode"); }
+	virtual FText GetBaseToolkitName() const override { return NSLOCTEXT("ProceduralDungeonEdModeToolkit", "DisplayName", "ProceduralDungeonEdMode Tool"); }
+	virtual class FProceduralDungeonEdMode* GetEditorMode() const override;
+	virtual TSharedPtr<class SWidget> GetInlineContent() const override;
 
-    void OnChangeTool(FName ToolName) const;
-    bool IsToolEnabled(FName ToolName) const;
-    bool IsToolActive(FName ToolName) const;
-    bool IsDoorTypeEnabled() const;
-    void OnLevelChanged();
+	void OnChangeTool(FName ToolName) const;
+	bool IsToolEnabled(FName ToolName) const;
+	bool IsToolActive(FName ToolName) const;
+	bool IsDoorTypeEnabled() const;
+	void OnLevelChanged();
 
 private:
-    TSharedPtr<class SProceduralDungeonEdModeWidget> EdModeWidget;
+	TSharedPtr<class SProceduralDungeonEdModeWidget> EdModeWidget;
 };
