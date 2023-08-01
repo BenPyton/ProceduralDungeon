@@ -25,6 +25,7 @@
 #include "TriggerType.h"
 #include "TimerManager.h"
 #include "ProceduralDungeonTypes.h"
+#include "Engine/World.h"
 
 // Sets default values for this component's properties
 UTriggerType::UTriggerType()
