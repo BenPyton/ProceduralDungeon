@@ -121,6 +121,12 @@ bool Dungeon::DrawDebug()
 	return Settings->DrawDebug;
 }
 
+bool Dungeon::ShowRoomOrigin()
+{
+	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
+	return Settings->ShowRoomOrigin;
+}
+
 bool Dungeon::CanLoop()
 {
 	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();

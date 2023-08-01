@@ -75,6 +75,10 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Debug")
 	bool DrawDebug;
 
+	// Show the room origin in magenta (useless imho but here if anyone find it useful)
+	UPROPERTY(EditAnywhere, config, Category = "Debug", meta = (EditCondition = "DrawDebug"))
+	bool ShowRoomOrigin;
+
 	// Show some logs on the screen
 	UPROPERTY(EditAnywhere, config, Category = "Debug")
 	bool OnScreenPrintDebug;
