@@ -58,106 +58,106 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 	TSharedPtr<SScrollBox> DataScrollBox = nullptr;
 
 	ChildSlot
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
+	[
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
 		.VAlign(VAlign_Top)
 		.Padding(5.f)
 		.AutoHeight()
 		[
 			SNew(STextBlock)
 			.Text(LevelName)
-		.Justification(ETextJustify::Center)
-		.AutoWrapText(true)
-		.WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
-		.Font(TitleFont)
+			.Justification(ETextJustify::Center)
+			.AutoWrapText(true)
+			.WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
+			.Font(TitleFont)
 		]
-	+ SVerticalBox::Slot()
+		+ SVerticalBox::Slot()
 		.AutoHeight()
 		.Padding(5.0f)
 		[
 			SAssignNew(LevelPropertyContainer, SBorder)
 			.Visibility(this, &SProceduralDungeonEdModeWidget::ShowDetails)
-		.BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f))
+			.BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f))
 		]
-	+ SVerticalBox::Slot()
+		+ SVerticalBox::Slot()
 		.Padding(5.0f)
 		.AutoHeight()
 		[
 			SAssignNew(Error, SErrorText)
 		]
-	+ SVerticalBox::Slot()
+		+ SVerticalBox::Slot()
 		.Padding(5.0f)
 		[
 			SNew(SBorder)
 			.BorderImage(FEditorStyle::GetBrush("DetailsView.CollapsedCategory"))
-		.BorderBackgroundColor(FLinearColor(0.2f, 0.2f, 0.2f, 1.0f))
-		.Padding(5.0f)
-		.Visibility(this, &SProceduralDungeonEdModeWidget::ShowDataDetails)
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-		.VAlign(VAlign_Top)
-		.AutoHeight()
-		[
-			SNew(SOverlay)
-			+ SOverlay::Slot()
-		.HAlign(EHorizontalAlignment::HAlign_Fill)
-		[
-			SNew(STextBlock)
-			.Text(this, &SProceduralDungeonEdModeWidget::GetDataAssetName)
-		.Justification(ETextJustify::Center)
-		.Font(SubTitleFont)
+			.BorderBackgroundColor(FLinearColor(0.2f, 0.2f, 0.2f, 1.0f))
+			.Padding(5.0f)
+			.Visibility(this, &SProceduralDungeonEdModeWidget::ShowDataDetails)
+			[
+				SNew(SVerticalBox)
+				+ SVerticalBox::Slot()
+				.VAlign(VAlign_Top)
+				.AutoHeight()
+				[
+					SNew(SOverlay)
+					+ SOverlay::Slot()
+					.HAlign(EHorizontalAlignment::HAlign_Fill)
+					[
+						SNew(STextBlock)
+						.Text(this, &SProceduralDungeonEdModeWidget::GetDataAssetName)
+						.Justification(ETextJustify::Center)
+						.Font(SubTitleFont)
+					]
+					+ SOverlay::Slot()
+					.HAlign(EHorizontalAlignment::HAlign_Left)
+					.VAlign(EVerticalAlignment::VAlign_Center)
+					[
+						SNew(SButton)
+						.Text(FText::FromString(TEXT("Edit")))
+						.OnClicked(this, &SProceduralDungeonEdModeWidget::EditData)
+						.IsEnabled(this, &SProceduralDungeonEdModeWidget::IsValidRoomData)
+						.HAlign(EHorizontalAlignment::HAlign_Center)
+					]
+					+ SOverlay::Slot()
+					.HAlign(EHorizontalAlignment::HAlign_Right)
+					.VAlign(EVerticalAlignment::VAlign_Center)
+					[
+						SNew(SButton)
+						.Text(FText::FromString(TEXT("Save")))
+						.OnClicked(this, &SProceduralDungeonEdModeWidget::SaveData)
+						.IsEnabled(this, &SProceduralDungeonEdModeWidget::IsDataDirty)
+						.ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetSaveButtonColor)
+						.HAlign(EHorizontalAlignment::HAlign_Center)
+					]
+				]
+				+ SVerticalBox::Slot()
+				.FillHeight(1.0f)
+				.Padding(0.0f, 5.0f, 0.0f, 0.0f)
+				[
+					SAssignNew(DataScrollBox, SScrollBox)
+					//.IsEnabled(this, &SProceduralDungeonEdModeWidget::MatchingDataLevel)
+				]
+			]
 		]
-	+ SOverlay::Slot()
-		.HAlign(EHorizontalAlignment::HAlign_Left)
-		.VAlign(EVerticalAlignment::VAlign_Center)
-		[
-			SNew(SButton)
-			.Text(FText::FromString(TEXT("Edit")))
-		.OnClicked(this, &SProceduralDungeonEdModeWidget::EditData)
-		.IsEnabled(this, &SProceduralDungeonEdModeWidget::IsValidRoomData)
-		.HAlign(EHorizontalAlignment::HAlign_Center)
-		]
-	+ SOverlay::Slot()
-		.HAlign(EHorizontalAlignment::HAlign_Right)
-		.VAlign(EVerticalAlignment::VAlign_Center)
-		[
-			SNew(SButton)
-			.Text(FText::FromString(TEXT("Save")))
-		.OnClicked(this, &SProceduralDungeonEdModeWidget::SaveData)
-		.IsEnabled(this, &SProceduralDungeonEdModeWidget::IsDataDirty)
-		.ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetSaveButtonColor)
-		.HAlign(EHorizontalAlignment::HAlign_Center)
-		]
-		]
-	+ SVerticalBox::Slot()
-		.FillHeight(1.0f)
-		.Padding(0.0f, 5.0f, 0.0f, 0.0f)
-		[
-			SAssignNew(DataScrollBox, SScrollBox)
-			//.IsEnabled(this, &SProceduralDungeonEdModeWidget::MatchingDataLevel)
-		]
-		]
-		]
-	+ SVerticalBox::Slot()
+		+ SVerticalBox::Slot()
 		.Padding(5.0f)
 		.AutoHeight()
 		[
 			SNew(SBorder)
 			.HAlign(EHorizontalAlignment::HAlign_Center)
-		.Visibility(this, &SProceduralDungeonEdModeWidget::ShowNote)
-		.BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f))
-		.Padding(0.0f)
-		[
-			SNew(SButton)
-			.Text(FText::FromString(TEXT("Reparent Level Blueprint")))
-		.OnClicked(this, &SProceduralDungeonEdModeWidget::ReparentLevelActor)
-		.ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetReparentButtonColor)
-		.HAlign(EHorizontalAlignment::HAlign_Center)
+			.Visibility(this, &SProceduralDungeonEdModeWidget::ShowNote)
+			.BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.0f))
+			.Padding(0.0f)
+			[
+				SNew(SButton)
+				.Text(FText::FromString(TEXT("Reparent Level Blueprint")))
+				.OnClicked(this, &SProceduralDungeonEdModeWidget::ReparentLevelActor)
+				.ButtonColorAndOpacity(this, &SProceduralDungeonEdModeWidget::GetReparentButtonColor)
+				.HAlign(EHorizontalAlignment::HAlign_Center)
+			]
 		]
-		]
-		];
+	];
 
 	FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
@@ -170,9 +170,9 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 	DataContentWidget = PropertyEditorModule.CreateDetailView(DetailsViewArgs);
 	DataContentWidget->OnFinishedChangingProperties().AddLambda([this](const FPropertyChangedEvent& Event) { UpdateErrorText(); });
 	DataScrollBox->AddSlot()
-		[
-			DataContentWidget.ToSharedRef()
-		];
+	[
+		DataContentWidget.ToSharedRef()
+	];
 
 	OnLevelChanged();
 }
