@@ -144,7 +144,8 @@ void ARoomLevel::Tick(float DeltaTime)
 
 		// TODO: is it still needed now?
 		// Pivot
-		DrawDebugSphere(World, DungeonTransform.TransformPosition(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
+		if(Dungeon::ShowRoomOrigin())
+			DrawDebugSphere(World, DungeonTransform.TransformPosition(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
 
 		// Room bounds
 		DrawDebugBox(World, DungeonTransform.TransformPosition(Bounds.Center), Bounds.Extent, DungeonTransform.GetRotation(), IsPlayerInside() ? FColor::Green : FColor::Red);

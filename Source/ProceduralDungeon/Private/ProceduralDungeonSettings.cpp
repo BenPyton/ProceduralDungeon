@@ -35,6 +35,7 @@ UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer&
 	OcclusionDistance = 2;
 	OccludeDynamicActors = false;
 	DrawDebug = true;
+	ShowRoomOrigin = false;
 	OnScreenPrintDebug = false;
 	PrintDebugDuration = 60.0f;
 	CanLoop = true;
