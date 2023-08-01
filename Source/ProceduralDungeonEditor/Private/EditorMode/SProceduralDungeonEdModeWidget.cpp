@@ -177,26 +177,29 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 	OnLevelChanged();
 }
 
+SProceduralDungeonEdModeWidget::~SProceduralDungeonEdModeWidget()
+{
+	ResetCachedData();
+	ResetCachedLevel();
+}
+
 void SProceduralDungeonEdModeWidget::OnLevelChanged()
 {
-	FProceduralDungeonEdMode* EdMode = ParentToolkit.Pin()->GetEditorMode();
-	auto Level = EdMode->GetLevel();
-	DungeonEd_LogInfo("Slate Editor Level: %s", *GetNameSafe(Level.Get()));
-
-	// Check Level script actor validity
-	if (!Level.IsValid())
+	FProceduralDungeonEdMode* EdMode = GetEditorMode();
+	ResetCachedLevel();
+	if (!IsValidRoomLevel(EdMode, &CachedLevel))
 	{
 		UpdateErrorText();
 		return;
 	}
 
-	Level->OnPropertiesChanged.AddLambda([this](ARoomLevel* RoomLevel) { OnDataAssetChanged(); });
+	DungeonEd_LogInfo("Slate Editor Level: %s", *GetNameSafe(CachedLevel.Get()));
+
+	LevelDelegateHandle = CachedLevel->OnPropertiesChanged.AddLambda([this](ARoomLevel* RoomLevel) { OnDataAssetChanged(); });
 
 	// RoomLevel Data property
 	FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	TSharedPtr<ISinglePropertyView> SinglePropView = PropertyEditorModule.CreateSingleProperty(Level.Get(), "Data", {});
-	FSimpleDelegate PropertyChangedDelegate = FSimpleDelegate::CreateSP(this, &SProceduralDungeonEdModeWidget::OnDataAssetChanged);
-	SinglePropView->SetOnPropertyValueChanged(PropertyChangedDelegate);
+	TSharedPtr<ISinglePropertyView> SinglePropView = PropertyEditorModule.CreateSingleProperty(CachedLevel.Get(), "Data", {});
 	LevelPropertyContainer->SetContent(SinglePropView.ToSharedRef());
 
 	OnDataAssetChanged();
@@ -204,17 +207,12 @@ void SProceduralDungeonEdModeWidget::OnLevelChanged()
 
 void SProceduralDungeonEdModeWidget::OnDataAssetChanged()
 {
-	auto EdMode = ParentToolkit.Pin()->GetEditorMode();
-	check(EdMode);
-
-	if (CurrentRoomData.IsValid())
-		CurrentRoomData->OnPropertiesChanged.Remove(DataDelegateHandle);
-
-	CurrentRoomData.Reset();
-	if (IsValidRoomData(EdMode, &CurrentRoomData))
+	auto EdMode = GetEditorMode();
+	ResetCachedData();
+	if (IsValidRoomData(EdMode, &CachedData))
 	{
-		DataContentWidget->SetObject(CurrentRoomData.Get());
-		DataDelegateHandle = CurrentRoomData.Get()->OnPropertiesChanged.AddLambda([this](URoomData* Data) { UpdateErrorText(); });
+		DataContentWidget->SetObject(CachedData.Get());
+		DataDelegateHandle = CachedData->OnPropertiesChanged.AddLambda([this](URoomData* Data) { UpdateErrorText(); });
 	}
 
 	UpdateErrorText();
@@ -223,12 +221,12 @@ void SProceduralDungeonEdModeWidget::OnDataAssetChanged()
 
 	FProceduralDungeonEditorTool* ActiveTool = EdMode->GetActiveTool();
 	if (ActiveTool)
-		ActiveTool->OnDataChanged(CurrentRoomData.Get());
+		ActiveTool->OnDataChanged(CachedData.Get());
 }
 
 FReply SProceduralDungeonEdModeWidget::ReparentLevelActor()
 {
-	auto EdMode = ParentToolkit.Pin()->GetEditorMode();
+	auto EdMode = GetEditorMode();
 	auto World = EdMode->GetWorld();
 	ULevelScriptBlueprint* LevelBlueprint = World->PersistentLevel->GetLevelScriptBlueprint();
 	if (!IsValid(LevelBlueprint))
@@ -287,7 +285,8 @@ FSlateColor SProceduralDungeonEdModeWidget::GetReparentButtonColor() const
 
 void SProceduralDungeonEdModeWidget::UpdateErrorText()
 {
-	auto EdMode = ParentToolkit.Pin()->GetEditorMode();
+	auto EdMode = GetEditorMode();
+	checkf(EdMode, TEXT("EdMode is Invalid in UpdateErrorText"));
 	if (!IsValidRoomLevel(EdMode))
 		Error->SetError(TEXT("Persistent Level is not a Room Level."));
 	else if (!IsValidRoomData(EdMode))
@@ -298,10 +297,34 @@ void SProceduralDungeonEdModeWidget::UpdateErrorText()
 		Error->SetError(FText::GetEmpty());
 }
 
+void SProceduralDungeonEdModeWidget::ResetCachedData()
+{
+	if (!CachedData.IsValid())
+		return;
+	CachedData->OnPropertiesChanged.Remove(DataDelegateHandle);
+	DataDelegateHandle.Reset();
+	CachedData.Reset();
+}
+
+void SProceduralDungeonEdModeWidget::ResetCachedLevel()
+{
+	if (!CachedLevel.IsValid())
+		return;
+	CachedLevel->OnPropertiesChanged.Remove(LevelDelegateHandle);
+	LevelDelegateHandle.Reset();
+	CachedLevel.Reset();
+}
+
+FProceduralDungeonEdMode* SProceduralDungeonEdModeWidget::GetEditorMode() const
+{
+	checkf(ParentToolkit.IsValid(), TEXT("ParentToolkit is invalid. This should never happen. There is a leakage somewhere."));
+	return ParentToolkit.Pin()->GetEditorMode();
+}
+
 bool SProceduralDungeonEdModeWidget::IsValidRoomLevel(FProceduralDungeonEdMode* EdMode, TWeakObjectPtr<ARoomLevel>* OutLevel) const
 {
 	if (!EdMode)
-		EdMode = ParentToolkit.Pin()->GetEditorMode();
+		EdMode = GetEditorMode();
 
 	auto Level = EdMode->GetLevel();
 	if (OutLevel)
@@ -313,7 +336,7 @@ bool SProceduralDungeonEdModeWidget::IsValidRoomLevel(FProceduralDungeonEdMode* 
 bool SProceduralDungeonEdModeWidget::IsValidRoomData(FProceduralDungeonEdMode* EdMode, TWeakObjectPtr<URoomData>* OutData, TWeakObjectPtr<ARoomLevel>* OutLevel) const
 {
 	if (!EdMode)
-		EdMode = ParentToolkit.Pin()->GetEditorMode();
+		EdMode = GetEditorMode();
 
 	TWeakObjectPtr<ARoomLevel> Level;
 	if (!IsValidRoomLevel(EdMode, &Level))
@@ -331,7 +354,7 @@ bool SProceduralDungeonEdModeWidget::IsValidRoomData(FProceduralDungeonEdMode* E
 bool SProceduralDungeonEdModeWidget::MatchingDataLevel(FProceduralDungeonEdMode* EdMode) const
 {
 	if (!EdMode)
-		EdMode = ParentToolkit.Pin()->GetEditorMode();
+		EdMode = GetEditorMode();
 
 	TWeakObjectPtr<URoomData> Data;
 	if (!IsValidRoomData(EdMode, &Data))
@@ -366,7 +389,7 @@ EVisibility SProceduralDungeonEdModeWidget::ShowNote() const
 
 FText SProceduralDungeonEdModeWidget::GetDataAssetName() const
 {
-	auto EdMode = ParentToolkit.Pin()->GetEditorMode();
+	auto EdMode = GetEditorMode();
 	TWeakObjectPtr<URoomData> Data;
 	if (!IsValidRoomData(EdMode, &Data))
 		return FText::GetEmpty();

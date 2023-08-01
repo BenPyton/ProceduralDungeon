@@ -27,6 +27,7 @@
 #include "Framework/Application/SlateApplication.h"
 
 class ARoomLevel;
+class URoomData;
 class FProceduralDungeonEdMode;
 class FProceduralDungeonEdModeToolkit;
 
@@ -36,12 +37,14 @@ public:
 	SLATE_BEGIN_ARGS(SProceduralDungeonEdModeWidget) {}
 	SLATE_END_ARGS();
 
+	~SProceduralDungeonEdModeWidget();
+
 	void Construct(const FArguments& InArgs, TSharedRef<FProceduralDungeonEdModeToolkit> InParentToolkit);
 	void OnLevelChanged();
 
 protected:
 	bool IsValidRoomLevel(FProceduralDungeonEdMode* EdMode = nullptr, TWeakObjectPtr<ARoomLevel>* OutLevel = nullptr) const;
-	bool IsValidRoomData(FProceduralDungeonEdMode* EdMode, TWeakObjectPtr<class URoomData>* OutData = nullptr, TWeakObjectPtr<ARoomLevel>* OutLevel = nullptr) const;
+	bool IsValidRoomData(FProceduralDungeonEdMode* EdMode, TWeakObjectPtr<URoomData>* OutData = nullptr, TWeakObjectPtr<ARoomLevel>* OutLevel = nullptr) const;
 	bool IsValidRoomData() const { return IsValidRoomData(nullptr); }
 	bool MatchingDataLevel(FProceduralDungeonEdMode* EdMode = nullptr) const;
 	bool IsDataDirty(FProceduralDungeonEdMode* EdMode) const;
@@ -57,6 +60,10 @@ protected:
 	FSlateColor GetSaveButtonColor() const;
 	FSlateColor GetReparentButtonColor() const;
 	void UpdateErrorText();
+	void ResetCachedData();
+	void ResetCachedLevel();
+
+	FProceduralDungeonEdMode* GetEditorMode() const;
 
 	static FLinearColor GetHighlightButtonColor(const FLinearColor& HighlightColor, const FLinearColor& NormalColor = FLinearColor::White, float Speed = 3.0f);
 
@@ -66,6 +73,8 @@ private:
 	TWeakPtr<FProceduralDungeonEdModeToolkit> ParentToolkit = nullptr;
 
 	TSharedPtr<class SBorder> LevelPropertyContainer = nullptr;
-	TWeakObjectPtr<class URoomData> CurrentRoomData = nullptr;
+	TWeakObjectPtr<URoomData> CachedData = nullptr;
+	TWeakObjectPtr<ARoomLevel> CachedLevel = nullptr;
 	FDelegateHandle DataDelegateHandle;
+	FDelegateHandle LevelDelegateHandle;
 };
