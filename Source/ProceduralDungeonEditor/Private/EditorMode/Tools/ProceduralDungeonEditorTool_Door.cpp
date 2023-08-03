@@ -54,6 +54,7 @@ void FProceduralDungeonEditorTool_Door::ExitTool()
 {
 	DungeonEd_LogInfo("Exit Door Tool.");
 	DestroyRoomBox();
+	CachedLevel.Reset();
 }
 
 void FProceduralDungeonEditorTool_Door::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
@@ -194,20 +195,19 @@ void FProceduralDungeonEditorTool_Door::UpdateRoomBox()
 	auto Level = EdMode->GetLevelInstance();
 	if (Level != CachedLevel)
 	{
-		DestroyRoomBox();
+		CachedLevel = Level;
 
-		if (Level.IsValid())
+		DestroyRoomBox();
+		if (CachedLevel.IsValid())
 		{
 			check(IsValid(Level->GetWorld()));
-			RoomBox = NewObject<UBoxComponent>(Level.Get(), TEXT("Editor Room Collision"), RF_Transient);
-			RoomBox->SetupAttachment(Level->GetRootComponent());
+			RoomBox = NewObject<UBoxComponent>(CachedLevel.Get(), TEXT("Editor Room Collision"), RF_Transient);
+			RoomBox->SetupAttachment(CachedLevel->GetRootComponent());
 			RoomBox->RegisterComponent();
 			RoomBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 			RoomBox->SetCollisionObjectType(ECollisionChannel::ECC_MAX);
 			DungeonEd_LogInfo("Create RoomBox: %s", *GetNameSafe(RoomBox.Get()));
 		}
-
-		CachedLevel = Level;
 	}
 
 	if (!CachedLevel.IsValid())
