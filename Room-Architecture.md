@@ -1,6 +1,6 @@
 # Room Architecture
 
-WARNING: This page is for plugin version 2.X.X and higher. If you use a version 1.X.X, please read the page [[(Legacy)-Room-Architecture]] instead.
+${\color{orange}\boxed{WARNING}}$ This page is for plugin version 2.X.X. If you use a version 1.X.X, please read the page [[(Legacy) Room Architecture]] instead. If you use a version 3.X.X, please read the page [[Getting Started]] instead.
 
 ### **Understanding the architecture**
 **Each** room is composed by 2 objects : the level and the data.\
