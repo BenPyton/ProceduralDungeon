@@ -1,39 +1,62 @@
 # Procedural Dungeon Plugin
-
+[![Plugin version number](https://img.shields.io/github/v/release/BenPyton/ProceduralDungeon?label=Version)](https://github.com/BenPyton/ProceduralDungeon/releases/latest)
+[![Unreal Engine Supported Versions](https://img.shields.io/badge/Unreal_Engine-4.27_%7C_5.0_%7C_5.1_%7C_5.2-9455CE?logo=unrealengine)
+](https://github.com/BenPyton/ProceduralDungeon/releases)
+[![License](https://img.shields.io/github/license/BenPyton/ProceduralDungeon?label=License)](https://github.com/BenPyton/ProceduralDungeon/blob/master/LICENSE)
+![Download count](https://img.shields.io/github/downloads/BenPyton/ProceduralDungeon/total?label=Downloads)
 [![Actively Maintained](https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-green.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
 
-Author : Benoît PELLETIER
-
 ## Overview
-This is an Unreal Engine 4 plugin to create procedural dungeons by arranging a set of room like "The Binding of Isaac" or "Rogue Legacy" but in 3D.
+This is an Unreal Engine plugin to create procedural dungeons by arranging procedurally a set of room like "The Binding of Isaac" or "Rogue Legacy" but in 3D.
 
-This procedural dungeon uses hand-created rooms that are Unreal levels.
+This procedural dungeon plugin uses hand-created rooms that are Unreal levels.\
+You define your own rules in blueprints or C++ to generate the dungeon via an actor placed in a master world.
 
-You define your own rules to generate the dungeon.
+If you have any suggestion/bug or you want to contribute, feel free to create an issue ticket or do a pull request.
 
-If you want more details about how it works and how to use it, please read the [wiki](https://github.com/BenPyton/ProceduralDungeon/wiki).
+### Example
 
-If you have any suggestion/bug or you want to contribute, don't hesitate to add an issue or do a pull request.
+Some hand-made rooms defined with bounds and doors:\
+<img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonDemo_RoomSpawn.gif" alt="Animated GIF" width="125"/>
+<img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonDemo_RoomA.gif" alt="Animated GIF" width="125"/>
+<img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonDemo_RoomB.gif" alt="Animated GIF" width="125"/>
+<img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonDemo_RoomC.gif" alt="Animated GIF" width="125"/>
+<img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonDemo_RoomD.gif" alt="Animated GIF" width="125"/>
+<img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonDemo_RoomExit.gif" alt="Animated GIF" width="125"/>
 
-### Demo in video:
-[![](http://img.youtube.com/vi/DmyNEd0YtDE/0.jpg)](http://www.youtube.com/watch?v=DmyNEd0YtDE "Procedural Dungeon Demo")<br>
+Some very simple generation rules:
+- A special room (red) used to spawn the player.
+- Then 10 rooms chosen randomly in a list (blue, green, yellow, cyan).
+- Then a special room (purple) used as an end goal for the player.
+- Finally 10 other rooms chosen randomly.
+
+Possible results:\
+<img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonResult.gif" alt="Animated GIF" width="400"/>
+<img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonResult2.gif" alt="Animated GIF" width="400"/>
+
+[Demo Video on Youtube](http://www.youtube.com/watch?v=DmyNEd0YtDE "Procedural Dungeon Demo")<br>
+
+## Features
+- Hand created rooms, allowing full control by the level designers.
+- Generation rules defined in blueprint, allowing flexible and powerful procedural generation.
+- Doors can be put on any Z height, allowing dungeons to be in 3D (but can do flat dungeons as well).
+- Defining different door types, allowing more complex dungeons.
+- Rooms and doors can be locked/unlocked. 
+- Optional occlusion culling, allowing only relevant rooms rendered (and thus better performances).
+- A new editor mode to ease the use of the plugin.
+- Custom data in rooms, allowing gameplay specific code in room instances.
+- Working well with navmeshes and multiplayers.
+
+## How to use it
+Go to the [Getting Started](https://github.com/BenPyton/ProceduralDungeon/wiki/Getting-Started) page to begin to work with the plugin.
+
+If you want more details about how it works internally, you can read the [wiki](https://github.com/BenPyton/ProceduralDungeon/wiki/Home).
 
 ## Installation
-Get the [latest release](https://github.com/BenPyton/ProceduralDungeon/releases) compatible with your Unreal version.
 
-**For blueprint only projects**
-- Before plugin version 1.2.1:\
-Upgrade your project to a C++ project and follow the instruction for C++ project below, or you wont be able to package your game.\
-(To do that, download Visual Studio 2019 and create a new C++ class from the Unreal Editor)
+Install it like any other Unreal Engine plugin.
 
-- Since plugin version 1.2.1:\
-You have to extract the plugin inside your Unreal engine `Plugins` folder.\
-For instance: `C:\Program Files\Epic Games\UE_4.26\Engine\Plugins`
-
-**For C++ projects**\
-Since the plugin version 1.2.1, you can install the plugin in the engine like for blueprint projects.\
-You can also extract the plugin in the `Plugins` folder of your project.\
-For instance: `D:\PathToYourProject\Plugins`
+If you have any trouble with installation, read the [Installation](https://github.com/BenPyton/ProceduralDungeon/wiki/Installation) page of the wiki.
 
 ## FAQ
 
