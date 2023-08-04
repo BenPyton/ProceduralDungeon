@@ -36,8 +36,8 @@ A generation is made of 4 phases :
 Here is the flowchart when we call `Generate` on a dungeon generator:
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="Images/Flowchart_Dark.svg">
-  <img alt="Procedural Generation Flowchart." src="Images/Flowchart_Light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/wiki/BenPyton/ProceduralDungeon/Images/Flowchart_Dark.svg">
+  <img alt="Procedural Generation Flowchart." src="https://raw.githubusercontent.com/wiki/BenPyton/ProceduralDungeon/Images/Flowchart_Light.svg">
 </picture>
 
 ## What you need to do
