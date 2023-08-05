@@ -580,6 +580,9 @@ void ADungeonGenerator::DispatchRoomAdded(const URoomData* NewRoom)
 
 URoomData* ADungeonGenerator::GetRandomRoomData(TArray<URoomData*> RoomDataArray)
 {
+	if (RoomDataArray.IsEmpty())
+		return nullptr;
+
 	int n = Random.RandRange(0, RoomDataArray.Num() - 1);
 	return RoomDataArray[n];
 }
