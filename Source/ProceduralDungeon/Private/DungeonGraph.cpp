@@ -40,6 +40,7 @@ void UDungeonGraph::AddRoom(URoom* Room)
 
 void UDungeonGraph::InitRooms()
 {
+	// First create custom data for all rooms
 	for (URoom* Room : Rooms)
 	{
 		check(IsValid(Room));
@@ -47,6 +48,13 @@ void UDungeonGraph::InitRooms()
 		check(IsValid(Data));
 		for (auto Datum : Data->CustomData)
 			Room->CreateCustomData(Datum);
+	}
+
+	// Then we can initialize them all
+	for (URoom* Room : Rooms)
+	{
+		// No need to check validity here
+		const URoomData* Data = Room->GetRoomData();
 		Data->InitializeRoom(Room, this);
 	}
 }
@@ -104,6 +112,9 @@ URoom* UDungeonGraph::GetRandomRoom(const TArray<URoom*>& RoomList) const
 		LogError(TEXT("DungeonGraph has no Generator set."));
 		return nullptr;
 	}
+
+	if (RoomList.IsEmpty())
+		return nullptr;
 
 	int32 rand = Generator->GetRandomStream().FRandRange(0, RoomList.Num() - 1);
 	return RoomList[rand];

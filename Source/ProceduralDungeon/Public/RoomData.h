@@ -74,7 +74,7 @@ public:
 	bool HasCompatibleDoor(const FDoorDef& DoorData) const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Room Data")
-	bool InitializeRoom(URoom* Room, UDungeonGraph* Dungeon) const;
+	void InitializeRoom(URoom* Room, UDungeonGraph* Dungeon) const;
 
 	FIntVector GetSize() const;
 	class FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
