@@ -1,6 +1,10 @@
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M3NW2JV)
+
+[[Wiki Home Page|Home]]
+
 ### Basics
-[[Getting Started]]\
 [[Dungeon Generator]]\
+[[Room Architecture]]\
 [[Door]]\
 [[Plugin Settings]]
 ### Dungeon's Rules Programming
@@ -9,10 +13,7 @@
 [[Continue To Add Room]]\
 [[Is Valid Dungeon]]
 ### Advance Features
-[[Occlusion Culling]]\
-[[Door Types]]\
-[[Room Initialization]]\
-[[Custom Room Data]]
-### Using Other Unreal Features
+[[Occlusion Culling]]
+### Misc
 [[Multiplayer]]\
 [[Navigation Mesh]]
