@@ -127,8 +127,8 @@ public:
 
 	FBoxMinAndMax& operator+=(const FIntVector& X);
 	FBoxMinAndMax& operator-=(const FIntVector& X);
-
-	friend static FBoxMinAndMax operator+(const FBoxMinAndMax& Box, const FIntVector& X);
-	friend static FBoxMinAndMax operator-(const FBoxMinAndMax& Box, const FIntVector& X);
-	friend static FBoxMinAndMax Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot);
+	FBoxMinAndMax operator+(const FIntVector& X) const;
+	FBoxMinAndMax operator-(const FIntVector& X) const;
 };
+
+FBoxMinAndMax PROCEDURALDUNGEON_API Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot);

@@ -229,11 +229,12 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void BeginGeneration(uint32 GenerationSeed);
 
-	// Create virtually the dungeon (no load nor initialization of rooms)
+	// Create virtually the dungeon (no load nor initialization of room levels)
 	UFUNCTION()
 	EGenerationResult CreateDungeon();
 
-	// That add a room function to generate all rooms
+	// Adds some new rooms linked to ParentRoom into Rooms list output
+	// Returns an array with only new rooms
 	TArray<URoom*> AddNewRooms(URoom& ParentRoom, TArray<URoom*>& Rooms);
 
 	// Instantiate a room in the scene
