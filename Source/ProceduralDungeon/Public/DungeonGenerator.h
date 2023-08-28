@@ -39,6 +39,14 @@ class URoom;
 class UDoorType;
 class UDungeonGraph;
 
+UENUM()
+enum class EGenerationResult : uint8
+{
+	None,
+	Error,
+	Success
+};
+
 UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADungeonGenerator : public AActor
 {
@@ -53,6 +61,8 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaTime) override;
+
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 
 public:
 
@@ -221,7 +231,7 @@ private:
 
 	// Create virtually the dungeon (no load nor initialization of rooms)
 	UFUNCTION()
-	void CreateDungeon();
+	EGenerationResult CreateDungeon();
 
 	// That add a room function to generate all rooms
 	TArray<URoom*> AddNewRooms(URoom& ParentRoom, TArray<URoom*>& Rooms);
@@ -277,7 +287,7 @@ public:
 	FQuat GetDungeonRotation() const;
 
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Dungeon Generator", meta = (DisplayName = "Rooms"))
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Dungeon Generator", meta = (DisplayName = "Rooms"))
 	UDungeonGraph* Graph;
 
 private:
@@ -294,6 +304,9 @@ private:
 
 	EGenerationState CurrentState = EGenerationState::None;
 	int32 UniqueId;
+
+	UPROPERTY(Replicated)
+	EGenerationResult Result = EGenerationResult::None;
 
 	// Occlusion culling system
 	TUniquePtr<FDungeonOctree> Octree;

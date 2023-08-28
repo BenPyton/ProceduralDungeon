@@ -25,6 +25,7 @@
 #include "DungeonGenerator.h"
 #include "Engine/World.h"
 #include "Engine/Engine.h" // GEngine
+#include "Net/UnrealNetwork.h" // DOREPLIFETIME
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Pawn.h"
 #include "NavigationSystem.h"
@@ -57,10 +58,24 @@ ADungeonGenerator::ADungeonGenerator()
 	bAlwaysRelevant = true;
 	bReplicates = true;
 	NetPriority = 10.0f;
-	NetUpdateFrequency = 10;
+	NetUpdateFrequency = 2;
 
 	Graph = CreateDefaultSubobject<UDungeonGraph>(TEXT("Dungeon Rooms"));
 	Octree = MakeUnique<FDungeonOctree>(FVector::ZeroVector, HALF_WORLD_MAX);
+}
+
+void ADungeonGenerator::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ADungeonGenerator, Graph);
+	DOREPLIFETIME(ADungeonGenerator, Result);
+}
+
+bool ADungeonGenerator::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
+{
+	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+	bWroteSomething |= Graph->ReplicateSubobject(Channel, Bunch, RepFlags);
+	return bWroteSomething;
 }
 
 // Called when the game starts or when spawned
@@ -109,14 +124,20 @@ void ADungeonGenerator::BeginGeneration_Implementation(uint32 GenerationSeed)
 	Random.Initialize(Seed);
 	LogInfo(FString::Printf(TEXT("Seed: %d"), Seed));
 	SetState(EGenerationState::Unload);
+	Result = EGenerationResult::None;
 }
 
-void ADungeonGenerator::CreateDungeon()
+EGenerationResult ADungeonGenerator::CreateDungeon()
 {
+	// Only server generate the dungeon
+	// DungeonGraph will be replicated to all clients
+	if (!HasAuthority())
+		return EGenerationResult::None;
+
 	int TriesLeft = MaxTry;
 	bool ValidDungeon = false;
 
-	// generate level until there IsValidDungeon return true
+	// generate level until IsValidDungeon return true
 	do {
 		TriesLeft--;
 
@@ -125,17 +146,6 @@ void ADungeonGenerator::CreateDungeon()
 
 		// Create the first room
 		Graph->Clear();
-
-		URoomData* def = ChooseFirstRoomData();
-		if (!IsValid(def))
-		{
-			LogError("ChooseFirstRoomData returned null.");
-			continue;
-		}
-
-		URoom* root = NewObject<URoom>();
-		root->Init(def, this, 0);
-		Graph->AddRoom(root);
 
 		// Create the list with the correct mode (depth or breadth)
 		TQueueOrStack<URoom*>::EMode listMode;
@@ -149,8 +159,19 @@ void ADungeonGenerator::CreateDungeon()
 			break;
 		default:
 			LogError("GenerationType value is not supported.");
-			return;
+			return EGenerationResult::Error;
 		}
+
+		URoomData* def = ChooseFirstRoomData();
+		if (!IsValid(def))
+		{
+			LogError("ChooseFirstRoomData returned null.");
+			continue;
+		}
+
+		URoom* root = NewObject<URoom>(this);
+		root->Init(def, this, 0);
+		Graph->AddRoom(root);
 
 		// Build the list of rooms
 		TQueueOrStack<URoom*> roomStack(listMode);
@@ -179,17 +200,10 @@ void ADungeonGenerator::CreateDungeon()
 		LogError(FString::Printf(TEXT("Generated dungeon is not valid after %d tries. Make sure your IsValidDungeon function is correct."), MaxTry));
 		Graph->Clear();
 		DispatchGenerationFailed();
+		return EGenerationResult::Error;
 	}
 
-	// Update Octree
-	Octree->Destroy();
-	for (URoom* r : Graph->Rooms)
-	{
-		check(IsValid(r));
-		FBoxCenterAndExtent bounds = r->GetBounds();
-		FDungeonOctreeElement octreeElement(r);
-		Octree->AddElement(octreeElement);
-	}
+	return EGenerationResult::Success;
 }
 
 void ADungeonGenerator::InstantiateRoom(URoom* Room)
@@ -243,6 +257,8 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 
 TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& InOutRoomList)
 {
+	check(HasAuthority());
+
 	TArray<URoom*> newRooms;
 	int nbDoor = ParentRoom.GetRoomData()->GetNbDoor();
 	URoom* newRoom = nullptr;
@@ -285,7 +301,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>&
 			}
 
 			// Create room from roomdef and set connections with current room
-			newRoom = NewObject<URoom>();
+			newRoom = NewObject<URoom>(this);
 			newRoom->Init(roomDef, this, InOutRoomList.Num());
 
 			int doorIndex = compatibleDoors[(roomDef->RandomDoor && compatibleDoors.Num() > 1) ? Random.RandRange(0, compatibleDoors.Num() - 1) : 0];
@@ -327,14 +343,18 @@ void ADungeonGenerator::LoadAllRooms()
 
 void ADungeonGenerator::UnloadAllRooms()
 {
-	for (int i = 0; i < DoorList.Num(); i++)
+	if (HasAuthority())
 	{
-		DoorList[i]->Destroy();
+		for (ADoor* Door : DoorList)
+		{
+			Door->Destroy();
+		}
+		DoorList.Empty();
 	}
-	DoorList.Empty();
 
 	for (URoom* Room : Graph->GetAllRooms())
 	{
+		check(Room);
 		Room->Destroy(GetWorld());
 	}
 }
@@ -403,7 +423,10 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 	case EGenerationState::Generation:
 		DispatchPreGeneration();
 		LogInfo("======= Begin Map Generation =======");
-		CreateDungeon();
+		Result = CreateDungeon();
+		// Server should never return None
+		// Client should always return None
+		check(HasAuthority() ^ (Result == EGenerationResult::None))
 		break;
 	case EGenerationState::Load:
 		LogInfo("======= Begin Load All Levels =======");
@@ -438,7 +461,11 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 			SetState(EGenerationState::Generation);
 		break;
 	case EGenerationState::Generation:
-		SetState((Graph->Count() > 0) ? EGenerationState::Load : EGenerationState::None);
+		if (Result != EGenerationResult::None)
+		{
+			LogInfo(FString::Printf(TEXT("End Generation with result: %s"), Result == EGenerationResult::Success ? TEXT("SUCCESS") : TEXT("FAILED")));
+			SetState((Result == EGenerationResult::Success) ? EGenerationState::Load : EGenerationState::None);
+		}
 		break;
 	case EGenerationState::Load:
 		for (URoom* Room : Graph->GetAllRooms())
@@ -482,6 +509,17 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 		break;
 	case EGenerationState::Generation:
 		LogInfo("======= End Map Generation =======");
+
+		// Update Octree
+		Octree->Destroy();
+		for (URoom* r : Graph->Rooms)
+		{
+			check(IsValid(r));
+			FBoxCenterAndExtent bounds = r->GetBounds();
+			FDungeonOctreeElement octreeElement(r);
+			Octree->AddElement(octreeElement);
+			r->SetVisible(false);
+		}
 		break;
 	case EGenerationState::Load:
 		LogInfo("======= End Load All Levels =======");

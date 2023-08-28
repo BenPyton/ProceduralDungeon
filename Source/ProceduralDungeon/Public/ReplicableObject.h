@@ -24,12 +24,29 @@
 
 #pragma once
 
-#include "ReplicableObject.h"
-#include "RoomCustomData.generated.h"
+#include "CoreMinimal.h"
+#include "UObject/NoExportTypes.h"
+#include "ReplicableObject.generated.h"
 
-// Base class for user custom data embedded in room instances
-UCLASS(Abstract, BlueprintType, Blueprintable)
-class PROCEDURALDUNGEON_API URoomCustomData : public UReplicableObject
+UCLASS()
+class PROCEDURALDUNGEON_API UReplicableObject : public UObject
 {
 	GENERATED_BODY()
+
+public:
+	// Enable object for replication
+	virtual bool IsSupportedForNetworking() const override { return true; }
+
+	virtual UWorld* GetWorld() const override;
+
+	// To be called in place of Channel->ReplicateSubobject(...)
+	bool ReplicateSubobject(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags);
+
+protected:
+	// Replicating the eventual nested subobjects.
+	// Should not be called directly, except from the overridden function in child classes.
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags);
+
+	// Returns "Server" or "Client" based on HasAuthority() result.
+	FString GetAuthorityName() const;
 };

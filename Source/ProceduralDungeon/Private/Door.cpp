@@ -32,12 +32,7 @@
 #include "DoorType.h"
 #include "ProceduralDungeonUtils.h"
 
-// Sets default values
 ADoor::ADoor()
-	: RoomA(nullptr)
-	, RoomB(nullptr)
-	, IndexRoomA(-1)
-	, IndexRoomB(-1)
 {
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
@@ -49,46 +44,10 @@ ADoor::ADoor()
 void ADoor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ADoor, IndexRoomA);
-	DOREPLIFETIME(ADoor, IndexRoomB);
 	DOREPLIFETIME(ADoor, bShouldBeLocked);
 	DOREPLIFETIME(ADoor, bShouldBeOpen);
-}
-
-void ADoor::OnRep_IndexRoomA()
-{
-	//GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Blue, FString::Printf(TEXT("[Door %s] Replicated index room A: %d"), *GetName(), IndexRoomA));
-	//UE_LOG(LogTemp, Log, TEXT("[Door %s] Replicated index room A: %d"), *GetName(), IndexRoomA);
-	if (IndexRoomA >= 0)
-	{
-		ADungeonGenerator* Generator = Cast<ADungeonGenerator>(GetOwner());
-		if (IsValid(Generator))
-		{
-			RoomA = Generator->GetRoomByIndex(IndexRoomA);
-			//UE_LOG(LogTemp, Log, TEXT("[Door %s] Replicated Room A: %s"), *GetName(), IsValid(RoomA) ? *RoomA->GetName() : TEXT("NULL"));
-		}
-	}
-}
-
-void ADoor::OnRep_IndexRoomB()
-{
-	//GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Blue, FString::Printf(TEXT("[Door %s] Replicated index room B: %d"), *GetName(), IndexRoomB));
-	//UE_LOG(LogTemp, Log, TEXT("[Door %s] Replicated index room B: %d"), *GetName(), IndexRoomB);
-	if (IndexRoomB >= 0)
-	{
-		ADungeonGenerator* Generator = Cast<ADungeonGenerator>(GetOwner());
-		if (IsValid(Generator))
-		{
-			RoomB = Generator->GetRoomByIndex(IndexRoomB);
-			//UE_LOG(LogTemp, Log, TEXT("[Door %s] Replicated Room B: %s"), *GetName(), IsValid(RoomB) ? *RoomB->GetName() : TEXT("NULL"));
-		}
-	}
-}
-
-void ADoor::BeginPlay()
-{
-	Super::BeginPlay();
-	//GEngine->AddOnScreenDebugMessage(-1, 20.0f, FColor::Blue, FString::Printf(TEXT("Door owner: %s"), GetOwner() ? *GetOwner()->GetName() : TEXT("NULL")));
+	DOREPLIFETIME(ADoor, RoomA);
+	DOREPLIFETIME(ADoor, RoomB);
 }
 
 // Called every frame
@@ -150,9 +109,7 @@ void ADoor::Tick(float DeltaTime)
 
 void ADoor::SetConnectingRooms(URoom* _RoomA, URoom* _RoomB)
 {
+	check(HasAuthority());
 	RoomA = _RoomA;
 	RoomB = _RoomB;
-	IndexRoomA = IsValid(_RoomA) ? _RoomA->GetRoomID() : -1;
-	IndexRoomB = IsValid(_RoomB) ? _RoomB->GetRoomID() : -1;
-	//UE_LOG(LogTemp, Log, TEXT("[Door %s] Set index room A: %d | B: %d"), *GetName(), IndexRoomA, IndexRoomB);
 }

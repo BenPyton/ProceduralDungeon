@@ -41,7 +41,6 @@ public:
 	ADoor();
 
 public:
-	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
 
@@ -53,10 +52,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Open"))
 	FORCEINLINE bool IsOpen() { return bIsOpen; }
 
-	UFUNCTION(BlueprintCallable, Category = "Door")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Door")
 	void Open(bool open) { bShouldBeOpen = open; }
 
-	UFUNCTION(BlueprintCallable, Category = "Door")
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Door")
 	void Lock(bool lock) { bShouldBeLocked = lock; }
 
 	const UDoorType* GetDoorType() const { return Type; }
@@ -93,15 +92,10 @@ protected:
 	bool bShouldBeOpen {false};
 
 	// The two connected rooms to this door
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Door")
 	URoom* RoomA {nullptr};
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Door")
 	URoom* RoomB {nullptr};
-
-	UPROPERTY(ReplicatedUsing = OnRep_IndexRoomA)
-	int IndexRoomA;
-	UPROPERTY(ReplicatedUsing = OnRep_IndexRoomB)
-	int IndexRoomB;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door", meta = (DisplayName = "Always Visible"))
 	bool bAlwaysVisible {false};
@@ -111,11 +105,4 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door", meta = (DisplayName = "Door Type"))
 	UDoorType* Type;
-
-private:
-	UFUNCTION() // Needed macro for replication to work
-	void OnRep_IndexRoomA();
-
-	UFUNCTION() // Needed macro for replication to work
-	void OnRep_IndexRoomB();
 };
