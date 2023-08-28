@@ -265,16 +265,16 @@ FBoxMinAndMax& FBoxMinAndMax::operator-=(const FIntVector& X)
 	return *this;
 }
 
-FBoxMinAndMax operator+(const FBoxMinAndMax& Box, const FIntVector& X)
+FBoxMinAndMax FBoxMinAndMax::operator+(const FIntVector& X) const
 {
-	FBoxMinAndMax NewBox(Box);
+	FBoxMinAndMax NewBox(*this);
 	NewBox += X;
 	return NewBox;
 }
 
-FBoxMinAndMax operator-(const FBoxMinAndMax& Box, const FIntVector& X)
+FBoxMinAndMax FBoxMinAndMax::operator-(const FIntVector& X) const
 {
-	FBoxMinAndMax NewBox(Box);
+	FBoxMinAndMax NewBox(*this);
 	NewBox -= X;
 	return NewBox;
 }

@@ -25,7 +25,7 @@
 #include "CoreTypes.h"
 #include "Containers/UnrealString.h"
 #include "Misc/AutomationTest.h"
-#include "Room.h"
+#include "ProceduralDungeonTypes.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 

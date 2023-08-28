@@ -34,20 +34,17 @@
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonGraphTest, "ProceduralDungeon.Types.DungeonGraph", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::EngineFilter)
 
-static UDungeonGraph* s_graph {nullptr};
-
 #define INIT_TEST(Graph) \
 	TStrongObjectPtr<UDungeonGraph> Graph(NewObject<UDungeonGraph>(GetTransientPackage(), #Graph)); \
-	s_graph = Graph.Get();
 
 #define CLEAN_TEST() \
-	s_graph = nullptr;
+	Graph->Clear();
 
 // Utility to create and initialize a room
 #define CREATE_ROOM(Name, RoomDataPtr) \
 	URoom* Name = NewObject<URoom>(); \
-	Name->Init(RoomDataPtr.Get(), nullptr, s_graph->Count()); \
-	s_graph->AddRoom(Name);
+	Name->Init(RoomDataPtr.Get(), nullptr, Graph->Count()); \
+	Graph->AddRoom(Name);
 
 // Utility to create room data
 #define CREATE_ROOM_DATA(Data) \
@@ -178,6 +175,8 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			TestFalse(TEXT("No path should be found between Room0 and Room6"), UDungeonGraph::FindPath(Room0, Room6, &Path));
 			TestEqual(TEXT("Path should be empty"), Path.Num(), 0);
 			TestTrue(TEXT("Path should be found between Room0 and Room6 (when locked rooms allowed)"), UDungeonGraph::FindPath(Room0, Room6, nullptr, /*IgnoreLocked = */true));
+
+			CLEAN_TEST();
 		}
 	}
 
