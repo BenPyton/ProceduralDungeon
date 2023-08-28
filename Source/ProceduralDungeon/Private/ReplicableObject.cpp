@@ -22,14 +22,36 @@
  * SOFTWARE.
  */
 
-#pragma once
-
 #include "ReplicableObject.h"
-#include "RoomCustomData.generated.h"
+#include "Engine/ActorChannel.h"
+#include "GameFramework/Actor.h"
 
-// Base class for user custom data embedded in room instances
-UCLASS(Abstract, BlueprintType, Blueprintable)
-class PROCEDURALDUNGEON_API URoomCustomData : public UReplicableObject
+bool UReplicableObject::ReplicateSubobject(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
 {
-	GENERATED_BODY()
-};
+	// Ensure that nested objects are replicated BEFORE!
+	// thus any reference to them inside this object will be correct.
+	bool bWroteSomething = ReplicateSubobjects(Channel, Bunch, RepFlags);
+	bWroteSomething |= Channel->ReplicateSubobject(this, *Bunch, *RepFlags);
+	return bWroteSomething;
+}
+
+bool UReplicableObject::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
+{
+	return false;
+}
+
+UWorld* UReplicableObject::GetWorld() const
+{
+	UObject* Outer = GetOuter();
+	if (!Outer)
+		return nullptr;
+	return Outer->GetWorld();
+}
+
+FString UReplicableObject::GetAuthorityName() const
+{
+	AActor* OwnerActor = Cast<AActor>(GetOuter());
+	if (!OwnerActor)
+		return TEXT("INVALID");
+	return OwnerActor->HasAuthority() ? TEXT("Server") : TEXT("Client");
+}

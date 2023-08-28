@@ -24,8 +24,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "ReplicableObject.h"
 #include "DungeonGraph.generated.h"
 
 class URoom;
@@ -33,7 +32,7 @@ class URoomData;
 class ADungeonGenerator;
 
 UCLASS(BlueprintType)
-class PROCEDURALDUNGEON_API UDungeonGraph : public UObject
+class PROCEDURALDUNGEON_API UDungeonGraph : public UReplicableObject
 {
 	GENERATED_BODY()
 
@@ -133,8 +132,11 @@ protected:
 	void GetRoomsByPredicate(TArray<URoom*>& OutRooms, TFunction<bool(const URoom*)> Predicate) const;
 	const URoom* FindFirstRoomByPredicate(TFunction<bool(const URoom*)> Predicate) const;
 
+	// UReplicableObject interface
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
+
 private:
-	UPROPERTY()
+	UPROPERTY(Replicated, Transient)
 	TArray<URoom*> Rooms;
 
 	TWeakObjectPtr<ADungeonGenerator> Generator {nullptr};

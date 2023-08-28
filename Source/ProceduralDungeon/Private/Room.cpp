@@ -25,6 +25,7 @@
 #include "Room.h"
 #include "Door.h"
 #include "Engine/World.h"
+#include "Net/UnrealNetwork.h" // DOREPLIFETIME
 #include "RoomData.h"
 #include "RoomLevel.h"
 #include "ProceduralDungeonUtils.h"
@@ -36,6 +37,29 @@ URoom::URoom()
 	: Super()
 	, Connections()
 {
+}
+
+void URoom::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME_CONDITION(URoom, RoomData, COND_InitialOnly);
+	DOREPLIFETIME_CONDITION(URoom, Position, COND_InitialOnly);
+	DOREPLIFETIME_CONDITION(URoom, Direction, COND_InitialOnly);
+	DOREPLIFETIME_CONDITION(URoom, Connections, COND_InitialOnly);
+	DOREPLIFETIME_CONDITION(URoom, GeneratorOwner, COND_InitialOnly);
+	DOREPLIFETIME_CONDITION(URoom, Id, COND_InitialOnly);
+	DOREPLIFETIME(URoom, bIsLocked);
+	DOREPLIFETIME(URoom, CustomData);
+}
+
+bool URoom::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
+{
+	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
+	for (const auto& Pair : CustomData)
+	{
+		bWroteSomething |= Pair.Data->ReplicateSubobject(Channel, Bunch, RepFlags);
+	}
+	return bWroteSomething;
 }
 
 void URoom::Init(URoomData* Data, ADungeonGenerator* Generator, int32 RoomId)
@@ -58,8 +82,6 @@ void URoom::Init(URoomData* Data, ADungeonGenerator* Generator, int32 RoomId)
 	{
 		LogError("No RoomData provided.");
 	}
-
-	SetVisible(false);
 }
 
 bool URoom::IsConnected(int Index) const
@@ -162,6 +184,17 @@ void URoom::OnInstanceLoaded()
 	}
 
 	Script->Init(this);
+}
+
+void URoom::Lock(bool lock)
+{
+	bIsLocked = lock;
+	LogInfo(FString::Printf(TEXT("[%s] Room '%s' setting IsLocked: %s"), *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False")));
+}
+
+void URoom::OnRep_IsLocked()
+{
+	LogInfo(FString::Printf(TEXT("[%s] Room '%s' IsLocked Replicated: %s"), *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False")));
 }
 
 ARoomLevel* URoom::GetLevelScript() const
@@ -377,10 +410,11 @@ bool URoom::CreateCustomData(const TSubclassOf<URoomCustomData>& DataType)
 	if (DataType == nullptr)
 		return false;
 
-	if (CustomData.Find(DataType))
+	// No duplicate allowed
+	if (HasCustomData(DataType))
 		return false;
 
-	CustomData.Add(DataType, NewObject<URoomCustomData>(this, DataType));
+	CustomData.Add({DataType, NewObject<URoomCustomData>(GetOuter(), DataType)});
 	return true;
 }
 
@@ -396,20 +430,29 @@ bool URoom::HasCustomData_BP(const TSubclassOf<URoomCustomData>& DataType)
 
 bool URoom::GetCustomData(const TSubclassOf<URoomCustomData>& DataType, URoomCustomData*& Data) const
 {
-	URoomCustomData* const* Datum = CustomData.Find(DataType);
-	if (!Datum && !IsValid(*Datum))
+	const FCustomDataPair* Pair = GetDataPair(DataType);
+	if (!Pair) // Not found
 		return false;
 
-	if (!(*Datum)->IsA(DataType))
+	URoomCustomData* Datum = Pair->Data;
+	if(!IsValid(Datum))
 		return false;
 
-	Data = *Datum;
+	if (!Datum->IsA(DataType))
+		return false;
+
+	Data = Datum;
 	return true;
 }
 
 bool URoom::HasCustomData(const TSubclassOf<URoomCustomData>& DataType) const
 {
-	return CustomData.Contains(DataType);
+	return GetDataPair(DataType) != nullptr;
+}
+
+const FCustomDataPair* URoom::GetDataPair(const TSubclassOf<URoomCustomData>& DataType) const
+{
+	return CustomData.FindByPredicate([&DataType](const FCustomDataPair& Pair) { return Pair.DataClass == DataType; });
 }
 
 // AABB Overlapping

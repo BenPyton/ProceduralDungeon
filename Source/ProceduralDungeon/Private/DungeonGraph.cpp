@@ -23,6 +23,7 @@
  */
 
 #include "DungeonGraph.h"
+#include "Net/UnrealNetwork.h" // DOREPLIFETIME
 #include "ProceduralDungeonLog.h"
 #include "DungeonGenerator.h"
 #include "Room.h"
@@ -31,6 +32,23 @@
 UDungeonGraph::UDungeonGraph()
 	: Super()
 {
+}
+
+void UDungeonGraph::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UDungeonGraph, Rooms);
+}
+
+bool UDungeonGraph::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
+{
+	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);;
+	for (URoom* Room : Rooms)
+	{
+		check(Room);
+		bWroteSomething |= Room->ReplicateSubobject(Channel, Bunch, RepFlags);
+	}
+	return bWroteSomething;
 }
 
 void UDungeonGraph::AddRoom(URoom* Room)

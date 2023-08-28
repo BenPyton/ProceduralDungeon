@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2022 Benoit Pelletier
+ * Copyright (c) 2019-2023 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "ReplicableObject.h"
 #include "ProceduralLevelStreaming.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralDungeonTypes.h"
@@ -48,8 +48,19 @@ struct FRoomConnection
 	ADoor* DoorInstance {nullptr};
 };
 
+USTRUCT()
+struct FCustomDataPair
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	UClass* DataClass {nullptr};
+	UPROPERTY()
+	URoomCustomData* Data {nullptr};
+};
+
 UCLASS(BlueprintType)
-class PROCEDURALDUNGEON_API URoom : public UObject
+class PROCEDURALDUNGEON_API URoom : public UReplicableObject
 {
 	GENERATED_BODY()
 
@@ -57,14 +68,15 @@ public:
 	// TODO: Make them private
 	UPROPERTY()
 	UProceduralLevelStreaming* Instance {nullptr};
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FIntVector Position {0};
+	UPROPERTY(Replicated)
 	EDoorDirection Direction {EDoorDirection::NbDirection};
 
 	URoom();
 
 	const URoomData* GetRoomData() const { return RoomData; }
-	const ADungeonGenerator* Generator() const { return GeneratorOwner; }
+	const ADungeonGenerator* Generator() const { return GeneratorOwner.Get(); }
 	void SetPlayerInside(bool PlayerInside);
 	void SetVisible(bool Visible);
 
@@ -77,8 +89,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Room", meta = (CompactNodeTitle = "Is Locked"))
 	FORCEINLINE bool IsLocked() const { return bIsLocked; }
 
-	UFUNCTION(BlueprintCallable, Category = "Room")
-	void Lock(bool lock) { bIsLocked = lock; }
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Room")
+	void Lock(bool lock);
 
 	FORCEINLINE uint64 GetRoomID() const { return Id; }
 
@@ -94,23 +106,38 @@ public:
 	bool HasCustomData(const TSubclassOf<URoomCustomData>& DataType) const;
 
 private:
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	URoomData* RoomData {nullptr};
 
-	UPROPERTY()
-	TMap<UClass*, URoomCustomData*> CustomData;
+	UPROPERTY(Replicated, Transient)
+	TArray<FCustomDataPair> CustomData;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<FRoomConnection> Connections;
 
-	ADungeonGenerator* GeneratorOwner {nullptr};
+	UPROPERTY(Replicated)
+	TWeakObjectPtr<ADungeonGenerator> GeneratorOwner {nullptr};
+
+	UPROPERTY(Replicated)
 	int64 Id {-1};
+
 	bool bPlayerInside {false};
 	bool bIsVisible {true};
+
+	UPROPERTY(ReplicatedUsing = OnRep_IsLocked)
 	bool bIsLocked {false};
+
+	UFUNCTION() // Needed macro for replication to work
+	void OnRep_IsLocked();
 
 	UFUNCTION() // needed macro for binding to delegate
 	void OnInstanceLoaded();
+
+	const FCustomDataPair* GetDataPair(const TSubclassOf<URoomCustomData>& DataType) const;
+
+protected:
+	// UReplicableObject interface
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 
 public:
 	void Init(URoomData* RoomData, ADungeonGenerator* Generator, int32 RoomId);
