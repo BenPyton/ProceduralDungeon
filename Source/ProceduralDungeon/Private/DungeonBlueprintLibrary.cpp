@@ -25,6 +25,9 @@
 #include "DungeonBlueprintLibrary.h"
 #include "Door.h"
 #include "DoorType.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
+#include "GameFramework/Pawn.h"
 
 bool UDungeonBlueprintLibrary::IsDoorOfType(const TSubclassOf<ADoor> DoorClass, const UDoorType* DoorType)
 {
@@ -35,4 +38,25 @@ bool UDungeonBlueprintLibrary::IsDoorOfType(const TSubclassOf<ADoor> DoorClass, 
 bool UDungeonBlueprintLibrary::CompareDataTableRows(const FDataTableRowHandle& A, const FDataTableRowHandle& B)
 {
 	return A == B;
+}
+
+void UDungeonBlueprintLibrary::Spectate(APlayerController* Controller, bool DestroyPawn)
+{
+	if (!Controller)
+		return;
+
+	if (!Controller->HasAuthority())
+		return;
+
+	APawn* PreviousPawn = Controller->GetPawn();
+
+	Controller->PlayerState->SetIsSpectator(true);
+	Controller->ChangeState(NAME_Spectating);
+	Controller->bPlayerIsWaiting = true;
+	Controller->ClientGotoState(NAME_Spectating);
+
+	if (DestroyPawn && IsValid(PreviousPawn))
+	{
+		PreviousPawn->Destroy();
+	}
 }
