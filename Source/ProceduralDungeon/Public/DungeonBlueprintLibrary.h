@@ -72,4 +72,11 @@ public:
 	// Transforms North into South and East into West (and vice versa)
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Opposite", CompactNodeTitle = "Opposite", AutoCreateRefTerm = "A"))
 	static EDoorDirection DoorDirection_Opposite(const EDoorDirection& A) { return ~A; }
+
+	// ===== Gameplay Utility Functions =====
+
+	// Set player to spectate
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Player", meta = (DefaultToSelf="Controller"))
+	static void Spectate(APlayerController* Controller, bool DestroyPawn = true);
+
 };
