@@ -100,25 +100,27 @@ public:
 
 	// ===== Optional events =====
 
-	// Called after unloading previous dungeon but before generating next dungeon.
-	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "Pre Generation"))
-	void OnPreGeneration_BP();
+	// Called once before anything else when generating a new dungeon.
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Pre Generation"))
+	void OnPreGeneration();
 
-	// Called after all rooms are loaded and initialized
-	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "Post Generation"))
-	void OnPostGeneration_BP();
+	// Called once after all the dungeon generation (even if failed).
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Post Generation"))
+	void OnPostGeneration();
 
-	// Called before generating a new dungeon and each time IsValidDungeon return false
-	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "Generation Init"))
-	void OnGenerationInit_BP();
+	// Called before trying to generate a new dungeon and each time IsValidDungeon return false.
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Generation Init"))
+	void OnGenerationInit();
 
-	// Called when dungeon failed to generate a valid dungeon after exhausting all tries
-	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "Generation Failed"))
-	void OnGenerationFailed_BP();
+	// Called when all dungeon generation tries are exhausted (IsValidDungeon always return false).
+	// No dungeon had been generated.
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Generation Failed"))
+	void OnGenerationFailed();
 
-	// Called when the room NewRoom is added in the generation (but not spawned yet)
-	UFUNCTION(BlueprintImplementableEvent, Category = "Dungeon Generator", meta = (DisplayName = "On Room Added"))
-	void OnRoomAdded_BP(const URoomData* NewRoom);
+	// Called each time a room is added in the dungeon (but not spawned yet).
+	// Those rooms can be destroyed without loading them if the generation try is not valid.
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "On Room Added"))
+	void OnRoomAdded(const URoomData* NewRoom);
 
 	// ===== Utility functions you can use in blueprint =====
 
@@ -173,56 +175,27 @@ public:
 
 	// ===== Events =====
 
+	// Called once before anything else when generating a new dungeon.
 	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FGenerationEvent OnPreGenerationEvent;
 
+	// Called once after all the dungeon generation (even if failed).
 	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FGenerationEvent OnPostGenerationEvent;
 
+	// Called before trying to generate a new dungeon and each time IsValidDungeon return false.
 	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FGenerationEvent OnGenerationInitEvent;
 
+	// Called when all dungeon generation tries are exhausted (IsValidDungeon always return false).
+	// No dungeon had been generated.
 	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FGenerationEvent OnGenerationFailedEvent;
 
+	// Called each time a room is added in the dungeon (but not spawned yet).
+	// Those rooms can be destroyed without loading them if the generation try is not valid.
 	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FRoomEvent OnRoomAddedEvent;
-
-protected:
-
-	// ===== Implementation of blueprint native events  =====
-
-	UFUNCTION()
-	virtual URoomData* ChooseFirstRoomData_Implementation();
-
-	UFUNCTION()
-	virtual URoomData* ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const FDoorDef& DoorData);
-
-	UFUNCTION()
-	virtual TSubclassOf<ADoor> ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType);
-
-	UFUNCTION()
-	virtual bool IsValidDungeon_Implementation();
-
-	UFUNCTION()
-	virtual bool ContinueToAddRoom_Implementation();
-
-	// ===== Overridable events by native inheritance =====
-
-	UFUNCTION()
-	virtual void OnPreGeneration() {}
-
-	UFUNCTION()
-	virtual void OnPostGeneration() {}
-
-	UFUNCTION()
-	virtual void OnGenerationInit() {}
-
-	UFUNCTION()
-	virtual void OnGenerationFailed() {}
-
-	UFUNCTION()
-	virtual void OnRoomAdded(const URoomData* NewRoom) {}
 
 private:
 	// Create virtually the dungeon (no load nor initialization of room levels)
@@ -260,14 +233,6 @@ private:
 	void OnStateBegin(EGenerationState State);
 	void OnStateTick(EGenerationState State);
 	void OnStateEnd(EGenerationState State);
-
-	// ===== Dispatch optional events =====
-
-	void DispatchPreGeneration();
-	void DispatchPostGeneration();
-	void DispatchGenerationInit();
-	void DispatchGenerationFailed();
-	void DispatchRoomAdded(const URoomData* NewRoom);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
