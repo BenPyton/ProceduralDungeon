@@ -251,6 +251,9 @@ private:
 	// Clear and refill octree from the dungeon graph
 	void UpdateOctree();
 
+	// Initialize the seed depending on the seed type setting
+	void UpdateSeed();
+
 	// ===== FSM =====
 
 	void SetState(EGenerationState NewState);
@@ -268,11 +271,13 @@ private:
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
+	bool bUseGeneratorTransform;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
 	EGenerationType GenerationType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
 	ESeedType SeedType;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
-	bool bUseGeneratorTransform;
+	UPROPERTY(EditAnywhere, Category = "Procedural Generation", meta = (EditCondition = "SeedType==ESeedType::AutoIncrement", EditConditionHides, DisplayAfter = "Seed"))
+	uint32 SeedIncrement;
 
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	void SetSeed(int32 NewSeed);
@@ -292,7 +297,7 @@ protected:
 	UDungeonGraph* Graph;
 
 private:
-	UPROPERTY(Replicated, EditAnywhere, Category = "Procedural Generation")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Procedural Generation", meta = (EditCondition = "SeedType!=ESeedType::Random", EditConditionHides))
 	uint32 Seed;
 
 	static uint32 GeneratorCount;
@@ -312,6 +317,9 @@ private:
 
 	// Set to true on server to start generating a new dungeon
 	bool bGenerate {false};
+
+	// Set to avoid adding increment o the seed after we've set manually the seed
+	bool bShouldIncrement {false};
 
 	// Occlusion culling system
 	TUniquePtr<FDungeonOctree> Octree;

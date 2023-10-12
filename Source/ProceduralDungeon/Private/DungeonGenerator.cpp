@@ -52,6 +52,7 @@ ADungeonGenerator::ADungeonGenerator()
 	GenerationType = EGenerationType::DFS;
 	SeedType = ESeedType::Random;
 	Seed = 123456789; // default Seed
+	SeedIncrement = 123456; // default Seed increment
 	UniqueId = GeneratorCount++; // TODO: make it better than a static increment. It can be increased very quickly in editor when we move an actor.
 	bUseGeneratorTransform = false;
 
@@ -104,19 +105,8 @@ void ADungeonGenerator::Generate()
 	// Do it only on server, do nothing on clients
 	if (HasAuthority())
 	{
-		if (SeedType == ESeedType::Random)
-		{
-			Random.GenerateNewSeed();
-			Seed = Random.GetCurrentSeed();
-		}
-
 		bGenerate = true;
-		++Generation;
-
-		if (SeedType == ESeedType::AutoIncrement)
-		{
-			Seed += 123456;
-		}
+		// TODO: wake up here for dormancy
 	}
 }
 
@@ -404,6 +394,31 @@ void ADungeonGenerator::UpdateOctree()
 	}
 }
 
+void ADungeonGenerator::UpdateSeed()
+{
+	switch (SeedType)
+	{
+	case ESeedType::Random:
+		Random.GenerateNewSeed();
+		Seed = Random.GetCurrentSeed();
+		break;
+	case ESeedType::AutoIncrement:
+		if(bShouldIncrement)
+			Seed += SeedIncrement;
+		else
+			bShouldIncrement = true;
+		// no break so we initialize the seed too
+	case ESeedType::Fixed:
+		Random.Initialize(Seed);
+		break;
+	default:
+		checkNoEntry();
+		break;
+	}
+
+	LogInfo(FString::Printf(TEXT("Seed: %d"), Seed));
+}
+
 /*
  *	=======================================
  *				State Machine
@@ -428,7 +443,9 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 		break;
 	case EGenerationState::Generation:
 		LogInfo("======= Begin Dungeon Generation =======");
+		++Generation;
 		bGenerate = false;
+		UpdateSeed();
 		CreateDungeon();
 	case EGenerationState::Initialization:
 		LogInfo("======= Begin Dungeon Initialization =======");
@@ -662,6 +679,7 @@ URoom* ADungeonGenerator::GetRoomByIndex(int64 Index) const
 void ADungeonGenerator::SetSeed(int32 NewSeed)
 {
 	Seed = static_cast<uint32>(NewSeed);
+	bShouldIncrement = false; // avoid incrementing when SeedType is AutoIncrement
 }
 
 int32 ADungeonGenerator::GetSeed()
