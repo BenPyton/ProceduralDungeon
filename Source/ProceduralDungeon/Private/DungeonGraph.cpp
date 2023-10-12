@@ -25,9 +25,12 @@
 #include "DungeonGraph.h"
 #include "Net/UnrealNetwork.h" // DOREPLIFETIME
 #include "ProceduralDungeonLog.h"
+#include "Containers/Queue.h"
 #include "DungeonGenerator.h"
 #include "Room.h"
 #include "RoomData.h"
+#include "ProceduralLevelStreaming.h"
+#include "Engine/Level.h"
 
 UDungeonGraph::UDungeonGraph()
 	: Super()
@@ -37,13 +40,13 @@ UDungeonGraph::UDungeonGraph()
 void UDungeonGraph::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UDungeonGraph, Rooms);
+	DOREPLIFETIME(UDungeonGraph, ReplicatedRooms);
 }
 
 bool UDungeonGraph::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
 {
 	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);;
-	for (URoom* Room : Rooms)
+	for (URoom* Room : ReplicatedRooms)
 	{
 		check(Room);
 		bWroteSomething |= Room->ReplicateSubobject(Channel, Bunch, RepFlags);
@@ -376,4 +379,59 @@ bool UDungeonGraph::FindPath(const URoom* From, const URoom* To, TArray<const UR
 	}
 
 	return Common != nullptr;
+}
+
+void CopyRooms(TArray<URoom*>& To, TArray<URoom*>& From)
+{
+	for (URoom* Room : From)
+	{
+		if(Room->Instance)
+			UE_LOG(LogProceduralDungeon, Error, TEXT("[%s] Loaded Level: %s"), *GetNameSafe(Room), *GetNameSafe(Room->Instance->GetLoadedLevel()));
+	}
+
+	To = TArray(From);
+}
+
+void UDungeonGraph::SynchronizeRooms()
+{
+	if (GetOwner()->HasAuthority())
+		CopyRooms(ReplicatedRooms, Rooms);
+	else
+		CopyRooms(Rooms, ReplicatedRooms);
+	bIsDirty = false;
+}
+
+bool UDungeonGraph::AreRoomsLoaded() const
+{
+	for (URoom* Room : Rooms)
+	{
+		if (!Room->IsInstanceLoaded())
+			return false;
+	}
+	return true;
+}
+
+bool UDungeonGraph::AreRoomsUnloaded() const
+{
+	for (URoom* Room : Rooms)
+	{
+		if (IsValid(Room) && !Room->IsInstanceUnloaded())
+			return false;
+	}
+	return true;
+}
+
+bool UDungeonGraph::AreRoomsInitialized() const
+{
+	for (URoom* Room : Rooms)
+	{
+		if (!Room->IsInstanceInitialized())
+			return false;
+	}
+	return true;
+}
+
+void UDungeonGraph::OnRep_Rooms()
+{
+	bIsDirty = true;
 }

@@ -41,7 +41,7 @@
 #include "DungeonGraph.h"
 #include <functional>
 
-int32 ADungeonGenerator::GeneratorCount = 0;
+uint32 ADungeonGenerator::GeneratorCount = 0;
 
 // Sets default values
 ADungeonGenerator::ADungeonGenerator()
@@ -67,8 +67,9 @@ ADungeonGenerator::ADungeonGenerator()
 void ADungeonGenerator::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ADungeonGenerator, Seed);
+	DOREPLIFETIME(ADungeonGenerator, Generation);
 	DOREPLIFETIME(ADungeonGenerator, Graph);
-	DOREPLIFETIME(ADungeonGenerator, Result);
 }
 
 bool ADungeonGenerator::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
@@ -109,7 +110,8 @@ void ADungeonGenerator::Generate()
 			Seed = Random.GetCurrentSeed();
 		}
 
-		BeginGeneration(Seed);
+		bGenerate = true;
+		++Generation;
 
 		if (SeedType == ESeedType::AutoIncrement)
 		{
@@ -118,21 +120,12 @@ void ADungeonGenerator::Generate()
 	}
 }
 
-void ADungeonGenerator::BeginGeneration_Implementation(uint32 GenerationSeed)
-{
-	Seed = GenerationSeed;
-	Random.Initialize(Seed);
-	LogInfo(FString::Printf(TEXT("Seed: %d"), Seed));
-	SetState(EGenerationState::Unload);
-	Result = EGenerationResult::None;
-}
-
-EGenerationResult ADungeonGenerator::CreateDungeon()
+void ADungeonGenerator::CreateDungeon()
 {
 	// Only server generate the dungeon
 	// DungeonGraph will be replicated to all clients
 	if (!HasAuthority())
-		return EGenerationResult::None;
+		return;
 
 	int TriesLeft = MaxTry;
 	bool ValidDungeon = false;
@@ -159,7 +152,7 @@ EGenerationResult ADungeonGenerator::CreateDungeon()
 			break;
 		default:
 			LogError("GenerationType value is not supported.");
-			return EGenerationResult::Error;
+			return;
 		}
 
 		URoomData* def = ChooseFirstRoomData();
@@ -200,10 +193,10 @@ EGenerationResult ADungeonGenerator::CreateDungeon()
 		LogError(FString::Printf(TEXT("Generated dungeon is not valid after %d tries. Make sure your IsValidDungeon function is correct."), MaxTry));
 		Graph->Clear();
 		DispatchGenerationFailed();
-		return EGenerationResult::Error;
+		return;
 	}
 
-	return EGenerationResult::Success;
+	return;
 }
 
 void ADungeonGenerator::InstantiateRoom(URoom* Room)
@@ -398,6 +391,19 @@ void ADungeonGenerator::Reset()
 	Octree->Destroy();
 }
 
+void ADungeonGenerator::UpdateOctree()
+{
+	Octree->Destroy();
+	for (URoom* r : Graph->Rooms)
+	{
+		check(IsValid(r));
+		FBoxCenterAndExtent bounds = r->GetBounds();
+		FDungeonOctreeElement octreeElement(r);
+		Octree->AddElement(octreeElement);
+		r->SetVisible(false);
+	}
+}
+
 /*
  *	=======================================
  *				State Machine
@@ -421,26 +427,24 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 		UnloadAllRooms();
 		break;
 	case EGenerationState::Generation:
-		DispatchPreGeneration();
-		LogInfo("======= Begin Map Generation =======");
-		Result = CreateDungeon();
-		// Server should never return None
-		// Client should always return None
-		check(HasAuthority() ^ (Result == EGenerationResult::None))
+		LogInfo("======= Begin Dungeon Generation =======");
+		bGenerate = false;
+		CreateDungeon();
+	case EGenerationState::Initialization:
+		LogInfo("======= Begin Dungeon Initialization =======");
+		Graph->SynchronizeRooms();
+		UpdateOctree();
 		break;
 	case EGenerationState::Load:
 		LogInfo("======= Begin Load All Levels =======");
 		LogInfo(FString::Printf(TEXT("Nb Room To Load: %d"), Graph->Count()));
 		LoadAllRooms();
 		break;
-	case EGenerationState::Initialization:
-		LogInfo("======= Begin Init All Levels =======");
-		LogInfo(FString::Printf(TEXT("Nb Room To Initialize: %d"), Graph->Count()));
-		break;
-	case EGenerationState::Play:
+	case EGenerationState::Idle:
 		LogInfo("======= Ready To Play =======");
 		break;
 	default:
+		checkNoEntry();
 		break;
 	}
 }
@@ -450,45 +454,24 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 	int RoomCount = 0;
 	switch (State)
 	{
+	case EGenerationState::Idle:
+		UpdateRoomVisibility();
+		if (Graph->IsDirty() || bGenerate)
+			SetState(EGenerationState::Unload);
+		break;
 	case EGenerationState::Unload:
-		for (URoom* Room : Graph->GetAllRooms())
-		{
-			if (Room->IsInstanceUnloaded())
-				RoomCount++;
-		}
-
-		if (RoomCount == Graph->Count())
-			SetState(EGenerationState::Generation);
+		if (Graph->AreRoomsUnloaded())
+			SetState((HasAuthority() && bGenerate) ? EGenerationState::Generation : EGenerationState::Initialization);
 		break;
 	case EGenerationState::Generation:
-		if (Result != EGenerationResult::None)
-		{
-			LogInfo(FString::Printf(TEXT("End Generation with result: %s"), Result == EGenerationResult::Success ? TEXT("SUCCESS") : TEXT("FAILED")));
-			SetState((Result == EGenerationResult::Success) ? EGenerationState::Load : EGenerationState::None);
-		}
-		break;
-	case EGenerationState::Load:
-		for (URoom* Room : Graph->GetAllRooms())
-		{
-			if (Room->IsInstanceLoaded())
-				RoomCount++;
-		}
-
-		if (RoomCount == Graph->Count())
-			SetState(EGenerationState::Initialization);
+		SetState(EGenerationState::Initialization);
 		break;
 	case EGenerationState::Initialization:
-		for (URoom* Room : Graph->GetAllRooms())
-		{
-			if (Room->IsInstanceInitialized())
-				RoomCount++;
-		}
-
-		if (RoomCount == Graph->Count())
-			SetState(EGenerationState::Play);
+		SetState(EGenerationState::Load);
 		break;
-	case EGenerationState::Play:
-		UpdateRoomVisibility();
+	case EGenerationState::Load:
+		if (Graph->AreRoomsInitialized())
+			SetState(EGenerationState::Idle);
 		break;
 	default:
 		break;
@@ -501,6 +484,9 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 	UNavigationSystemV1* nav = nullptr;
 	switch (State)
 	{
+	case EGenerationState::Idle:
+		DispatchPreGeneration();
+		break;
 	case EGenerationState::Unload:
 		Graph->Clear();
 		GetWorld()->FlushLevelStreaming();
@@ -508,24 +494,13 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 		LogInfo("======= End Unload All Levels =======");
 		break;
 	case EGenerationState::Generation:
-		LogInfo("======= End Map Generation =======");
-
-		// Update Octree
-		Octree->Destroy();
-		for (URoom* r : Graph->Rooms)
-		{
-			check(IsValid(r));
-			FBoxCenterAndExtent bounds = r->GetBounds();
-			FDungeonOctreeElement octreeElement(r);
-			Octree->AddElement(octreeElement);
-			r->SetVisible(false);
-		}
+		LogInfo("======= End Dungeon Generation =======");
+		break;
+	case EGenerationState::Initialization:
+		LogInfo("======= End Dungeon Initialization =======");
 		break;
 	case EGenerationState::Load:
 		LogInfo("======= End Load All Levels =======");
-		break;
-	case EGenerationState::Initialization:
-		LogInfo("======= End Init All Levels =======");
 
 		// Try to rebuild the navmesh
 		nav = UNavigationSystemV1::GetCurrent(GetWorld());
@@ -538,9 +513,6 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 
 		// Invoke Post Generation Event when initialization is done
 		DispatchPostGeneration();
-		break;
-	case EGenerationState::Play:
-		LogInfo("======= End Play =======");
 		break;
 	default:
 		break;
