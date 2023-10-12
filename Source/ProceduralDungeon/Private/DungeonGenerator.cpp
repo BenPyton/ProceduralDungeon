@@ -125,7 +125,7 @@ void ADungeonGenerator::CreateDungeon()
 		TriesLeft--;
 
 		// Reset generation data
-		DispatchGenerationInit();
+		OnGenerationInit();
 
 		// Create the first room
 		Graph->Clear();
@@ -182,7 +182,7 @@ void ADungeonGenerator::CreateDungeon()
 	{
 		LogError(FString::Printf(TEXT("Generated dungeon is not valid after %d tries. Make sure your IsValidDungeon function is correct."), MaxTry));
 		Graph->Clear();
-		DispatchGenerationFailed();
+		OnGenerationFailed();
 		return;
 	}
 
@@ -303,7 +303,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>&
 				}
 				InOutRoomList.Add(newRoom);
 				newRooms.Add(newRoom);
-				DispatchRoomAdded(newRoom->GetRoomData());
+				OnRoomAdded(newRoom->GetRoomData());
 			}
 			else
 			{
@@ -502,7 +502,7 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 	switch (State)
 	{
 	case EGenerationState::Idle:
-		DispatchPreGeneration();
+		OnPreGeneration();
 		break;
 	case EGenerationState::Unload:
 		Graph->Clear();
@@ -529,12 +529,14 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 		}
 
 		// Invoke Post Generation Event when initialization is done
-		DispatchPostGeneration();
+		OnPostGeneration();
 		break;
 	default:
 		break;
 	}
 }
+
+// ===== Default Native Events Implementations =====
 
 URoomData* ADungeonGenerator::ChooseFirstRoomData_Implementation()
 {
@@ -570,40 +572,32 @@ void ADungeonGenerator::InitializeDungeon_Implementation(const UDungeonGraph* Ro
 {
 }
 
-void ADungeonGenerator::DispatchPreGeneration()
+void ADungeonGenerator::OnPreGeneration_Implementation()
 {
-	OnPreGeneration();
-	OnPreGeneration_BP();
 	OnPreGenerationEvent.Broadcast();
 }
 
-void ADungeonGenerator::DispatchPostGeneration()
+void ADungeonGenerator::OnPostGeneration_Implementation()
 {
-	OnPostGeneration();
-	OnPostGeneration_BP();
 	OnPostGenerationEvent.Broadcast();
 }
 
-void ADungeonGenerator::DispatchGenerationInit()
+void ADungeonGenerator::OnGenerationInit_Implementation()
 {
-	OnGenerationInit();
-	OnGenerationInit_BP();
 	OnGenerationInitEvent.Broadcast();
 }
 
-void ADungeonGenerator::DispatchGenerationFailed()
+void ADungeonGenerator::OnGenerationFailed_Implementation()
 {
-	OnGenerationFailed();
-	OnGenerationFailed_BP();
 	OnGenerationFailedEvent.Broadcast();
 }
 
-void ADungeonGenerator::DispatchRoomAdded(const URoomData* NewRoom)
+void ADungeonGenerator::OnRoomAdded_Implementation(const URoomData* NewRoom)
 {
-	OnRoomAdded(NewRoom);
-	OnRoomAdded_BP(NewRoom);
 	OnRoomAddedEvent.Broadcast(NewRoom);
 }
+
+// ===== Utility Functions =====
 
 URoomData* ADungeonGenerator::GetRandomRoomData(TArray<URoomData*> RoomDataArray)
 {
