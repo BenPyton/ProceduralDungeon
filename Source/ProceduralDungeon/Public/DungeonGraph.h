@@ -44,6 +44,11 @@ public:
 	void InitRooms();
 	void Clear();
 
+	bool IsDirty() const { return bIsDirty; }
+	void SetDirty() { bIsDirty = true; }
+
+	bool HasRooms() const { return !Rooms.IsEmpty(); }
+
 	// Returns all rooms
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	const TArray<URoom*>& GetAllRooms() const { return Rooms; }
@@ -135,9 +140,27 @@ protected:
 	// UReplicableObject interface
 	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 
+	// Sync Rooms and ReplicatedRooms arrays
+	void SynchronizeRooms();
+
+	bool AreRoomsLoaded() const;
+	bool AreRoomsUnloaded() const;
+	bool AreRoomsInitialized() const;
+
 private:
-	UPROPERTY(Replicated, Transient)
+	UPROPERTY(Transient)
 	TArray<URoom*> Rooms;
+
+	// This array is synchronized with the server
+	// We keep it separated to be able to unload previous rooms on clients
+	UPROPERTY(ReplicatedUsing = OnRep_Rooms, Transient)
+	TArray<URoom*> ReplicatedRooms;
+
+	UFUNCTION()
+	void OnRep_Rooms();
+
+	// set to true when replicated room list has changed
+	bool bIsDirty {false};
 
 	TWeakObjectPtr<ADungeonGenerator> Generator {nullptr};
 };

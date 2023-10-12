@@ -225,13 +225,9 @@ protected:
 	virtual void OnRoomAdded(const URoomData* NewRoom) {}
 
 private:
-	// Launch the generation process of the dungeon
-	UFUNCTION(NetMulticast, Reliable)
-	void BeginGeneration(uint32 GenerationSeed);
-
 	// Create virtually the dungeon (no load nor initialization of room levels)
 	UFUNCTION()
-	EGenerationResult CreateDungeon();
+	void CreateDungeon();
 
 	// Adds some new rooms linked to ParentRoom into Rooms list output
 	// Returns an array with only new rooms
@@ -251,6 +247,9 @@ private:
 
 	// Reset all data from a specific generation
 	void Reset();
+
+	// Clear and refill octree from the dungeon graph
+	void UpdateOctree();
 
 	// ===== FSM =====
 
@@ -281,7 +280,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle = "Seed"))
 	int32 GetSeed();
 
-	int32 GetUniqueId() const { return UniqueId; }
+	uint32 GetUniqueId() const { return UniqueId; }
+	uint64 GetGeneration() const { return Generation; }
 
 	inline bool UseGeneratorTransform() const { return bUseGeneratorTransform; }
 	FVector GetDungeonOffset() const;
@@ -292,22 +292,26 @@ protected:
 	UDungeonGraph* Graph;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Procedural Generation")
+	UPROPERTY(Replicated, EditAnywhere, Category = "Procedural Generation")
 	uint32 Seed;
 
-	static int32 GeneratorCount;
-	static const int MaxTry = 500;
-	static const int MaxRoomTry = 10;
+	static uint32 GeneratorCount;
+	static const uint32 MaxTry {500};
+	static const uint32 MaxRoomTry {10};
+
 	FRandomStream Random;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TArray<class ADoor*> DoorList;
 
-	EGenerationState CurrentState = EGenerationState::None;
-	int32 UniqueId;
+	EGenerationState CurrentState {EGenerationState::Idle};
+	uint32 UniqueId;
 
-	UPROPERTY(Replicated)
-	EGenerationResult Result = EGenerationResult::None;
+	UPROPERTY(Replicated, Transient)
+	uint64 Generation {0};
+
+	// Set to true on server to start generating a new dungeon
+	bool bGenerate {false};
 
 	// Occlusion culling system
 	TUniquePtr<FDungeonOctree> Octree;

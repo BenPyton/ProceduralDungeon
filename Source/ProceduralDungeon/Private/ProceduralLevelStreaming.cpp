@@ -6,6 +6,7 @@
 #include "RoomData.h"
 #include "ProceduralDungeon.h"
 #include "ProceduralDungeonLog.h"
+#include "Kismet/GameplayStatics.h"
 
 #define LOCTEXT_NAMESPACE "World"
 
@@ -38,14 +39,13 @@ void UProceduralLevelStreaming::SetShouldBeLoaded(const bool bInShouldBeLoaded)
 	}
 }
 
-
 void UProceduralLevelStreaming::OnLevelDynamicUnloaded()
 {
 	//UE_LOG(LogProceduralDungeon, Warning, TEXT("End unload level: %s"), *GetWorldAssetPackageName());
 	UWorld* World = GetWorld();
 	if (nullptr != World)
 	{
-		//UE_LOG(LogProceduralDungeon, Warning, TEXT("Remove instance from world"));
+		UE_LOG(LogProceduralDungeon, Log, TEXT("Remove instance from world: %s"), *GetName());
 		World->RemoveStreamingLevel(this);
 	}
 	bIsUnloaded = true;
@@ -77,12 +77,14 @@ UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstanceBySoftObj
 	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 	if (!World)
 	{
+		UE_LOG(LogProceduralDungeon, Error, TEXT("Failed to load LevelStreamingDynamic: World is null"));
 		return nullptr;
 	}
 
 	// Check whether requested map exists, this could be very slow if LevelName is a short package name
 	if (Level.IsNull())
 	{
+		UE_LOG(LogProceduralDungeon, Error, TEXT("Failed to load LevelStreamingDynamic: Level already exists"));
 		return nullptr;
 	}
 
@@ -91,6 +93,7 @@ UProceduralLevelStreaming* UProceduralLevelStreaming::LoadLevelInstanceBySoftObj
 
 UProceduralLevelStreaming* UProceduralLevelStreaming::Load(UObject* WorldContextObject, URoomData* Data, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation)
 {
+	UE_LOG(LogProceduralDungeon, Log, TEXT("[W:%s][D:%s] Loading LevelStreamingDynamic"), *GetNameSafe(WorldContextObject), *GetNameSafe(Data));
 	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 	if (nullptr == World)
 	{
@@ -117,6 +120,7 @@ UProceduralLevelStreaming* UProceduralLevelStreaming::Load(UObject* WorldContext
 
 void UProceduralLevelStreaming::Unload(UObject* WorldContextObject, UProceduralLevelStreaming* Instance)
 {
+	UE_LOG(LogProceduralDungeon, Log, TEXT("[W:%s][I:%s] Unloading LevelStreamingDynamic"), *GetNameSafe(WorldContextObject), *GetNameSafe(Instance));
 	UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull);
 	if (nullptr == World)
 	{
@@ -126,6 +130,13 @@ void UProceduralLevelStreaming::Unload(UObject* WorldContextObject, UProceduralL
 	if (nullptr == Instance)
 	{
 		UE_LOG(LogProceduralDungeon, Error, TEXT("Failed to unload LevelStreamingDynamic: Instance is null"));
+		return;
+	}
+
+	if (!Instance->HasLoadedLevel())
+	{
+		UE_LOG(LogProceduralDungeon, Log, TEXT("[%s] Level is not loaded."), *GetNameSafe(Instance));
+		Instance->bIsUnloaded = true;
 		return;
 	}
 

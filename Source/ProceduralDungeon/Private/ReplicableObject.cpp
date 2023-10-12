@@ -48,6 +48,11 @@ UWorld* UReplicableObject::GetWorld() const
 	return Outer->GetWorld();
 }
 
+AActor* UReplicableObject::GetOwner() const
+{
+	return CastChecked<AActor>(GetOuter());
+}
+
 FString UReplicableObject::GetAuthorityName() const
 {
 	AActor* OwnerActor = Cast<AActor>(GetOuter());

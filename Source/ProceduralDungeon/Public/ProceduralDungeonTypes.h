@@ -31,7 +31,7 @@
 UENUM()
 enum class EGenerationState : uint8
 {
-	None					UMETA(DisplayName = "None"),
+	Idle					UMETA(DisplayName = "Idle"),
 	Generation 				UMETA(DisplayName = "Generation"),
 	Load 					UMETA(DisplayName = "Load"),
 	Initialization 			UMETA(DisplayName = "Initialization"),

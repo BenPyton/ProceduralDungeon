@@ -38,6 +38,7 @@ public:
 	virtual bool IsSupportedForNetworking() const override { return true; }
 
 	virtual UWorld* GetWorld() const override;
+	AActor* GetOwner() const;
 
 	// To be called in place of Channel->ReplicateSubobject(...)
 	bool ReplicateSubobject(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags);

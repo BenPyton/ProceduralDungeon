@@ -128,11 +128,12 @@ void URoom::Instantiate(UWorld* World)
 		FVector offset(0, 0, 0);
 		FQuat rotation = FQuat::Identity;
 		FString nameSuffix = FString::FromInt(Id);
-		if (GeneratorOwner != nullptr)
+		if (GeneratorOwner.IsValid())
 		{
 			offset = GeneratorOwner->GetDungeonOffset();
 			rotation = GeneratorOwner->GetDungeonRotation();
-			nameSuffix = FString::FromInt(GeneratorOwner->GetUniqueId()) + TEXT("_") + nameSuffix;
+
+			nameSuffix = FString::Printf(TEXT("%d_%d_%s"), GeneratorOwner->GetUniqueId(), GeneratorOwner->GetGeneration(), *nameSuffix);
 		}
 
 		FVector FinalLocation = rotation.RotateVector(Dungeon::RoomUnit() * FVector(Position)) + offset;
@@ -145,7 +146,7 @@ void URoom::Instantiate(UWorld* World)
 			return;
 		}
 
-		LogInfo(FString::Printf(TEXT("Load room Instance: %s"), *Instance->GetWorldAssetPackageName()));
+		LogInfo(FString::Printf(TEXT("[%s][R:%s][I:%s] Load room Instance: %s"), *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName()));
 		Instance->OnLevelLoaded.AddDynamic(this, &URoom::OnInstanceLoaded);
 	}
 	else
@@ -158,7 +159,7 @@ void URoom::Destroy(UWorld* World)
 {
 	if (IsValid(Instance))
 	{
-		UE_LOG(LogProceduralDungeon, Log, TEXT("Unload room Instance: %s"), nullptr != Instance ? *Instance->GetWorldAssetPackageName() : TEXT("Null"));
+		UE_LOG(LogProceduralDungeon, Log, TEXT("[%s][R:%s][I:%s] Unload room Instance: %s"), *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName());
 
 		ARoomLevel* Script = GetLevelScript();
 		if (IsValid(Script))
@@ -166,8 +167,12 @@ void URoom::Destroy(UWorld* World)
 			Script->Room = nullptr;
 			Script->Destroy();
 		}
-
+		check(World);
 		UProceduralLevelStreaming::Unload(World, Instance);
+	}
+	else
+	{
+		UE_LOG(LogProceduralDungeon, Log, TEXT("[%s][R:%s] No room instance to unload"), *GetAuthorityName(), *GetName());
 	}
 }
 
@@ -184,6 +189,8 @@ void URoom::OnInstanceLoaded()
 	}
 
 	Script->Init(this);
+
+	UE_LOG(LogProceduralDungeon, Log, TEXT("[%s][R:%s][I:%s] Room loaded: %s"), *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName());
 }
 
 void URoom::Lock(bool lock)
