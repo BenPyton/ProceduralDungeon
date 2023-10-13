@@ -90,7 +90,8 @@ void ADungeonGenerator::BeginPlay()
 void ADungeonGenerator::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	UnloadAllRooms();
+	if(EndPlayReason == EEndPlayReason::Destroyed)
+		UnloadAllRooms();
 }
 
 // Called every frame
