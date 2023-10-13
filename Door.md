@@ -1,5 +1,3 @@
-# Door
-
 The `Door` class is the base class for all doors spawned by the dungeon.
 
 You have to manage yourself how your doors open or close.\

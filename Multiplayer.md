@@ -1,5 +1,3 @@
-# Multiplayer
-
 First off, be sure to have minimum knowledge of how multiplayer games work in Unreal Engine.\
 I would suggest you to read this [compendium](https://cedric-neukirchen.net/Downloads/Compendium/UE4_Network_Compendium_by_Cedric_eXi_Neukirchen.pdf) if not (it was written for UE4 but it's the same for UE5).
 

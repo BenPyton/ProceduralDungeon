@@ -1,4 +1,3 @@
-# Navigation Mesh
 
 The best way to manage navmesh bounding boxes and obstacle zones is to place them in each room level (not in the master level).
 

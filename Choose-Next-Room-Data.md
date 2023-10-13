@@ -1,5 +1,3 @@
-# Choose Next Room Data
-
 This function is the main part of the procedural generation:
 it's where you set your rules.
 

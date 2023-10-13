@@ -1,5 +1,3 @@
-# Continue To Add Room
-
 This function determine if the generation should continue or not.
 
 A generation will naturally stops if there are no unconnected door left.\

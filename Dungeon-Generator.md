@@ -1,6 +1,4 @@
-# Dungeon Generator
-
-### Create a dungeon generator
+## Create a dungeon generator
 
 The dungeon generator is an actor placed in your main level and which generates the dungeon and spawns the room levels.\
 To create one, create a new blueprint, expand "All Classes" and type "DungeonGenerator".

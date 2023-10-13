@@ -1,5 +1,3 @@
-# Choose First Room Data
-
 This function define the root of the dungeon generation.
 
 In output, you have to pass a non-null RoomData.
