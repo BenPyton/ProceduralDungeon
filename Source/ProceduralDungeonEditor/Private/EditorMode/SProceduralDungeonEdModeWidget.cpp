@@ -34,6 +34,7 @@
 #include "FileHelpers.h"
 #include "Engine/LevelScriptBlueprint.h"
 #include "Kismet2/KismetEditorUtilities.h"
+#include "Runtime/Launch/Resources/Version.h" // for version preprocessors
 #include "ProceduralDungeonEdLog.h"
 #include "ProceduralDungeonEditor.h"
 #include "ProceduralDungeonEdMode.h"
@@ -43,16 +44,22 @@
 #include "RoomLevel.h"
 #include "RoomData.h"
 
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 1)
+using StyleProvider = FEditorStyle;
+#else
+using StyleProvider = FAppStyle;
+#endif
+
 void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TSharedRef<FProceduralDungeonEdModeToolkit> InParentToolkit)
 {
 	ParentToolkit = InParentToolkit;
 	FProceduralDungeonEdMode* EdMode = InParentToolkit->GetEditorMode();
 	FText LevelName = FText::FromString(GetNameSafe(EdMode->GetWorld()));
 
-	FSlateFontInfo TitleFont = FEditorStyle::GetFontStyle("DetailsView.CategoryFontStyle");
+	FSlateFontInfo TitleFont = StyleProvider::GetFontStyle("DetailsView.CategoryFontStyle");
 	TitleFont.Size = 24;
 
-	FSlateFontInfo SubTitleFont = FEditorStyle::GetFontStyle("DetailsView.CategoryFontStyle");
+	FSlateFontInfo SubTitleFont = StyleProvider::GetFontStyle("DetailsView.CategoryFontStyle");
 	SubTitleFont.Size = 16;
 
 	TSharedPtr<SScrollBox> DataScrollBox = nullptr;
@@ -90,7 +97,7 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 		.Padding(5.0f)
 		[
 			SNew(SBorder)
-			.BorderImage(FEditorStyle::GetBrush("DetailsView.CollapsedCategory"))
+			.BorderImage(StyleProvider::GetBrush("DetailsView.CollapsedCategory"))
 			.BorderBackgroundColor(FLinearColor(0.2f, 0.2f, 0.2f, 1.0f))
 			.Padding(5.0f)
 			.Visibility(this, &SProceduralDungeonEdModeWidget::ShowDataDetails)

@@ -134,7 +134,7 @@ URoom* UDungeonGraph::GetRandomRoom(const TArray<URoom*>& RoomList) const
 		return nullptr;
 	}
 
-	if (RoomList.IsEmpty())
+	if (!HasRooms())
 		return nullptr;
 
 	int32 rand = Generator->GetRandomStream().FRandRange(0, RoomList.Num() - 1);
@@ -389,7 +389,7 @@ void CopyRooms(TArray<URoom*>& To, TArray<URoom*>& From)
 			UE_LOG(LogProceduralDungeon, Error, TEXT("[%s] Loaded Level: %s"), *GetNameSafe(Room), *GetNameSafe(Room->Instance->GetLoadedLevel()));
 	}
 
-	To = TArray(From);
+	To = TArray<URoom*>(From);
 }
 
 void UDungeonGraph::SynchronizeRooms()

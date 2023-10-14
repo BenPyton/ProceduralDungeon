@@ -47,7 +47,7 @@ public:
 	bool IsDirty() const { return bIsDirty; }
 	void SetDirty() { bIsDirty = true; }
 
-	bool HasRooms() const { return !Rooms.IsEmpty(); }
+	bool HasRooms() const { return Rooms.Num() > 0; }
 
 	// Returns all rooms
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
