@@ -36,13 +36,13 @@ A generation is made of 4 phases :
 Here is the flowchart when we call `Generate` on a dungeon generator:
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/wiki/BenPyton/ProceduralDungeon/Images/Flowchart_Dark.svg">
-  <img alt="Procedural Generation Flowchart." src="https://raw.githubusercontent.com/wiki/BenPyton/ProceduralDungeon/Images/Flowchart_Light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/wiki/BenPyton/ProceduralDungeon/Images/Flowchart_Dark_v3.svg">
+  <img alt="Procedural Generation Flowchart." src="https://raw.githubusercontent.com/wiki/BenPyton/ProceduralDungeon/Images/Flowchart_Light_v3.svg">
 </picture>
 
 ## What you need to do
 First, read the [[Installation]] page to install the plugin.\
-Then, read and follow the instructions in the [[Dungeon-Generator]] page.
+Then, read and follow the instructions in the [[Getting Started]] page.
 
 You can get the [example project in the release page](https://github.com/BenPyton/ProceduralDungeon/releases/tag/v2.0.1) if you want a minimal working project.
 

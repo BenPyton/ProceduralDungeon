@@ -1,5 +1,3 @@
-# Plugin Settings
-
 Here you can change some settings for all the plugin.
 
 [[Images/PluginSettings.jpg]]

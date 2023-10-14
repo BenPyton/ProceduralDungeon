@@ -1,25 +1,44 @@
 First off, be sure to have minimum knowledge of how multiplayer games work in Unreal Engine.\
-I would suggest you to read this [compendium](https://cedric-neukirchen.net/Downloads/Compendium/UE4_Network_Compendium_by_Cedric_eXi_Neukirchen.pdf) if not (it was written for UE4 but it's the same for UE5).
+I would suggest you to read this [compendium][1] if not (it was written for UE4 but it's the same for UE5).
 
-### Overview
+## Overview
 
-Your dungeons can have lots of actors, thousands of actors.\
-So, to avoid sending all those actors over the network, the dungeon generation has been made deterministic.\
-A seed is generated on server-side, and then sent to all clients, thus they can generate the exact same dungeon.
+The first important thing to know is that only the server will generate the dungeon.\
+The clients will replicate the room instance list from the server and then load/unload accordingly the levels.
 
-However, there are some caveats with that, and the main one is that the actors placed in the room levels are not replicated over the network.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/wiki/BenPyton/ProceduralDungeon/Images/Flowchart_Dark_v3.svg">
+  <img alt="Procedural Generation Flowchart." src="https://raw.githubusercontent.com/wiki/BenPyton/ProceduralDungeon/Images/Flowchart_Light_v3.svg">
+</picture>
 
-Also, all players must be connected and loaded when you call the `Generate` function of the `DungeonGenerator`.
-Otherwise, clients which arrives after won't trigger the `Generate` event.\
-*(this will eventually be fixed in a later release of the plugin)*
+If you look at the state machine above, both server and client start in a state `idle`.
 
-### How to do replication with this plugin
+When the `Generate` function is called on the server, it will trigger a generation process.\
+It will run the `CreateDungeon` function after all previous rooms was unloaded.\
+When this function is ended, it will replicates the new room list to the client.
 
-- **Doors** are the only replicated actors spawned by the dungeon generation.\
+When the client receives the replicated room list from the server, it will also triggers a generation process.\
+However the client does **not** run the `CreateDungeon` function and loads directly the new rooms.\
+Finally it will goes back to the `idle` state like the server.
+
+This system is beneficial because, unlike the previous versions of the plugin, any client joining after the server has generated the dungeon will properly load all rooms.
+Also this ensure that all clients have the same rooms as the server.\
+However, a lot more data will be sent over the network, especially if you have a huge amount of rooms in your dungeon.
+
+## How to do actor replication with this plugin
+
+- **Doors** are properly replicated over the network.\
 However, you still need to do some logic correctly on your project in order to make it work properly.\
 See the multiplayer section of the [[door wiki page|Door]] for details on it.
 
-- Actors directly placed in room levels are not replicated. If you want to have some actors (like enemies, chests, NPCs, etc.) and want them replicated, you need to make some workarounds.\
+### *Since Plugin v3.0*
+
+- **Actors** directly placed in room levels can be replicated like you would do with a normal unreal level.\
+However, you should not forget to replicate properly your actors (see the [compendium][1]).
+
+### *Before Plugin v3.0*
+
+- **Actors** directly placed in room levels are not replicated. If you want to have some actors (like enemies, chests, NPCs, etc.) and want them replicated, you need to make some workarounds.\
 My suggestion: 
 	- In your actor you want replicated, check the `Replicates` field.
 	- Create and place a spawner actor in your room level. This spawner is not replicated.
@@ -28,7 +47,7 @@ My suggestion:
 
 [[Images/MultiSpawner.jpg]]
 
-### Multiplayer in Editor
+## Multiplayer in Editor
 
 You cannot play in multiplayer directly from the editor viewport.\
 You have to change some settings in the editor in order to test your game in multiplayer.
@@ -44,3 +63,5 @@ Here is how to setup the editor.\
 
 - Finally, close the settings window and click again on the arrow next to the Play button and choose `Standalone Game`.\
 [[Images/Standalone.jpg]]
+
+[1]: https://cedric-neukirchen.net/Downloads/Compendium/UE4_Network_Compendium_by_Cedric_eXi_Neukirchen.pdf

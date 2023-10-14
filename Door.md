@@ -8,6 +8,8 @@ If you want to place walls instead of doors when the rooms are not connected, yo
 
 You can lock or unlock a door to prevent players from opening the door if you want. You just need to call the `Lock` function for that.
 
+If you want to see the correct size depending on the [[door type|Door Types]] in the blueprint viewport of the actor, you have to set the `Type` variable of the door.
+
 ### Trigger Doors
 
 The `TriggerDoor` class is a `Door` which will open or close depending of actors being inside its trigger box.
