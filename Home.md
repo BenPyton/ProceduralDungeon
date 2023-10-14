@@ -44,7 +44,7 @@ Here is the flowchart when we call `Generate` on a dungeon generator:
 First, read the [[Installation]] page to install the plugin.\
 Then, read and follow the instructions in the [[Getting Started]] page.
 
-You can get the [example project in the release page](https://github.com/BenPyton/ProceduralDungeon/releases/tag/v2.0.1) if you want a minimal working project.
+You can get an [example project here](https://github.com/BenPyton/DungeonExample) if you want a minimal working project.
 
 ## Tips
 The generation take a certain time (the generation itself is done on one frame, but the instantiation and loading of each room take some times proportionally to the number and complexity of the rooms).<br/>
