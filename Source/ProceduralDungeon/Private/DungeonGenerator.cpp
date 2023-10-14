@@ -161,12 +161,16 @@ void ADungeonGenerator::CreateDungeon()
 		TQueueOrStack<URoom*> roomStack(listMode);
 		roomStack.Push(root);
 		URoom* currentRoom = nullptr;
-		URoom* newRoom = nullptr;
-		while (ContinueToAddRoom() && !roomStack.IsEmpty())
+		TArray<URoom*> newRooms;
+		while (!roomStack.IsEmpty())
 		{
 			currentRoom = roomStack.Pop();
 			check(IsValid(currentRoom)); // currentRoom should always be valid
-			for (URoom* room : AddNewRooms(*currentRoom, Graph->Rooms))
+
+			if (!AddNewRooms(*currentRoom, newRooms, Graph->Rooms))
+				break;
+
+			for (URoom* room : newRooms)
 			{
 				roomStack.Push(room);
 			}
@@ -239,14 +243,17 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 	}
 }
 
-TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& InOutRoomList)
+bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRooms, TArray<URoom*>& InOutRoomList)
 {
 	check(HasAuthority());
 
-	TArray<URoom*> newRooms;
 	int nbDoor = ParentRoom.GetRoomData()->GetNbDoor();
-	URoom* newRoom = nullptr;
-	for (int i = 0; i < nbDoor; ++i)
+	if (nbDoor <= 0)
+		LogError(FString::Printf(TEXT("The room data '%s' has no door! Nothing could be generated with it!"), *GetNameSafe(ParentRoom.GetRoomData())));
+
+	AddedRooms.Reset();
+	bool shouldContinue = false;
+	for (int i = 0; shouldContinue = ContinueToAddRoom(), i < nbDoor && shouldContinue; ++i)
 	{
 		if (ParentRoom.IsConnected(i))
 			continue;
@@ -259,6 +266,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>&
 		const EDoorDirection newRoomDoorDir = ~doorDef.Direction;
 
 		int nbTries = MaxRoomTry;
+		URoom* newRoom = nullptr;
 		// Try to place a new room
 		do
 		{
@@ -303,7 +311,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>&
 					newRoom->TryConnectToExistingDoors(InOutRoomList);
 				}
 				InOutRoomList.Add(newRoom);
-				newRooms.Add(newRoom);
+				AddedRooms.Add(newRoom);
 				OnRoomAdded(newRoom->GetRoomData());
 			}
 			else
@@ -313,7 +321,7 @@ TArray<URoom*> ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>&
 		} while (nbTries > 0 && newRoom == nullptr);
 	}
 
-	return newRooms;
+	return shouldContinue;
 }
 
 void ADungeonGenerator::LoadAllRooms()

@@ -203,8 +203,9 @@ private:
 	void CreateDungeon();
 
 	// Adds some new rooms linked to ParentRoom into Rooms list output
-	// Returns an array with only new rooms
-	TArray<URoom*> AddNewRooms(URoom& ParentRoom, TArray<URoom*>& Rooms);
+	// AddedRooms contains only the new rooms added to Rooms list
+	// Returns true if the dungeon should keep adding new rooms
+	bool AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRooms, TArray<URoom*>& Rooms);
 
 	// Instantiate a room in the scene
 	void InstantiateRoom(URoom* Room);
