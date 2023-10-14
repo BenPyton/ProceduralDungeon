@@ -28,6 +28,10 @@
 #include "UObject/NoExportTypes.h"
 #include "ReplicableObject.generated.h"
 
+class UActorChannel;
+class FOutBunch;
+struct FReplicationFlags;
+
 UCLASS()
 class PROCEDURALDUNGEON_API UReplicableObject : public UObject
 {

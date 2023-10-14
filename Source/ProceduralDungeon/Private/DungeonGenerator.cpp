@@ -610,7 +610,7 @@ void ADungeonGenerator::OnRoomAdded_Implementation(const URoomData* NewRoom)
 
 URoomData* ADungeonGenerator::GetRandomRoomData(TArray<URoomData*> RoomDataArray)
 {
-	if (RoomDataArray.IsEmpty())
+	if (RoomDataArray.Num() <= 0)
 		return nullptr;
 
 	int n = Random.RandRange(0, RoomDataArray.Num() - 1);

@@ -30,6 +30,7 @@
 #include "ClassViewerFilter.h"
 #include "Kismet2/SClassPickerDialog.h"
 #include "ProceduralDungeonEditorSettings.h"
+#include "Runtime/Launch/Resources/Version.h" // for version preprocessors
 
 #define LOCTEXT_NAMESPACE "RoomDataFactory"
 
@@ -112,14 +113,18 @@ bool URoomDataFactory::ConfigureProperties()
 	// Load the classviewer module to display a class picker
 	FClassViewerModule& ClassViewerModule = FModuleManager::LoadModuleChecked<FClassViewerModule>("ClassViewer");
 
+	// The class viewer filter to show only RoomData class and its child classes
+	TSharedPtr<FRoomDataClassFilter> Filter = MakeShareable(new FRoomDataClassFilter);
+
 	// Fill in options
 	FClassViewerInitializationOptions Options;
 	Options.Mode = EClassViewerMode::ClassPicker;
-
-
-	TSharedPtr<FRoomDataClassFilter> Filter = MakeShareable(new FRoomDataClassFilter);
-	Options.ClassFilter = Filter;
 	Options.InitiallySelectedClass = DefaultClass;
+#if ENGINE_MAJOR_VERSION < 5
+	Options.ClassFilter = Filter;
+#else
+	Options.ClassFilters.Add(Filter.ToSharedRef());
+#endif
 
 	const FText TitleText = LOCTEXT("CreateRoomDataOptions", "Pick Room Data Class");
 	UClass* ChosenClass = nullptr;
