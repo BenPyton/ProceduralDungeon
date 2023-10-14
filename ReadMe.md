@@ -48,7 +48,7 @@ You can find an example project [here](https://github.com/BenPyton/DungeonExampl
 - Defining different door types, allowing more complex dungeons.
 - Rooms and doors can be locked/unlocked. 
 - Optional occlusion culling, allowing only relevant rooms rendered (and thus better performances).
-- A new editor mode to ease the use of the plugin.
+- A new editor mode to ease the creation and edition of the rooms.
 - Custom data in rooms, allowing gameplay specific code in room instances.
 - Working well with navmeshes and multiplayers.
 
@@ -127,11 +127,10 @@ You can also disable the occlusion culling from the [plugin's settings](https://
 <summary><b>Is there a seed?</b></summary>
 
 Yes, there is a seed for the dungeon generation.\
-This is what is sent from server to clients in multiplayer. The clients also generate the dungeon on their side from the same seed. So, the actors and meshes inside the room levels are not linked over the network and then not replicated in multiplayer. So this is why I suggest you the spawner and ID system above.\
 I made a parameter in the `DungeonGenerator` actor to have different types of seed:
-- You can have a fixed seed you can set in the actor which will be always used (useful for testing and debugging purpose).
+- You can have a fixed seed you can set in the actor which will be always used (useful for testing and debugging purpose, or to set manually the seed from the game).
 - You can have an incrementing seed, using the fixed seed for the first generation, then adding a value to it at each generation (useful for demonstration purpose).
-- You can have a random seed generated for each generation (for released game mostly).
+- You can have a random seed generated for each generation (for released game mostly, or to test quickly a lot of dungeon generations).
 
 </details>
 
