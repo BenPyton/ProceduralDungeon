@@ -27,7 +27,14 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "ProceduralDungeonTypes.h"
+#include "Runtime/Launch/Resources/Version.h"
 #include "RoomData.generated.h"
+
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 3)
+#define USE_LEGACY_DATA_VALIDATION 1
+#else
+#define USE_LEGACY_DATA_VALIDATION 0
+#endif
 
 class URoom;
 class UDungeonGraph;
@@ -82,7 +89,12 @@ public:
 
 #if WITH_EDITOR
 	bool IsDoorValid(int DoorIndex) const;
+
+#if USE_LEGACY_DATA_VALIDATION
 	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;
+#else
+	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
+#endif
 
 	FRoomDataEditorEvent OnPropertiesChanged;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
