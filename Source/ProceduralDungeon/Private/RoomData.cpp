@@ -28,6 +28,10 @@
 #include "ProceduralDungeonUtils.h"
 #include "Math/GenericOctree.h" // FBoxCenterAndExtent
 
+#if !USE_LEGACY_DATA_VALIDATION
+#include "Misc/DataValidation.h"
+#endif
+
 URoomData::URoomData()
 	: Super()
 {
@@ -99,16 +103,26 @@ bool URoomData::IsDoorValid(int DoorIndex) const
 	}
 }
 
+#if USE_LEGACY_DATA_VALIDATION
+#define VALIDATION_LOG_ERROR(Msg) ValidationErrors.Add(Msg)
 EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
+#else
+#define VALIDATION_LOG_ERROR(Msg) Context.AddError(Msg)
+EDataValidationResult URoomData::IsDataValid(FDataValidationContext& Context) const
+#endif
 {
+#if USE_LEGACY_DATA_VALIDATION
 	EDataValidationResult Result = Super::IsDataValid(ValidationErrors);
+#else
+	EDataValidationResult Result = Super::IsDataValid(Context);
+#endif
 	if (!IsAsset() || Result == EDataValidationResult::Invalid)
 		return Result;
 
 	// Check the Level validity
 	if (Level.IsNull())
 	{
-		ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has no level set. You have to set up a room level."), *GetName())));
+		VALIDATION_LOG_ERROR(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has no level set. You have to set up a room level."), *GetName())));
 		Result = EDataValidationResult::Invalid;
 	}
 
@@ -117,13 +131,13 @@ EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 		|| FirstPoint.Y == SecondPoint.Y
 		|| FirstPoint.Z == SecondPoint.Z)
 	{
-		ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has a size of 0 on at least one axis."), *GetName())));
+		VALIDATION_LOG_ERROR(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has a size of 0 on at least one axis."), *GetName())));
 		Result = EDataValidationResult::Invalid;
 	}
 
 	if (Doors.Num() <= 0)
 	{
-		ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" should have at least one door."), *GetName())));
+		VALIDATION_LOG_ERROR(FText::FromString(FString::Printf(TEXT("Room data \"%s\" should have at least one door."), *GetName())));
 		Result = EDataValidationResult::Invalid;
 	}
 	else
@@ -133,7 +147,7 @@ EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 			// Check if all doors are valid
 			if (!IsDoorValid(i))
 			{
-				ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has invalid door: %s."), *GetName(), *Doors[i].ToString())));
+				VALIDATION_LOG_ERROR(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has invalid door: %s."), *GetName(), *Doors[i].ToString())));
 				Result = EDataValidationResult::Invalid;
 			}
 
@@ -142,7 +156,7 @@ EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 			{
 				if (Doors[i] == Doors[k])
 				{
-					ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has duplicated doors: %s."), *GetName(), *Doors[i].ToString())));
+					VALIDATION_LOG_ERROR(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has duplicated doors: %s."), *GetName(), *Doors[i].ToString())));
 					Result = EDataValidationResult::Invalid;
 				}
 			}
@@ -152,12 +166,13 @@ EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 	// Check if CustomData Set does not have null value
 	if (CustomData.Contains(nullptr))
 	{
-		ValidationErrors.Add(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has value None in CustomData."), *GetName())));
+		VALIDATION_LOG_ERROR(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has value None in CustomData."), *GetName())));
 		Result = EDataValidationResult::Invalid;
 	}
 
 	return Result;
 }
+#undef VALIDATION_LOG_ERROR
 
 void URoomData::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
