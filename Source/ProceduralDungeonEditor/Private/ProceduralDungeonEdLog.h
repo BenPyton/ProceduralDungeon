@@ -36,7 +36,3 @@ DECLARE_LOG_CATEGORY_EXTERN(LogProceduralDungeonEditor, Verbose, All);
 
 #define DungeonEd_LogError(Format, ...)\
 	UE_LOG(LogProceduralDungeonEditor, Error, TEXT(Format), ##__VA_ARGS__)
-
-void LogInfoEd(FString Message);
-void LogWarningEd(FString Message);
-void LogErrorEd(FString Message);

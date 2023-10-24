@@ -25,18 +25,3 @@
 #include "ProceduralDungeonEdLog.h"
 
 DEFINE_LOG_CATEGORY(LogProceduralDungeonEditor);
-
-void LogInfoEd(FString Message)
-{
-	UE_LOG(LogProceduralDungeonEditor, Log, TEXT("%s"), *Message);
-}
-
-void LogWarningEd(FString Message)
-{
-	UE_LOG(LogProceduralDungeonEditor, Warning, TEXT("%s"), *Message);
-}
-
-void LogErrorEd(FString Message)
-{
-	UE_LOG(LogProceduralDungeonEditor, Error, TEXT("%s"), *Message);
-}
