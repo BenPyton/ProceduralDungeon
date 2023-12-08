@@ -1,3 +1,5 @@
+[![Discord](https://img.shields.io/discord/1182461404092055574?logo=discord&logoColor=white&label=Discord&color=%235865F2)](https://discord.gg/YE2dPda2CC)
+
 [[Wiki Home Page|Home]]
 
 ### Basics
@@ -22,7 +24,8 @@
 [[Multiplayer]]\
 [[Navigation Mesh]]
 
-### Sponsor Me
+### Support Me
+If you like my plugin, please consider giving a tip:
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M3NW2JV)\
 [![Donate using Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/BenPyton/donate)

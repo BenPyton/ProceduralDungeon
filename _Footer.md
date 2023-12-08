@@ -1,0 +1,1 @@
+You can join the [Discord server](https://discord.gg/YE2dPda2CC) dedicated to this plugin if you want to share, help or ask questions about it.
