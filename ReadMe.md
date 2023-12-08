@@ -1,11 +1,11 @@
 # Procedural Dungeon Plugin
 
 [![Plugin version number](https://img.shields.io/github/v/release/BenPyton/ProceduralDungeon?label=Version)](https://github.com/BenPyton/ProceduralDungeon/releases/latest)
-[![Unreal Engine Supported Versions](https://img.shields.io/badge/Unreal_Engine-4.27_%7C_5.0_%7C_5.1_%7C_5.2_%7C_5.3-9455CE?logo=unrealengine)
-](https://github.com/BenPyton/ProceduralDungeon/releases)
+[![Unreal Engine Supported Versions](https://img.shields.io/badge/Unreal_Engine-4.27_%7C_5.0_%7C_5.1_%7C_5.2_%7C_5.3-9455CE?logo=unrealengine)](https://github.com/BenPyton/ProceduralDungeon/releases)
 [![License](https://img.shields.io/github/license/BenPyton/ProceduralDungeon?label=License&color=blue)](LICENSE)
 ![Download count](https://img.shields.io/github/downloads/BenPyton/ProceduralDungeon/total?label=Downloads)
 [![Actively Maintained](https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-green.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
+[![Discord](https://img.shields.io/discord/1182461404092055574?logo=discord&logoColor=white&label=Discord&color=%235865F2)][1]
 
 ## Overview
 
@@ -57,6 +57,8 @@ You can find an example project [here](https://github.com/BenPyton/DungeonExampl
 Go to the [Getting Started](https://github.com/BenPyton/ProceduralDungeon/wiki/Getting-Started) page to begin to work with the plugin.
 
 If you want more details about how it works internally, you can read the [wiki](https://github.com/BenPyton/ProceduralDungeon/wiki/Home).
+
+You can also join the [Discord server][1] dedicated to this plugin if you want to ask question or get help from the community.
 
 ## Installation
 
@@ -164,3 +166,6 @@ The only condition is to add the copyright notice and a copy of the license with
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M3NW2JV)
 [![Donate using Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/BenPyton/donate)
 [![Donate using Paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/donate/?hosted_button_id=9VWP66JU5DZXN)
+
+
+[1]: https://discord.gg/YE2dPda2CC
