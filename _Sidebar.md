@@ -9,6 +9,7 @@
 [[Plugin Settings]]
 
 ### Dungeon's Rules Programming
+[[Dungeon Generator]]\
 [[Choose First Room Data]]\
 [[Choose Next Room Data]]\
 [[Continue To Add Room]]\
