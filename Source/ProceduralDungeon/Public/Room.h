@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -104,6 +104,10 @@ public:
 
 	bool GetCustomData(const TSubclassOf<URoomCustomData>& DataType, URoomCustomData*& Data) const;
 	bool HasCustomData(const TSubclassOf<URoomCustomData>& DataType) const;
+
+	// Returns the RandomStream from the Dungeon Generator
+	UFUNCTION(BlueprintCallable, Category = "Room")
+	FRandomStream GetRandomStream() const;
 
 private:
 	UPROPERTY(Replicated)
