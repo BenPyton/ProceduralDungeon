@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -460,6 +460,13 @@ bool URoom::HasCustomData(const TSubclassOf<URoomCustomData>& DataType) const
 const FCustomDataPair* URoom::GetDataPair(const TSubclassOf<URoomCustomData>& DataType) const
 {
 	return CustomData.FindByPredicate([&DataType](const FCustomDataPair& Pair) { return Pair.DataClass == DataType; });
+}
+
+FRandomStream URoom::GetRandomStream() const
+{
+	if (!GeneratorOwner.IsValid())
+		return FRandomStream();
+	return GeneratorOwner->GetRandomStream();
 }
 
 // AABB Overlapping
