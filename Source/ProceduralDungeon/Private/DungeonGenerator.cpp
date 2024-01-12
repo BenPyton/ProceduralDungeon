@@ -29,7 +29,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Pawn.h"
 #include "NavigationSystem.h"
-#include "ProceduralLevelStreaming.h"
 #include "RoomData.h"
 #include "Room.h"
 #include "Door.h"
@@ -347,7 +346,7 @@ void ADungeonGenerator::UnloadAllRooms()
 	for (URoom* Room : Graph->GetAllRooms())
 	{
 		check(Room);
-		Room->Destroy(GetWorld());
+		Room->Destroy();
 	}
 }
 

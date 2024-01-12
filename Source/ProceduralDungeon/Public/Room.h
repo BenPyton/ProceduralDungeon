@@ -25,7 +25,6 @@
 #pragma once
 
 #include "ReplicableObject.h"
-#include "ProceduralLevelStreaming.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralDungeonTypes.h"
 #include "Math/GenericOctree.h" // for FBoxCenterAndExtent (required for UE5.0)
@@ -36,6 +35,7 @@ class ARoomLevel;
 class URoomData;
 class ADoor;
 class URoomCustomData;
+class ULevelStreamingDynamic;
 
 USTRUCT()
 struct FRoomConnection
@@ -67,7 +67,7 @@ class PROCEDURALDUNGEON_API URoom : public UReplicableObject
 public:
 	// TODO: Make them private
 	UPROPERTY()
-	UProceduralLevelStreaming* Instance {nullptr};
+	ULevelStreamingDynamic* Instance {nullptr};
 	UPROPERTY(Replicated)
 	FIntVector Position {0};
 	UPROPERTY(Replicated)
@@ -152,7 +152,7 @@ public:
 	int GetFirstEmptyConnection() const;
 
 	void Instantiate(UWorld* World);
-	void Destroy(UWorld* World);
+	void Destroy();
 	ARoomLevel* GetLevelScript() const;
 	bool IsInstanceLoaded() const;
 	bool IsInstanceUnloaded() const;
@@ -189,4 +189,9 @@ public:
 
 	static void Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB);
 	static URoom* GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList);
+
+private:
+	// Utility functions to load/unload level instances
+	static ULevelStreamingDynamic* LoadInstance(UObject* WorldContextObject, const TSoftObjectPtr<UWorld>& Level, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation);
+	static void UnloadInstance(ULevelStreamingDynamic* Instance);
 };
