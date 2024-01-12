@@ -32,6 +32,9 @@
 #include "ProceduralDungeonLog.h"
 #include "DungeonGenerator.h"
 #include "RoomCustomData.h"
+#include "Engine/Engine.h"
+#include "Engine/LevelStreamingDynamic.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 URoom::URoom()
 	: Super()
@@ -125,20 +128,29 @@ void URoom::Instantiate(UWorld* World)
 			return;
 		}
 
+		const TSoftObjectPtr<UWorld>& Level = RoomData->Level;
+		if (Level.IsNull())
+		{
+			LogError("Failed to instantiate the room: Level asset is invalid in room data.");
+			return;
+		}
+
 		FVector offset(0, 0, 0);
 		FQuat rotation = FQuat::Identity;
-		FString nameSuffix = FString::FromInt(Id);
+		TStringBuilder<256> InstanceName;
+
+		InstanceName.Append(Level.GetAssetName());
 		if (GeneratorOwner.IsValid())
 		{
 			offset = GeneratorOwner->GetDungeonOffset();
 			rotation = GeneratorOwner->GetDungeonRotation();
-
-			nameSuffix = FString::Printf(TEXT("%d_%d_%s"), GeneratorOwner->GetUniqueId(), GeneratorOwner->GetGeneration(), *nameSuffix);
+			InstanceName.Appendf(TEXT("_%d_%d"), GeneratorOwner->GetUniqueId(), GeneratorOwner->GetGeneration());
 		}
+		InstanceName.Appendf(TEXT("_%d"), Id);
 
 		FVector FinalLocation = rotation.RotateVector(Dungeon::RoomUnit() * FVector(Position)) + offset;
 		FQuat FinalRotation = rotation * ToQuaternion(Direction);
-		Instance = UProceduralLevelStreaming::Load(World, RoomData, nameSuffix, FinalLocation, FinalRotation.Rotator());
+		Instance = LoadInstance(World, Level, InstanceName.ToString(), FinalLocation, FinalRotation.Rotator());
 
 		if (!IsValid(Instance))
 		{
@@ -155,20 +167,12 @@ void URoom::Instantiate(UWorld* World)
 	}
 }
 
-void URoom::Destroy(UWorld* World)
+void URoom::Destroy()
 {
 	if (IsValid(Instance))
 	{
 		UE_LOG(LogProceduralDungeon, Log, TEXT("[%s][R:%s][I:%s] Unload room Instance: %s"), *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName());
-
-		ARoomLevel* Script = GetLevelScript();
-		if (IsValid(Script))
-		{
-			Script->Room = nullptr;
-			Script->Destroy();
-		}
-		check(World);
-		UProceduralLevelStreaming::Unload(World, Instance);
+		UnloadInstance(Instance);
 	}
 	else
 	{
@@ -215,12 +219,26 @@ ARoomLevel* URoom::GetLevelScript() const
 
 bool URoom::IsInstanceLoaded() const
 {
-	return IsValid(Instance) ? Instance->IsLevelLoaded() : false;
+	if (!IsValid(Instance))
+		return false;
+
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 2)
+	return Instance->GetCurrentState() > ULevelStreaming::ECurrentState::Loading;
+#else
+	return Instance->GetLevelStreamingState() > ELevelStreamingState::Loading;
+#endif
 }
 
 bool URoom::IsInstanceUnloaded() const
 {
-	return IsValid(Instance) ? Instance->IsLevelUnloaded() : true;
+	if (!IsValid(Instance))
+		return true;
+
+#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 2)
+	return Instance->GetCurrentState() <= ULevelStreaming::ECurrentState::Removed;
+#else
+	return Instance->GetLevelStreamingState() <= ELevelStreamingState::Removed;
+#endif
 }
 
 bool URoom::IsInstanceInitialized() const
@@ -506,4 +524,39 @@ URoom* URoom::GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList)
 		}
 	}
 	return nullptr;
+}
+
+ULevelStreamingDynamic* URoom::LoadInstance(UObject* WorldContextObject, const TSoftObjectPtr<UWorld>& Level, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation)
+{
+	UE_LOG(LogProceduralDungeon, Log, TEXT("[W:%s] Loading LevelStreamingDynamic"), *GetNameSafe(WorldContextObject));
+
+	if (Level.IsNull())
+	{
+		LogError(TEXT("Failed to load level instance: Level is invalid."));
+		return nullptr;
+	}
+
+	bool success = false;
+	ULevelStreamingDynamic* Instance = ULevelStreamingDynamic::LoadLevelInstanceBySoftObjectPtr(WorldContextObject, Level, Location, Rotation, success, InstanceNameSuffix);
+	Instance->bDisableDistanceStreaming = true; // Make sure the level will not be streamed out by distance. We have our own streaming logic.
+
+	if (!success)
+	{
+		LogError(TEXT("Failed to load level instance: Unknown reason"));
+		return nullptr;
+	}
+
+	return Instance;
+}
+
+void URoom::UnloadInstance(ULevelStreamingDynamic* Instance)
+{
+	UE_LOG(LogProceduralDungeon, Log, TEXT("[I:%s] Unloading LevelStreamingDynamic"), *GetNameSafe(Instance));
+	if (nullptr == Instance)
+	{
+		UE_LOG(LogProceduralDungeon, Error, TEXT("Failed to unload LevelStreamingDynamic: Instance is null"));
+		return;
+	}
+
+	Instance->SetIsRequestingUnloadAndRemoval(true);
 }

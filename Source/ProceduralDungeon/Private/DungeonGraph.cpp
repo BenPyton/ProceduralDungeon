@@ -29,8 +29,8 @@
 #include "DungeonGenerator.h"
 #include "Room.h"
 #include "RoomData.h"
-#include "ProceduralLevelStreaming.h"
 #include "Engine/Level.h"
+#include "Engine/LevelStreamingDynamic.h"
 
 UDungeonGraph::UDungeonGraph()
 	: Super()
