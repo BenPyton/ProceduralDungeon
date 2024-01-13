@@ -398,7 +398,7 @@ void UDungeonGraph::SynchronizeRooms()
 		CopyRooms(ReplicatedRooms, Rooms);
 	else
 		CopyRooms(Rooms, ReplicatedRooms);
-	bIsDirty = false;
+	CurrentState = EDungeonGraphState::None;
 }
 
 bool UDungeonGraph::AreRoomsLoaded() const
@@ -431,7 +431,19 @@ bool UDungeonGraph::AreRoomsInitialized() const
 	return true;
 }
 
+void UDungeonGraph::RequestGeneration()
+{
+	check(GetOwner()->HasAuthority());
+	CurrentState = EDungeonGraphState::RequestGeneration;
+}
+
+void UDungeonGraph::RequestUnload()
+{
+	check(GetOwner()->HasAuthority());
+	CurrentState = EDungeonGraphState::RoomListChanged;
+}
+
 void UDungeonGraph::OnRep_Rooms()
 {
-	bIsDirty = true;
+	CurrentState = EDungeonGraphState::RoomListChanged;
 }

@@ -105,7 +105,17 @@ void ADungeonGenerator::Generate()
 	// Do it only on server, do nothing on clients
 	if (HasAuthority())
 	{
-		bGenerate = true;
+		Graph->RequestGeneration();
+		// TODO: wake up here for dormancy
+	}
+}
+
+void ADungeonGenerator::Unload()
+{
+	// Do it only on server, do nothing on clients
+	if (HasAuthority())
+	{
+		Graph->RequestUnload();
 		// TODO: wake up here for dormancy
 	}
 }
@@ -452,7 +462,6 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 	case EGenerationState::Generation:
 		LogInfo("======= Begin Dungeon Generation =======");
 		++Generation;
-		bGenerate = false;
 		UpdateSeed();
 		CreateDungeon();
 	case EGenerationState::Initialization:
@@ -481,12 +490,12 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 	{
 	case EGenerationState::Idle:
 		UpdateRoomVisibility();
-		if (Graph->IsDirty() || bGenerate)
+		if (Graph->IsDirty())
 			SetState(EGenerationState::Unload);
 		break;
 	case EGenerationState::Unload:
 		if (Graph->AreRoomsUnloaded())
-			SetState((HasAuthority() && bGenerate) ? EGenerationState::Generation : EGenerationState::Initialization);
+			SetState((HasAuthority() && Graph->IsRequestingGeneration()) ? EGenerationState::Generation : EGenerationState::Initialization);
 		break;
 	case EGenerationState::Generation:
 		SetState(EGenerationState::Initialization);

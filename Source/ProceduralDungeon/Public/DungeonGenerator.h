@@ -71,6 +71,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Dungeon Generator")
 	void Generate();
 
+	// Unload the current dungeon
+	// Do nothing when called on clients
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Dungeon Generator")
+	void Unload();
+
 	// ===== Methods that should be overriden in blueprint =====
 
 	// Return the RoomData you want as root of the dungeon generation
@@ -281,10 +286,7 @@ private:
 	UPROPERTY(Replicated, Transient)
 	uint64 Generation {0};
 
-	// Set to true on server to start generating a new dungeon
-	bool bGenerate {false};
-
-	// Set to avoid adding increment o the seed after we've set manually the seed
+	// Set to avoid adding increment the seed after we've set manually the seed
 	bool bShouldIncrement {false};
 
 	// Occlusion culling system
