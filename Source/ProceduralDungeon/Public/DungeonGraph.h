@@ -31,6 +31,15 @@ class URoom;
 class URoomData;
 class ADungeonGenerator;
 
+UENUM()
+enum class EDungeonGraphState : uint8
+{
+	None,
+	RoomListChanged,
+	RequestGeneration,
+	NbState
+};
+
 UCLASS(BlueprintType)
 class PROCEDURALDUNGEON_API UDungeonGraph : public UReplicableObject
 {
@@ -44,10 +53,9 @@ public:
 	void InitRooms();
 	void Clear();
 
-	bool IsDirty() const { return bIsDirty; }
-	void SetDirty() { bIsDirty = true; }
-
 	bool HasRooms() const { return Rooms.Num() > 0; }
+	bool IsDirty() const { return CurrentState != EDungeonGraphState::None; }
+	bool IsRequestingGeneration() const { return CurrentState == EDungeonGraphState::RequestGeneration; }
 
 	// Returns all rooms
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
@@ -147,6 +155,9 @@ protected:
 	bool AreRoomsUnloaded() const;
 	bool AreRoomsInitialized() const;
 
+	void RequestGeneration();
+	void RequestUnload();
+
 private:
 	UPROPERTY(Transient)
 	TArray<URoom*> Rooms;
@@ -159,8 +170,6 @@ private:
 	UFUNCTION()
 	void OnRep_Rooms();
 
-	// set to true when replicated room list has changed
-	bool bIsDirty {false};
-
+	EDungeonGraphState CurrentState {EDungeonGraphState::None};
 	TWeakObjectPtr<ADungeonGenerator> Generator {nullptr};
 };
