@@ -34,7 +34,7 @@
 #include "FileHelpers.h"
 #include "Engine/LevelScriptBlueprint.h"
 #include "Kismet2/KismetEditorUtilities.h"
-#include "Runtime/Launch/Resources/Version.h" // for version preprocessors
+#include "Misc/EngineVersionComparison.h"
 #include "ProceduralDungeonEdLog.h"
 #include "ProceduralDungeonEditor.h"
 #include "ProceduralDungeonEdMode.h"
@@ -44,7 +44,7 @@
 #include "RoomLevel.h"
 #include "RoomData.h"
 
-#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 1)
+#if UE_VERSION_OLDER_THAN(5, 1, 0)
 using StyleProvider = FEditorStyle;
 #else
 using StyleProvider = FAppStyle;

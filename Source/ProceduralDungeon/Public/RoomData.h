@@ -27,10 +27,10 @@
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
 #include "ProceduralDungeonTypes.h"
-#include "Runtime/Launch/Resources/Version.h"
+#include "Misc/EngineVersionComparison.h"
 #include "RoomData.generated.h"
 
-#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 3)
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
 #define USE_LEGACY_DATA_VALIDATION 1
 #else
 #define USE_LEGACY_DATA_VALIDATION 0
