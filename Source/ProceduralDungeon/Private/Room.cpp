@@ -34,7 +34,7 @@
 #include "RoomCustomData.h"
 #include "Engine/Engine.h"
 #include "Engine/LevelStreamingDynamic.h"
-#include "Runtime/Launch/Resources/Version.h"
+#include "Misc/EngineVersionComparison.h"
 
 URoom::URoom()
 	: Super()
@@ -222,7 +222,7 @@ bool URoom::IsInstanceLoaded() const
 	if (!IsValid(Instance))
 		return false;
 
-#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 2)
+#if UE_VERSION_OLDER_THAN(5, 2, 0)
 	return Instance->GetCurrentState() > ULevelStreaming::ECurrentState::Loading;
 #else
 	return Instance->GetLevelStreamingState() > ELevelStreamingState::Loading;
@@ -234,7 +234,7 @@ bool URoom::IsInstanceUnloaded() const
 	if (!IsValid(Instance))
 		return true;
 
-#if ENGINE_MAJOR_VERSION < 5 || (ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION < 2)
+#if UE_VERSION_OLDER_THAN(5, 2, 0)
 	return Instance->GetCurrentState() <= ULevelStreaming::ECurrentState::Removed;
 #else
 	return Instance->GetLevelStreamingState() <= ELevelStreamingState::Removed;

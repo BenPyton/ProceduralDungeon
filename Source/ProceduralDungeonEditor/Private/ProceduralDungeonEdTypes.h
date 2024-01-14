@@ -24,13 +24,15 @@
 
 #pragma once
 
-#if ENGINE_MAJOR_VERSION <= 4
+#include "ProceduralDungeonTypes.h"
+#include "Misc/EngineVersionComparison.h"
+
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
 #define COMPATIBILITY 1
 #else
 #define COMPATIBILITY 0
 #endif
 
-#include "ProceduralDungeonTypes.h"
 
 #if !COMPATIBILITY
 #include "UnrealWidgetFwd.h"

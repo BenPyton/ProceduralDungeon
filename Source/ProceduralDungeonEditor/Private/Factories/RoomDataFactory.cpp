@@ -30,7 +30,7 @@
 #include "ClassViewerFilter.h"
 #include "Kismet2/SClassPickerDialog.h"
 #include "ProceduralDungeonEditorSettings.h"
-#include "Runtime/Launch/Resources/Version.h" // for version preprocessors
+#include "Misc/EngineVersionComparison.h"
 
 #define LOCTEXT_NAMESPACE "RoomDataFactory"
 
@@ -120,7 +120,7 @@ bool URoomDataFactory::ConfigureProperties()
 	FClassViewerInitializationOptions Options;
 	Options.Mode = EClassViewerMode::ClassPicker;
 	Options.InitiallySelectedClass = DefaultClass;
-#if ENGINE_MAJOR_VERSION < 5
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
 	Options.ClassFilter = Filter;
 #else
 	Options.ClassFilters.Add(Filter.ToSharedRef());

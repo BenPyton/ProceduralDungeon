@@ -25,9 +25,9 @@
 #pragma once
 
 #include "Math/GenericOctree.h"
-#include "Runtime/Launch/Resources/Version.h"
+#include "Misc/EngineVersionComparison.h"
 
-#if ENGINE_MAJOR_VERSION < 4 || (ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26)
+#if UE_VERSION_OLDER_THAN(4, 26, 0)
 #define USE_LEGACY_OCTREE 1
 #else
 #define USE_LEGACY_OCTREE 0
