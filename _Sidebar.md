@@ -23,7 +23,8 @@
 
 ### Misc
 [[Multiplayer]]\
-[[Navigation Mesh]]
+[[Navigation Mesh]]\
+[[Geometry Brushes]]
 
 ### Support Me
 If you like my plugin, please consider giving a tip:
