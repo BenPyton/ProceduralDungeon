@@ -187,6 +187,11 @@ FVector FDoorDef::GetDoorSize() const
 	return UDoorType::GetSize(Type);
 }
 
+FString FDoorDef::GetTypeName() const
+{
+	return IsValid(Type) ? Type->GetName() : TEXT("Default");
+}
+
 FString FDoorDef::ToString() const
 {
 	FText DirectionName;

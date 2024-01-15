@@ -280,10 +280,17 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 		do
 		{
 			nbTries--;
-			URoomData* roomDef = ChooseNextRoomData(ParentRoom.GetRoomData(), doorDef);
+			int doorIndex = -1;
+			URoomData* roomDef = ChooseNextRoomData(ParentRoom.GetRoomData(), doorDef, doorIndex);
 			if (!IsValid(roomDef))
 			{
 				LogError("ChooseNextRoomData returned null.");
+				continue;
+			}
+
+			if (doorIndex >= roomDef->Doors.Num())
+			{
+				LogError(FString::Printf(TEXT("ChooseNextRoomData returned door index '%d' which is out of range in the RoomData '%s' door list (max: %d)."), doorIndex, *roomDef->GetName(), roomDef->Doors.Num() - 1));
 				continue;
 			}
 
@@ -297,17 +304,21 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 
 			if (compatibleDoors.Num() <= 0)
 			{
-				LogError("ChooseNextRoomData returned a room with no compatible door.");
+				LogError(FString::Printf(TEXT("ChooseNextRoomData returned room data '%s' with no compatible door (door type: '%s')."), *roomDef->GetName(), *doorDef.GetTypeName()));
+				continue;
+			}
+
+			if (roomDef->RandomDoor || (doorIndex < 0))
+				doorIndex = compatibleDoors[Random.RandRange(0, compatibleDoors.Num() - 1)];
+			else if (!compatibleDoors.Contains(doorIndex))
+			{
+				LogError(FString::Printf(TEXT("ChooseNextRoomData returned door index '%d' (RoomData '%s') which its type '%s' is not compatible with '%s'."), doorIndex, *roomDef->GetName(), *roomDef->Doors[doorIndex].GetTypeName(), *doorDef.GetTypeName()));
 				continue;
 			}
 
 			// Create room from roomdef and set connections with current room
 			newRoom = NewObject<URoom>(this);
 			newRoom->Init(roomDef, this, InOutRoomList.Num());
-
-			int doorIndex = compatibleDoors[(roomDef->RandomDoor && compatibleDoors.Num() > 1) ? Random.RandRange(0, compatibleDoors.Num() - 1) : 0];
-
-			// Place the room at its new position with the correct rotation
 			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomPos, newRoomDoorDir);
 
 			// Test if it fits in the place
@@ -325,6 +336,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 			}
 			else
 			{
+				// The object will be automatically deleted by the GC
 				newRoom = nullptr;
 			}
 		} while (nbTries > 0 && newRoom == nullptr);
@@ -561,7 +573,7 @@ URoomData* ADungeonGenerator::ChooseFirstRoomData_Implementation()
 	return nullptr;
 }
 
-URoomData* ADungeonGenerator::ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const FDoorDef& DoorData)
+URoomData* ADungeonGenerator::ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const FDoorDef& DoorData, int& DoorIndex)
 {
 	LogError("Error: ChooseNextRoomData not implemented");
 	return nullptr;

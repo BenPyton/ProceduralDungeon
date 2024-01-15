@@ -82,9 +82,16 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose First Room"))
 	URoomData* ChooseFirstRoomData();
 
-	// Return the RoomData that will be connected to the Current Room
-	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Next Room"))
-	URoomData* ChooseNextRoomData(const URoomData* CurrentRoom, const FDoorDef& DoorData);
+	/** Return the RoomData that will be connected to the Current Room
+	* @param CurrentRoom The room from wich the generator will connect the next room.
+	* @param DoorData The door of the CurrentRoom on which the next room will be connected (its location in room units, its orientation and its type).
+	* @param DoorIndex The index of the door used on the next room to connect to the CurrentRoom.
+	* Use -1 for a random (compatible) door, or the door index from the RoomData door array (0 is the first door).
+	* WARNING: If the RandomDoor boolean of the RoomData is checked, then it will be considered -1 whatever you set here.
+	* @return The room data asset used to instantiate the new room instance (must not be null)
+	*/
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Next Room", ReturnDisplayName="Room Data", AutoCreateRefTerm = "DoorIndex"))
+	URoomData* ChooseNextRoomData(const URoomData* CurrentRoom, const FDoorDef& DoorData, int& DoorIndex);
 
 	// Return the door which will be spawned between Current Room and Next Room
 	// Use IsDoorOfType function to compare a door class with DoorType.
