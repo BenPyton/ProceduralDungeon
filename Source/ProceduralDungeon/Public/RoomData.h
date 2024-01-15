@@ -56,6 +56,8 @@ public:
 	TSoftObjectPtr<UWorld> Level {nullptr};
 
 public:
+	// This will force a random door to be chosen during the dungeon generation.
+	// DEPRECATED: It will be removed in a future version of the plugin. As a replacement, you should return -1 as DoorIndex in the ChooseNextRoomData of your DungeonGenerator.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Doors")
 	bool RandomDoor {true};
 

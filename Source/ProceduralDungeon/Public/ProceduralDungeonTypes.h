@@ -104,6 +104,7 @@ public:
 	static bool AreCompatible(const FDoorDef& A, const FDoorDef& B);
 
 	FVector GetDoorSize() const;
+	FString GetTypeName() const;
 	FString ToString() const;
 
 	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset = true);
