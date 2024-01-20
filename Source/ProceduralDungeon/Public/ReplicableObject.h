@@ -32,7 +32,7 @@ class UActorChannel;
 class FOutBunch;
 struct FReplicationFlags;
 
-UCLASS()
+UCLASS(NotBlueprintable, NotBlueprintType)
 class PROCEDURALDUNGEON_API UReplicableObject : public UObject
 {
 	GENERATED_BODY()
@@ -54,4 +54,9 @@ protected:
 
 	// Returns "Server" or "Client" based on HasAuthority() result.
 	FString GetAuthorityName() const;
+
+	// Wakes up the owner actor from dormance to indicate that a replicated variable will change.
+	// You have to use it *before* modifying the replicated variables.
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Replication")
+	void WakeUpOwnerActor();
 };

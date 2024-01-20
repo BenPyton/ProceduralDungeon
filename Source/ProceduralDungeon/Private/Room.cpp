@@ -199,6 +199,7 @@ void URoom::OnInstanceLoaded()
 
 void URoom::Lock(bool lock)
 {
+	WakeUpOwnerActor();
 	bIsLocked = lock;
 	LogInfo(FString::Printf(TEXT("[%s] Room '%s' setting IsLocked: %s"), *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False")));
 }
