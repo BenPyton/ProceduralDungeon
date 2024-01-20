@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2022, 2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,10 +53,10 @@ public:
 	FORCEINLINE bool IsOpen() { return bIsOpen; }
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Door")
-	void Open(bool open) { bShouldBeOpen = open; }
+	void Open(bool open);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Door")
-	void Lock(bool lock) { bShouldBeLocked = lock; }
+	void Lock(bool lock);
 
 	const UDoorType* GetDoorType() const { return Type; }
 

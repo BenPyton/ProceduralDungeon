@@ -50,7 +50,10 @@ UWorld* UReplicableObject::GetWorld() const
 
 AActor* UReplicableObject::GetOwner() const
 {
-	return CastChecked<AActor>(GetOuter());
+	UObject* Outer = GetOuter();
+	while (Outer && !Outer->IsA<AActor>())
+		Outer = Outer->GetOuter();
+	return Cast<AActor>(Outer);
 }
 
 FString UReplicableObject::GetAuthorityName() const
@@ -59,4 +62,16 @@ FString UReplicableObject::GetAuthorityName() const
 	if (!OwnerActor)
 		return TEXT("INVALID");
 	return OwnerActor->HasAuthority() ? TEXT("Server") : TEXT("Client");
+}
+
+void UReplicableObject::WakeUpOwnerActor()
+{
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner))
+		return;
+
+	if (!Owner->HasAuthority())
+		return;
+
+	Owner->FlushNetDormancy();
 }

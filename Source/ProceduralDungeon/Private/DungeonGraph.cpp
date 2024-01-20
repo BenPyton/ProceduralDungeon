@@ -394,8 +394,15 @@ void CopyRooms(TArray<URoom*>& To, TArray<URoom*>& From)
 
 void UDungeonGraph::SynchronizeRooms()
 {
-	if (GetOwner()->HasAuthority())
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner))
+		return;
+
+	if (Owner->HasAuthority())
+	{
+		Owner->FlushNetDormancy();
 		CopyRooms(ReplicatedRooms, Rooms);
+	}
 	else
 		CopyRooms(Rooms, ReplicatedRooms);
 	CurrentState = EDungeonGraphState::None;

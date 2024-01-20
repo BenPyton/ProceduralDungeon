@@ -58,7 +58,8 @@ ADungeonGenerator::ADungeonGenerator()
 	bAlwaysRelevant = true;
 	bReplicates = true;
 	NetPriority = 10.0f;
-	NetUpdateFrequency = 2;
+	NetUpdateFrequency = 20;
+	NetDormancy = ENetDormancy::DORM_DormantAll;
 
 	Graph = CreateDefaultSubobject<UDungeonGraph>(TEXT("Dungeon Rooms"));
 	Octree = MakeUnique<FDungeonOctree>(FVector::ZeroVector, HALF_WORLD_MAX);
@@ -473,6 +474,7 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 		break;
 	case EGenerationState::Generation:
 		LogInfo("======= Begin Dungeon Generation =======");
+		FlushNetDormancy();
 		++Generation;
 		UpdateSeed();
 		CreateDungeon();

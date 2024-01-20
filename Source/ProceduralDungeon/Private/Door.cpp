@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2022 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,7 @@ ADoor::ADoor()
 	PrimaryActorTick.bCanEverTick = true;
 	bReplicates = true;
 	bAlwaysRelevant = true; // prevent the doors from despawning on clients when server's player is too far
+	NetDormancy = ENetDormancy::DORM_DormantAll;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
 }
@@ -110,6 +111,23 @@ void ADoor::Tick(float DeltaTime)
 void ADoor::SetConnectingRooms(URoom* _RoomA, URoom* _RoomB)
 {
 	check(HasAuthority());
+	FlushNetDormancy();
 	RoomA = _RoomA;
 	RoomB = _RoomB;
+}
+
+void ADoor::Open(bool open)
+{
+	if (!HasAuthority())
+		return;
+	FlushNetDormancy();
+	bShouldBeOpen = open;
+}
+
+void ADoor::Lock(bool lock)
+{
+	if (!HasAuthority())
+		return;
+	FlushNetDormancy();
+	bShouldBeLocked = lock;
 }
