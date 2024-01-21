@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,39 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogProceduralDungeon, Log, All);
 
-bool ShowLogsOnScreen(float& _duration);
-void LogInfo(FString message, bool showOnScreen = true);
-void LogWarning(FString message, bool showOnScreen = true);
-void LogError(FString message, bool showOnScreen = true);
+bool ShowLogsOnScreen(float& Duration);
+
+#if NO_LOGGING
+#define _DungeonLog_PrivateImpl(ShowOnScreen, Color, Verbosity, Format, ...)
+#else
+// Private implementation. Dot not use it.
+#define _DungeonLog_PrivateImpl(ShowOnScreen, Color, Verbosity, Format, ...) \
+{ \
+	UE_LOG(LogProceduralDungeon, Verbosity, TEXT(Format), ##__VA_ARGS__) \
+	float Duration; \
+	if (ShowOnScreen && ShowLogsOnScreen(Duration)) \
+	{ \
+		GEngine->AddOnScreenDebugMessage(-1, Duration, Color, FString::Printf(TEXT(Format), ##__VA_ARGS__)); \
+	} \
+}
+#endif // NO_LOGGING
+
+// Logs info message to output and on screen
+#define DungeonLog_Info(Format, ...) \
+	_DungeonLog_PrivateImpl(true, FColor::White, Log, Format, ##__VA_ARGS__)
+
+// Logs info message *only* to output
+#define DungeonLog_InfoSilent(Format, ...) \
+	_DungeonLog_PrivateImpl(false, FColor::White, Log, Format, ##__VA_ARGS__)
+
+// Logs warning message to output and on screen
+#define DungeonLog_Warning(Format, ...) \
+	_DungeonLog_PrivateImpl(true, FColor::Yellow, Warning, Format, ##__VA_ARGS__)
+
+// Logs warning message *only* to output
+#define DungeonLog_WarningSilent(Format, ...) \
+	_DungeonLog_PrivateImpl(false, FColor::Yellow, Warning, Format, ##__VA_ARGS__)
+
+// Logs error message to output and on screen
+#define DungeonLog_Error(Format, ...) \
+	_DungeonLog_PrivateImpl(true, FColor::Red, Error, Format, ##__VA_ARGS__)

@@ -177,7 +177,6 @@ EDataValidationResult URoomData::IsDataValid(FDataValidationContext& Context) co
 void URoomData::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	UE_LOG(LogTemp, Log, TEXT("Room Data Post Change Properties"));
 	OnPropertiesChanged.Broadcast(this);
 }
 

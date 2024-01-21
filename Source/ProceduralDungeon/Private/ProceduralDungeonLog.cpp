@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,32 +33,4 @@ bool ShowLogsOnScreen(float& _duration)
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
 	_duration = Settings->PrintDebugDuration;
 	return Settings->OnScreenPrintDebug;
-}
-
-void LogInfo(FString message, bool showOnScreen)
-{
-	UE_LOG(LogProceduralDungeon, Log, TEXT("%s"), *message);
-	float duration;
-	if (showOnScreen && ShowLogsOnScreen(duration))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::White, message);
-	}
-}
-
-void LogWarning(FString message, bool showOnScreen)
-{
-	UE_LOG(LogProceduralDungeon, Warning, TEXT("%s"), *message);
-	float duration;
-	if (showOnScreen && ShowLogsOnScreen(duration))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Yellow, message);
-	}
-}
-
-void LogError(FString message, bool showOnScreen)
-{
-	UE_LOG(LogProceduralDungeon, Error, TEXT("%s"), *message);
-	float duration;
-	ShowLogsOnScreen(duration);
-	GEngine->AddOnScreenDebugMessage(-1, duration, FColor::Red, message);
 }
