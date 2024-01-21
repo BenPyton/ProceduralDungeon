@@ -75,7 +75,9 @@ public:
 
 	URoom();
 
+	UFUNCTION(BlueprintPure, Category = "Room")
 	const URoomData* GetRoomData() const { return RoomData; }
+
 	const ADungeonGenerator* Generator() const { return GeneratorOwner.Get(); }
 	void SetPlayerInside(bool PlayerInside);
 	void SetVisible(bool Visible);
@@ -108,6 +110,12 @@ public:
 	// Returns the RandomStream from the Dungeon Generator
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	FRandomStream GetRandomStream() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Room")
+	ADoor* GetDoor(int DoorIndex) const;
+
+	UFUNCTION(BlueprintPure = false, Category = "Room")
+	void GetAllDoors(UPARAM(ref) TArray<ADoor*>& OutDoors) const;
 
 private:
 	UPROPERTY(Replicated)
