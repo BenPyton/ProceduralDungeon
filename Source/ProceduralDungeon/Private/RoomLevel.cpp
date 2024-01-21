@@ -72,14 +72,14 @@ void ARoomLevel::BeginPlay()
 
 	if (!IsValid(Room))
 	{
-		LogWarning(TEXT("RoomLevel was not spawned by a DungeonGenerator. It's fine for testing a room but occlusion will not work properly. Consider unchecking \"Occlude Dynamic Actors\" in the plugin's settings."));
+		DungeonLog_Warning("RoomLevel was not spawned by a DungeonGenerator. It's fine for testing a room but occlusion will not work properly. Consider unchecking \"Occlude Dynamic Actors\" in the plugin's settings.");
 		return;
 	}
 
 	// Check if the data that spawned this level correspond to the data provided in blueprint
 	if (Data != Room->GetRoomData())
 	{
-		LogError(FString::Printf(TEXT("RoomLevel's Data does not match RoomData's Level [Data \"%s\" | Level \"%s\"]"), *Room->GetRoomData()->GetName(), *GetName()));
+		DungeonLog_Error("RoomLevel's Data does not match RoomData's Level [Data \"%s\" | Level \"%s\"]", *Room->GetRoomData()->GetName(), *GetName());
 	}
 
 	// Create trigger box to track dynamic actors inside the room with IRoomVisitor

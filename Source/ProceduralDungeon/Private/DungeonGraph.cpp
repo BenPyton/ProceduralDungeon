@@ -130,7 +130,7 @@ URoom* UDungeonGraph::GetRandomRoom(const TArray<URoom*>& RoomList) const
 {
 	if (!Generator.IsValid())
 	{
-		LogError(TEXT("DungeonGraph has no Generator set."));
+		DungeonLog_Error("DungeonGraph has no Generator set.");
 		return nullptr;
 	}
 
@@ -386,7 +386,7 @@ void CopyRooms(TArray<URoom*>& To, TArray<URoom*>& From)
 	for (URoom* Room : From)
 	{
 		if(Room->Instance)
-			UE_LOG(LogProceduralDungeon, Error, TEXT("[%s] Loaded Level: %s"), *GetNameSafe(Room), *GetNameSafe(Room->Instance->GetLoadedLevel()));
+			DungeonLog_InfoSilent("[%s] Loaded Level: %s", *GetNameSafe(Room), *GetNameSafe(Room->Instance->GetLoadedLevel()));
 	}
 
 	To = TArray<URoom*>(From);

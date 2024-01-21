@@ -152,14 +152,14 @@ void ADungeonGenerator::CreateDungeon()
 			listMode = TQueueOrStack<URoom*>::EMode::QUEUE;
 			break;
 		default:
-			LogError("GenerationType value is not supported.");
+			DungeonLog_Error("GenerationType value is not supported.");
 			return;
 		}
 
 		URoomData* def = ChooseFirstRoomData();
 		if (!IsValid(def))
 		{
-			LogError("ChooseFirstRoomData returned null.");
+			DungeonLog_Error("ChooseFirstRoomData returned null.");
 			continue;
 		}
 
@@ -195,7 +195,7 @@ void ADungeonGenerator::CreateDungeon()
 
 	if (!ValidDungeon)
 	{
-		LogError(FString::Printf(TEXT("Generated dungeon is not valid after %d tries. Make sure your IsValidDungeon function is correct."), MaxTry));
+		DungeonLog_Error("Generated dungeon is not valid after %d tries. Make sure your IsValidDungeon function is correct.", MaxTry);
 		Graph->Clear();
 		OnGenerationFailed();
 		return;
@@ -246,7 +246,7 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 				}
 				else
 				{
-					LogError("Failed to spawn Door, make sure you set door actor to always spawning.");
+					DungeonLog_Error("Failed to spawn Door, make sure you set door actor to always spawning.");
 				}
 			}
 		}
@@ -259,7 +259,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 
 	int nbDoor = ParentRoom.GetRoomData()->GetNbDoor();
 	if (nbDoor <= 0)
-		LogError(FString::Printf(TEXT("The room data '%s' has no door! Nothing could be generated with it!"), *GetNameSafe(ParentRoom.GetRoomData())));
+		DungeonLog_Error("The room data '%s' has no door! Nothing could be generated with it!", *GetNameSafe(ParentRoom.GetRoomData()));
 
 	AddedRooms.Reset();
 	bool shouldContinue = false;
@@ -285,13 +285,13 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 			URoomData* roomDef = ChooseNextRoomData(ParentRoom.GetRoomData(), doorDef, doorIndex);
 			if (!IsValid(roomDef))
 			{
-				LogError("ChooseNextRoomData returned null.");
+				DungeonLog_Error("ChooseNextRoomData returned null.");
 				continue;
 			}
 
 			if (doorIndex >= roomDef->Doors.Num())
 			{
-				LogError(FString::Printf(TEXT("ChooseNextRoomData returned door index '%d' which is out of range in the RoomData '%s' door list (max: %d)."), doorIndex, *roomDef->GetName(), roomDef->Doors.Num() - 1));
+				DungeonLog_Error("ChooseNextRoomData returned door index '%d' which is out of range in the RoomData '%s' door list (max: %d).", doorIndex, *roomDef->GetName(), roomDef->Doors.Num() - 1);
 				continue;
 			}
 
@@ -305,7 +305,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 
 			if (compatibleDoors.Num() <= 0)
 			{
-				LogError(FString::Printf(TEXT("ChooseNextRoomData returned room data '%s' with no compatible door (door type: '%s')."), *roomDef->GetName(), *doorDef.GetTypeName()));
+				DungeonLog_Error("ChooseNextRoomData returned room data '%s' with no compatible door (door type: '%s').", *roomDef->GetName(), *doorDef.GetTypeName());
 				continue;
 			}
 
@@ -313,7 +313,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 				doorIndex = compatibleDoors[Random.RandRange(0, compatibleDoors.Num() - 1)];
 			else if (!compatibleDoors.Contains(doorIndex))
 			{
-				LogError(FString::Printf(TEXT("ChooseNextRoomData returned door index '%d' (RoomData '%s') which its type '%s' is not compatible with '%s'."), doorIndex, *roomDef->GetName(), *roomDef->Doors[doorIndex].GetTypeName(), *doorDef.GetTypeName()));
+				DungeonLog_Error("ChooseNextRoomData returned door index '%d' (RoomData '%s') which its type '%s' is not compatible with '%s'.", doorIndex, *roomDef->GetName(), *roomDef->Doors[doorIndex].GetTypeName(), *doorDef.GetTypeName());
 				continue;
 			}
 
@@ -447,7 +447,7 @@ void ADungeonGenerator::UpdateSeed()
 		break;
 	}
 
-	LogInfo(FString::Printf(TEXT("Seed: %d"), Seed));
+	DungeonLog_Info("Seed: %d", Seed);
 }
 
 /*
@@ -467,29 +467,29 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 	switch (State)
 	{
 	case EGenerationState::Unload:
-		LogInfo("======= Begin Unload All Levels =======");
+		DungeonLog_Info("======= Begin Unload All Levels =======");
 		Reset();
-		LogInfo(FString::Printf(TEXT("Nb Room To Unload: %d"), Graph->Count()));
+		DungeonLog_Info("Nb Room To Unload: %d", Graph->Count());
 		UnloadAllRooms();
 		break;
 	case EGenerationState::Generation:
-		LogInfo("======= Begin Dungeon Generation =======");
+		DungeonLog_Info("======= Begin Dungeon Generation =======");
 		FlushNetDormancy();
 		++Generation;
 		UpdateSeed();
 		CreateDungeon();
 	case EGenerationState::Initialization:
-		LogInfo("======= Begin Dungeon Initialization =======");
+		DungeonLog_Info("======= Begin Dungeon Initialization =======");
 		Graph->SynchronizeRooms();
 		UpdateOctree();
 		break;
 	case EGenerationState::Load:
-		LogInfo("======= Begin Load All Levels =======");
-		LogInfo(FString::Printf(TEXT("Nb Room To Load: %d"), Graph->Count()));
+		DungeonLog_Info("======= Begin Load All Levels =======");
+		DungeonLog_Info("Nb Room To Load: %d", Graph->Count());
 		LoadAllRooms();
 		break;
 	case EGenerationState::Idle:
-		LogInfo("======= Ready To Play =======");
+		DungeonLog_Info("======= Ready To Play =======");
 		break;
 	default:
 		checkNoEntry();
@@ -539,22 +539,22 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 		Graph->Clear();
 		GetWorld()->FlushLevelStreaming();
 		GEngine->ForceGarbageCollection(true);
-		LogInfo("======= End Unload All Levels =======");
+		DungeonLog_Info("======= End Unload All Levels =======");
 		break;
 	case EGenerationState::Generation:
-		LogInfo("======= End Dungeon Generation =======");
+		DungeonLog_Info("======= End Dungeon Generation =======");
 		break;
 	case EGenerationState::Initialization:
-		LogInfo("======= End Dungeon Initialization =======");
+		DungeonLog_Info("======= End Dungeon Initialization =======");
 		break;
 	case EGenerationState::Load:
-		LogInfo("======= End Load All Levels =======");
+		DungeonLog_Info("======= End Load All Levels =======");
 
 		// Try to rebuild the navmesh
 		nav = UNavigationSystemV1::GetCurrent(GetWorld());
 		if (nullptr != nav)
 		{
-			LogInfo("Rebuild navmesh");
+			DungeonLog_Info("Rebuild navmesh");
 			nav->CancelBuild();
 			nav->Build();
 		}
@@ -571,31 +571,31 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 
 URoomData* ADungeonGenerator::ChooseFirstRoomData_Implementation()
 {
-	LogError("Error: ChooseFirstRoomData not implemented");
+	DungeonLog_Error("Error: ChooseFirstRoomData not implemented");
 	return nullptr;
 }
 
 URoomData* ADungeonGenerator::ChooseNextRoomData_Implementation(const URoomData* CurrentRoom, const FDoorDef& DoorData, int& DoorIndex)
 {
-	LogError("Error: ChooseNextRoomData not implemented");
+	DungeonLog_Error("Error: ChooseNextRoomData not implemented");
 	return nullptr;
 }
 
 TSubclassOf<ADoor> ADungeonGenerator::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType)
 {
-	LogError("Error: ChooseDoor not implemented");
+	DungeonLog_Error("Error: ChooseDoor not implemented");
 	return nullptr;
 }
 
 bool ADungeonGenerator::IsValidDungeon_Implementation()
 {
-	LogError("Error: IsValidDungeon not implemented");
+	DungeonLog_Error("Error: IsValidDungeon not implemented");
 	return false;
 }
 
 bool ADungeonGenerator::ContinueToAddRoom_Implementation()
 {
-	LogError("Error: ContinueToAddRoom not implemented");
+	DungeonLog_Error("Error: ContinueToAddRoom not implemented");
 	return false;
 }
 

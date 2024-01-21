@@ -83,7 +83,7 @@ void URoom::Init(URoomData* Data, ADungeonGenerator* Generator, int32 RoomId)
 	}
 	else
 	{
-		LogError("No RoomData provided.");
+		DungeonLog_Error("No RoomData provided.");
 	}
 }
 
@@ -124,14 +124,14 @@ void URoom::Instantiate(UWorld* World)
 	{
 		if (!IsValid(RoomData))
 		{
-			LogError("Failed to instantiate the room: it has no RoomData.");
+			DungeonLog_Error("Failed to instantiate the room: it has no RoomData.");
 			return;
 		}
 
 		const TSoftObjectPtr<UWorld>& Level = RoomData->Level;
 		if (Level.IsNull())
 		{
-			LogError("Failed to instantiate the room: Level asset is invalid in room data.");
+			DungeonLog_Error("Failed to instantiate the room: Level asset is invalid in room data.");
 			return;
 		}
 
@@ -154,16 +154,16 @@ void URoom::Instantiate(UWorld* World)
 
 		if (!IsValid(Instance))
 		{
-			LogError("Error when instantiating the room: unknown error.");
+			DungeonLog_Error("Error when instantiating the room: unknown error.");
 			return;
 		}
 
-		LogInfo(FString::Printf(TEXT("[%s][R:%s][I:%s] Load room Instance: %s"), *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName()));
+		DungeonLog_Info("[%s][R:%s][I:%s] Load room Instance: %s", *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName());
 		Instance->OnLevelLoaded.AddDynamic(this, &URoom::OnInstanceLoaded);
 	}
 	else
 	{
-		LogError("Failed to instantiate the room: it is already instanciated.");
+		DungeonLog_Error("Failed to instantiate the room: it is already instanciated.");
 	}
 }
 
@@ -171,12 +171,12 @@ void URoom::Destroy()
 {
 	if (IsValid(Instance))
 	{
-		UE_LOG(LogProceduralDungeon, Log, TEXT("[%s][R:%s][I:%s] Unload room Instance: %s"), *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName());
+		DungeonLog_InfoSilent("[%s][R:%s][I:%s] Unload room Instance: %s", *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName());
 		UnloadInstance(Instance);
 	}
 	else
 	{
-		UE_LOG(LogProceduralDungeon, Log, TEXT("[%s][R:%s] No room instance to unload"), *GetAuthorityName(), *GetName());
+		DungeonLog_InfoSilent("[%s][R:%s] No room instance to unload", *GetAuthorityName(), *GetName());
 	}
 }
 
@@ -188,25 +188,25 @@ void URoom::OnInstanceLoaded()
 	ARoomLevel* Script = GetLevelScript();
 	if (!IsValid(Script))
 	{
-		LogError("Error when instantiating the room: the level blueprint does not derive from RoomLevel.");
+		DungeonLog_Error("Error when instantiating the room: the level blueprint does not derive from RoomLevel.");
 		return;
 	}
 
 	Script->Init(this);
 
-	UE_LOG(LogProceduralDungeon, Log, TEXT("[%s][R:%s][I:%s] Room loaded: %s"), *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName());
+	DungeonLog_InfoSilent("[%s][R:%s][I:%s] Room loaded: %s", *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName());
 }
 
 void URoom::Lock(bool lock)
 {
 	WakeUpOwnerActor();
 	bIsLocked = lock;
-	LogInfo(FString::Printf(TEXT("[%s] Room '%s' setting IsLocked: %s"), *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False")));
+	DungeonLog_InfoSilent("[%s] Room '%s' setting IsLocked: %s", *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False"));
 }
 
 void URoom::OnRep_IsLocked()
 {
-	LogInfo(FString::Printf(TEXT("[%s] Room '%s' IsLocked Replicated: %s"), *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False")));
+	DungeonLog_InfoSilent("[%s] Room '%s' IsLocked Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False"));
 }
 
 ARoomLevel* URoom::GetLevelScript() const
@@ -546,11 +546,11 @@ URoom* URoom::GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList)
 
 ULevelStreamingDynamic* URoom::LoadInstance(UObject* WorldContextObject, const TSoftObjectPtr<UWorld>& Level, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation)
 {
-	UE_LOG(LogProceduralDungeon, Log, TEXT("[W:%s] Loading LevelStreamingDynamic"), *GetNameSafe(WorldContextObject));
+	DungeonLog_InfoSilent("[W:%s] Loading LevelStreamingDynamic", *GetNameSafe(WorldContextObject));
 
 	if (Level.IsNull())
 	{
-		LogError(TEXT("Failed to load level instance: Level is invalid."));
+		DungeonLog_Error("Failed to load level instance: Level is invalid.");
 		return nullptr;
 	}
 
@@ -560,7 +560,7 @@ ULevelStreamingDynamic* URoom::LoadInstance(UObject* WorldContextObject, const T
 
 	if (!success)
 	{
-		LogError(TEXT("Failed to load level instance: Unknown reason"));
+		DungeonLog_Error("Failed to load level instance: Unknown reason");
 		return nullptr;
 	}
 
@@ -569,10 +569,10 @@ ULevelStreamingDynamic* URoom::LoadInstance(UObject* WorldContextObject, const T
 
 void URoom::UnloadInstance(ULevelStreamingDynamic* Instance)
 {
-	UE_LOG(LogProceduralDungeon, Log, TEXT("[I:%s] Unloading LevelStreamingDynamic"), *GetNameSafe(Instance));
+	DungeonLog_InfoSilent("[I:%s] Unloading LevelStreamingDynamic", *GetNameSafe(Instance));
 	if (nullptr == Instance)
 	{
-		UE_LOG(LogProceduralDungeon, Error, TEXT("Failed to unload LevelStreamingDynamic: Instance is null"));
+		DungeonLog_Error("Failed to unload LevelStreamingDynamic: Instance is null");
 		return;
 	}
 
