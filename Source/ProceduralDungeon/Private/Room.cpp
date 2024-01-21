@@ -488,6 +488,23 @@ FRandomStream URoom::GetRandomStream() const
 	return GeneratorOwner->GetRandomStream();
 }
 
+ADoor* URoom::GetDoor(int DoorIndex) const
+{
+	if (!Connections.IsValidIndex(DoorIndex))
+		return nullptr;
+	return Connections[DoorIndex].DoorInstance;
+}
+
+void URoom::GetAllDoors(TArray<ADoor*>& OutDoors) const
+{
+	OutDoors.Reset();
+	for (const auto& Connection : Connections)
+	{
+		if (Connection.DoorInstance)
+			OutDoors.Add(Connection.DoorInstance);
+	}
+}
+
 // AABB Overlapping
 bool URoom::Overlap(const URoom& A, const URoom& B)
 {
