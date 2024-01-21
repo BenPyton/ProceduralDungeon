@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 
 #include "RoomVisibilityComponent.h"
 #include "ProceduralDungeonUtils.h"
+#include "RoomLevel.h"
 
 URoomVisibilityComponent::URoomVisibilityComponent()
 	: VisibilityMode(EVisibilityMode::Default)
@@ -35,6 +36,22 @@ void URoomVisibilityComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	UpdateVisibility();
+}
+
+void URoomVisibilityComponent::OnRoomEnter_Implementation(ARoomLevel* RoomLevel)
+{
+	if (!IsValid(RoomLevel))
+		return;
+
+	RoomLevel->VisibilityChangedEvent.AddDynamic(this, &URoomVisibilityComponent::RoomVisibilityChanged);
+}
+
+void URoomVisibilityComponent::OnRoomExit_Implementation(ARoomLevel* RoomLevel)
+{
+	if (!IsValid(RoomLevel))
+		return;
+
+	RoomLevel->VisibilityChangedEvent.RemoveDynamic(this, &URoomVisibilityComponent::RoomVisibilityChanged);
 }
 
 bool URoomVisibilityComponent::IsVisible()
@@ -60,15 +77,7 @@ void URoomVisibilityComponent::SetVisible(UObject* Owner, bool Visible)
 
 void URoomVisibilityComponent::ResetVisible(UObject* Owner)
 {
-	const bool bOldVisible = IsVisible();
-	VisibilityEnablers.Remove(Owner);
-
-	const bool bNewVisible = IsVisible();
-	if (bOldVisible != bNewVisible)
-	{
-		UpdateVisibility();
-		OnRoomVisibilityChanged.Broadcast(GetOwner(), bNewVisible);
-	}
+	SetVisible(Owner, false);
 }
 
 void URoomVisibilityComponent::SetVisibilityMode(EVisibilityMode Mode)
@@ -108,6 +117,11 @@ void URoomVisibilityComponent::UpdateVisibility()
 			}
 		}
 	}
+}
+
+void URoomVisibilityComponent::RoomVisibilityChanged(ARoomLevel* RoomLevel, bool IsVisible)
+{
+	SetVisible(RoomLevel, IsVisible);
 }
 
 void URoomVisibilityComponent::CleanEnablers()

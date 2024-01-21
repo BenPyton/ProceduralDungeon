@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,9 +31,11 @@
 
 #define ROOM_TRIGGER_OBJECT_TYPE ECollisionChannel::ECC_EngineTraceChannel6
 
-#if WITH_EDITOR
 class ARoomLevel;
-DECLARE_MULTICAST_DELEGATE_OneParam(FRoomLevelEditorEvent, ARoomLevel*)
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoomLevelVisibilityEvent, ARoomLevel*, RoomLevel, bool, IsVisible);
+
+#if WITH_EDITOR
+DECLARE_MULTICAST_DELEGATE_OneParam(FRoomLevelEditorEvent, ARoomLevel*);
 #endif
 
 class URoom;
@@ -85,16 +87,23 @@ public:
 	UFUNCTION()
 	void OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+public:
+	// Event to notify when the visibility of the room has been toggled.
+	UPROPERTY(BlueprintAssignable, Category = "Procedural Dungeon")
+	FRoomLevelVisibilityEvent VisibilityChangedEvent;
+
 private:
 	bool bIsInit = false;
 	FTransform DungeonTransform;
 	FBoxCenterAndExtent Bounds;
 	UPROPERTY(Transient)
 	class UBoxComponent* RoomTrigger = nullptr;
-	TSet<TWeakObjectPtr<class URoomVisibilityComponent>> VisibilityComponents;
+	TSet<TWeakObjectPtr<UObject>> Visitors;
 
 private:
 	void UpdateBounds();
+	void UpdateVisitor(UObject* Visitor, bool IsInside);
+	void TriggerActor(AActor* Actor, bool IsInTrigger);
 	virtual void PostInitProperties() override;
 
 #if WITH_EDITOR
