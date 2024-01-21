@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "RoomVisitor.h"
 #include "RoomVisibilityComponent.generated.h"
 
 UENUM(BlueprintType, meta = (DisplayName = "Room Visibility"))
@@ -41,7 +42,7 @@ enum class EVisibilityMode : uint8
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoomVisibilityEvent, AActor*, Actor, bool, IsInVisibleRoom);
 
 UCLASS(ClassGroup = "ProceduralDungeon", meta = (BlueprintSpawnableComponent, DisplayName = "Room Visibility"))
-class PROCEDURALDUNGEON_API URoomVisibilityComponent : public UActorComponent
+class PROCEDURALDUNGEON_API URoomVisibilityComponent : public UActorComponent, public IRoomVisitor
 {
 	GENERATED_BODY()
 
@@ -50,8 +51,13 @@ public:
 
 	virtual void BeginPlay() override;
 
+	//~ BEGIN IRoomVisitor
+	virtual void OnRoomEnter_Implementation(ARoomLevel* RoomLevel) override;
+	virtual void OnRoomExit_Implementation(ARoomLevel* RoomLevel) override;
+	//~ END IRoomVisitor
+
 	void SetVisible(UObject* Owner, bool Visible);
-	void ResetVisible(UObject* Owner);
+	void ResetVisible(UObject* Owner); // Same as SetVisible(Owner, false)
 
 	// Returns true if the actor is in a visible room.
 	// Always returns true when "Occlude Dynamic Actors" is unchecked in the plugin's settings
@@ -72,6 +78,9 @@ public:
 
 protected:
 	void UpdateVisibility();
+
+	UFUNCTION()
+	void RoomVisibilityChanged(class ARoomLevel* RoomLevel, bool IsVisible);
 
 private:
 	void CleanEnablers();

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,7 @@
 #include "DungeonGenerator.h"
 #include "Components/BoxComponent.h"
 #include "RoomVisibilityComponent.h"
+#include "RoomVisitor.h"
 
 ARoomLevel::ARoomLevel(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -81,40 +82,37 @@ void ARoomLevel::BeginPlay()
 		LogError(FString::Printf(TEXT("RoomLevel's Data does not match RoomData's Level [Data \"%s\" | Level \"%s\"]"), *Room->GetRoomData()->GetName(), *GetName()));
 	}
 
-	if (Dungeon::OccludeDynamicActors())
+	// Create trigger box to track dynamic actors inside the room with IRoomVisitor
+	RoomTrigger = NewObject<UBoxComponent>(this, UBoxComponent::StaticClass(), FName("Room Trigger"));
+	RoomTrigger->RegisterComponent();
+	RoomTrigger->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	RoomTrigger->SetCanEverAffectNavigation(false);
+	RoomTrigger->SetGenerateOverlapEvents(true);
+	RoomTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	RoomTrigger->SetCollisionObjectType(ROOM_TRIGGER_OBJECT_TYPE);
+	RoomTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+	RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Ignore);
+	RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
+	RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	static const uint8 FirstChannel = static_cast<uint8>(ECollisionChannel::ECC_GameTraceChannel1);
+	static const uint8 LastChannel = static_cast<uint8>(ECollisionChannel::ECC_GameTraceChannel18);
+	for (uint8 Channel = FirstChannel; Channel <= LastChannel; ++Channel)
 	{
-		// Create trigger box to track dynamic actors inside the room
-		RoomTrigger = NewObject<UBoxComponent>(this, UBoxComponent::StaticClass(), FName("Room Trigger"));
-		RoomTrigger->RegisterComponent();
-		RoomTrigger->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-		RoomTrigger->SetCanEverAffectNavigation(false);
-		RoomTrigger->SetGenerateOverlapEvents(true);
-		RoomTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		RoomTrigger->SetCollisionObjectType(ROOM_TRIGGER_OBJECT_TYPE);
-		RoomTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Ignore);
-		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
-		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-
-		static const uint8 FirstChannel = static_cast<uint8>(ECollisionChannel::ECC_GameTraceChannel1);
-		static const uint8 LastChannel = static_cast<uint8>(ECollisionChannel::ECC_GameTraceChannel18);
-		for (uint8 Channel = FirstChannel; Channel <= LastChannel; ++Channel)
+		ETraceTypeQuery TraceChannel = UEngineTypes::ConvertToTraceType(static_cast<ECollisionChannel>(Channel));
+		if (TraceChannel != ETraceTypeQuery::TraceTypeQuery_MAX)
 		{
-			ETraceTypeQuery TraceChannel = UEngineTypes::ConvertToTraceType(static_cast<ECollisionChannel>(Channel));
-			if (TraceChannel != ETraceTypeQuery::TraceTypeQuery_MAX)
-			{
-				RoomTrigger->SetCollisionResponseToChannel(static_cast<ECollisionChannel>(Channel), ECollisionResponse::ECR_Ignore);
-			}
+			RoomTrigger->SetCollisionResponseToChannel(static_cast<ECollisionChannel>(Channel), ECollisionResponse::ECR_Ignore);
 		}
-
-		RoomTrigger->OnComponentBeginOverlap.AddDynamic(this, &ARoomLevel::OnTriggerBeginOverlap);
-		RoomTrigger->OnComponentEndOverlap.AddDynamic(this, &ARoomLevel::OnTriggerEndOverlap);
-
-		// Update trigger box to have the room's bounds
-		FBoxCenterAndExtent LocalBounds = Room->GetLocalBounds();
-		RoomTrigger->SetRelativeLocationAndRotation(LocalBounds.Center, FQuat::Identity);
-		RoomTrigger->SetBoxExtent(LocalBounds.Extent, true);
 	}
+
+	RoomTrigger->OnComponentBeginOverlap.AddDynamic(this, &ARoomLevel::OnTriggerBeginOverlap);
+	RoomTrigger->OnComponentEndOverlap.AddDynamic(this, &ARoomLevel::OnTriggerEndOverlap);
+
+	// Update trigger box to have the room's bounds
+	FBoxCenterAndExtent LocalBounds = Room->GetLocalBounds();
+	RoomTrigger->SetRelativeLocationAndRotation(LocalBounds.Center, FQuat::Identity);
+	RoomTrigger->SetBoxExtent(LocalBounds.Extent, true);
 
 	SetActorsVisible(Room->IsVisible());
 
@@ -194,28 +192,12 @@ void ARoomLevel::Lock(bool lock)
 
 void ARoomLevel::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!IsValid(OtherActor))
-		return;
-
-	URoomVisibilityComponent* comp = Cast<URoomVisibilityComponent>(OtherActor->GetComponentByClass(URoomVisibilityComponent::StaticClass()));
-	if (IsValid(comp) && !VisibilityComponents.Contains(comp))
-	{
-		VisibilityComponents.Add(comp);
-		comp->SetVisible(this, IsVisible());
-	}
+	TriggerActor(OtherActor, true);
 }
 
 void ARoomLevel::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (!IsValid(OtherActor))
-		return;
-
-	URoomVisibilityComponent* comp = Cast<URoomVisibilityComponent>(OtherActor->GetComponentByClass(URoomVisibilityComponent::StaticClass()));
-	if (IsValid(comp))
-	{
-		VisibilityComponents.Remove(comp);
-		comp->ResetVisible(this);
-	}
+	TriggerActor(OtherActor, false);
 }
 
 void ARoomLevel::UpdateBounds()
@@ -248,12 +230,42 @@ void ARoomLevel::SetActorsVisible(bool Visible)
 		}
 	}
 
-	for (TWeakObjectPtr<URoomVisibilityComponent> Comp : VisibilityComponents)
+	// Notify the change (useful for RoomVisibilityComponent)
+	VisibilityChangedEvent.Broadcast(this, Visible);
+}
+
+void ARoomLevel::UpdateVisitor(UObject* Visitor, bool IsInside)
+{
+	check(Visitor->Implements<URoomVisitor>());
+
+	if (IsInside && !Visitors.Contains(Visitor))
 	{
-		if (!Comp.IsValid())
-			VisibilityComponents.Remove(Comp);
-		else
-			Comp->SetVisible(this, Visible);
+		Visitors.Add(Visitor);
+		IRoomVisitor::Execute_OnRoomEnter(Visitor, this);
+	}
+	else if (!IsInside && Visitors.Contains(Visitor))
+	{
+		Visitors.Remove(Visitor);
+		IRoomVisitor::Execute_OnRoomExit(Visitor, this);
+	}
+}
+
+void ARoomLevel::TriggerActor(AActor* Actor, bool IsInTrigger)
+{
+	if (!IsValid(Actor))
+		return;
+
+	// Call the interface on the actor itself
+	if (Actor->Implements<URoomVisitor>())
+	{
+		UpdateVisitor(Actor, IsInTrigger);
+	}
+
+	// Call the interface on its components too
+	TArray<UActorComponent*, FDefaultAllocator> VisitorComps = Actor->GetComponentsByInterface(URoomVisitor::StaticClass());
+	for (UActorComponent* VisitorComp : VisitorComps)
+	{
+		UpdateVisitor(VisitorComp, IsInTrigger);
 	}
 }
 
