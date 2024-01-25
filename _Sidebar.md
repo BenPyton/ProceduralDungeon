@@ -3,6 +3,7 @@
 [[Wiki Home Page|Home]]
 
 ### Basics
+[[Installation]]\
 [[Getting Started]]\
 [[Room Architecture]]\
 [[Door]]\
