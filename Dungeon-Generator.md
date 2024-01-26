@@ -25,6 +25,9 @@ There are some other functions you can override:
 **`Generate`**\
 Launch the generation of the dungeon (for multiplayer games, it starts the generation when called on the server, and does nothing when called on clients).
 
+**`Unload`**\
+Unload all exiting rooms and clear the dungeon.
+
 **`Get Random Room Data`**\
 Returns a room data chosen randomly from the provided array (deterministic with the dungeon generator seed).
 
