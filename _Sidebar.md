@@ -20,7 +20,8 @@
 [[Occlusion Culling]]\
 [[Door Types]]\
 [[Room Initialization]]\
-[[Room Custom Data]]
+[[Room Custom Data]]\
+[[Room Visitor]]
 
 ### Misc
 [[Multiplayer]]\
