@@ -24,6 +24,7 @@
 
 #include "RoomVisibilityComponent.h"
 #include "ProceduralDungeonUtils.h"
+#include "ProceduralDungeonLog.h"
 #include "RoomLevel.h"
 
 URoomVisibilityComponent::URoomVisibilityComponent()
@@ -40,18 +41,22 @@ void URoomVisibilityComponent::BeginPlay()
 
 void URoomVisibilityComponent::OnRoomEnter_Implementation(ARoomLevel* RoomLevel)
 {
+	DungeonLog_InfoSilent("Visibility Component '%s' Enters Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
 	if (!IsValid(RoomLevel))
 		return;
 
+	SetVisible(RoomLevel, RoomLevel->IsVisible());
 	RoomLevel->VisibilityChangedEvent.AddDynamic(this, &URoomVisibilityComponent::RoomVisibilityChanged);
 }
 
 void URoomVisibilityComponent::OnRoomExit_Implementation(ARoomLevel* RoomLevel)
 {
+	DungeonLog_InfoSilent("Visibility Component '%s' Exits Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
 	if (!IsValid(RoomLevel))
 		return;
 
 	RoomLevel->VisibilityChangedEvent.RemoveDynamic(this, &URoomVisibilityComponent::RoomVisibilityChanged);
+	SetVisible(RoomLevel, false);
 }
 
 bool URoomVisibilityComponent::IsVisible()
@@ -68,9 +73,11 @@ void URoomVisibilityComponent::SetVisible(UObject* Owner, bool Visible)
 		VisibilityEnablers.Remove(Owner);
 
 	const bool bNewVisible = IsVisible();
+	DungeonLog_InfoSilent("Visibility of '%s' Changed: %d (before: %d)", *GetNameSafe(GetOwner()), bNewVisible, bOldVisible);
 	if (bOldVisible != bNewVisible)
 	{
 		UpdateVisibility();
+		DungeonLog_InfoSilent("Dispatch Room Visibility Event of '%s'", *GetNameSafe(GetOwner()));
 		OnRoomVisibilityChanged.Broadcast(GetOwner(), bNewVisible);
 	}
 }
@@ -121,6 +128,7 @@ void URoomVisibilityComponent::UpdateVisibility()
 
 void URoomVisibilityComponent::RoomVisibilityChanged(ARoomLevel* RoomLevel, bool IsVisible)
 {
+	DungeonLog_InfoSilent("[%s] Room '%s' Visibility Changed: %d", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel), IsVisible);
 	SetVisible(RoomLevel, IsVisible);
 }
 
