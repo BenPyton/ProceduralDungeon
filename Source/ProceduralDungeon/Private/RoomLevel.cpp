@@ -24,6 +24,7 @@
 
 #include "RoomLevel.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
@@ -265,6 +266,7 @@ void ARoomLevel::TriggerActor(AActor* Actor, bool IsInTrigger)
 	TArray<UActorComponent*, FDefaultAllocator> VisitorComps = Actor->GetComponentsByInterface(URoomVisitor::StaticClass());
 	for (UActorComponent* VisitorComp : VisitorComps)
 	{
+		check(VisitorComp);
 		UpdateVisitor(VisitorComp, IsInTrigger);
 	}
 }

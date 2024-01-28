@@ -33,7 +33,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogProceduralDungeon, Log, All);
 bool ShowLogsOnScreen(float& Duration);
 
 #if NO_LOGGING
-#define _DungeonLog_PrivateImpl(ShowOnScreen, Color, Verbosity, Format, ...)
+#define _DungeonLog_PrivateImpl(ShowOnScreen, Color, Verbosity, Format, ...) {}
 #else
 // Private implementation. Dot not use it.
 #define _DungeonLog_PrivateImpl(ShowOnScreen, Color, Verbosity, Format, ...) \
