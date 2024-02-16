@@ -57,12 +57,14 @@ void ADoor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	// Update door visibility
-	if (Dungeon::OcclusionCulling())
-	{
-		SetActorHiddenInGame(!bAlwaysVisible
-			&& (!IsValid(RoomA) || (!RoomA->IsVisible()))
-			&& (!IsValid(RoomB) || (!RoomB->IsVisible())));
-	}
+	// TODO: this should not work with multiplayer games, because bHidden is replicated!
+	// It works only because it is updated each frame on clients too!
+	// The behavior will change if update in an event instead!
+	// So, I should find another way to hide the actor... (avoiding if possible RootComponent::SetVisible)
+	SetActorHiddenInGame(Dungeon::OcclusionCulling()
+		&& (!bAlwaysVisible
+		&& (!IsValid(RoomA) || (!RoomA->IsVisible()))
+		&& (!IsValid(RoomB) || (!RoomB->IsVisible()))));
 
 	// Update door's lock state
 	const bool bPrevLocked = bLocked;

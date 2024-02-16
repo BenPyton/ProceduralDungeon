@@ -299,4 +299,9 @@ private:
 	// Occlusion culling system
 	TUniquePtr<FDungeonOctree> Octree;
 	TSet<URoom*> CurrentPlayerRooms;
+
+#if WITH_EDITOR
+	// Transient. Only used to detect when occlusion setting is changed.
+	bool bWasOcclusionEnabled {false};
+#endif
 };
