@@ -217,8 +217,8 @@ void ARoomLevel::SetActorsVisible(bool Visible)
 {
 	if (!Dungeon::OcclusionCulling())
 	{
-		// TODO? Force visibility? (it will only be a QoL for editor use)
-		return;
+		// Force visibility when occlusion culling is disabled
+		Visible = true;
 	}
 
 	ULevel* Level = GetLevel();

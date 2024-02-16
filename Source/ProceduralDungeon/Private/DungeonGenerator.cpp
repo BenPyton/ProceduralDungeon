@@ -375,9 +375,6 @@ void ADungeonGenerator::UnloadAllRooms()
 
 void ADungeonGenerator::UpdateRoomVisibility()
 {
-	if (!Dungeon::OcclusionCulling())
-		return;
-
 	APawn* Player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawnOrSpectator();
 	if (!IsValid(Player))
 		return;
@@ -399,6 +396,23 @@ void ADungeonGenerator::UpdateRoomVisibility()
 	{
 		room->SetPlayerInside(false);
 	}
+
+	const bool bIsOcclusionEnabled = Dungeon::OcclusionCulling();
+#if WITH_EDITOR
+	// Detects occlusion setting changes and toggles on/off all room visibilities when occlusion is enabled/disabled.
+	if (bWasOcclusionEnabled != bIsOcclusionEnabled)
+	{
+		for (URoom* Room : Graph->GetAllRooms())
+		{
+			Room->SetVisible(!bIsOcclusionEnabled);
+		}
+	}
+	bWasOcclusionEnabled = bIsOcclusionEnabled;
+#endif
+
+	// Don't change room visibilities if occlusion is disabled.
+	if (!bIsOcclusionEnabled)
+		return;
 
 	uint32 OcclusionDistance = Dungeon::OcclusionDistance();
 	TSet<URoom*> VisibleRooms;
