@@ -226,8 +226,15 @@ void ARoomLevel::SetActorsVisible(bool Visible)
 	{
 		for (AActor* Actor : Level->Actors)
 		{
-			if (IsValid(Actor))
-				Actor->SetActorHiddenInGame(!Visible);
+			if (!IsValid(Actor))
+				continue;
+
+			// HACK: Don't manage replicated actors as their ActorHiddenInGame is replicated
+			// and will mess up the actor visibility on clients!
+			if (Actor->GetIsReplicated())
+				continue;
+
+			Actor->SetActorHiddenInGame(!Visible);
 		}
 	}
 
