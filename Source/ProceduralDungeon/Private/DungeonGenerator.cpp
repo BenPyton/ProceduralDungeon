@@ -229,7 +229,7 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 			if (nullptr != DoorClass)
 			{
 				FVector InstanceDoorPos = GetDungeonRotation().RotateVector(FDoorDef::GetRealDoorPosition(DoorCell, DoorRot)) + GetDungeonOffset();
-				FQuat InstanceDoorRot = GetDungeonRotation() * FRotator(0, -90 * (int8)DoorRot, 0).Quaternion();
+				FQuat InstanceDoorRot = GetDungeonRotation() * FRotator(0, 90 * (int8)DoorRot, 0).Quaternion();
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.Owner = this;
 				ADoor* Door = GetWorld()->SpawnActor<ADoor>(DoorClass, InstanceDoorPos, InstanceDoorRot.Rotator(), SpawnParams);
