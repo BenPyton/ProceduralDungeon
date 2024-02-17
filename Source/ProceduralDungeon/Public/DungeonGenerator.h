@@ -303,5 +303,8 @@ private:
 #if WITH_EDITOR
 	// Transient. Only used to detect when occlusion setting is changed.
 	bool bWasOcclusionEnabled {false};
+
+	// Transient. Only used to detect when occlusion distance is changed.
+	uint32 PreviousOcclusionDistance {0};
 #endif
 };

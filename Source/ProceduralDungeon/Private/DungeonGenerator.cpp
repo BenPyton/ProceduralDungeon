@@ -398,23 +398,26 @@ void ADungeonGenerator::UpdateRoomVisibility()
 	}
 
 	const bool bIsOcclusionEnabled = Dungeon::OcclusionCulling();
+	const uint32 OcclusionDistance = Dungeon::OcclusionDistance();
 #if WITH_EDITOR
 	// Detects occlusion setting changes and toggles on/off all room visibilities when occlusion is enabled/disabled.
-	if (bWasOcclusionEnabled != bIsOcclusionEnabled)
+	if (bWasOcclusionEnabled != bIsOcclusionEnabled
+		|| PreviousOcclusionDistance != OcclusionDistance)
 	{
+		RoomsToHide.Empty();
 		for (URoom* Room : Graph->GetAllRooms())
 		{
 			Room->SetVisible(!bIsOcclusionEnabled);
 		}
 	}
 	bWasOcclusionEnabled = bIsOcclusionEnabled;
+	PreviousOcclusionDistance = OcclusionDistance;
 #endif
 
 	// Don't change room visibilities if occlusion is disabled.
 	if (!bIsOcclusionEnabled)
 		return;
 
-	uint32 OcclusionDistance = Dungeon::OcclusionDistance();
 	TSet<URoom*> VisibleRooms;
 	UDungeonGraph::TraverseRooms(CurrentPlayerRooms, &VisibleRooms, OcclusionDistance, [](URoom* room) { room->SetVisible(true); });
 	UDungeonGraph::TraverseRooms(RoomsToHide, nullptr, OcclusionDistance, [&VisibleRooms](URoom* room) { room->SetVisible(VisibleRooms.Contains(room)); });
