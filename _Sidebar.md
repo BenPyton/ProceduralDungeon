@@ -16,7 +16,7 @@
 [[Continue To Add Room]]\
 [[Is Valid Dungeon]]
 
-### Advance Features
+### Advanced Features
 [[Occlusion Culling]]\
 [[Door Types]]\
 [[Room Initialization]]\
@@ -29,7 +29,7 @@
 [[Geometry Brushes]]
 
 ### Support Me
-If you like my plugin, please consider giving a tip:
+If you like my plugin, please consider tipping:
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/M4M3NW2JV)\
 [![Donate using Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/BenPyton/donate)
