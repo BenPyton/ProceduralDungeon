@@ -58,11 +58,13 @@ public:
 	//UPROPERTY(EditAnywhere, config, Category = "Procedural Dungeon", meta=(EditCondition="OcclusionCulling"))
 	//bool LegacyOcclusion;
 
-	// Defines the number of connected rooms are visible from the player's room (1 means only the room where the player is).
-	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta = (EditCondition = "OcclusionCulling"))
+	// Defines how many connected rooms are visible from the player's room (1 means only the room where the player is).
+	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta = (EditCondition = "OcclusionCulling", UIMin = 1, ClampMin = 1))
 	uint32 OcclusionDistance;
 
 	// Keep track of dynamic actors entering and leaving the room to be able to show/hide them with the room.
+	// TODO: Still useful? It was there for performance issues, but there is none anymore...
+	// Maybe moving it in a console variable only for debug purpose?
 	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta = (EditCondition = "OcclusionCulling"))
 	bool OccludeDynamicActors;
 
