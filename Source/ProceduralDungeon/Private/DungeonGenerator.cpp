@@ -128,7 +128,7 @@ void ADungeonGenerator::CreateDungeon()
 	if (!HasAuthority())
 		return;
 
-	int TriesLeft = MaxTry;
+	int TriesLeft = 500;
 	bool ValidDungeon = false;
 
 	// generate level until IsValidDungeon return true

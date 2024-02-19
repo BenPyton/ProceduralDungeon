@@ -20,7 +20,10 @@
 			"Type": "Runtime",
 			"LoadingPhase": "PreDefault",
 			"WhitelistPlatforms": [
-				"Win64"
+				"Win64",
+				"Mac",
+				"IOS",
+				"TVOS"
 			]
 		},
 
@@ -29,7 +32,10 @@
 			"Type": "Editor",
 			"LoadingPhase": "Default",
 			"WhitelistPlatforms": [
-				"Win64"
+				"Win64",
+				"Mac",
+				"IOS",
+				"TVOS"
 			]
 		}
 	]
