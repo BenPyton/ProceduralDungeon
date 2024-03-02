@@ -38,6 +38,7 @@
 
 class URoom;
 class UDungeonGraph;
+class URoomCustomData;
 
 #if WITH_EDITOR
 class URoomData;
@@ -71,7 +72,7 @@ public:
 	FIntVector SecondPoint {1};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Room")
-	TSet<TSubclassOf<class URoomCustomData>> CustomData;
+	TSet<TSubclassOf<URoomCustomData>> CustomData;
 
 public:
 	URoomData();
