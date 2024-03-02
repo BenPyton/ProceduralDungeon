@@ -57,6 +57,7 @@ void FProceduralDungeonEdMode::AddReferencedObjects(FReferenceCollector& Collect
 
 void FProceduralDungeonEdMode::Enter()
 {
+	DungeonEd_LogInfo("Enter Room Editor Mode.");
 	FEdMode::Enter();
 
 	if (!Toolkit.IsValid())
@@ -70,6 +71,8 @@ void FProceduralDungeonEdMode::Enter()
 
 void FProceduralDungeonEdMode::Exit()
 {
+	RegisterLevelCompilationDelegate(false);
+
 	FToolkitManager::Get().CloseToolkit(Toolkit.ToSharedRef());
 	Toolkit.Reset();
 
@@ -81,9 +84,9 @@ void FProceduralDungeonEdMode::Exit()
 
 	CachedLevelInstance.Reset();
 	CachedLevelBlueprint.Reset();
-	LevelBlueprintDelegateHandle.Reset();
 
 	FEdMode::Exit();
+	DungeonEd_LogInfo("Exit Room Editor Mode.");
 }
 
 void FProceduralDungeonEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
@@ -238,17 +241,12 @@ void FProceduralDungeonEdMode::UpdateLevelBlueprint()
 		return;
 
 	if (CachedLevelBlueprint.IsValid())
-	{
-		CachedLevelBlueprint->OnCompiled().Remove(LevelBlueprintDelegateHandle);
-	}
+		RegisterLevelCompilationDelegate(false);
 
-	LevelBlueprintDelegateHandle.Reset();
 	CachedLevelBlueprint = LevelBlueprint;
 
 	if (CachedLevelBlueprint.IsValid())
-	{
-		LevelBlueprintDelegateHandle = CachedLevelBlueprint->OnCompiled().AddRaw(this, &FProceduralDungeonEdMode::OnLevelBlueprintCompiled);
-	}
+		RegisterLevelCompilationDelegate(true);
 
 	OnLevelBlueprintCompiled();
 }
@@ -271,4 +269,39 @@ void FProceduralDungeonEdMode::OnLevelBlueprintCompiled(UBlueprint* Blueprint)
 
 	if (ActiveTool)
 		ActiveTool->OnLevelChanged(Level.Get());
+}
+
+void FProceduralDungeonEdMode::RegisterLevelCompilationDelegate(bool Register)
+{
+	if (!CachedLevelBlueprint.IsValid())
+	{
+		DungeonEd_LogWarning("Can't (un)register level blueprint compilation delegate: the level blueprint is invalid.");
+		return;
+	}
+
+	if (Register)
+	{
+		if (LevelBlueprintDelegateHandle.IsValid())
+		{
+			DungeonEd_LogWarning("Can't register level blueprint compilation delegate: the delegate is already registered.");
+		}
+		else
+		{
+			LevelBlueprintDelegateHandle = CachedLevelBlueprint->OnCompiled().AddRaw(this, &FProceduralDungeonEdMode::OnLevelBlueprintCompiled);
+			DungeonEd_LogInfo("Regitered level blueprint compilation delegate.");
+		}
+	}
+	else
+	{
+		if (LevelBlueprintDelegateHandle.IsValid())
+		{
+			CachedLevelBlueprint->OnCompiled().Remove(LevelBlueprintDelegateHandle);
+			LevelBlueprintDelegateHandle.Reset();
+			DungeonEd_LogInfo("Unregitered level blueprint compilation delegate.");
+		}
+		else
+		{
+			DungeonEd_LogWarning("Can't unregister level blueprint compilation delegate: the delegate is not registered.");
+		}
+	}
 }

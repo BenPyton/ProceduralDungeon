@@ -73,6 +73,7 @@ public:
 protected:
 	void SetActiveTool(FProceduralDungeonEditorTool* NewTool);
 	void OnLevelBlueprintCompiled(UBlueprint* Blueprint = nullptr);
+	void RegisterLevelCompilationDelegate(bool Register);
 
 public:
 	class UProceduralDungeonEditorObject* Settings {nullptr};
