@@ -24,6 +24,7 @@
 
 #include "RoomData.h"
 #include "RoomLevel.h"
+#include "RoomCustomData.h"
 #include "ProceduralDungeonTypes.h"
 #include "ProceduralDungeonUtils.h"
 #include "Math/GenericOctree.h" // FBoxCenterAndExtent
