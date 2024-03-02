@@ -80,7 +80,7 @@ void ARoomLevel::BeginPlay()
 	// Check if the data that spawned this level correspond to the data provided in blueprint
 	if (Data != Room->GetRoomData())
 	{
-		DungeonLog_Error("RoomLevel's Data does not match RoomData's Level [Data \"%s\" | Level \"%s\"]", *Room->GetRoomData()->GetName(), *GetName());
+		DungeonLog_Error("RoomLevel's Data does not match RoomData's Level [Data \"%s\" | Level \"%s\"]. Debug Draw will be incorrect.", *GetNameSafe(Room->GetRoomData()), *GetName());
 	}
 
 	// Create trigger box to track dynamic actors inside the room with IRoomVisitor
@@ -134,8 +134,11 @@ void ARoomLevel::Tick(float DeltaTime)
 	// TODO: Place the debug draw in an editor module of the plugin?
 	if (Dungeon::DrawDebug() && IsValid(Data))
 	{
-		const FTransform& RoomTransform = (Room != nullptr) ? Room->GetTransform() : FTransform::Identity;
-		const bool bIsRoomLocked = Room != nullptr && Room->IsLocked();
+		const bool bIsRoomValid = (Room != nullptr);
+		const bool bIsRoomDataValid = bIsRoomValid && (Data == Room->GetRoomData());
+
+		const FTransform& RoomTransform = (bIsRoomValid) ? Room->GetTransform() : FTransform::Identity;
+		const bool bIsRoomLocked = bIsRoomValid && Room->IsLocked();
 		UpdateBounds();
 
 		// Cache world
@@ -162,7 +165,7 @@ void ARoomLevel::Tick(float DeltaTime)
 		// Doors
 		for (int i = 0; i < Data->GetNbDoor(); i++)
 		{
-			const bool bIsConnected = Room == nullptr || Room->IsConnected(i);
+			const bool bIsConnected = !bIsRoomValid || (bIsRoomDataValid && Room->IsConnected(i));
 			const bool bIsDoorValid = Data->IsDoorValid(i);
 			FDoorDef::DrawDebug(World, bIsDoorValid ? FColor::Blue : FColor::Orange, Data->Doors[i], RoomTransform * DungeonTransform, true, bIsConnected);
 		}
