@@ -399,7 +399,7 @@ void ADungeonGenerator::UpdateRoomVisibility()
 
 	const bool bIsOcclusionEnabled = Dungeon::OcclusionCulling();
 	const uint32 OcclusionDistance = Dungeon::OcclusionDistance();
-#if WITH_EDITOR
+
 	// Detects occlusion setting changes and toggles on/off all room visibilities when occlusion is enabled/disabled.
 	if (bWasOcclusionEnabled != bIsOcclusionEnabled
 		|| PreviousOcclusionDistance != OcclusionDistance)
@@ -412,7 +412,6 @@ void ADungeonGenerator::UpdateRoomVisibility()
 	}
 	bWasOcclusionEnabled = bIsOcclusionEnabled;
 	PreviousOcclusionDistance = OcclusionDistance;
-#endif
 
 	// Don't change room visibilities if occlusion is disabled.
 	if (!bIsOcclusionEnabled)
