@@ -90,16 +90,20 @@ public:
 	class FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
 	FBoxMinAndMax GetIntBounds() const;
 
-#if WITH_EDITOR
+#if !(UE_BUILD_SHIPPING) || WITH_EDITOR
 	bool IsDoorValid(int DoorIndex) const;
+#endif // !(UE_BUILD_SHIPPING) || WITH_EDITOR
+
+#if WITH_EDITOR
 
 #if USE_LEGACY_DATA_VALIDATION
 	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;
 #else
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif
+#endif // USE_LEGACY_DATA_VALIDATION
 
 	FRoomDataEditorEvent OnPropertiesChanged;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
+
+#endif // WITH_EDITOR
 };

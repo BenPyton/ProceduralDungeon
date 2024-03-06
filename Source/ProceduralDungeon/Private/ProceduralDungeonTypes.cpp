@@ -207,7 +207,7 @@ FVector FDoorDef::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRo
 	return Dungeon::RoomUnit() * (CellPosition + DirectionOffset + HeightOffset);
 }
 
-
+#if !UE_BUILD_SHIPPING
 void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FDoorDef& DoorDef, const FTransform& Transform, bool includeOffset, bool isConnected)
 {
 	DrawDebug(World, Color, DoorDef.GetDoorSize(), DoorDef.Position, DoorDef.Direction, Transform, includeOffset, isConnected);
@@ -215,6 +215,7 @@ void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FDoorDe
 
 void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector& DoorSize, const FIntVector& DoorCell, const EDoorDirection& DoorRot, const FTransform& Transform, bool includeOffset, bool isConnected)
 {
+#if ENABLE_DRAW_DEBUG
 	FQuat DoorRotation = Transform.GetRotation() * ToQuaternion(!DoorRot ? EDoorDirection::North : DoorRot);
 	FVector DoorPosition = Transform.TransformPosition(GetRealDoorPosition(DoorCell, DoorRot, includeOffset) + FVector(0, 0, DoorSize.Z * 0.5f));
 
@@ -234,7 +235,9 @@ void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector
 		DrawDebugLine(World, DoorPosition - HalfSize, DoorPosition + HalfSize, Color);
 		DrawDebugLine(World, DoorPosition - HalfSizeConjugate, DoorPosition + HalfSizeConjugate, Color);
 	}
+#endif // ENABLE_DRAW_DEBUG
 }
+#endif // !UE_BUILD_SHIPPING
 
 // ############ FBoxMinAndMax ##############
 

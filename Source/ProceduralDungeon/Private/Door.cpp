@@ -103,11 +103,11 @@ void ADoor::Tick(float DeltaTime)
 		}
 	}
 
-#if WITH_EDITOR
+#if ENABLE_DRAW_DEBUG
 	// TODO: Place it in an editor module of the plugin
 	if (Dungeon::DrawDebug() && GetWorld()->WorldType == EWorldType::EditorPreview)
 		FDoorDef::DrawDebug(GetWorld(), FColor::Blue, UDoorType::GetSize(Type));
-#endif
+#endif // ENABLE_DRAW_DEBUG
 }
 
 void ADoor::SetConnectingRooms(URoom* _RoomA, URoom* _RoomB)
