@@ -70,7 +70,7 @@ FBoxMinAndMax URoomData::GetIntBounds() const
 	return FBoxMinAndMax(FirstPoint, SecondPoint);
 }
 
-#if WITH_EDITOR
+#if !(UE_BUILD_SHIPPING) || WITH_EDITOR
 
 bool URoomData::IsDoorValid(int DoorIndex) const
 {
@@ -104,19 +104,23 @@ bool URoomData::IsDoorValid(int DoorIndex) const
 	}
 }
 
+#endif // !(UE_BUILD_SHIPPING) || WITH_EDITOR
+
+#if WITH_EDITOR
+
 #if USE_LEGACY_DATA_VALIDATION
 #define VALIDATION_LOG_ERROR(Msg) ValidationErrors.Add(Msg)
 EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
 #else
 #define VALIDATION_LOG_ERROR(Msg) Context.AddError(Msg)
 EDataValidationResult URoomData::IsDataValid(FDataValidationContext& Context) const
-#endif
+#endif // USE_LEGACY_DATA_VALIDATION
 {
 #if USE_LEGACY_DATA_VALIDATION
 	EDataValidationResult Result = Super::IsDataValid(ValidationErrors);
 #else
 	EDataValidationResult Result = Super::IsDataValid(Context);
-#endif
+#endif // USE_LEGACY_DATA_VALIDATION
 	if (!IsAsset() || Result == EDataValidationResult::Invalid)
 		return Result;
 

@@ -108,8 +108,11 @@ public:
 	FString ToString() const;
 
 	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset = true);
+
+#if !UE_BUILD_SHIPPING
 	static void DrawDebug(const class UWorld* World, const FColor& Color, const FDoorDef& DoorDef, const FTransform& Transform = FTransform::Identity, bool includeOffset = false, bool isConnected = true);
 	static void DrawDebug(const class UWorld* World, const FColor& Color, const FVector& DoorSize, const FIntVector& DoorCell = FIntVector::ZeroValue, const EDoorDirection& DoorRot = EDoorDirection::NbDirection, const FTransform& Transform = FTransform::Identity, bool includeOffset = false, bool isConnected = true);
+#endif // !UE_BUILD_SHIPPING
 };
 
 struct PROCEDURALDUNGEON_API FBoxMinAndMax

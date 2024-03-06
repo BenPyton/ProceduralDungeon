@@ -130,7 +130,7 @@ void ARoomLevel::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-#if WITH_EDITOR
+#if ENABLE_DRAW_DEBUG
 	// TODO: Place the debug draw in an editor module of the plugin?
 	if (Dungeon::DrawDebug() && IsValid(Data))
 	{
@@ -170,7 +170,7 @@ void ARoomLevel::Tick(float DeltaTime)
 			FDoorDef::DrawDebug(World, bIsDoorValid ? FColor::Blue : FColor::Orange, Data->Doors[i], RoomTransform * DungeonTransform, true, bIsConnected);
 		}
 	}
-#endif
+#endif // ENABLE_DRAW_DEBUG
 }
 
 bool ARoomLevel::IsPlayerInside()
