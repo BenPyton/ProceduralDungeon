@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021, 2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,16 +27,60 @@
 UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	// Dungeon settings
 	RoomUnit = FVector(1000, 1000, 400);
 	DoorSize = FVector(40, 640, 400);
 	DoorOffset = 0.0f;
+	CanLoop = true;
+
+	// Occlusion settings
 	OcclusionCulling = true;
 	//LegacyOcclusion = true;
 	OcclusionDistance = 2;
 	OccludeDynamicActors = true;
+
+	// Debug settings
 	DrawDebug = true;
 	ShowRoomOrigin = false;
 	OnScreenPrintDebug = false;
 	PrintDebugDuration = 60.0f;
-	CanLoop = true;
+
+	// Register console variables.
+
+	IConsoleManager::Get().RegisterConsoleVariableRef(TEXT("pd.Occlusion")
+		, OcclusionCulling
+		, TEXT("Enable/disable the plugin's occlusion culling system.")
+		, EConsoleVariableFlags::ECVF_Cheat
+	);
+
+	IConsoleManager::Get().RegisterConsoleVariableRef(TEXT("pd.Occlusion.Distance")
+		, OcclusionDistance
+		, TEXT("Change the number of room shown by the plugin's occlusion culling system.\n")
+		  TEXT("1 means only the player's room is visible. 0 or negative means no room visible at all. 2 or more will show the connected rooms to the player based on their number of connection.")
+		, EConsoleVariableFlags::ECVF_Cheat
+	);
+
+	IConsoleManager::Get().RegisterConsoleVariableRef(TEXT("pd.Occlusion.DynamicActors")
+		, OccludeDynamicActors
+		, TEXT("Enable/disable the occlusion of actors with a RoomVisibility component attached on them.")
+		, EConsoleVariableFlags::ECVF_Cheat
+	);
+
+	IConsoleManager::Get().RegisterConsoleVariableRef(TEXT("pd.Debug.Draw")
+		, DrawDebug
+		, TEXT("Enable/disable the debug drawings of the rooms and doors.")
+		, EConsoleVariableFlags::ECVF_Cheat
+	);
+
+	IConsoleManager::Get().RegisterConsoleVariableRef(TEXT("pd.Debug.Log.OnScreen")
+		, OnScreenPrintDebug
+		, TEXT("Enable/disable the on-screen logging of the plugin.")
+		, EConsoleVariableFlags::ECVF_Cheat
+	);
+
+	IConsoleManager::Get().RegisterConsoleVariableRef(TEXT("pd.Debug.Log.Duration")
+		, PrintDebugDuration
+		, TEXT("Change the on-screen logging duration (in seconds) of the plugin.")
+		, EConsoleVariableFlags::ECVF_Cheat
+	);
 }
