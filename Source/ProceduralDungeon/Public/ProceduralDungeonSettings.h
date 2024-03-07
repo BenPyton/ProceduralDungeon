@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021, 2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,11 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "General")
 	float DoorOffset;
 
+	// When true, doors will be connected as long they are at the same place.
+	// When false, only the doors between the previous and the new generated room will be connected.
+	UPROPERTY(EditAnywhere, config, Category = "General")
+	bool CanLoop;
+
 	// The rooms visibility will be toggled off when the player is not inside it or in a room next to it.
 	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta = (DisplayName = "Enable Occlusion Culling"))
 	bool OcclusionCulling;
@@ -60,18 +65,13 @@ public:
 
 	// Defines how many connected rooms are visible from the player's room (1 means only the room where the player is).
 	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta = (EditCondition = "OcclusionCulling", UIMin = 1, ClampMin = 1))
-	uint32 OcclusionDistance;
+	int32 OcclusionDistance;
 
 	// Keep track of dynamic actors entering and leaving the room to be able to show/hide them with the room.
 	// TODO: Still useful? It was there for performance issues, but there is none anymore...
 	// Maybe moving it in a console variable only for debug purpose?
 	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta = (EditCondition = "OcclusionCulling"))
 	bool OccludeDynamicActors;
-
-	// When true, doors will be connected as long they are at the same place.
-	// When false, only the doors between the previous and the new generated room will be connected.
-	UPROPERTY(EditAnywhere, config, Category = "General")
-	bool CanLoop;
 
 	// Show room and door outlines in editor and development builds
 	UPROPERTY(EditAnywhere, config, Category = "Debug")
