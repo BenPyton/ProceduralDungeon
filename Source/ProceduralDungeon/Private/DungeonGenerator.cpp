@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -225,12 +225,13 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 		// Don't instantiate door if it's the parent
 		if (!Room->IsDoorInstanced(i))
 		{
-			TSubclassOf<ADoor> DoorClass = ChooseDoor(Room->GetRoomData(), nullptr != r ? r->GetRoomData() : nullptr, Room->GetRoomData()->Doors[i].Type);
+			bool Flipped = false;
+			TSubclassOf<ADoor> DoorClass = ChooseDoor(Room->GetRoomData(), nullptr != r ? r->GetRoomData() : nullptr, Room->GetRoomData()->Doors[i].Type, Flipped);
 
 			if (nullptr != DoorClass)
 			{
 				FVector InstanceDoorPos = GetDungeonRotation().RotateVector(FDoorDef::GetRealDoorPosition(DoorCell, DoorRot)) + GetDungeonOffset();
-				FQuat InstanceDoorRot = GetDungeonRotation() * FRotator(0, 90 * (int8)DoorRot, 0).Quaternion();
+				FQuat InstanceDoorRot = GetDungeonRotation() * FRotator(0, 90 * (int8)DoorRot + Flipped * 180, 0).Quaternion();
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.Owner = this;
 				ADoor* Door = GetWorld()->SpawnActor<ADoor>(DoorClass, InstanceDoorPos, InstanceDoorRot.Rotator(), SpawnParams);
@@ -598,7 +599,7 @@ URoomData* ADungeonGenerator::ChooseNextRoomData_Implementation(const URoomData*
 	return nullptr;
 }
 
-TSubclassOf<ADoor> ADungeonGenerator::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType)
+TSubclassOf<ADoor> ADungeonGenerator::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType, bool& Flipped)
 {
 	DungeonLog_Error("Error: ChooseDoor not implemented");
 	return nullptr;
