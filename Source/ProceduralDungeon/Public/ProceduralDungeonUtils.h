@@ -68,3 +68,31 @@ namespace Dungeon
 	bool PROCEDURALDUNGEON_API ShowRoomOrigin();
 	bool PROCEDURALDUNGEON_API CanLoop();
 }
+
+namespace World
+{
+	template<class T>
+	static void FindAllActors(UWorld* InWorld, TArray<T*>& OutActors)
+	{
+		OutActors.Empty();
+		for (TActorIterator<T> It(InWorld); It; ++It)
+		{
+			T* Actor = *It;
+			OutActors.Add(Actor);
+		}
+	}
+
+	template<class T>
+	static void FindAllActorsByPredicate(UWorld* InWorld, TArray<T*>& OutActors, TFunction<bool(const T*)> Predicate)
+	{
+		OutActors.Empty();
+		for (TActorIterator<T> It(InWorld); It; ++It)
+		{
+			T* Actor = *It;
+			if (Predicate(Actor))
+			{
+				OutActors.Add(Actor);
+			}
+		}
+	}
+}

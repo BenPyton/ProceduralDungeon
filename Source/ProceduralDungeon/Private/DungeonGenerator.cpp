@@ -39,6 +39,7 @@
 #include "QueueOrStack.h"
 #include "DungeonGraph.h"
 #include <functional>
+#include <EngineUtils.h>
 
 uint32 ADungeonGenerator::GeneratorCount = 0;
 
@@ -736,4 +737,110 @@ FVector ADungeonGenerator::GetDungeonOffset() const
 FQuat ADungeonGenerator::GetDungeonRotation() const
 {
 	return UseGeneratorTransform() ? GetActorQuat() : FQuat::Identity;
+}
+
+// ##############################
+//        CONSOLE COMMANDS
+// ##############################
+
+// An helper class for console commands
+struct FDungeonConsoleCommands
+{
+private:
+	// Fills OutGenerators array with DungeonGenerator actors patching the NameOrTag provided, or all if NameOrTag is empty.
+	static bool CollectDungeonGenerators(const TCHAR* CommandName, UWorld* InWorld, const FString& NameOrTag, TArray<ADungeonGenerator*>& OutGenerators);
+
+public:
+	// Execute a Callback on all DungeonGenerator actors found depending on the InParams provided.
+	static void ExecuteOnDungeonGenerators(const TCHAR* CommandName, const TArray<FString>& InParams, UWorld* InWorld, TFunction<void(ADungeonGenerator*)> Callback);
+
+public:
+	static const TCHAR* GenerateCommandName;
+	static const TCHAR* UnloadCommandName;
+};
+
+const TCHAR* FDungeonConsoleCommands::GenerateCommandName = TEXT("pd.Generate");
+const TCHAR* FDungeonConsoleCommands::UnloadCommandName = TEXT("pd.Unload");
+
+FAutoConsoleCommandWithWorldAndArgs CCmdGenerateDungeon(FDungeonConsoleCommands::GenerateCommandName
+	, TEXT("Call \"Generate\" on DungeonsGenerator actors with the name or tag provided, or all if nothing provided. USAGE: pd.Generate [name|tag]")
+	, FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& InParams, UWorld* InWorld) {
+		FDungeonConsoleCommands::ExecuteOnDungeonGenerators(FDungeonConsoleCommands::GenerateCommandName
+			, InParams
+			, InWorld
+			, [](ADungeonGenerator* Generator) { Generator->Generate(); }
+		);
+		})
+	, EConsoleVariableFlags::ECVF_Cheat
+);
+
+FAutoConsoleCommandWithWorldAndArgs CCmdUnloadDungeon(FDungeonConsoleCommands::UnloadCommandName
+	, TEXT("Call \"Unload\" on DungeonsGenerator actors with the name or tag provided, or all if nothing provided. USAGE: pd.Unload [name|tag]")
+	, FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& InParams, UWorld* InWorld) {
+		FDungeonConsoleCommands::ExecuteOnDungeonGenerators(FDungeonConsoleCommands::UnloadCommandName
+			, InParams
+			, InWorld
+			, [](ADungeonGenerator* Generator) { Generator->Unload(); }
+		);
+		})
+	, EConsoleVariableFlags::ECVF_Cheat
+);
+
+bool FDungeonConsoleCommands::CollectDungeonGenerators(const TCHAR* CommandName, UWorld* InWorld, const FString& NameOrTag, TArray<ADungeonGenerator*>& OutGenerators)
+{
+	if (!IsValid(InWorld) || !InWorld->IsGameWorld())
+	{
+		UE_LOG(LogProceduralDungeon, Error, TEXT("[%s] Invalid world."), CommandName);
+		return false;
+	}
+
+	OutGenerators.Empty();
+	if (!NameOrTag.IsEmpty())
+	{
+		UE_LOG(LogProceduralDungeon, Log, TEXT("[%s] Search for DungeonGenerator actors with name or tag '%s'."), CommandName, *NameOrTag);
+		FString Name(NameOrTag);
+		FName Tag(NameOrTag);
+		World::FindAllActorsByPredicate<ADungeonGenerator>(InWorld, OutGenerators, [&Name, &Tag](const ADungeonGenerator* Generator) { return Generator->GetName() == Name || Generator->ActorHasTag(Tag); });
+	}
+	else
+	{
+		UE_LOG(LogProceduralDungeon, Log, TEXT("[%s] Search for all DungeonGenerator actors."), CommandName);
+		World::FindAllActors(InWorld, OutGenerators);
+	}
+
+	// Found no generator
+	if (OutGenerators.Num() <= 0)
+	{
+		UE_LOG(LogProceduralDungeon, Error, TEXT("[%s] No DungeonGenerator found%s.")
+			, CommandName
+			, (!NameOrTag.IsEmpty())
+			? *FString::Printf(TEXT(" with name or tag '%s'"), *NameOrTag)
+			: TEXT("")
+		);
+		return false;
+	}
+
+	return true;
+}
+
+void FDungeonConsoleCommands::ExecuteOnDungeonGenerators(const TCHAR* CommandName, const TArray<FString>& InParams, UWorld* InWorld, TFunction<void(ADungeonGenerator*)> Callback)
+{
+	UE_LOG(LogProceduralDungeon, Log, TEXT("[%s] Begin."), CommandName);
+
+	TArray<ADungeonGenerator*> Generators;
+	if (!CollectDungeonGenerators(CommandName, InWorld, (InParams.Num() > 0) ? InParams[0] : FString(), Generators))
+		return;
+
+	for (ADungeonGenerator* Generator : Generators)
+	{
+		if (!IsValid(Generator))
+		{
+			UE_LOG(LogProceduralDungeon, Warning, TEXT("[%s] Generator is invalid!."), CommandName);
+			continue;
+		}
+
+		UE_LOG(LogProceduralDungeon, Log, TEXT("[%s] Execute command on DungeonGenerator '%s'."), CommandName, *Generator->GetName());
+		Callback(Generator);
+	}
+	UE_LOG(LogProceduralDungeon, Log, TEXT("[%s] End."), CommandName);
 }
