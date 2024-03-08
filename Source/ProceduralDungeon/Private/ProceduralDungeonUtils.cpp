@@ -132,3 +132,15 @@ bool Dungeon::CanLoop()
 	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
 	return Settings->CanLoop;
 }
+
+void Dungeon::EnableOcclusionCulling(bool Enable)
+{
+	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
+	Settings->OcclusionCulling = Enable;
+}
+
+void Dungeon::SetOcclusionDistance(int32 Distance)
+{
+	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
+	Settings->OcclusionDistance = Distance;
+}

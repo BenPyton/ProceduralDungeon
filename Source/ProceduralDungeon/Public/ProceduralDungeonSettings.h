@@ -51,6 +51,7 @@ public:
 
 	// When true, doors will be connected as long they are at the same place.
 	// When false, only the doors between the previous and the new generated room will be connected.
+	// TODO: Deprecate this global setting and make a variable in DungeonGenerator actors instead
 	UPROPERTY(EditAnywhere, config, Category = "General")
 	bool CanLoop;
 
@@ -77,7 +78,8 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Debug")
 	bool DrawDebug;
 
-	// Show the room origin in magenta (useless imho but here if anyone find it useful)
+	// Show the room origin in magenta
+	// DEPRECATED: This setting will be removed in a future release of the plugin.
 	UPROPERTY(EditAnywhere, config, Category = "Debug", meta = (EditCondition = "DrawDebug"))
 	bool ShowRoomOrigin;
 

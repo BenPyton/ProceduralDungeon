@@ -57,6 +57,7 @@ namespace Dungeon
 	FVector PROCEDURALDUNGEON_API SnapPoint(FVector Point);
 
 	// ===== Plugin's Settings =====
+
 	FVector PROCEDURALDUNGEON_API RoomUnit();
 	FVector PROCEDURALDUNGEON_API DefaultDoorSize();
 	float PROCEDURALDUNGEON_API DoorOffset();
@@ -67,6 +68,9 @@ namespace Dungeon
 	bool PROCEDURALDUNGEON_API DrawDebug();
 	bool PROCEDURALDUNGEON_API ShowRoomOrigin();
 	bool PROCEDURALDUNGEON_API CanLoop();
+
+	void PROCEDURALDUNGEON_API EnableOcclusionCulling(bool Enable);
+	void PROCEDURALDUNGEON_API SetOcclusionDistance(int32 Distance);
 }
 
 namespace World
