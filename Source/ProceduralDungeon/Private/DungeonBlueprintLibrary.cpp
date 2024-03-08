@@ -25,6 +25,7 @@
 #include "DungeonBlueprintLibrary.h"
 #include "Door.h"
 #include "DoorType.h"
+#include "ProceduralDungeonUtils.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/Pawn.h"
@@ -39,6 +40,50 @@ bool UDungeonBlueprintLibrary::CompareDataTableRows(const FDataTableRowHandle& A
 {
 	return A == B;
 }
+
+// ===== Plugin Settings Accessors =====
+
+FVector UDungeonBlueprintLibrary::Settings_RoomUnit()
+{
+	return Dungeon::RoomUnit();
+}
+
+FVector UDungeonBlueprintLibrary::Settings_DefaultDoorSize()
+{
+	return Dungeon::DefaultDoorSize();
+}
+
+float UDungeonBlueprintLibrary::Settings_DoorOffset()
+{
+	return Dungeon::DoorOffset();
+}
+
+bool UDungeonBlueprintLibrary::Settings_OcclusionCulling()
+{
+	return Dungeon::OcclusionCulling();
+}
+
+void UDungeonBlueprintLibrary::Settings_SetOcclusionCulling(bool Enable)
+{
+	Dungeon::EnableOcclusionCulling(Enable);
+}
+
+int32 UDungeonBlueprintLibrary::Settings_OcclusionDistance()
+{
+	return Dungeon::OcclusionDistance();
+}
+
+void UDungeonBlueprintLibrary::Settings_SetOcclusionDistance(int32 Distance)
+{
+	Dungeon::SetOcclusionDistance(Distance);
+}
+
+bool UDungeonBlueprintLibrary::Settings_OccludeDynamicActors()
+{
+	return Dungeon::OccludeDynamicActors();
+}
+
+// ===== Gameplay Utility Functions =====
 
 void UDungeonBlueprintLibrary::Spectate(APlayerController* Controller, bool DestroyPawn)
 {

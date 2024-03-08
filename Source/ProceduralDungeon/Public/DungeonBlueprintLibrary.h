@@ -36,10 +36,10 @@ class PROCEDURALDUNGEON_API UDungeonBlueprintLibrary : public UBlueprintFunction
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Utilities|Procedural Dungeon")
+	UFUNCTION(BlueprintPure, Category = "Utilities|Procedural Dungeon")
 	static bool IsDoorOfType(const TSubclassOf<class ADoor> DoorClass, const class UDoorType* DoorType);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Utilities", meta = (DisplayName = "Equal (Data Table Row Handle)", CompactNodeTitle = "=="))
+	UFUNCTION(BlueprintPure, Category = "Utilities", meta = (DisplayName = "Equal (Data Table Row Handle)", CompactNodeTitle = "=="))
 	static bool CompareDataTableRows(const FDataTableRowHandle& A, const FDataTableRowHandle& B);
 
 	// ===== DoorDirection Math Utility Functions =====
@@ -50,11 +50,11 @@ public:
 	static bool DoorDirection_Valid(const EDoorDirection& A) { return !!A; }
 
 	// Addition (A + B)
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Direction + Direction", CompactNodeTitle = "+", AutoCreateRefTerm = "A,B"))
+	UFUNCTION(BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Direction + Direction", CompactNodeTitle = "+", AutoCreateRefTerm = "A,B"))
 	static EDoorDirection DoorDirection_Add(const EDoorDirection& A, const EDoorDirection& B) { return A + B; }
 
 	// Subtraction (A - B)
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Direction - Direction", CompactNodeTitle = "-", AutoCreateRefTerm = "A,B"))
+	UFUNCTION(BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Direction - Direction", CompactNodeTitle = "-", AutoCreateRefTerm = "A,B"))
 	static EDoorDirection DoorDirection_Sub(const EDoorDirection& A, const EDoorDirection& B) { return A - B; }
 
 	// Increment the direction and set it
@@ -70,8 +70,42 @@ public:
 	static EDoorDirection& DoorDirection_Negate(UPARAM(ref) EDoorDirection& A) { A = -A;  return A; }
 
 	// Transforms North into South and East into West (and vice versa)
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Opposite", CompactNodeTitle = "Opposite", AutoCreateRefTerm = "A"))
+	UFUNCTION(BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Opposite", CompactNodeTitle = "Opposite", AutoCreateRefTerm = "A"))
 	static EDoorDirection DoorDirection_Opposite(const EDoorDirection& A) { return ~A; }
+
+	// ===== Plugin Settings Accessors =====
+
+	// Returns the room unit size in unreal units
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Get Room Unit"))
+	static FVector Settings_RoomUnit();
+
+	// Returns the default door type's size
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Get Default Door Size"))
+	static FVector Settings_DefaultDoorSize();
+
+	// Returns the room offset as a percentage of the height of a room unit
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Get Door Offset"))
+	static float Settings_DoorOffset();
+
+	// Returns true if the plugin's occlusion system is enabled
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Is Occlusion Culling Enabled"))
+	static bool Settings_OcclusionCulling();
+
+	// Enable/disable the plugin's occlusion system
+	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Enable Occlusion Culling"))
+	static void Settings_SetOcclusionCulling(bool Enable);
+
+	// Returns the number of visible room from the player's room (1 mean only the player room is visible)
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Get Occlusion Culling Distance"))
+	static int32 Settings_OcclusionDistance();
+
+	// Set the number of visible rooms from the player's room (1 mean only the player room is visible)
+	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Set Occlusion Culling Distance"))
+	static void Settings_SetOcclusionDistance(int32 Distance);
+
+	// Returns true if actors with a RoomVisibility component should have their visibility toggled with the rooms
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Should Dynamic Actors Be Occluded"))
+	static bool Settings_OccludeDynamicActors();
 
 	// ===== Gameplay Utility Functions =====
 
