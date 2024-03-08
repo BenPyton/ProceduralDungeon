@@ -505,6 +505,47 @@ void URoom::GetAllDoors(TArray<ADoor*>& OutDoors) const
 	}
 }
 
+bool URoom::IsDoorConnected(int DoorIndex) const
+{
+	if (!Connections.IsValidIndex(DoorIndex))
+	{
+		DungeonLog_WarningSilent("Door index out of bounds.");
+		return false;
+	}
+	return Connections[DoorIndex].OtherRoom != nullptr;
+}
+
+bool URoom::AreAllDoorsConnected() const
+{
+	for (const auto& Connection : Connections)
+	{
+		if (Connection.OtherRoom == nullptr)
+			return false;
+	}
+	return true;
+}
+
+URoom* URoom::GetConnectedRoomAt(int DoorIndex) const
+{
+	if (!Connections.IsValidIndex(DoorIndex))
+	{
+		DungeonLog_WarningSilent("Door index out of bounds.");
+		return nullptr;
+	}
+	return Connections[DoorIndex].OtherRoom.Get();
+}
+
+void URoom::GetAllConnectedRooms(TArray<URoom*>& ConnectedRooms) const
+{
+	ConnectedRooms.Empty();
+	for (const auto& Connection : Connections)
+	{
+		URoom* ConnectedRoom = Connection.OtherRoom.Get();
+		if (ConnectedRoom)
+			ConnectedRooms.Add(ConnectedRoom);
+	}
+}
+
 // AABB Overlapping
 bool URoom::Overlap(const URoom& A, const URoom& B)
 {

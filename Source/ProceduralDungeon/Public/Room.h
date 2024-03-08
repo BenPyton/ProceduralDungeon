@@ -117,6 +117,22 @@ public:
 	UFUNCTION(BlueprintPure = false, Category = "Room")
 	void GetAllDoors(UPARAM(ref) TArray<ADoor*>& OutDoors) const;
 
+	// Returns true if the door at DoorIndex is connected to another room.
+	UFUNCTION(BlueprintPure, Category = "Room")
+	bool IsDoorConnected(int DoorIndex) const;
+
+	// Returns true if all the doors of this room are connected to other rooms.
+	UFUNCTION(BlueprintPure, Category = "Room")
+	bool AreAllDoorsConnected() const;
+
+	// Returns the connected room instance at DoorIndex.
+	UFUNCTION(BlueprintPure, Category = "Room")
+	URoom* GetConnectedRoomAt(int DoorIndex) const;
+
+	// Returns all the room instances connected with this one.
+	UFUNCTION(BlueprintPure, Category = "Room")
+	void GetAllConnectedRooms(TArray<URoom*>& ConnectedRooms) const;
+
 private:
 	UPROPERTY(Replicated)
 	URoomData* RoomData {nullptr};
