@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -94,9 +94,14 @@ public:
 	URoomData* ChooseNextRoomData(const URoomData* CurrentRoom, const FDoorDef& DoorData, int& DoorIndex);
 
 	// Return the door which will be spawned between Current Room and Next Room
-	// Use IsDoorOfType function to compare a door class with DoorType.
+	// @param CurrentRoom The first of both rooms to have been generated. By default the door will face this room.
+	// @param NextRoom The second of both rooms to have been generated. Set Flipped to true to make the door facing this room.
+	// @param DoorType The door type set by both room data. Use IsDoorOfType function to compare a door actor class with this.
+	// @param Flipped Tells which room the door is facing between CurrentRoom and NextRoom.
+	// If null is returned or another room than Current and Next, then then door will face CurrentRoom.
+	// @return The door actor class to spawn between CurrentRoom and NextRoom.
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Door"))
-	TSubclassOf<ADoor> ChooseDoor(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType);
+	TSubclassOf<ADoor> ChooseDoor(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType, bool& Flipped);
 
 	// Condition to validate a dungeon Generation
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Is Valid Dungeon"))
