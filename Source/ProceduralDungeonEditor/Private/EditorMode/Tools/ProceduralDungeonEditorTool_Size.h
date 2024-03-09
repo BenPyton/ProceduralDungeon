@@ -93,6 +93,9 @@ public:
 	void ResetDragPoint();
 	void UpdateDataAsset() const;
 
+	void SetSelectedPoint(int32 Index);
+	void ResetSelectedPoint();
+
 private:
 	int32 SelectedPoint {-1};
 	TArray<FRoomPoint> Points;

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,8 @@
 
 #include "ProceduralDungeonEditorTool_Size.h"
 #include "EditorMode/ProceduralDungeonEdMode.h"
+#include "EditorModeManager.h"
+#include "Selection.h"
 #include "ProceduralDungeonEdLog.h"
 #include "ProceduralDungeonUtils.h"
 #include "Room.h"
@@ -132,6 +134,7 @@ void FProceduralDungeonEditorTool_Size::EnterTool()
 	Points[4].AddLinkedPoint(Points[6], EAxisList::XY);
 
 	OnDataChanged();
+	ResetSelectedPoint();
 }
 
 void FProceduralDungeonEditorTool_Size::ExitTool()
@@ -165,28 +168,26 @@ void FProceduralDungeonEditorTool_Size::Render(const FSceneView* View, FViewport
 
 bool FProceduralDungeonEditorTool_Size::HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click)
 {
-	bool bIsHandled = false;
+	ResetSelectedPoint();
 
-	if (HitProxy)
-	{
-		if (HitProxy->IsA(HRoomPointProxy::StaticGetType()))
-		{
-			bIsHandled = true;
-			const HRoomPointProxy* RoomProxy = (HRoomPointProxy*)HitProxy;
-			if (RoomProxy->Index >= 0 && RoomProxy->Index < Points.Num())
-			{
-				DungeonEd_LogInfo("Selected Point: %d", RoomProxy->Index);
-				SelectedPoint = RoomProxy->Index;
-				DragPoint = Points[SelectedPoint].GetLocation();
-			}
-		}
-	}
-	else if (SelectedPoint >= 0)
-	{
-		SelectedPoint = -1;
-	}
+	if (!HitProxy)
+		return false;
 
-	return bIsHandled;
+	if (!HitProxy->IsA(HRoomPointProxy::StaticGetType()))
+		return false;
+
+	const HRoomPointProxy* RoomProxy = (HRoomPointProxy*)HitProxy;
+	checkf(RoomProxy->Index >= 0 && RoomProxy->Index < Points.Num(), TEXT("A room point has been clicked but is out of bounds!"));
+
+	SetSelectedPoint(RoomProxy->Index);
+	GEditor->GetSelectedActors()->DeselectAll();
+
+	// Force translate widget when a point is selected.
+	FEditorModeTools* ModeTools = EdMode->GetModeManager();
+	if (ModeTools)
+		ModeTools->SetWidgetMode(UE::Widget::EWidgetMode::WM_Translate);
+
+	return true;
 }
 
 bool FProceduralDungeonEditorTool_Size::InputKey(FEditorViewportClient* InViewportClient, FViewport* InViewport, FKey InKey, EInputEvent InEvent)
@@ -201,35 +202,33 @@ bool FProceduralDungeonEditorTool_Size::InputDelta(FEditorViewportClient* InView
 	if (InViewportClient->GetCurrentWidgetAxis() == EAxisList::None)
 		return false;
 
-	if (HasValidSelection())
-	{
-		if (!InDrag.IsNearlyZero())
-		{
-			DragPoint += InDrag;
-			FVector OldPoint = Points[SelectedPoint].GetLocation();
-			Points[SelectedPoint].SetLocation(Dungeon::SnapPoint(DragPoint));
-			if (OldPoint != Points[SelectedPoint].GetLocation())
-				UpdateDataAsset();
-		}
-		return true;
-	}
+	if (!HasValidSelection())
+		return false;
 
-	return false;
+	if (!InDrag.IsNearlyZero())
+	{
+		DragPoint += InDrag;
+		FVector OldPoint = Points[SelectedPoint].GetLocation();
+		Points[SelectedPoint].SetLocation(Dungeon::SnapPoint(DragPoint));
+		if (OldPoint != Points[SelectedPoint].GetLocation())
+			UpdateDataAsset();
+	}
+	return true;
 }
 
 bool FProceduralDungeonEditorTool_Size::UsesTransformWidget() const
 {
-	return true;
+	return HasValidSelection() || (GEditor->GetSelectedActorCount() > 0);
 }
 
 bool FProceduralDungeonEditorTool_Size::UsesTransformWidget(WidgetMode CheckMode) const
 {
-	return CheckMode == WidgetMode::WM_Translate;
+	return HasValidSelection() ? (CheckMode == WidgetMode::WM_Translate) : EdMode->FEdMode::UsesTransformWidget(CheckMode);
 }
 
 FVector FProceduralDungeonEditorTool_Size::GetWidgetLocation() const
 {
-	return HasValidSelection() ? DragPoint : FVector::ZeroVector;
+	return HasValidSelection() ? DragPoint : EdMode->FEdMode::GetWidgetLocation();
 }
 
 void FProceduralDungeonEditorTool_Size::OnDataChanged(const URoomData* NewData)
@@ -268,4 +267,19 @@ void FProceduralDungeonEditorTool_Size::UpdateDataAsset() const
 	Data->Modify();
 	Data->FirstPoint = Dungeon::ToRoomLocation(Points[0].GetLocation());
 	Data->SecondPoint = Dungeon::ToRoomLocation(Points[1].GetLocation());
+}
+
+void FProceduralDungeonEditorTool_Size::SetSelectedPoint(int32 Index)
+{
+	if (Index < 0 || Index >= Points.Num())
+		Index = -1;
+
+	DungeonEd_LogInfo("Selected Point: %d", Index);
+	SelectedPoint = Index;
+	ResetDragPoint();
+}
+
+void FProceduralDungeonEditorTool_Size::ResetSelectedPoint()
+{
+	SetSelectedPoint(-1);
 }
