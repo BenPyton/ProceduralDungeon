@@ -31,10 +31,14 @@
 #include "Widgets/Notifications/SErrorText.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/SOverlay.h"
+#include "Widgets/Input/SSpinBox.h"
 #include "FileHelpers.h"
 #include "Engine/LevelScriptBlueprint.h"
 #include "Kismet2/KismetEditorUtilities.h"
 #include "Misc/EngineVersionComparison.h"
+#include "GameFramework/Volume.h"
+#include "Builders/CubeBuilder.h"
+#include "Selection.h"
 #include "ProceduralDungeonEdLog.h"
 #include "ProceduralDungeonEditor.h"
 #include "ProceduralDungeonEdMode.h"
@@ -151,6 +155,51 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 		.Padding(5.0f)
 		.AutoHeight()
 		[
+			SNew(SVerticalBox)
+			.Visibility(this, &SProceduralDungeonEdModeWidget::ShowDataDetails)
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.HAlign(EHorizontalAlignment::HAlign_Center)
+			[
+				SNew(STextBlock)
+				.Text(FText::FromString(TEXT("Utilities")))
+				.Font(SubTitleFont)
+			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(0.0f, 5.0f, 0.0f, 0.0f)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				[
+					SNew(SButton)
+					.Text(FText::FromString(TEXT("Update Selected Volumes")))
+					.IsEnabled_Lambda([this]() { return SelectedVolumeCount > 0; })
+					.OnClicked(this, &SProceduralDungeonEdModeWidget::UpdateSelectedVolumes)
+					.ToolTipText(FText::FromString(TEXT("Selected volumes will be positioned and sized on the room's bounds (defined in data asset).\nAn optional margin can be set.")))
+				]
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(20.0f, 0.0f, 5.0f, 0.0f)
+				.VAlign(EVerticalAlignment::VAlign_Center)
+				[
+					SNew(STextBlock)
+					.Text(FText::FromString(TEXT("Margins")))
+					.ToolTipText(FText::FromString(TEXT("The amount (in Unreal Unit) to extend the volumes on each side of the room bounds (can be negative).")))
+				]
+				+ SHorizontalBox::Slot()
+				.FillWidth(1)
+				[
+					SAssignNew(VolumeMargins, SSpinBox<float>)
+					.Value(10.0f)
+				]
+			]
+		]
+		+ SVerticalBox::Slot()
+		.Padding(5.0f)
+		.AutoHeight()
+		[
 			SNew(SBorder)
 			.HAlign(EHorizontalAlignment::HAlign_Center)
 			.Visibility(this, &SProceduralDungeonEdModeWidget::ShowNote)
@@ -182,10 +231,14 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 	];
 
 	OnLevelChanged();
+
+	RegisterSelectionDelegate(true);
+	OnSelectedActorsChanged(nullptr);
 }
 
 SProceduralDungeonEdModeWidget::~SProceduralDungeonEdModeWidget()
 {
+	RegisterSelectionDelegate(false);
 	ResetCachedData();
 	ResetCachedLevel();
 }
@@ -278,6 +331,50 @@ FReply SProceduralDungeonEdModeWidget::SaveData()
 	return FReply::Handled();
 }
 
+FReply SProceduralDungeonEdModeWidget::UpdateSelectedVolumes()
+{
+	DungeonEd_LogInfo("Update Selected Volumes.");
+
+	auto EdMode = GetEditorMode();
+	TWeakObjectPtr<ARoomLevel> Level;
+	TWeakObjectPtr<URoomData> Data;
+	if (!IsValidRoomData(EdMode, &Data, &Level))
+	{
+		DungeonEd_LogError("Can't update selected volumes: RoomData is not valid.");
+		return FReply::Unhandled();
+	}
+
+	FBoxCenterAndExtent RoomBounds = Data->GetBounds();
+	FVector Size = 2.0f * (FVector(RoomBounds.Extent) + VolumeMargins->GetValue());
+
+	for (auto It = GEditor->GetSelectedActorIterator(); It; ++It)
+	{
+		AVolume* Volume = Cast<AVolume>(*It);
+		if (!IsValid(Volume))
+			continue;
+
+		UCubeBuilder* CubeBrush = Cast<UCubeBuilder>(Volume->BrushBuilder);
+		if (!IsValid(CubeBrush))
+		{
+			DungeonEd_LogWarning("Volume's brush is not a cube. Ignoring this volume.");
+			continue;
+		}
+
+		DungeonEd_LogInfo("Updating volume: '%s'", *Volume->GetName());
+
+		Volume->SetActorLocationAndRotation(RoomBounds.Center, FQuat::Identity);
+
+		CubeBrush->X = Size.X;
+		CubeBrush->Y = Size.Y;
+		CubeBrush->Z = Size.Z;
+
+		// Rebuild volume after changing its builder values
+		CubeBrush->Build(Volume->GetWorld(), Volume);
+	}
+
+	return FReply::Handled();
+}
+
 FSlateColor SProceduralDungeonEdModeWidget::GetSaveButtonColor() const
 {
 	const FLinearColor& Default = FLinearColor::White;
@@ -326,6 +423,44 @@ FProceduralDungeonEdMode* SProceduralDungeonEdModeWidget::GetEditorMode() const
 {
 	checkf(ParentToolkit.IsValid(), TEXT("ParentToolkit is invalid. This should never happen. There is a leakage somewhere."));
 	return ParentToolkit.Pin()->GetEditorMode();
+}
+
+void SProceduralDungeonEdModeWidget::RegisterSelectionDelegate(bool Register)
+{
+	USelection* SelectedActors = GEditor->GetSelectedActors();
+	checkf(IsValid(SelectedActors), TEXT("Editor Actor Selection is not valid!"));
+
+	if (Register)
+	{
+		if (SelectionDelegateHandle.IsValid())
+		{
+			DungeonEd_LogWarning("Can't register SelectionChanged callback: callback is already registered.");
+		}
+		else
+		{
+			DungeonEd_LogInfo("Register SelectionChanged callback.");
+			SelectionDelegateHandle = SelectedActors->SelectionChangedEvent.AddRaw(this, &SProceduralDungeonEdModeWidget::OnSelectedActorsChanged);
+		}
+	}
+	else
+	{
+		if (SelectionDelegateHandle.IsValid())
+		{
+			DungeonEd_LogInfo("Unregister SelectionChanged callback.");
+			SelectedActors->SelectionChangedEvent.Remove(SelectionDelegateHandle);
+			SelectionDelegateHandle.Reset();
+		}
+		else
+		{
+			DungeonEd_LogWarning("Can't unregister SelectionChanged callback: callback is not registered.");
+		}
+	}
+}
+
+void SProceduralDungeonEdModeWidget::OnSelectedActorsChanged(UObject* NewSelectedObject)
+{
+	USelection* SelectedActors = GEditor->GetSelectedActors();
+	SelectedVolumeCount = SelectedActors->CountSelections<AVolume>();
 }
 
 bool SProceduralDungeonEdModeWidget::IsValidRoomLevel(FProceduralDungeonEdMode* EdMode, TWeakObjectPtr<ARoomLevel>* OutLevel) const
