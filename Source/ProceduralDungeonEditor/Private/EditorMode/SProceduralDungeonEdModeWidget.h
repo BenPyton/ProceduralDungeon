@@ -30,6 +30,7 @@ class ARoomLevel;
 class URoomData;
 class FProceduralDungeonEdMode;
 class FProceduralDungeonEdModeToolkit;
+template <typename> class SSpinBox;
 
 class SProceduralDungeonEdModeWidget : public SCompoundWidget
 {
@@ -57,24 +58,31 @@ protected:
 	FReply ReparentLevelActor();
 	FReply EditData();
 	FReply SaveData();
+	FReply UpdateSelectedVolumes();
 	FSlateColor GetSaveButtonColor() const;
 	FSlateColor GetReparentButtonColor() const;
 	void UpdateErrorText();
+
 	void ResetCachedData();
 	void ResetCachedLevel();
 
 	FProceduralDungeonEdMode* GetEditorMode() const;
+	void RegisterSelectionDelegate(bool Register);
+	void OnSelectedActorsChanged(UObject* NewSelectedObject);
 
 	static FLinearColor GetHighlightButtonColor(const FLinearColor& HighlightColor, const FLinearColor& NormalColor = FLinearColor::White, float Speed = 3.0f);
 
 private:
-	TSharedPtr<class SErrorText> Error = nullptr;
-	TSharedPtr<class IDetailsView> DataContentWidget = nullptr;
-	TWeakPtr<FProceduralDungeonEdModeToolkit> ParentToolkit = nullptr;
+	TSharedPtr<class SErrorText> Error {nullptr};
+	TSharedPtr<class IDetailsView> DataContentWidget {nullptr};
+	TSharedPtr<SSpinBox<float>> VolumeMargins {nullptr};
+	TWeakPtr<FProceduralDungeonEdModeToolkit> ParentToolkit {nullptr};
 
-	TSharedPtr<class SBorder> LevelPropertyContainer = nullptr;
-	TWeakObjectPtr<URoomData> CachedData = nullptr;
-	TWeakObjectPtr<ARoomLevel> CachedLevel = nullptr;
+	TSharedPtr<class SBorder> LevelPropertyContainer {nullptr};
+	TWeakObjectPtr<URoomData> CachedData {nullptr};
+	TWeakObjectPtr<ARoomLevel> CachedLevel {nullptr};
 	FDelegateHandle DataDelegateHandle;
 	FDelegateHandle LevelDelegateHandle;
+	FDelegateHandle SelectionDelegateHandle;
+	int32 SelectedVolumeCount {0};
 };
