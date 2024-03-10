@@ -28,11 +28,12 @@
 #include "InputCoreTypes.h"
 #include "UObject/GCObject.h"
 #include "EdMode.h"
+#include "EditorUndoClient.h"
 #include "ProceduralDungeonEdTypes.h"
 
 class FProceduralDungeonEdMode;
 
-class FProceduralDungeonEditorTool : public FGCObject
+class FProceduralDungeonEditorTool : public FGCObject, public FSelfRegisteringEditorUndoClient
 {
 public:
 	FProceduralDungeonEditorTool(FProceduralDungeonEdMode* InEdMode)

@@ -362,6 +362,7 @@ FReply SProceduralDungeonEdModeWidget::UpdateSelectedVolumes()
 	FBoxCenterAndExtent RoomBounds = Data->GetBounds();
 	FVector Size = 2.0f * (FVector(RoomBounds.Extent) + VolumeMargins->GetValue());
 
+	GEditor->BeginTransaction(FText::FromString(TEXT("Update Selected Volumes")));
 	for (auto It = GEditor->GetSelectedActorIterator(); It; ++It)
 	{
 		AVolume* Volume = Cast<AVolume>(*It);
@@ -377,8 +378,10 @@ FReply SProceduralDungeonEdModeWidget::UpdateSelectedVolumes()
 
 		DungeonEd_LogInfo("Updating volume: '%s'", *Volume->GetName());
 
+		Volume->Modify();
 		Volume->SetActorLocationAndRotation(RoomBounds.Center, FQuat::Identity);
 
+		CubeBrush->Modify();
 		CubeBrush->X = Size.X;
 		CubeBrush->Y = Size.Y;
 		CubeBrush->Z = Size.Z;
@@ -386,6 +389,7 @@ FReply SProceduralDungeonEdModeWidget::UpdateSelectedVolumes()
 		// Rebuild volume after changing its builder values
 		CubeBrush->Build(Volume->GetWorld(), Volume);
 	}
+	GEditor->EndTransaction();
 
 	return FReply::Handled();
 }

@@ -144,8 +144,10 @@ bool FProceduralDungeonEditorTool_Door::HandleClick(FEditorViewportClient* InVie
 	{
 		if (IsDoorValid(Data, DoorPreview))
 		{
+			GEditor->BeginTransaction(FText::FromString(TEXT("Add Door")));
 			Data->Modify();
 			Data->Doors.Add(DoorPreview);
+			GEditor->EndTransaction();
 			return true;
 		}
 	}
