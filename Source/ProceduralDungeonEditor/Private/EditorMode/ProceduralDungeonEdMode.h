@@ -57,6 +57,7 @@ public:
 	virtual bool UsesTransformWidget(WidgetMode CheckMode) const;
 	virtual FVector GetWidgetLocation() const override;
 	virtual bool AllowWidgetMove() override { return true; }
+	virtual bool GetPivotForOrbit(FVector& OutPivot) const override;
 
 	bool GetTool(FName ToolName, FProceduralDungeonEditorTool*& OutTool) const;
 	FProceduralDungeonEditorTool* GetActiveTool() const;

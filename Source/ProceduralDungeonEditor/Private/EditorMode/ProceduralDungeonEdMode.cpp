@@ -155,6 +155,20 @@ FVector FProceduralDungeonEdMode::GetWidgetLocation() const
 	return ROUTE_TO_TOOL(GetWidgetLocation());
 }
 
+bool FProceduralDungeonEdMode::GetPivotForOrbit(FVector& OutPivot) const
+{
+	if (!CachedLevelInstance.IsValid())
+		return false;
+
+	URoomData* Data = CachedLevelInstance->Data;
+	if (!IsValid(Data))
+		return false;
+
+	FBoxCenterAndExtent RoomBounds = Data->GetBounds();
+	OutPivot = RoomBounds.Center;
+	return true;
+}
+
 bool FProceduralDungeonEdMode::GetTool(FName ToolName, FProceduralDungeonEditorTool*& OutTool) const
 {
 	for (auto& Tool : Tools)
