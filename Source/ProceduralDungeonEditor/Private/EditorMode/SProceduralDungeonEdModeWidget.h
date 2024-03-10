@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,6 +59,7 @@ protected:
 	FReply EditData();
 	FReply SaveData();
 	FReply UpdateSelectedVolumes();
+	FReply RemoveInvalidDoors();
 	FSlateColor GetSaveButtonColor() const;
 	FSlateColor GetReparentButtonColor() const;
 	void UpdateErrorText();

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -195,6 +195,21 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 					.Value(10.0f)
 				]
 			]
+			+ SVerticalBox::Slot()
+			.AutoHeight()
+			.Padding(0.0f, 5.0f, 0.0f, 0.0f)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				[
+					SNew(SButton)
+					.Text(FText::FromString(TEXT("Remove All Invalid Doors")))
+					//.IsEnabled_Lambda([this]() { return SelectedVolumeCount > 0; })
+					.OnClicked(this, &SProceduralDungeonEdModeWidget::RemoveInvalidDoors)
+					.ToolTipText(FText::FromString(TEXT("All invalid doors (drawn in orange) will be removed.")))
+				]
+			]
 		]
 		+ SVerticalBox::Slot()
 		.Padding(5.0f)
@@ -371,6 +386,24 @@ FReply SProceduralDungeonEdModeWidget::UpdateSelectedVolumes()
 		// Rebuild volume after changing its builder values
 		CubeBrush->Build(Volume->GetWorld(), Volume);
 	}
+
+	return FReply::Handled();
+}
+
+FReply SProceduralDungeonEdModeWidget::RemoveInvalidDoors()
+{
+	TWeakObjectPtr<URoomData> Data;
+	if (!IsValidRoomData(nullptr, &Data))
+		return FReply::Unhandled();
+
+	GEditor->BeginTransaction(FText::FromString(TEXT("Remove Invalid Doors")));
+	Data->Modify();
+	for (int i = Data->Doors.Num() - 1; i >= 0; --i)
+	{
+		if (!Data->IsDoorValid(i))
+			Data->Doors.RemoveAt(i);
+	}
+	GEditor->EndTransaction();
 
 	return FReply::Handled();
 }
