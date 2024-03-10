@@ -154,7 +154,13 @@ bool FProceduralDungeonEditorTool_Door::HandleClick(FEditorViewportClient* InVie
 
 	if (Click.GetKey() == EKeys::RightMouseButton)
 	{
-		DungeonEd_LogInfo("TODO: Delete existing door");
+		if (Data->Doors.Contains(DoorPreview))
+		{
+			GEditor->BeginTransaction(FText::FromString(TEXT("Remove Door")));
+			Data->Modify();
+			Data->Doors.Remove(DoorPreview);
+			GEditor->EndTransaction();
+		}
 		return true;
 	}
 
