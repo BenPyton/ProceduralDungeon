@@ -231,6 +231,16 @@ FVector FProceduralDungeonEditorTool_Size::GetWidgetLocation() const
 	return HasValidSelection() ? DragPoint : EdMode->FEdMode::GetWidgetLocation();
 }
 
+void FProceduralDungeonEditorTool_Size::PostUndo(bool bSuccess)
+{
+	OnDataChanged();
+}
+
+void FProceduralDungeonEditorTool_Size::PostRedo(bool bSuccess)
+{
+	OnDataChanged();
+}
+
 void FProceduralDungeonEditorTool_Size::OnDataChanged(const URoomData* NewData)
 {
 	TWeakObjectPtr<ARoomLevel> Level = EdMode->GetLevel();

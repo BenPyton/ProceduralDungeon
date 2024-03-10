@@ -87,6 +87,10 @@ public:
 	virtual bool UsesTransformWidget(WidgetMode CheckMode) const override;
 	virtual FVector GetWidgetLocation() const override;
 
+	/** FEditorUndoClient interface */
+	virtual void PostUndo(bool bSuccess) override;
+	virtual void PostRedo(bool bSuccess) override;
+
 	virtual void OnDataChanged(const URoomData* NewData = nullptr) override;
 
 	bool HasValidSelection() const;
