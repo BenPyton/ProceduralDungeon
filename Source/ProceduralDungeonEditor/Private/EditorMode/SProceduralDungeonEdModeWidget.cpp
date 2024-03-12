@@ -53,7 +53,7 @@ using StyleProvider = FAppStyle;
 void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TSharedRef<FProceduralDungeonEdModeToolkit> InParentToolkit)
 {
 	ParentToolkit = InParentToolkit;
-	FProceduralDungeonEdMode* EdMode = InParentToolkit->GetEditorMode();
+	FProceduralDungeonEdMode* EdMode = InParentToolkit->GetDungeonEditorMode();
 	FText LevelName = FText::FromString(GetNameSafe(EdMode->GetWorld()));
 
 	FSlateFontInfo TitleFont = StyleProvider::GetFontStyle("DetailsView.CategoryFontStyle");
@@ -325,7 +325,7 @@ void SProceduralDungeonEdModeWidget::ResetCachedLevel()
 FProceduralDungeonEdMode* SProceduralDungeonEdModeWidget::GetEditorMode() const
 {
 	checkf(ParentToolkit.IsValid(), TEXT("ParentToolkit is invalid. This should never happen. There is a leakage somewhere."));
-	return ParentToolkit.Pin()->GetEditorMode();
+	return ParentToolkit.Pin()->GetDungeonEditorMode();
 }
 
 bool SProceduralDungeonEdModeWidget::IsValidRoomLevel(FProceduralDungeonEdMode* EdMode, TWeakObjectPtr<ARoomLevel>* OutLevel) const

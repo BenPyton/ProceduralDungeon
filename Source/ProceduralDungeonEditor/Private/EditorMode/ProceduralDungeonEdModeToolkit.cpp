@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -74,7 +74,7 @@ void FProceduralDungeonEdModeToolkit::BuildToolPalette(FName Palette, FToolBarBu
 	auto CommandList = FProceduralDungeonEditorCommands::Get();
 
 	// DoorType property from Settings
-	UProceduralDungeonEditorObject* EditorSettings = GetEditorMode()->Settings;
+	UProceduralDungeonEditorObject* EditorSettings = GetDungeonEditorMode()->Settings;
 	FPropertyEditorModule& PropertyEditorModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	FSinglePropertyParams Params;
 #if !COMPATIBILITY
@@ -101,9 +101,14 @@ void FProceduralDungeonEdModeToolkit::BuildToolPalette(FName Palette, FToolBarBu
 	ToolbarBuilder.EndSection();
 }
 
-FProceduralDungeonEdMode* FProceduralDungeonEdModeToolkit::GetEditorMode() const
+FEdMode* FProceduralDungeonEdModeToolkit::GetEditorMode() const
 {
-	return (FProceduralDungeonEdMode*)GLevelEditorModeTools().GetActiveMode(FProceduralDungeonEdMode::EM_ProceduralDungeon);
+	return GLevelEditorModeTools().GetActiveMode(FProceduralDungeonEdMode::EM_ProceduralDungeon);
+}
+
+FProceduralDungeonEdMode* FProceduralDungeonEdModeToolkit::GetDungeonEditorMode() const
+{
+	return (FProceduralDungeonEdMode*)GetEditorMode();
 }
 
 TSharedPtr<SWidget> FProceduralDungeonEdModeToolkit::GetInlineContent() const
@@ -113,7 +118,7 @@ TSharedPtr<SWidget> FProceduralDungeonEdModeToolkit::GetInlineContent() const
 
 void FProceduralDungeonEdModeToolkit::OnChangeTool(FName ToolName) const
 {
-	FProceduralDungeonEdMode* EdMode = GetEditorMode();
+	FProceduralDungeonEdMode* EdMode = GetDungeonEditorMode();
 	if (!EdMode)
 	{
 		DungeonEd_LogError("Editor Mode is invalid.");
@@ -126,13 +131,13 @@ void FProceduralDungeonEdModeToolkit::OnChangeTool(FName ToolName) const
 
 bool FProceduralDungeonEdModeToolkit::IsToolEnabled(FName ToolName) const
 {
-	FProceduralDungeonEdMode* EdMode = GetEditorMode();
+	FProceduralDungeonEdMode* EdMode = GetDungeonEditorMode();
 	return EdMode && EdMode->IsToolEnabled(ToolName);
 }
 
 bool FProceduralDungeonEdModeToolkit::IsToolActive(FName ToolName) const
 {
-	FProceduralDungeonEdMode* EdMode = GetEditorMode();
+	FProceduralDungeonEdMode* EdMode = GetDungeonEditorMode();
 	if (EdMode)
 	{
 		FProceduralDungeonEditorTool* Tool = nullptr;

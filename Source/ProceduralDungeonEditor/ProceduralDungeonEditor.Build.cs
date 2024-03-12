@@ -7,7 +7,10 @@ public class ProceduralDungeonEditor : ModuleRules
 	public ProceduralDungeonEditor(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
+
+		// Uncomment that to detect when there are missing includes in cpp files
+		//bUseUnity = false;
+
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "Projects" });
 			
 		PrivateDependencyModuleNames.AddRange(new string[] {
