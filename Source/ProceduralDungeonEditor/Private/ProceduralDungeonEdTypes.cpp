@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Benoit Pelletier
+ * Copyright (c) 2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,28 +22,15 @@
  * SOFTWARE.
  */
 
-#pragma once
+#include "ProceduralDungeonEdTypes.h"
 
-#include "ProceduralDungeonTypes.h"
-#include "Misc/EngineVersionComparison.h"
+EAxisList::Type operator~(const EAxisList::Type& This)
+{
+	return static_cast<EAxisList::Type>(EAxisList::All - This);
+}
 
-#if UE_VERSION_OLDER_THAN(5, 0, 0)
-#define COMPATIBILITY 1
-#else
-#define COMPATIBILITY 0
-#endif
-
-
-#if !COMPATIBILITY
-#include "UnrealWidgetFwd.h"
-#endif
-
-#if COMPATIBILITY
-using WidgetMode = FWidget::EWidgetMode;
-#else
-using WidgetMode = UE::Widget::EWidgetMode;
-#endif
-
-// Adding operators for some engine types
-EAxisList::Type operator~(const EAxisList::Type& This);
-EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other);
+EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other)
+{
+	This = static_cast<EAxisList::Type>(This & Other);
+	return This;
+}
