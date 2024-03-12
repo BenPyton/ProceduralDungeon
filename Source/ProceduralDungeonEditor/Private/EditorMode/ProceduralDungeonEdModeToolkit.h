@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,8 +38,10 @@ public:
 	/** IToolkit interface */
 	virtual FName GetToolkitFName() const override { return FName("ProceduralDungeonEdMode"); }
 	virtual FText GetBaseToolkitName() const override { return NSLOCTEXT("ProceduralDungeonEdModeToolkit", "DisplayName", "ProceduralDungeonEdMode Tool"); }
-	virtual class FProceduralDungeonEdMode* GetEditorMode() const override;
+	virtual FEdMode* GetEditorMode() const override;
 	virtual TSharedPtr<class SWidget> GetInlineContent() const override;
+
+	class FProceduralDungeonEdMode* GetDungeonEditorMode() const;
 
 	void OnChangeTool(FName ToolName) const;
 	bool IsToolEnabled(FName ToolName) const;
