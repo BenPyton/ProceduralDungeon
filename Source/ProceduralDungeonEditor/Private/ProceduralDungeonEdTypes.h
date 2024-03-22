@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 
 #include "ProceduralDungeonTypes.h"
 #include "Misc/EngineVersionComparison.h"
+#include "ProceduralDungeonEdTypes.generated.h"
 
 #if UE_VERSION_OLDER_THAN(5, 0, 0)
 #define COMPATIBILITY 1
@@ -54,3 +55,29 @@ EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other)
 	This = static_cast<EAxisList::Type>(This & Other);
 	return This;
 }
+
+// Holds margin values in 3D (e.g. used for box volumes)
+USTRUCT()
+struct FMargin3f
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	FVector2f X;
+
+	UPROPERTY(EditAnywhere)
+	FVector2f Y;
+
+	UPROPERTY(EditAnywhere)
+	FVector2f Z;
+
+	// Create a new bounds from an existing bounds with the margin applied on it.
+	FBoxCenterAndExtent Apply(const FBoxCenterAndExtent& Bounds) const
+	{
+		FBoxCenterAndExtent NewBounds(Bounds);
+		NewBounds.Extent += 0.5f * FVector(X.X + X.Y, Y.X + Y.Y, Z.X + Z.Y);
+		NewBounds.Center += 0.5f * FVector(X.X - X.Y, Y.X - Y.Y, Z.X - Z.Y);
+		return NewBounds;
+	}
+};

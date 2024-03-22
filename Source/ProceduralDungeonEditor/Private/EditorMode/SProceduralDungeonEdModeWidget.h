@@ -25,6 +25,7 @@
 #pragma once
 
 #include "Framework/Application/SlateApplication.h"
+#include "ProceduralDungeonEdTypes.h"
 
 class ARoomLevel;
 class URoomData;
@@ -76,8 +77,9 @@ protected:
 private:
 	TSharedPtr<class SErrorText> Error {nullptr};
 	TSharedPtr<class IDetailsView> DataContentWidget {nullptr};
-	TSharedPtr<SSpinBox<float>> VolumeMargins {nullptr};
 	TWeakPtr<FProceduralDungeonEdModeToolkit> ParentToolkit {nullptr};
+
+	FMargin3f VolumeMargins;
 
 	TSharedPtr<class SBorder> LevelPropertyContainer {nullptr};
 	TWeakObjectPtr<URoomData> CachedData {nullptr};
