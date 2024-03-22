@@ -43,6 +43,7 @@
 #include "ProceduralDungeonEditor.h"
 #include "ProceduralDungeonEdMode.h"
 #include "ProceduralDungeonEdModeToolkit.h"
+#include "ProceduralDungeonEditorSettings.h"
 #include "Tools/ProceduralDungeonEditorTool.h"
 #include "Room.h" // TODO: remove the need to include Room.h when including RoomLevel.h
 #include "RoomLevel.h"
@@ -65,6 +66,9 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 
 	FSlateFontInfo SubTitleFont = StyleProvider::GetFontStyle("DetailsView.CategoryFontStyle");
 	SubTitleFont.Size = 16;
+
+	const UProceduralDungeonEditorSettings* EditorSettings = GetDefault<UProceduralDungeonEditorSettings>();
+	VolumeMargins = EditorSettings->DefaultMargins;
 
 	TSharedPtr<SScrollBox> DataScrollBox = nullptr;
 
@@ -181,7 +185,7 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 				]
 				+ SHorizontalBox::Slot()
 				.AutoWidth()
-				.Padding(20.0f, 0.0f, 5.0f, 0.0f)
+				.Padding(20.0f, 0.0f, 0.0f, 0.0f)
 				.VAlign(EVerticalAlignment::VAlign_Center)
 				[
 					SNew(STextBlock)
@@ -189,10 +193,70 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 					.ToolTipText(FText::FromString(TEXT("The amount (in Unreal Unit) to extend the volumes on each side of the room bounds (can be negative).")))
 				]
 				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(10.0f, 0.0f, 5.0f, 0.0f)
+				.VAlign(EVerticalAlignment::VAlign_Center)
+				[
+					SNew(STextBlock)
+					.Text(FText::FromString(TEXT("X")))
+				]
+				+ SHorizontalBox::Slot()
 				.FillWidth(1)
 				[
-					SAssignNew(VolumeMargins, SSpinBox<float>)
-					.Value(10.0f)
+					SNew(SSpinBox<float>)
+					.Value(VolumeMargins.X.X)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.X.X = Value; })
+				]
+				+ SHorizontalBox::Slot()
+				.FillWidth(1)
+				[
+					SNew(SSpinBox<float>)
+					.Value(VolumeMargins.X.Y)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.X.Y = Value; })
+				]
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(10.0f, 0.0f, 5.0f, 0.0f)
+				.VAlign(EVerticalAlignment::VAlign_Center)
+				[
+					SNew(STextBlock)
+					.Text(FText::FromString(TEXT("Y")))
+				]
+				+ SHorizontalBox::Slot()
+				.FillWidth(1)
+				[
+					SNew(SSpinBox<float>)
+					.Value(VolumeMargins.Y.X)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.Y.X = Value; })
+				]
+				+ SHorizontalBox::Slot()
+				.FillWidth(1)
+				[
+					SNew(SSpinBox<float>)
+					.Value(VolumeMargins.Y.Y)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.Y.Y = Value; })
+				]
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(10.0f, 0.0f, 5.0f, 0.0f)
+				.VAlign(EVerticalAlignment::VAlign_Center)
+				[
+					SNew(STextBlock)
+					.Text(FText::FromString(TEXT("Z")))
+				]
+				+ SHorizontalBox::Slot()
+				.FillWidth(1)
+				[
+					SNew(SSpinBox<float>)
+					.Value(VolumeMargins.Z.X)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.Z.X = Value; })
+				]
+				+ SHorizontalBox::Slot()
+				.FillWidth(1)
+				[
+					SNew(SSpinBox<float>)
+					.Value(VolumeMargins.Z.Y)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.Z.Y = Value; })
 				]
 			]
 			+ SVerticalBox::Slot()
@@ -360,7 +424,7 @@ FReply SProceduralDungeonEdModeWidget::UpdateSelectedVolumes()
 	}
 
 	FBoxCenterAndExtent RoomBounds = Data->GetBounds();
-	FVector Size = 2.0f * (FVector(RoomBounds.Extent) + VolumeMargins->GetValue());
+	RoomBounds = VolumeMargins.Apply(RoomBounds);
 
 	GEditor->BeginTransaction(FText::FromString(TEXT("Update Selected Volumes")));
 	for (auto It = GEditor->GetSelectedActorIterator(); It; ++It)
@@ -382,9 +446,9 @@ FReply SProceduralDungeonEdModeWidget::UpdateSelectedVolumes()
 		Volume->SetActorLocationAndRotation(RoomBounds.Center, FQuat::Identity);
 
 		CubeBrush->Modify();
-		CubeBrush->X = Size.X;
-		CubeBrush->Y = Size.Y;
-		CubeBrush->Z = Size.Z;
+		CubeBrush->X = 2.0f * RoomBounds.Extent.X;
+		CubeBrush->Y = 2.0f * RoomBounds.Extent.Y;
+		CubeBrush->Z = 2.0f * RoomBounds.Extent.Z;
 
 		// Rebuild volume after changing its builder values
 		CubeBrush->Build(Volume->GetWorld(), Volume);

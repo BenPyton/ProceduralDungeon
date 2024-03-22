@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,10 +27,11 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "RoomData.h"
+#include "ProceduralDungeonEdTypes.h"
 #include "ProceduralDungeonEditorSettings.generated.h"
 
 UCLASS(Config = Editor, DefaultConfig)
-class PROCEDURALDUNGEONEDITOR_API UProceduralDungeonEditorSettings : public UObject
+class UProceduralDungeonEditorSettings : public UObject
 {
 	GENERATED_BODY()
 	
@@ -38,7 +39,7 @@ public:
 	UProceduralDungeonEditorSettings(const FObjectInitializer& ObjectInitializer);
 
 	// The default RoomData class to use in the class picker when creating a new RoomData asset.
-	UPROPERTY(Config, EditAnywhere, Category = "General", NoClear, meta = (AllowAbstract=false))
+	UPROPERTY(Config, EditAnywhere, Category = "General", NoClear, meta = (AllowAbstract = false))
 	TSubclassOf<URoomData> DefaultRoomDataClass;
 
 	// The class picker will not show if the default RoomData class has no child classes
@@ -48,4 +49,7 @@ public:
 	// The class picker will show only the default RoomData and its children
 	//UPROPERTY(Config, EditAnywhere, Category = "General")
 	//bool bShowOnlyDefaultAndChildren;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Room Editor Mode", meta = (Tooltip = "Default margin values on each axis to update volumes in Room Editor mode (format is (X=min, Y=max) for each axis)."))
+	FMargin3f DefaultMargins;
 };

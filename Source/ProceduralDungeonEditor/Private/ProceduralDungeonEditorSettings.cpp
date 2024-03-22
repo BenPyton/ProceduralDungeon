@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,4 +30,11 @@ UProceduralDungeonEditorSettings::UProceduralDungeonEditorSettings(const FObject
 	DefaultRoomDataClass = URoomData::StaticClass();
 	bUseDefaultIfNoChild = true;
 	//bShowOnlyDefaultAndChildren = false;
+
+	DefaultMargins.X.X = 10.0f;
+	DefaultMargins.X.Y = 10.0f;
+	DefaultMargins.Y.X = 10.0f;
+	DefaultMargins.Y.Y = 10.0f;
+	DefaultMargins.Z.X = 10.0f;
+	DefaultMargins.Z.Y = 10.0f;
 }
