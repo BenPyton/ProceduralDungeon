@@ -40,6 +40,7 @@
 #include "Components/BoxComponent.h"
 #include "RoomVisibilityComponent.h"
 #include "RoomVisitor.h"
+#include "RoomObserver.h"
 
 ARoomLevel::ARoomLevel(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -194,6 +195,24 @@ void ARoomLevel::Lock(bool lock)
 		Room->Lock(lock);
 }
 
+void ARoomLevel::RegisterObserver(TScriptInterface<IRoomObserver> Observer, bool Register)
+{
+	UObject* Object = Observer.GetObject();
+	if (!IsValid(Object))
+		return;
+
+	if (!Object->Implements<URoomObserver>())
+	{
+		DungeonLog_Error("Trying to (un)register an observer, but it does not implements IRoomObserver interface!");
+		return;
+	}
+
+	if (Register)
+		Observers.AddUnique(Object);
+	else
+		Observers.Remove(Object);
+}
+
 void ARoomLevel::OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	TriggerActor(OtherActor, true);
@@ -279,6 +298,45 @@ void ARoomLevel::TriggerActor(AActor* Actor, bool IsInTrigger)
 		check(VisitorComp);
 		UpdateVisitor(VisitorComp, IsInTrigger);
 	}
+
+	NotifyObservers(Actor, IsInTrigger);
+}
+
+template<class T, bool V = true>
+struct FValidWeakObjectPtrPredicate
+{
+	static const FValidWeakObjectPtrPredicate<T, V>& Get()
+	{
+		static auto Predicate = FValidWeakObjectPtrPredicate<T, V>();
+		return Predicate;
+	}
+
+	bool operator()(const TWeakObjectPtr<T>& Ptr) const
+	{
+		return Ptr.IsValid() == V;
+	}
+};
+
+void ARoomLevel::NotifyObservers(AActor* Actor, bool Entered)
+{
+	// Removes all invalid pointers
+	CleanObservers();
+
+	const auto NotifyCallback = (Entered) ? IRoomObserver::Execute_OnActorEnterRoom : IRoomObserver::Execute_OnActorExitRoom;
+	for (const auto& Observer : Observers)
+	{
+		// When getting here, an observer should always implements IRoomObserver
+		check(Observer->Implements<URoomObserver>());
+		NotifyCallback(Observer.Get(), this, Actor);
+	}
+}
+
+void ARoomLevel::CleanObservers()
+{
+	int32 Num = Observers.RemoveAllSwap(FValidWeakObjectPtrPredicate<UObject, false>::Get());
+
+	if (Num > 0)
+		DungeonLog_Warning("%d observers have been destroyed, but did not unregistered from its room level!", Num);
 }
 
 void ARoomLevel::PostInitProperties()

@@ -81,6 +81,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Room"))
 	URoom* GetRoom() { return Room; }
 
+	UFUNCTION(BlueprintCallable, Category = "Procedural Dungeon")
+	void RegisterObserver(TScriptInterface<class IRoomObserver> Observer, bool Register = true);
+
 	UFUNCTION()
 	void OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
@@ -99,11 +102,14 @@ private:
 	UPROPERTY(Transient)
 	class UBoxComponent* RoomTrigger = nullptr;
 	TSet<TWeakObjectPtr<UObject>> Visitors;
+	TArray<TWeakObjectPtr<UObject>> Observers;
 
 private:
 	void UpdateBounds();
 	void UpdateVisitor(UObject* Visitor, bool IsInside);
 	void TriggerActor(AActor* Actor, bool IsInTrigger);
+	void NotifyObservers(AActor* Actor, bool Entered);
+	void CleanObservers();
 	virtual void PostInitProperties() override;
 
 #if WITH_EDITOR
