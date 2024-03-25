@@ -546,6 +546,22 @@ void URoom::GetAllConnectedRooms(TArray<URoom*>& ConnectedRooms) const
 	}
 }
 
+FVector URoom::GetBoundsCenter() const
+{
+	FVector Center = GetBounds().Center;
+	if (GeneratorOwner.IsValid())
+	{
+		FTransform DungeonTransform(GeneratorOwner->GetDungeonRotation(), GeneratorOwner->GetDungeonOffset());
+		Center = DungeonTransform.TransformPosition(Center);
+	}
+	return Center;
+}
+
+FVector URoom::GetBoundsExtent() const
+{
+	return GetBounds().Extent;
+}
+
 // AABB Overlapping
 bool URoom::Overlap(const URoom& A, const URoom& B)
 {

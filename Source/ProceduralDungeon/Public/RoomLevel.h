@@ -90,6 +90,12 @@ public:
 	UFUNCTION()
 	void OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon")
+	FVector GetBoundsCenter() const;
+
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon")
+	FVector GetBoundsExtent() const;
+
 public:
 	// Event to notify when the visibility of the room has been toggled.
 	UPROPERTY(BlueprintAssignable, Category = "Procedural Dungeon")
