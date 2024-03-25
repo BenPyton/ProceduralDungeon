@@ -133,6 +133,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Room")
 	void GetAllConnectedRooms(TArray<URoom*>& ConnectedRooms) const;
 
+	UFUNCTION(BlueprintPure, Category = "Room")
+	FVector GetBoundsCenter() const;
+
+	UFUNCTION(BlueprintPure, Category = "Room")
+	FVector GetBoundsExtent() const;
+
 private:
 	UPROPERTY(Replicated)
 	URoomData* RoomData {nullptr};

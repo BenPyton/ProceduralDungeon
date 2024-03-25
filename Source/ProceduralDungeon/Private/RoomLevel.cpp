@@ -223,6 +223,16 @@ void ARoomLevel::OnTriggerEndOverlap(UPrimitiveComponent* OverlappedComp, AActor
 	TriggerActor(OtherActor, false);
 }
 
+FVector ARoomLevel::GetBoundsCenter() const
+{
+	return DungeonTransform.TransformPosition(Bounds.Center);
+}
+
+FVector ARoomLevel::GetBoundsExtent() const
+{
+	return Bounds.Extent;
+}
+
 void ARoomLevel::UpdateBounds()
 {
 	if (IsValid(Room))
