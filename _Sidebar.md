@@ -7,7 +7,8 @@
 [[Getting Started]]\
 [[Room Architecture]]\
 [[Door]]\
-[[Plugin Settings]]
+[[Plugin Settings]]\
+[[Packaging]]
 
 ### Dungeon's Rules Programming
 [[Dungeon Generator]]\
