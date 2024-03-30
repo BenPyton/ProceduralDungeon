@@ -54,10 +54,10 @@ void URoomData::InitializeRoom_Implementation(URoom* Room, UDungeonGraph* Dungeo
 
 FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
 {
-	FBoxMinAndMax LocalBounds = GetIntBounds();
-	FVector Center = Transform.TransformPosition(0.5f * Dungeon::RoomUnit() * FVector(LocalBounds.Min + LocalBounds.Max - FIntVector(1, 1, 0)));
-	FVector Extent = Transform.TransformVector(0.5f * Dungeon::RoomUnit() * FVector(LocalBounds.GetSize()));
-	return FBoxCenterAndExtent(Center, Extent.GetAbs());
+	FBoxCenterAndExtent Bounds = GetIntBounds().ToCenterAndExtent();
+	Bounds.Center = Transform.TransformPosition(Dungeon::RoomUnit() * Bounds.Center);
+	Bounds.Extent = Transform.TransformVector(Dungeon::RoomUnit() * Bounds.Extent).GetAbs();
+	return Bounds;
 }
 
 FIntVector URoomData::GetSize() const

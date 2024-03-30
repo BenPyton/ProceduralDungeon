@@ -115,6 +115,8 @@ public:
 #endif // !UE_BUILD_SHIPPING
 };
 
+// TODO: Use UE built-in TBox<FIntVector> instead?
+// The downside of doing that would be the Center and Extent computation that is slightly different...
 struct PROCEDURALDUNGEON_API FBoxMinAndMax
 {
 public:
@@ -126,6 +128,8 @@ public:
 	FBoxMinAndMax(const FIntVector& A, const FIntVector& B);
 
 	FIntVector GetSize() const;
+
+	FBoxCenterAndExtent ToCenterAndExtent() const;
 
 	static bool Overlap(const FBoxMinAndMax& A, const FBoxMinAndMax& B);
 

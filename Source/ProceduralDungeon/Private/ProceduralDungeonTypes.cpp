@@ -252,6 +252,13 @@ FIntVector FBoxMinAndMax::GetSize() const
 	return Max - Min;
 }
 
+FBoxCenterAndExtent FBoxMinAndMax::ToCenterAndExtent() const
+{
+	FVector Center = 0.5f * FVector(Min + Max - FIntVector(1, 1, 0));
+	FVector Extent = 0.5f * FVector(Max - Min);
+	return FBoxCenterAndExtent(Center, Extent.GetAbs());
+}
+
 bool FBoxMinAndMax::Overlap(const FBoxMinAndMax& A, const FBoxMinAndMax& B)
 {
 	return (A.Max.X > B.Min.X && A.Min.X < B.Max.X)

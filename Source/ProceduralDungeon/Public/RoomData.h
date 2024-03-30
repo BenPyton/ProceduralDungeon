@@ -77,10 +77,10 @@ public:
 public:
 	URoomData();
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Room Data", meta = (DisplayName = "Door Count", CompactNodeTitle = "Door Count"))
+	UFUNCTION(BlueprintPure, Category = "Room Data", meta = (DisplayName = "Door Count", CompactNodeTitle = "Door Count"))
 	int GetNbDoor() const { return Doors.Num(); }
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Room Data")
+	UFUNCTION(BlueprintPure, Category = "Room Data")
 	bool HasCompatibleDoor(const FDoorDef& DoorData) const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Room Data")
