@@ -263,6 +263,15 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 	if (nbDoor <= 0)
 		DungeonLog_Error("The room data '%s' has no door! Nothing could be generated with it!", *GetNameSafe(ParentRoom.GetRoomData()));
 
+	// Cache world before loops
+	const UWorld* World = GetWorld();
+	const FTransform DungeonTransform = bUseGeneratorTransform ? GetTransform() : FTransform::Identity;
+
+	// Collision params to use if bUseWorldCollisionChecks is true
+	FCollisionQueryParams Params;
+	Params.bIgnoreTouches = true;
+	Params.AddIgnoredActor(this);
+
 	AddedRooms.Reset();
 	bool shouldContinue = false;
 	for (int i = 0; shouldContinue = ContinueToAddRoom(), i < nbDoor && shouldContinue; ++i)
@@ -323,6 +332,18 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 			newRoom = NewObject<URoom>(this);
 			newRoom->Init(roomDef, this, InOutRoomList.Num());
 			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomPos, newRoomDoorDir);
+
+			if (bUseWorldCollisionChecks)
+			{
+				const FBoxCenterAndExtent Bounds = newRoom->GetBounds();
+				const bool bCollideWithWorld = World->OverlapBlockingTestByChannel(DungeonTransform.TransformPosition(Bounds.Center), DungeonTransform.GetRotation(), ECC_WorldStatic, FCollisionShape::MakeBox(Bounds.Extent), Params);
+				if (bCollideWithWorld)
+				{
+					// The object will be automatically deleted by the GC
+					newRoom = nullptr;
+					continue;
+				}
+			}
 
 			// Test if it fits in the place
 			if (!URoom::Overlap(*newRoom, InOutRoomList))

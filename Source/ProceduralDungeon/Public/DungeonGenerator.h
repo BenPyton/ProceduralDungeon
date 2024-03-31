@@ -262,6 +262,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Procedural Generation", meta = (EditCondition = "SeedType==ESeedType::AutoIncrement", EditConditionHides, DisplayAfter = "Seed"))
 	uint32 SeedIncrement;
 
+	// If ticked, when trying to place a new room during a dungeon generation,
+	// a box overlap test will be made to make sure the room will not spawn
+	// inside existing meshes in the persistent world.
+	// This is a heavy work and should be ticked only when necessary.
+	// Does not have impact during gameplay. Only during the generation process.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation", AdvancedDisplay)
+	bool bUseWorldCollisionChecks {false};
+
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	void SetSeed(int32 NewSeed);
 
