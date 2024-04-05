@@ -68,6 +68,7 @@ namespace Dungeon
 	bool PROCEDURALDUNGEON_API DrawDebug();
 	bool PROCEDURALDUNGEON_API ShowRoomOrigin();
 	bool PROCEDURALDUNGEON_API CanLoop();
+	ECollisionChannel PROCEDURALDUNGEON_API RoomObjectType();
 
 	void PROCEDURALDUNGEON_API EnableOcclusionCulling(bool Enable);
 	void PROCEDURALDUNGEON_API SetOcclusionDistance(int32 Distance);
