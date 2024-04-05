@@ -33,35 +33,47 @@ UStaticRoomObserverComponent::UStaticRoomObserverComponent()
 void UStaticRoomObserverComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	RegisterToLevel(true);
+	BindToLevel(true);
 }
 
 void UStaticRoomObserverComponent::EndPlay(EEndPlayReason::Type Reason)
 {
 	Super::EndPlay(Reason);
-	RegisterToLevel(false);
+	BindToLevel(false);
 }
 
-void UStaticRoomObserverComponent::OnActorEnterRoom_Implementation(ARoomLevel* RoomLevel, AActor* Actor)
+void UStaticRoomObserverComponent::OnActorEnterRoom(ARoomLevel* RoomLevel, AActor* Actor)
 {
-	IRoomObserver::OnActorEnterRoom_Implementation(RoomLevel, Actor);
 	// Just forward the call to the delegate.
 	ActorEnterRoomEvent.Broadcast(RoomLevel, Actor);
 }
 
-void UStaticRoomObserverComponent::OnActorExitRoom_Implementation(ARoomLevel* RoomLevel, AActor* Actor)
+void UStaticRoomObserverComponent::OnActorExitRoom(ARoomLevel* RoomLevel, AActor* Actor)
 {
-	IRoomObserver::OnActorExitRoom_Implementation(RoomLevel, Actor);
 	// Just forward the call to the delegate.
 	ActorExitRoomEvent.Broadcast(RoomLevel, Actor);
 }
 
-void UStaticRoomObserverComponent::RegisterToLevel(bool Register)
+void UStaticRoomObserverComponent::BindToLevel(bool Bind)
 {
+	if (bBound == Bind)
+		return;
+
 	ULevel* Level = GetComponentLevel();
 	check(IsValid(Level));
 	ARoomLevel* RoomLevel = Cast<ARoomLevel>(Level->GetLevelScriptActor());
 	if (!IsValid(RoomLevel))
 		return;
-	RoomLevel->RegisterObserver(this, Register);
+
+	if (Bind)
+	{
+		RoomLevel->ActorEnterRoomEvent.AddDynamic(this, &UStaticRoomObserverComponent::OnActorEnterRoom);
+		RoomLevel->ActorExitRoomEvent.AddDynamic(this, &UStaticRoomObserverComponent::OnActorExitRoom);
+	}
+	else
+	{
+		RoomLevel->ActorEnterRoomEvent.RemoveDynamic(this, &UStaticRoomObserverComponent::OnActorEnterRoom);
+		RoomLevel->ActorExitRoomEvent.RemoveDynamic(this, &UStaticRoomObserverComponent::OnActorExitRoom);
+	}
+	bBound = Bind;
 }

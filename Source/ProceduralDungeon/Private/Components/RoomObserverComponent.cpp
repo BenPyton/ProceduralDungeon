@@ -26,7 +26,6 @@
 #include "ProceduralDungeonLog.h"
 #include "RoomLevel.h"
 
-// Sets default values for this component's properties
 URoomObserverComponent::URoomObserverComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -35,31 +34,45 @@ URoomObserverComponent::URoomObserverComponent()
 void URoomObserverComponent::OnRoomEnter_Implementation(ARoomLevel* RoomLevel)
 {
 	DungeonLog_InfoSilent("Observer Component '%s' Enters Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	if (!IsValid(RoomLevel))
-		return;
-
-	RoomLevel->RegisterObserver(this, true);
+	BindToLevel(RoomLevel, true);
 }
 
 void URoomObserverComponent::OnRoomExit_Implementation(ARoomLevel* RoomLevel)
 {
 	DungeonLog_InfoSilent("Observer Component '%s' Exits Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
+	BindToLevel(RoomLevel, false);
+}
+
+void URoomObserverComponent::OnActorEnterRoom(ARoomLevel* RoomLevel, AActor* Actor)
+{
+	// Just forward the call to the delegate.
+	ActorEnterRoomEvent.Broadcast(RoomLevel, Actor);
+}
+
+void URoomObserverComponent::OnActorExitRoom(ARoomLevel* RoomLevel, AActor* Actor)
+{
+	// Just forward the call to the delegate.
+	ActorEnterRoomEvent.Broadcast(RoomLevel, Actor);
+}
+
+void URoomObserverComponent::BindToLevel(ARoomLevel* RoomLevel, bool Bind)
+{
+	if (BoundLevels.Contains(RoomLevel) == Bind)
+		return;
+
 	if (!IsValid(RoomLevel))
 		return;
 
-	RoomLevel->RegisterObserver(this, false);
-}
-
-void URoomObserverComponent::OnActorEnterRoom_Implementation(ARoomLevel* RoomLevel, AActor* Actor)
-{
-	IRoomObserver::OnActorEnterRoom_Implementation(RoomLevel, Actor);
-	// Just forward the call to the delegate.
-	ActorEnterRoomEvent.Broadcast(RoomLevel, Actor);
-}
-
-void URoomObserverComponent::OnActorExitRoom_Implementation(ARoomLevel* RoomLevel, AActor* Actor)
-{
-	IRoomObserver::OnActorEnterRoom_Implementation(RoomLevel, Actor);
-	// Just forward the call to the delegate.
-	ActorEnterRoomEvent.Broadcast(RoomLevel, Actor);
+	if (Bind)
+	{
+		RoomLevel->ActorEnterRoomEvent.AddDynamic(this, &URoomObserverComponent::OnActorEnterRoom);
+		RoomLevel->ActorExitRoomEvent.AddDynamic(this, &URoomObserverComponent::OnActorExitRoom);
+		BoundLevels.Add(RoomLevel);
+	}
+	else
+	{
+		RoomLevel->ActorEnterRoomEvent.RemoveDynamic(this, &URoomObserverComponent::OnActorEnterRoom);
+		RoomLevel->ActorExitRoomEvent.RemoveDynamic(this, &URoomObserverComponent::OnActorExitRoom);
+		BoundLevels.Remove(RoomLevel);
+	}
 }

@@ -26,22 +26,24 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "RoomObserver.h"
 #include "RoomVisitor.h"
 #include "RoomObserverComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoomObserverEvent, ARoomLevel*, RoomLevel, AActor*, Actor);
 
-// Room Observer that auto-(un)register itself at BeginPlay, EndPlay and when it moves from one room to another.
-// Could observe (be registered) in multiple rooms at once if the actor overlaps multiple room.
+// Room Observer that auto-(un)bind itself when it enters/exits a dungeon room.
+// Could observe (be bound) multiple rooms at once if the actor overlaps multiple room.
 // This component **does** track its own Room, thus the actor can move between rooms (use StaticRoomObserverComponent instead if this behavior is not needed).
 UCLASS(ClassGroup = "ProceduralDungeon", meta = (BlueprintSpawnableComponent))
-class PROCEDURALDUNGEON_API URoomObserverComponent : public UActorComponent, public IRoomObserver, public IRoomVisitor
+class PROCEDURALDUNGEON_API URoomObserverComponent : public UActorComponent, public IRoomVisitor
 {
 	GENERATED_BODY()
 
 public:	
 	URoomObserverComponent();
+
+	FRoomObserverEvent& OnActorEnterRoomEvent() { return ActorEnterRoomEvent; }
+	FRoomObserverEvent& OnActorExitRoomEvent() { return ActorExitRoomEvent; }
 
 protected:
 	UPROPERTY(BlueprintAssignable, Category = "Room Observer", meta = (DisplayName = "On Actor Enter Room"))
@@ -56,8 +58,14 @@ private:
 	virtual void OnRoomExit_Implementation(ARoomLevel* RoomLevel) override;
 	//~ END IRoomVisitor
 
-	//~ BEGIN IRoomObserver
-	virtual void OnActorEnterRoom_Implementation(ARoomLevel* RoomLevel, AActor* Actor) override;
-	virtual void OnActorExitRoom_Implementation(ARoomLevel* RoomLevel, AActor* Actor) override;
-	//~ END IRoomObserver
+	void BindToLevel(ARoomLevel* RoomLevel, bool Bind);
+
+	UFUNCTION()
+	void OnActorEnterRoom(ARoomLevel* RoomLevel, AActor* Actor);
+
+	UFUNCTION()
+	void OnActorExitRoom(ARoomLevel* RoomLevel, AActor* Actor);
+
+private:
+	TSet<ARoomLevel*> BoundLevels;
 };
