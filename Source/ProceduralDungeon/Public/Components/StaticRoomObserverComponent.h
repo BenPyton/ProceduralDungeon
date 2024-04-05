@@ -26,16 +26,15 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "RoomObserver.h"
 #include "StaticRoomObserverComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FStaticRoomObserverEvent, ARoomLevel*, RoomLevel, AActor*, Actor);
 
-// Room Observer that auto-(un)register itself at BeginPlay and EndPlay.
-// This component will register to the level it belongs to. So it needs to be placed directly in the Room map.
-// This component does **not** track its own Room, thus the actor should not be moved between rooms (use RoomObserverComponent instead).
+// Room Observer that auto-(un)bind itself at BeginPlay and EndPlay.
+// This component will bind to the level it belongs to. So it needs to be placed directly in the Room map.
+// This component does **not** track its own Room, thus the actor should not move between rooms (use RoomObserverComponent instead).
 UCLASS(ClassGroup = "ProceduralDungeon", meta = (BlueprintSpawnableComponent))
-class PROCEDURALDUNGEON_API UStaticRoomObserverComponent : public UActorComponent, public IRoomObserver
+class PROCEDURALDUNGEON_API UStaticRoomObserverComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -57,10 +56,14 @@ protected:
 	FStaticRoomObserverEvent ActorExitRoomEvent;
 
 private:
-	//~ BEGIN IRoomObserver
-	virtual void OnActorEnterRoom_Implementation(ARoomLevel* RoomLevel, AActor* Visitor) override;
-	virtual void OnActorExitRoom_Implementation(ARoomLevel* RoomLevel, AActor* Visitor) override;
-	//~ END IRoomObserver
+	void BindToLevel(bool Bind);
 
-	void RegisterToLevel(bool Register);
+	UFUNCTION()
+	void OnActorEnterRoom(ARoomLevel* RoomLevel, AActor* Visitor);
+
+	UFUNCTION()
+	void OnActorExitRoom(ARoomLevel* RoomLevel, AActor* Visitor);
+
+private:
+	bool bBound {false};
 };
