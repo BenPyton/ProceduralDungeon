@@ -91,7 +91,7 @@ void ARoomLevel::BeginPlay()
 	RoomTrigger->SetCanEverAffectNavigation(false);
 	RoomTrigger->SetGenerateOverlapEvents(true);
 	RoomTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	RoomTrigger->SetCollisionObjectType(ROOM_TRIGGER_OBJECT_TYPE);
+	RoomTrigger->SetCollisionObjectType(Dungeon::RoomObjectType());
 	RoomTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 	RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Ignore);
 	RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);

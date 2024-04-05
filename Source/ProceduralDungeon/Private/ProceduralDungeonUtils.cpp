@@ -133,6 +133,12 @@ bool Dungeon::CanLoop()
 	return Settings->CanLoop;
 }
 
+ECollisionChannel Dungeon::RoomObjectType()
+{
+	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
+	return Settings->RoomObjectType;
+}
+
 void Dungeon::EnableOcclusionCulling(bool Enable)
 {
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();

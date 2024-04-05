@@ -55,6 +55,12 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "General")
 	bool CanLoop;
 
+	// The object type used for the dungeon rooms trigger boxes.
+	// Defaulted to Engine Trace Channel 6.
+	// You can create new ones in your project settings under the Collision tab.
+	UPROPERTY(EditAnywhere, config, Category = "General")
+	TEnumAsByte<ECollisionChannel> RoomObjectType {ECollisionChannel::ECC_EngineTraceChannel6};
+
 	// The rooms visibility will be toggled off when the player is not inside it or in a room next to it.
 	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta = (DisplayName = "Enable Occlusion Culling"))
 	bool OcclusionCulling;
