@@ -51,7 +51,7 @@ public:
 
 	// When true, doors will be connected as long they are at the same place.
 	// When false, only the doors between the previous and the new generated room will be connected.
-	// TODO: Deprecate this global setting and make a variable in DungeonGenerator actors instead
+	// DEPRECATED: Keep it true and use the CanLoop setting in the DungeonGenerator actor instead. This project-wide setting will be removed in a future version.
 	UPROPERTY(EditAnywhere, config, Category = "General")
 	bool CanLoop;
 

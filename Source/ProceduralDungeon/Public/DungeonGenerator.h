@@ -253,14 +253,33 @@ private:
 	void OnStateEnd(EGenerationState State);
 
 public:
+	// If ticked, the rooms location and rotation will be relative to this actor transform.
+	// If unticked, the rooms will be placed relatively to the world's origin.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
 	bool bUseGeneratorTransform;
+
+	// In which order the dungeon generate rooms.
+	// Depth First: Dungeon will use the last generated room to place the next one. Resulting in a more linear dungeon.
+	// Breadth First: Dungeon will generate a room at each door of the current one before going to the next room. Resulting in a more spread dungeon.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
 	EGenerationType GenerationType;
+
+	// How to handle the seed at each generation call.
+	// Random: Generate and use a random seed.
+	// Auto Increment: Use Seed for first generation, and increment it by SeedIncrement in each subsequent generation.
+	// Fixed: Use only Seed for each generation.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
 	ESeedType SeedType;
+
+	// The increment number for each subsequent dungeon generation when SeedType is AutoIncrement.
 	UPROPERTY(EditAnywhere, Category = "Procedural Generation", meta = (EditCondition = "SeedType==ESeedType::AutoIncrement", EditConditionHides, DisplayAfter = "Seed"))
 	uint32 SeedIncrement;
+
+	// If ticked, newly placed room will check if any door is aligned with another room, and if so will connect them.
+	// If unticked, only the doors between CurrentRoom and NextRoom (in the function ChooseNextRoom) will be connected.
+	// (will only have effect if the deprecated CanLoop in the plugin settings is ticked too, until it is removed in a future version)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
+	bool bCanLoop {true};
 
 	// If ticked, when trying to place a new room during a dungeon generation,
 	// a box overlap test will be made to make sure the room will not spawn

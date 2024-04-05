@@ -350,7 +350,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 			{
 				// connect the doors to all possible existing rooms
 				URoom::Connect(*newRoom, doorIndex, ParentRoom, i);
-				if (Dungeon::CanLoop())
+				if (bCanLoop && Dungeon::CanLoop())
 				{
 					newRoom->TryConnectToExistingDoors(InOutRoomList);
 				}
