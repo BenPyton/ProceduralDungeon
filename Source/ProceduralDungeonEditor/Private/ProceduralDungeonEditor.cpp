@@ -25,7 +25,7 @@
 #include "ProceduralDungeonEditor.h"
 #include "ProceduralDungeonEdLog.h"
 #include "Customizations/DoorDefCustomization.h"
-#include "Customizations/Margin3fCustomization.h"
+#include "Customizations/Margin3DCustomization.h"
 #include "ProceduralDungeonTypes.h"
 #include "IAssetTools.h"
 #include "Interfaces/IPluginManager.h"
@@ -64,7 +64,7 @@ void FProceduralDungeonEditorModule::StartupModule()
 	{
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 		PropertyModule.RegisterCustomPropertyTypeLayout(FDoorDef::StaticStruct()->GetFName(), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FDoorDefCustomization::MakeInstance));
-		PropertyModule.RegisterCustomPropertyTypeLayout(FMargin3f::StaticStruct()->GetFName(), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FMargin3fCustomization::MakeInstance));
+		PropertyModule.RegisterCustomPropertyTypeLayout(FMargin3D::StaticStruct()->GetFName(), FOnGetPropertyTypeCustomizationInstance::CreateStatic(&FMargin3DCustomization::MakeInstance));
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
 
@@ -100,7 +100,7 @@ void FProceduralDungeonEditorModule::ShutdownModule()
 	{
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 		PropertyModule.UnregisterCustomPropertyTypeLayout(FDoorDef::StaticStruct()->GetFName());
-		PropertyModule.UnregisterCustomPropertyTypeLayout(FMargin3f::StaticStruct()->GetFName());
+		PropertyModule.UnregisterCustomPropertyTypeLayout(FMargin3D::StaticStruct()->GetFName());
 	}
 
 	// Unregister editor mode

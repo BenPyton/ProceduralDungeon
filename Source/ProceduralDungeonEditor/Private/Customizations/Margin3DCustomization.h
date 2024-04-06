@@ -27,7 +27,7 @@
 #include "IPropertyTypeCustomization.h"
 #include "PropertyHandle.h"
 
-class FMargin3fCustomization : public IPropertyTypeCustomization
+class FMargin3DCustomization : public IPropertyTypeCustomization
 {
 public:
 	static TSharedRef<IPropertyTypeCustomization> MakeInstance();
