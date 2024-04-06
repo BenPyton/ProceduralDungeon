@@ -38,7 +38,7 @@
 #include "Misc/EngineVersionComparison.h"
 #include "GameFramework/Volume.h"
 #include "Builders/CubeBuilder.h"
-#include "Selection.h"
+#include "Engine/Selection.h"
 #include "ProceduralDungeonEdLog.h"
 #include "ProceduralDungeonEditor.h"
 #include "ProceduralDungeonEdMode.h"
@@ -204,15 +204,15 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 				.FillWidth(1)
 				[
 					SNew(SSpinBox<float>)
-					.Value(VolumeMargins.X.X)
-					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.X.X = Value; })
+					.Value(VolumeMargins.XAxis.X)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.XAxis.X = Value; })
 				]
 				+ SHorizontalBox::Slot()
 				.FillWidth(1)
 				[
 					SNew(SSpinBox<float>)
-					.Value(VolumeMargins.X.Y)
-					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.X.Y = Value; })
+					.Value(VolumeMargins.XAxis.Y)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.XAxis.Y = Value; })
 				]
 				+ SHorizontalBox::Slot()
 				.AutoWidth()
@@ -226,15 +226,15 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 				.FillWidth(1)
 				[
 					SNew(SSpinBox<float>)
-					.Value(VolumeMargins.Y.X)
-					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.Y.X = Value; })
+					.Value(VolumeMargins.YAxis.X)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.YAxis.X = Value; })
 				]
 				+ SHorizontalBox::Slot()
 				.FillWidth(1)
 				[
 					SNew(SSpinBox<float>)
-					.Value(VolumeMargins.Y.Y)
-					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.Y.Y = Value; })
+					.Value(VolumeMargins.YAxis.Y)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.YAxis.Y = Value; })
 				]
 				+ SHorizontalBox::Slot()
 				.AutoWidth()
@@ -248,15 +248,15 @@ void SProceduralDungeonEdModeWidget::Construct(const FArguments& InArgs, TShared
 				.FillWidth(1)
 				[
 					SNew(SSpinBox<float>)
-					.Value(VolumeMargins.Z.X)
-					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.Z.X = Value; })
+					.Value(VolumeMargins.ZAxis.X)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.ZAxis.X = Value; })
 				]
 				+ SHorizontalBox::Slot()
 				.FillWidth(1)
 				[
 					SNew(SSpinBox<float>)
-					.Value(VolumeMargins.Z.Y)
-					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.Z.Y = Value; })
+					.Value(VolumeMargins.ZAxis.Y)
+					.OnValueChanged_Lambda([this](float Value) {VolumeMargins.ZAxis.Y = Value; })
 				]
 			]
 			+ SVerticalBox::Slot()

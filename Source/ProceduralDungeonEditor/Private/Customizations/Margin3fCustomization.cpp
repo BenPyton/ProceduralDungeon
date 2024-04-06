@@ -36,9 +36,9 @@ TSharedRef<IPropertyTypeCustomization> FMargin3fCustomization::MakeInstance()
 void FMargin3fCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructPropertyHandle, class FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
 	TSharedPtr<IPropertyHandle> AxisProps[3] = {
-		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3f, X)),
-		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3f, Y)),
-		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3f, Z))
+		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3f, XAxis)),
+		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3f, YAxis)),
+		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3f, ZAxis))
 	};
 
 	TSharedPtr<SHorizontalBox> ValueRow;
@@ -54,8 +54,8 @@ void FMargin3fCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructP
 
 	for (const auto& AxisProp : AxisProps)
 	{
-		auto PositiveProp = AxisProp->GetChildHandle(GET_MEMBER_NAME_CHECKED(FVector2f, X));
-		auto NegativeProp = AxisProp->GetChildHandle(GET_MEMBER_NAME_CHECKED(FVector2f, Y));
+		auto PositiveProp = AxisProp->GetChildHandle(GET_MEMBER_NAME_CHECKED(FVector2D, X));
+		auto NegativeProp = AxisProp->GetChildHandle(GET_MEMBER_NAME_CHECKED(FVector2D, Y));
 
 		// Axis name
 		ValueRow->AddSlot()
@@ -64,20 +64,27 @@ void FMargin3fCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructP
 				AxisProp->CreatePropertyNameWidget()
 			];
 
-		// Margin along positive axis
-		ValueRow->AddSlot()
-			.AutoWidth()
-			[
-				PositiveProp->CreatePropertyValueWidget()
-			];
+		if (PositiveProp)
+		{
+			// Margin along positive axis
+			ValueRow->AddSlot()
+				.AutoWidth()
+				.Padding(3.0f, 0.0f)
+				[
+					PositiveProp->CreatePropertyValueWidget()
+				];
+		}
 
-		// Margin along negative axis
-		ValueRow->AddSlot()
-			.AutoWidth()
-			.Padding(0.0f, 0.0f, 20.0f, 0.0f)
-			[
-				NegativeProp->CreatePropertyValueWidget()
-			];
+		if (NegativeProp)
+		{
+			// Margin along negative axis
+			ValueRow->AddSlot()
+				.AutoWidth()
+				.Padding(0.0f, 0.0f, 20.0f, 0.0f)
+				[
+					NegativeProp->CreatePropertyValueWidget()
+				];
+		}
 	}
 }
 

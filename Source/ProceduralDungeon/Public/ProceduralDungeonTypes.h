@@ -26,6 +26,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Math/GenericOctree.h" // FBoxCenterAndExtent
 #include "ProceduralDungeonTypes.generated.h"
 
 UENUM()

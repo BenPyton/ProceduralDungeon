@@ -26,6 +26,7 @@
 
 #include "ProceduralDungeonTypes.h"
 #include "Misc/EngineVersionComparison.h"
+#include "Math/GenericOctree.h" // FBoxCenterAndExtent
 #include "ProceduralDungeonEdTypes.generated.h"
 
 #if UE_VERSION_OLDER_THAN(5, 0, 0)
@@ -45,16 +46,9 @@ using WidgetMode = FWidget::EWidgetMode;
 using WidgetMode = UE::Widget::EWidgetMode;
 #endif
 
-EAxisList::Type operator~(const EAxisList::Type& This)
-{
-	return static_cast<EAxisList::Type>(EAxisList::All - This);
-}
-
-EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other)
-{
-	This = static_cast<EAxisList::Type>(This & Other);
-	return This;
-}
+// Some utility functions for EAxisList
+EAxisList::Type operator~(const EAxisList::Type& This);
+EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other);
 
 // Holds margin values in 3D (e.g. used for box volumes)
 USTRUCT()
@@ -63,21 +57,15 @@ struct FMargin3f
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
-	FVector2f X;
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "X"))
+	FVector2D XAxis;
 
-	UPROPERTY(EditAnywhere)
-	FVector2f Y;
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Y"))
+	FVector2D YAxis;
 
-	UPROPERTY(EditAnywhere)
-	FVector2f Z;
+	UPROPERTY(EditAnywhere, meta = (DisplayName = "Z"))
+	FVector2D ZAxis;
 
 	// Create a new bounds from an existing bounds with the margin applied on it.
-	FBoxCenterAndExtent Apply(const FBoxCenterAndExtent& Bounds) const
-	{
-		FBoxCenterAndExtent NewBounds(Bounds);
-		NewBounds.Extent += 0.5f * FVector(X.X + X.Y, Y.X + Y.Y, Z.X + Z.Y);
-		NewBounds.Center += 0.5f * FVector(X.X - X.Y, Y.X - Y.Y, Z.X - Z.Y);
-		return NewBounds;
-	}
+	FBoxCenterAndExtent Apply(const FBoxCenterAndExtent& Bounds) const;
 };
