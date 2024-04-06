@@ -22,23 +22,23 @@
 * SOFTWARE.
 */
 
-#include "Margin3fCustomization.h"
+#include "Margin3DCustomization.h"
 #include "ProceduralDungeonEditorSettings.h"
 #include "PropertyCustomizationHelpers.h"
 
-#define LOCTEXT_NAMESPACE "FMargin3fCustomization"
+#define LOCTEXT_NAMESPACE "FMargin3DCustomization"
 
-TSharedRef<IPropertyTypeCustomization> FMargin3fCustomization::MakeInstance()
+TSharedRef<IPropertyTypeCustomization> FMargin3DCustomization::MakeInstance()
 {
-	return MakeShareable(new FMargin3fCustomization());
+	return MakeShareable(new FMargin3DCustomization());
 }
 
-void FMargin3fCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructPropertyHandle, class FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
+void FMargin3DCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructPropertyHandle, class FDetailWidgetRow& HeaderRow, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
 	TSharedPtr<IPropertyHandle> AxisProps[3] = {
-		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3f, XAxis)),
-		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3f, YAxis)),
-		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3f, ZAxis))
+		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3D, XAxis)),
+		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3D, YAxis)),
+		StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FMargin3D, ZAxis))
 	};
 
 	TSharedPtr<SHorizontalBox> ValueRow;
@@ -88,7 +88,7 @@ void FMargin3fCustomization::CustomizeHeader(TSharedRef<IPropertyHandle> StructP
 	}
 }
 
-void FMargin3fCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, class IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
+void FMargin3DCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, class IDetailChildrenBuilder& StructBuilder, IPropertyTypeCustomizationUtils& StructCustomizationUtils)
 {
 	// TODO?
 }

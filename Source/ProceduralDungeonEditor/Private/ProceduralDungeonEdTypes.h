@@ -52,18 +52,18 @@ EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other)
 
 // Holds margin values in 3D (e.g. used for box volumes)
 USTRUCT()
-struct FMargin3f
+struct FMargin3D
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "X"))
+	UPROPERTY(EditAnywhere, Category = "Margin", meta = (DisplayName = "X"))
 	FVector2D XAxis;
 
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Y"))
+	UPROPERTY(EditAnywhere, Category = "Margin", meta = (DisplayName = "Y"))
 	FVector2D YAxis;
 
-	UPROPERTY(EditAnywhere, meta = (DisplayName = "Z"))
+	UPROPERTY(EditAnywhere, Category = "Margin", meta = (DisplayName = "Z"))
 	FVector2D ZAxis;
 
 	// Create a new bounds from an existing bounds with the margin applied on it.

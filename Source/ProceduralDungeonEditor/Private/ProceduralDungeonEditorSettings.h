@@ -51,5 +51,5 @@ public:
 	//bool bShowOnlyDefaultAndChildren;
 
 	UPROPERTY(Config, EditAnywhere, Category = "Room Editor Mode", meta = (Tooltip = "Default margin values on each axis to update volumes in Room Editor mode (format is (X=min, Y=max) for each axis)."))
-	FMargin3f DefaultMargins;
+	FMargin3D DefaultMargins;
 };

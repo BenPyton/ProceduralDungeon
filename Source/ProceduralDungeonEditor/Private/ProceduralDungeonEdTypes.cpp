@@ -35,7 +35,7 @@ EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other)
 	return This;
 }
 
-FBoxCenterAndExtent FMargin3f::Apply(const FBoxCenterAndExtent& Bounds) const
+FBoxCenterAndExtent FMargin3D::Apply(const FBoxCenterAndExtent& Bounds) const
 {
 	FBoxCenterAndExtent NewBounds(Bounds);
 	NewBounds.Extent += 0.5f * FVector(XAxis.X + XAxis.Y, YAxis.X + YAxis.Y, ZAxis.X + ZAxis.Y);

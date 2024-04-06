@@ -79,7 +79,7 @@ private:
 	TSharedPtr<class IDetailsView> DataContentWidget {nullptr};
 	TWeakPtr<FProceduralDungeonEdModeToolkit> ParentToolkit {nullptr};
 
-	FMargin3f VolumeMargins;
+	FMargin3D VolumeMargins;
 
 	TSharedPtr<class SBorder> LevelPropertyContainer {nullptr};
 	TWeakObjectPtr<URoomData> CachedData {nullptr};
