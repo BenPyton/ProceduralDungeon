@@ -25,7 +25,7 @@
 #include "ProceduralDungeonEditorTool_Size.h"
 #include "EditorMode/ProceduralDungeonEdMode.h"
 #include "EditorModeManager.h"
-#include "Selection.h"
+#include "Engine/Selection.h"
 #include "ProceduralDungeonEdLog.h"
 #include "ProceduralDungeonUtils.h"
 #include "Room.h"
@@ -185,7 +185,7 @@ bool FProceduralDungeonEditorTool_Size::HandleClick(FEditorViewportClient* InVie
 	// Force translate widget when a point is selected.
 	FEditorModeTools* ModeTools = EdMode->GetModeManager();
 	if (ModeTools)
-		ModeTools->SetWidgetMode(UE::Widget::EWidgetMode::WM_Translate);
+		ModeTools->SetWidgetMode(WidgetMode::WM_Translate);
 
 	return true;
 }

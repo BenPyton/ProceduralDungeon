@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Benoit Pelletier
+ * Copyright (c) 2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,19 +22,23 @@
  * SOFTWARE.
  */
 
-#include "ProceduralDungeonEditorSettings.h"
+#include "ProceduralDungeonEdTypes.h"
 
-UProceduralDungeonEditorSettings::UProceduralDungeonEditorSettings(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+EAxisList::Type operator~(const EAxisList::Type& This)
 {
-	DefaultRoomDataClass = URoomData::StaticClass();
-	bUseDefaultIfNoChild = true;
-	//bShowOnlyDefaultAndChildren = false;
+	return static_cast<EAxisList::Type>(EAxisList::All - This);
+}
 
-	DefaultMargins.XAxis.X = 10.0f;
-	DefaultMargins.XAxis.Y = 10.0f;
-	DefaultMargins.YAxis.X = 10.0f;
-	DefaultMargins.YAxis.Y = 10.0f;
-	DefaultMargins.ZAxis.X = 10.0f;
-	DefaultMargins.ZAxis.Y = 10.0f;
+EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other)
+{
+	This = static_cast<EAxisList::Type>(This & Other);
+	return This;
+}
+
+FBoxCenterAndExtent FMargin3f::Apply(const FBoxCenterAndExtent& Bounds) const
+{
+	FBoxCenterAndExtent NewBounds(Bounds);
+	NewBounds.Extent += 0.5f * FVector(XAxis.X + XAxis.Y, YAxis.X + YAxis.Y, ZAxis.X + ZAxis.Y);
+	NewBounds.Center += 0.5f * FVector(XAxis.X - XAxis.Y, YAxis.X - YAxis.Y, ZAxis.X - ZAxis.Y);
+	return NewBounds;
 }
