@@ -29,6 +29,7 @@
 #include "Engine/LevelScriptBlueprint.h"
 #include "ProceduralDungeonEdModeToolkit.h"
 #include "ProceduralDungeonEdLog.h"
+#include "ProceduralDungeonEditorSettings.h"
 #include "ProceduralDungeonEditorObject.h"
 #include "Tools/ProceduralDungeonEditorTool_Size.h"
 #include "Tools/ProceduralDungeonEditorTool_Door.h"
@@ -157,6 +158,10 @@ FVector FProceduralDungeonEdMode::GetWidgetLocation() const
 
 bool FProceduralDungeonEdMode::GetPivotForOrbit(FVector& OutPivot) const
 {
+	const auto* PluginSettings = GetDefault<UProceduralDungeonEditorSettings>();
+	if (!PluginSettings->bUseRoomAsOrbitPivot)
+		return false;
+
 	if (!CachedLevelInstance.IsValid())
 		return false;
 

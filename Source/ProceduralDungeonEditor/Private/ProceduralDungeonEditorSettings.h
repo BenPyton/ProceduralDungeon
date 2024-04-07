@@ -53,4 +53,10 @@ public:
 	// Default margin values on each axis to update volumes in Room Editor mode.
 	UPROPERTY(Config, EditAnywhere, Category = "Room Editor Mode")
 	FMargin3D DefaultMargins;
+
+	// When ticked the orbit rotation of the camera will use the room bounds center as pivot point
+	// instead of the current selected actor when the Room Editor Mode is active.
+	// (Works only when "Orbit Camera Around Selection" is ticked in your Editor Preferences)
+	UPROPERTY(Config, EditAnywhere, Category = "Room Editor Mode", meta = (DisplayName = "Use the room bounds center as pivot for camera orbit"))
+	bool bUseRoomAsOrbitPivot {true};
 };
