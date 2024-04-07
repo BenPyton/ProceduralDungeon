@@ -43,6 +43,9 @@ UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer&
 	// Debug settings
 	DrawDebug = true;
 	ShowRoomOrigin = false;
+	bFlipDoorArrowSide = false;
+	DoorArrowLength = 300.0f;
+	DoorArrowHeadSize = 300.0f;
 	OnScreenPrintDebug = false;
 	PrintDebugDuration = 60.0f;
 

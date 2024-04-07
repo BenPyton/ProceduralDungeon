@@ -69,6 +69,9 @@ namespace Dungeon
 	bool PROCEDURALDUNGEON_API OccludeDynamicActors();
 	bool PROCEDURALDUNGEON_API DrawDebug();
 	bool PROCEDURALDUNGEON_API ShowRoomOrigin();
+	bool PROCEDURALDUNGEON_API FlipDoorArrow();
+	float PROCEDURALDUNGEON_API DoorArrowLength();
+	float PROCEDURALDUNGEON_API DoorArrowHeadSize();
 	bool PROCEDURALDUNGEON_API CanLoop();
 	ECollisionChannel PROCEDURALDUNGEON_API RoomObjectType();
 

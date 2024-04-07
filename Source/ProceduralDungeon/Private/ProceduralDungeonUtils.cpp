@@ -127,6 +127,24 @@ bool Dungeon::ShowRoomOrigin()
 	return Settings->ShowRoomOrigin;
 }
 
+bool Dungeon::FlipDoorArrow()
+{
+	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
+	return Settings->bFlipDoorArrowSide;
+}
+
+float Dungeon::DoorArrowLength()
+{
+	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
+	return Settings->DoorArrowLength;
+}
+
+float Dungeon::DoorArrowHeadSize()
+{
+	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
+	return Settings->DoorArrowHeadSize;
+}
+
 bool Dungeon::CanLoop()
 {
 	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
