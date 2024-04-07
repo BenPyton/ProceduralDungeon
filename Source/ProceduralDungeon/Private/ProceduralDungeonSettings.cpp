@@ -23,6 +23,7 @@
  */
 
 #include "ProceduralDungeonSettings.h"
+#include "HAL/IConsoleManager.h"
 
 UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)

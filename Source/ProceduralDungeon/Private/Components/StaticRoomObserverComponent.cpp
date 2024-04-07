@@ -24,6 +24,7 @@
 
 #include "Components/StaticRoomObserverComponent.h"
 #include "RoomLevel.h"
+#include "Engine/Level.h"
 
 UStaticRoomObserverComponent::UStaticRoomObserverComponent()
 {

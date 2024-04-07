@@ -26,6 +26,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Engine/EngineTypes.h"
 #include "ProceduralDungeonSettings.generated.h"
 
 UCLASS(config = Game, defaultconfig)

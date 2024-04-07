@@ -29,6 +29,7 @@
 #include "DungeonGenerator.h"
 #include "Room.h"
 #include "RoomData.h"
+#include "RoomCustomData.h"
 #include "Engine/Level.h"
 #include "Engine/LevelStreamingDynamic.h"
 

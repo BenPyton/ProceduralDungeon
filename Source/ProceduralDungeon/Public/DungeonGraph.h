@@ -25,10 +25,12 @@
 #pragma once
 
 #include "ReplicableObject.h"
+#include "Templates/SubclassOf.h"
 #include "DungeonGraph.generated.h"
 
 class URoom;
 class URoomData;
+class URoomCustomData;
 class ADungeonGenerator;
 
 UENUM()

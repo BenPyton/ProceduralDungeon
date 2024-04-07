@@ -26,6 +26,8 @@
 
 #include "Math/Vector.h"
 #include "Math/IntVector.h"
+#include "Engine/EngineTypes.h"
+#include "EngineUtils.h"
 
 namespace IntVector
 {
