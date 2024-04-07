@@ -70,11 +70,28 @@ The `Size` tool will allows you to edit the room's bounding box by dragging poin
 
 ![](Images/SizeTool.gif)
 
-The `Door` tool will allows you to add doors easily by clicking on your room bounding box in the viewport.\
+The `Door` tool will allows you to add or remove doors easily by clicking on your room bounding box in the viewport (left-click to add, right-click to remove).\
 If you want to place different [[door types|Door Types]], you can select the one you want in the selector beside the tool button.\
 If none is selected, then the default door is used.
 
 ![](Images/DoorTool.gif)
+
+# Utility Functions
+
+When in `Dungeon Room` editor mode, you also have access to some utilities to ease your room creation.
+
+![](Images/EditorModeUtilities.jpg)
+
+### Update Selected Volumes
+In most cases, you'll end up with some volumes in your room levels that should be of the same size as the room.\
+For example, you could have a NavMesh Bounds Volume and a Post Process Volume. Making them the size of the room bounds might be tedious when doing it for many room levels.\
+This button will help you doing it automatically for all the selected volumes. You can also specify some margins to add on each side of the room with the `Margins` field beside the button.\
+(you can specify the default margins in the [[plugin's editor settings|Plugin Settings]])
+
+### Remove All Invalid Doors
+When you resize the room bounds while some doors have already been placed, they can become invalid (turning orange) because they are inside or outside the room bounds.\
+You can't delete them from the viewport, and instead you would have to find them in the data asset and delete them here. This might be tedious to do as you don't have an easy way to know which door is which.\
+This button will help you by removing automatically all invalid doors of the room data asset.
 
 # Next Step
 

@@ -22,9 +22,11 @@
 [[Door Types]]\
 [[Room Initialization]]\
 [[Room Custom Data]]\
-[[Room Visitor]]
+[[Room Visitor]]\
+[[Room Observer]]
 
 ### Misc
+[[Console Commands]]\
 [[Multiplayer]]\
 [[Navigation Mesh]]\
 [[Geometry Brushes]]
