@@ -97,8 +97,7 @@ public:
 	// @param CurrentRoom The first of both rooms to have been generated. By default the door will face this room.
 	// @param NextRoom The second of both rooms to have been generated. Set Flipped to true to make the door facing this room.
 	// @param DoorType The door type set by both room data. Use IsDoorOfType function to compare a door actor class with this.
-	// @param Flipped Tells which room the door is facing between CurrentRoom and NextRoom.
-	// If null is returned or another room than Current and Next, then then door will face CurrentRoom.
+	// @param Flipped Tells which room the door is facing between CurrentRoom (false) and NextRoom (true).
 	// @return The door actor class to spawn between CurrentRoom and NextRoom.
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Door"))
 	TSubclassOf<ADoor> ChooseDoor(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType, bool& Flipped);
