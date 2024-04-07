@@ -268,11 +268,11 @@ public:
 	// Random: Generate and use a random seed.
 	// Auto Increment: Use Seed for first generation, and increment it by SeedIncrement in each subsequent generation.
 	// Fixed: Use only Seed for each generation.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Seed")
 	ESeedType SeedType;
 
 	// The increment number for each subsequent dungeon generation when SeedType is AutoIncrement.
-	UPROPERTY(EditAnywhere, Category = "Procedural Generation", meta = (EditCondition = "SeedType==ESeedType::AutoIncrement", EditConditionHides, DisplayAfter = "Seed"))
+	UPROPERTY(EditAnywhere, Category = "Procedural Generation|Seed", meta = (EditCondition = "SeedType==ESeedType::AutoIncrement", EditConditionHides, DisplayAfter = "Seed"))
 	uint32 SeedIncrement;
 
 	// If ticked, newly placed room will check if any door is aligned with another room, and if so will connect them.
@@ -307,7 +307,7 @@ protected:
 	UDungeonGraph* Graph;
 
 private:
-	UPROPERTY(Replicated, EditAnywhere, Category = "Procedural Generation", meta = (EditCondition = "SeedType!=ESeedType::Random", EditConditionHides))
+	UPROPERTY(Replicated, EditAnywhere, Category = "Procedural Generation|Seed", meta = (EditCondition = "SeedType!=ESeedType::Random", EditConditionHides))
 	uint32 Seed;
 
 	static uint32 GeneratorCount;
