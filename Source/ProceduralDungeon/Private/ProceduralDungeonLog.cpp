@@ -28,9 +28,21 @@
 
 DEFINE_LOG_CATEGORY(LogProceduralDungeon);
 
-bool ShowLogsOnScreen(float& _duration)
+namespace
 {
-	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
-	_duration = Settings->PrintDebugDuration;
-	return Settings->OnScreenPrintDebug;
+	bool ShowLogsOnScreen(float& _duration)
+	{
+		UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
+		_duration = Settings->PrintDebugDuration;
+		return Settings->OnScreenPrintDebug;
+	}
+}
+
+void LogOnScreen(const FString& Message, FColor Color)
+{
+	float Duration;
+	if (ShowLogsOnScreen(Duration))
+	{
+		GEngine->AddOnScreenDebugMessage(-1, Duration, Color, Message);
+	}
 }

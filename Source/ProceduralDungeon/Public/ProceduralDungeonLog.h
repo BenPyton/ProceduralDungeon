@@ -30,7 +30,7 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogProceduralDungeon, Log, All);
 
-bool ShowLogsOnScreen(float& Duration);
+void LogOnScreen(const FString& Message, FColor Color);
 
 #if NO_LOGGING
 #define _DungeonLog_PrivateImpl(ShowOnScreen, Color, Verbosity, Format, ...) {}
@@ -39,11 +39,8 @@ bool ShowLogsOnScreen(float& Duration);
 #define _DungeonLog_PrivateImpl(ShowOnScreen, Color, Verbosity, Format, ...) \
 { \
 	UE_LOG(LogProceduralDungeon, Verbosity, TEXT(Format), ##__VA_ARGS__) \
-	float Duration; \
-	if (ShowOnScreen && ShowLogsOnScreen(Duration)) \
-	{ \
-		GEngine->AddOnScreenDebugMessage(-1, Duration, Color, FString::Printf(TEXT(Format), ##__VA_ARGS__)); \
-	} \
+	if (ShowOnScreen) \
+		LogOnScreen(FString::Printf(TEXT(Format), ##__VA_ARGS__), Color); \
 }
 #endif // NO_LOGGING
 
