@@ -90,6 +90,20 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Debug", meta = (EditCondition = "DrawDebug"))
 	bool ShowRoomOrigin;
 
+	// Flip side the arrow that shows door facing direction.
+	// True means that the arrow gets inside the room (opposite of door actor's forward).
+	// False means that the arrow goes outside the room (same as door actor's forward).
+	UPROPERTY(EditAnywhere, config, Category = "Debug", meta = (EditCondition = "DrawDebug"))
+	bool bFlipDoorArrowSide;
+
+	// Length of the door's debug arrow.
+	UPROPERTY(EditAnywhere, config, Category = "Debug", meta = (EditCondition = "DrawDebug"))
+	float DoorArrowLength;
+
+	// Size of the door's debug arrow head.
+	UPROPERTY(EditAnywhere, config, Category = "Debug", meta = (EditCondition = "DrawDebug"))
+	float DoorArrowHeadSize;
+
 	// Show some logs on the screen
 	UPROPERTY(EditAnywhere, config, Category = "Debug")
 	bool OnScreenPrintDebug;

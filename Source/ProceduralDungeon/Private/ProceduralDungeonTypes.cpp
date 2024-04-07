@@ -225,7 +225,8 @@ void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector
 	if (isConnected)
 	{
 		// Arrow (there is a room on the other side OR in the editor preview)
-		DrawDebugDirectionalArrow(World, DoorPosition, DoorPosition + DoorRotation * FVector(300, 0, 0), 300, Color);
+		FVector ArrowVector = (Dungeon::FlipDoorArrow() ? -1.0f : 1.0f) * FVector(Dungeon::DoorArrowLength(), 0.0f, 0.0f);
+		DrawDebugDirectionalArrow(World, DoorPosition, DoorPosition + DoorRotation * ArrowVector, Dungeon::DoorArrowHeadSize(), Color);
 	}
 	else
 	{
