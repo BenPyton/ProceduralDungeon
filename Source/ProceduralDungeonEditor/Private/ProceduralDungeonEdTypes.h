@@ -56,6 +56,13 @@ struct FMargin3D
 {
 	GENERATED_BODY()
 
+	FMargin3D()
+	{
+		XAxis = FVector2D::ZeroVector;
+		YAxis = FVector2D::ZeroVector;
+		ZAxis = FVector2D::ZeroVector;
+	}
+
 public:
 	UPROPERTY(EditAnywhere, Category = "Margin", meta = (DisplayName = "X"))
 	FVector2D XAxis;
