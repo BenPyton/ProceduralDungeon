@@ -58,13 +58,13 @@ struct FMargin3D
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Margin", meta = (DisplayName = "X"))
-	FVector2D XAxis;
+	FVector2D XAxis{0.0f, 0.0f};
 
 	UPROPERTY(EditAnywhere, Category = "Margin", meta = (DisplayName = "Y"))
-	FVector2D YAxis;
+	FVector2D YAxis{0.0f, 0.0f};
 
 	UPROPERTY(EditAnywhere, Category = "Margin", meta = (DisplayName = "Z"))
-	FVector2D ZAxis;
+	FVector2D ZAxis{0.0f, 0.0f};
 
 	// Create a new bounds from an existing bounds with the margin applied on it.
 	FBoxCenterAndExtent Apply(const FBoxCenterAndExtent& Bounds) const;
