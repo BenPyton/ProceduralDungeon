@@ -26,13 +26,49 @@
 #include "Developer/Settings/Public/ISettingsModule.h"
 #include "Developer/Settings/Public/ISettingsSection.h"
 #include "ProceduralDungeonSettings.h"
+#include "ProceduralDungeonLog.h"
+#include "Misc/EngineVersionComparison.h"
 
 #define LOCTEXT_NAMESPACE "FProceduralDungeonModule"
+
+#if WITH_EDITOR && UE_VERSION_NEWER_THAN(5, 4, 0)
+#define ACTOR_REPLACEMENT_FIX_HACK 1
+#else
+#define ACTOR_REPLACEMENT_FIX_HACK 0
+#endif
+
+// ----- Hack to fix Room references issues of RoomLevel actors in PIE for UE 5.4
+#if ACTOR_REPLACEMENT_FIX_HACK
+#include "RoomLevel.h"
+FDelegateHandle ObjectReplacedHandle;
+void ObjectReplaced(const FCoreUObjectDelegates::FReplacementObjectMap& ReplacementMap)
+{
+	for (const auto& Pair : ReplacementMap)
+	{
+		ARoomLevel* OldActor = Cast<ARoomLevel>(Pair.Key);
+		ARoomLevel* NewActor = Cast<ARoomLevel>(Pair.Value);
+		if (!IsValid(OldActor) || !IsValid(NewActor))
+			continue;
+
+		if (OldActor->HasAllFlags(EObjectFlags::RF_ClassDefaultObject) || NewActor->HasAllFlags(EObjectFlags::RF_ClassDefaultObject))
+			continue;
+
+		// Fixup Room reference not properly carried over during actor replacement process
+		NewActor->Init(OldActor->GetRoom());
+		DungeonLog_InfoSilent("Fixed Room reference ('%s' -> '%s')", *GetNameSafe(OldActor), *GetNameSafe(NewActor));
+	}
+}
+#endif
+// ----- End Hack
 
 void FProceduralDungeonModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 	RegisterSettings();
+
+#if ACTOR_REPLACEMENT_FIX_HACK
+	ObjectReplacedHandle = FCoreUObjectDelegates::OnObjectsReplaced.AddStatic(ObjectReplaced);
+#endif
 }
 
 void FProceduralDungeonModule::ShutdownModule()
@@ -43,6 +79,10 @@ void FProceduralDungeonModule::ShutdownModule()
 	{
 		UnregisterSettings();
 	}
+
+#if ACTOR_REPLACEMENT_FIX_HACK
+	FCoreUObjectDelegates::OnObjectsReplaced.Remove(ObjectReplacedHandle);
+#endif
 }
 
 void FProceduralDungeonModule::RegisterSettings()
