@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,10 +29,10 @@
 #include "GameFramework/Actor.h"
 #include "TriggerType.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTriggerEvent, AActor*, Actor);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTriggerArrayEvent, TArray<AActor*>, Actor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorTriggerEvent, AActor*, Actor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorTriggerArrayEvent, TArray<AActor*>, Actor);
 
-UCLASS(BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+UCLASS(BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent, ScriptName = "ActorTrigger"))
 class PROCEDURALDUNGEON_API UTriggerType : public UBoxComponent
 {
 	GENERATED_BODY()
@@ -55,17 +55,17 @@ public:
 	TSubclassOf<AActor> ActorType;
 
 	UPROPERTY(BlueprintAssignable, Meta = (DisplayName = "On Actor Enter"))
-	FTriggerEvent OnActorEnter;
+	FActorTriggerEvent OnActorEnter;
 	UPROPERTY(BlueprintAssignable, Meta = (DisplayName = "On Actor Exit"))
-	FTriggerEvent OnActorExit;
+	FActorTriggerEvent OnActorExit;
 
 	UPROPERTY(BlueprintAssignable, Meta = (DisplayName = "On Trigger Tick"))
-	FTriggerArrayEvent OnTriggerTick;
+	FActorTriggerArrayEvent OnTriggerTick;
 
 	UPROPERTY(BlueprintAssignable, Meta = (DisplayName = "On Trigger Activation"))
-	FTriggerArrayEvent OnActivation;
+	FActorTriggerArrayEvent OnActivation;
 	UPROPERTY(BlueprintAssignable, Meta = (DisplayName = "On Trigger Deactivation"))
-	FTriggerArrayEvent OnDeactivation;
+	FActorTriggerArrayEvent OnDeactivation;
 
 	UFUNCTION()
 	bool IsActivated() { return bIsActivated; }
