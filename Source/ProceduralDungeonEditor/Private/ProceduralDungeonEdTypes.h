@@ -46,6 +46,12 @@ using WidgetMode = FWidget::EWidgetMode;
 using WidgetMode = UE::Widget::EWidgetMode;
 #endif
 
+#if UE_VERSION_NEWER_THAN(5, 3, 0)
+#define GC_PTR(VAR_TYPE) TObjectPtr<VAR_TYPE>
+#else
+#define GC_PTR(VAR_TYPE) VAR_TYPE*
+#endif
+
 // Some utility functions for EAxisList
 EAxisList::Type operator~(const EAxisList::Type& This);
 EAxisList::Type& operator&=(EAxisList::Type& This, const EAxisList::Type& Other);
