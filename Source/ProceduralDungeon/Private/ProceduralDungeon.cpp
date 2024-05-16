@@ -47,7 +47,8 @@ void ObjectReplaced(const FCoreUObjectDelegates::FReplacementObjectMap& Replacem
 	{
 		ARoomLevel* OldActor = Cast<ARoomLevel>(Pair.Key);
 		ARoomLevel* NewActor = Cast<ARoomLevel>(Pair.Value);
-		if (!IsValid(OldActor) || !IsValid(NewActor))
+
+		if (!OldActor || !NewActor)
 			continue;
 
 		if (OldActor->HasAllFlags(EObjectFlags::RF_ClassDefaultObject) || NewActor->HasAllFlags(EObjectFlags::RF_ClassDefaultObject))
@@ -67,7 +68,8 @@ void FProceduralDungeonModule::StartupModule()
 	RegisterSettings();
 
 #if ACTOR_REPLACEMENT_FIX_HACK
-	ObjectReplacedHandle = FCoreUObjectDelegates::OnObjectsReplaced.AddStatic(ObjectReplaced);
+	ObjectReplacedHandle = FCoreUObjectDelegates::OnObjectsReinstanced.AddStatic(ObjectReplaced);
+	DungeonLog_InfoSilent("Use Actor Replacement Hack");
 #endif
 }
 
@@ -81,7 +83,7 @@ void FProceduralDungeonModule::ShutdownModule()
 	}
 
 #if ACTOR_REPLACEMENT_FIX_HACK
-	FCoreUObjectDelegates::OnObjectsReplaced.Remove(ObjectReplacedHandle);
+	FCoreUObjectDelegates::OnObjectsReinstanced.Remove(ObjectReplacedHandle);
 #endif
 }
 
