@@ -77,7 +77,7 @@ protected:
 	void RegisterLevelCompilationDelegate(bool Register);
 
 public:
-	class UProceduralDungeonEditorObject* Settings {nullptr};
+	GC_PTR(class UProceduralDungeonEditorObject) Settings {nullptr};
 
 private:
 	TArray<TUniquePtr<FProceduralDungeonEditorTool>> Tools;
