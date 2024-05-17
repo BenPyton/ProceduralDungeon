@@ -40,6 +40,8 @@
 // ----- Hack to fix Room references issues of RoomLevel actors in PIE for UE 5.4
 #if ACTOR_REPLACEMENT_FIX_HACK
 #include "RoomLevel.h"
+#include "Room.h"
+
 FDelegateHandle ObjectReplacedHandle;
 void ObjectReplaced(const FCoreUObjectDelegates::FReplacementObjectMap& ReplacementMap)
 {
@@ -54,8 +56,12 @@ void ObjectReplaced(const FCoreUObjectDelegates::FReplacementObjectMap& Replacem
 		if (OldActor->HasAllFlags(EObjectFlags::RF_ClassDefaultObject) || NewActor->HasAllFlags(EObjectFlags::RF_ClassDefaultObject))
 			continue;
 
+		URoom* RoomInstance = OldActor->GetRoom();
+		if (!IsValid(RoomInstance))
+			continue;
+
 		// Fixup Room reference not properly carried over during actor replacement process
-		NewActor->Init(OldActor->GetRoom());
+		NewActor->Init(RoomInstance);
 		DungeonLog_InfoSilent("Fixed Room reference ('%s' -> '%s')", *GetNameSafe(OldActor), *GetNameSafe(NewActor));
 	}
 }
