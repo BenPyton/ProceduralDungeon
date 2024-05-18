@@ -176,15 +176,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	URoomData* GetRandomRoomData(TArray<URoomData*> RoomDataArray);
 
+	// Return a random RoomData from the weighted map provided.
+	// For example: you have RoomA with weight 1 and RoomB with weight 2,
+	// then RoomA has proba of 1/3 and RoomB 2/3 to be returned.
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
+	URoomData* GetRandomRoomDataWeighted(const TMap<URoomData*, int>& RoomDataWeightedMap);
+
 	// Returns the current number of room in the generated dungeon.
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator", meta = (DisplayName = "Room Count", CompactNodeTitle = "Room Count", DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
+	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta = (DisplayName = "Room Count", CompactNodeTitle = "Room Count", DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
 	int GetNbRoom();
 
 	// Returns an array of room data with compatible at least one compatible door with the door data provided.
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	UFUNCTION(BlueprintPure, Category = "Dungeon Generator")
 	void GetCompatibleRoomData(bool& bSuccess, TArray<URoomData*>& CompatibleRooms, const TArray<URoomData*>& RoomDataArray, const FDoorDef& DoorData);
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Dungeon Generator")
+	UFUNCTION(BlueprintPure, Category = "Dungeon Generator")
 	const FRandomStream& GetRandomStream() { return Random; }
 
 	URoom* GetRoomByIndex(int64 Index) const;
