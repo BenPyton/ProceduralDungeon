@@ -58,6 +58,33 @@ namespace Dungeon
 	// Returns the real world snapped location to the nearest point in room units from a real world point
 	FVector PROCEDURALDUNGEON_API SnapPoint(FVector Point);
 
+	template<typename T>
+	int GetTotalWeight(const TMap<T, int>& WeightMap)
+	{
+		int Total = 0;
+		for (const auto& Pair : WeightMap)
+		{
+			Total += Pair.Value;
+		}
+		return Total;
+	}
+
+	template<typename T>
+	T GetWeightedAt(const TMap<T, int>& WeightMap, int Index)
+	{
+		if (Index < 0)
+			return T();
+
+		int Current = 0;
+		for (const auto& Pair : WeightMap)
+		{
+			Current += Pair.Value;
+			if (Current > Index)
+				return Pair.Key;
+		}
+		return T();
+	}
+
 	// ===== Plugin's Settings =====
 
 	FVector PROCEDURALDUNGEON_API RoomUnit();
