@@ -247,6 +247,11 @@ void ARoomLevel::SetActorsVisible(bool Visible)
 			if (Actor->GetIsReplicated())
 				continue;
 
+			// Discard explicitly ignored actors.
+			// They can have a (Static) Room Visibility Component attached to have a custom occlusion management.
+			if (Actor->ActorHasTag(FName("Ignore Room Culling")))
+				continue;
+
 			Actor->SetActorHiddenInGame(!Visible);
 		}
 	}
