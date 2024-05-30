@@ -39,7 +39,8 @@ ADoor::ADoor()
 	bAlwaysRelevant = true; // prevent the doors from despawning on clients when server's player is too far
 	NetDormancy = ENetDormancy::DORM_DormantAll;
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
+	DefaultSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
+	RootComponent = DefaultSceneComponent;
 }
 
 void ADoor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

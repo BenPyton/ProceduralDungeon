@@ -104,5 +104,8 @@ protected:
 	bool bAlwaysUnlocked {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door", meta = (DisplayName = "Door Type"))
-	UDoorType* Type;
+	UDoorType* Type {nullptr};
+
+	UPROPERTY(EditAnywhere, Category = "Door")
+	USceneComponent* DefaultSceneComponent {nullptr};
 };
