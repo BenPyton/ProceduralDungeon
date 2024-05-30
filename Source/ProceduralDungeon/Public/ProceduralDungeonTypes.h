@@ -86,6 +86,17 @@ enum class ESeedType : uint8
 	NbType = 3 				UMETA(Hidden)
 };
 
+// Visibility mode for Room Visibilty Components.
+UENUM(BlueprintType, meta = (DisplayName = "Room Visibility"))
+enum class EVisibilityMode : uint8
+{
+	Default			UMETA(DisplayName = "Same As Room"),
+	ForceVisible	UMETA(DisplayName = "Force Visible"),
+	ForceHidden		UMETA(DisplayName = "Force Hidden"),
+	Custom			UMETA(DisplayName = "Custom"),
+	NbMode			UMETA(Hidden)
+};
+
 USTRUCT(BlueprintType)
 struct PROCEDURALDUNGEON_API FDoorDef
 {
