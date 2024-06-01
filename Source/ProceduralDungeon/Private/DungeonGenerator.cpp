@@ -398,7 +398,11 @@ void ADungeonGenerator::UnloadAllRooms()
 
 void ADungeonGenerator::UpdateRoomVisibility()
 {
-	APawn* Player = UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawnOrSpectator();
+	APlayerController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!IsValid(Controller))
+		return;
+
+	APawn* Player = Controller->GetPawnOrSpectator();
 	if (!IsValid(Player))
 		return;
 
