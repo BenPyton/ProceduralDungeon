@@ -167,6 +167,7 @@ void ADungeonGenerator::CreateDungeon()
 		URoom* root = NewObject<URoom>(this);
 		root->Init(def, this, 0);
 		Graph->AddRoom(root);
+		OnRoomAdded(root->GetRoomData());
 
 		// Build the list of rooms
 		TQueueOrStack<URoom*> roomStack(listMode);
