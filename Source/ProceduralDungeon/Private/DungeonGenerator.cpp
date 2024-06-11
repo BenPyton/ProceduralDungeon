@@ -129,7 +129,7 @@ void ADungeonGenerator::CreateDungeon()
 	if (!HasAuthority())
 		return;
 
-	int TriesLeft = MaxTry;
+	int TriesLeft = Dungeon::MaxGenerationTryBeforeGivingUp();
 	bool ValidDungeon = false;
 
 	// generate level until IsValidDungeon return true
@@ -197,7 +197,7 @@ void ADungeonGenerator::CreateDungeon()
 
 	if (!ValidDungeon)
 	{
-		DungeonLog_Error("Generated dungeon is not valid after %d tries. Make sure your IsValidDungeon function is correct.", MaxTry);
+		DungeonLog_Error("Generated dungeon is not valid after %d tries. Make sure your IsValidDungeon function is correct.", Dungeon::MaxGenerationTryBeforeGivingUp());
 		Graph->Clear();
 		OnGenerationFailed();
 		return;
@@ -287,7 +287,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 		const FIntVector newRoomPos = doorDef.Position + ToIntVector(doorDef.Direction);
 		const EDoorDirection newRoomDoorDir = ~doorDef.Direction;
 
-		int nbTries = MaxRoomTry;
+		int nbTries = Dungeon::MaxRoomPlacementTryBeforeGivingUp();
 		URoom* newRoom = nullptr;
 		// Try to place a new room
 		do

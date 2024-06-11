@@ -316,8 +316,6 @@ private:
 	uint32 Seed;
 
 	static uint32 GeneratorCount;
-	static const uint32 MaxTry {500};
-	static const uint32 MaxRoomTry {10};
 
 	FRandomStream Random;
 

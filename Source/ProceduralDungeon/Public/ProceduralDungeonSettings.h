@@ -62,6 +62,14 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "General")
 	TEnumAsByte<ECollisionChannel> RoomObjectType {ECollisionChannel::ECC_EngineTraceChannel6};
 
+	// The number of dungeon generation retry before the generator gives up.
+	UPROPERTY(EditAnywhere, config, Category = "General", AdvancedDisplay, meta = (UIMin = 1, ClampMin = 1))
+	int32 MaxGenerationTry;
+
+	// The number of room placement retry on a specific door before the generator gives up and continues with the next door.
+	UPROPERTY(EditAnywhere, config, Category = "General", AdvancedDisplay, meta = (UIMin = 1, ClampMin = 1))
+	int32 MaxRoomPlacementTry;
+
 	// The rooms visibility will be toggled off when the player is not inside it or in a room next to it.
 	UPROPERTY(EditAnywhere, config, Category = "Occlusion Culling", meta = (DisplayName = "Enable Occlusion Culling"))
 	bool OcclusionCulling;

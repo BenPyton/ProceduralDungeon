@@ -33,6 +33,8 @@ UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer&
 	DoorSize = FVector(40, 640, 400);
 	DoorOffset = 0.0f;
 	CanLoop = true;
+	MaxGenerationTry = 500;
+	MaxRoomPlacementTry = 10;
 
 	// Occlusion settings
 	OcclusionCulling = true;
