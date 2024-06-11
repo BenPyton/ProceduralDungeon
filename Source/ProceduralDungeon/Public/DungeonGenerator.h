@@ -307,6 +307,8 @@ public:
 	FVector GetDungeonOffset() const;
 	FQuat GetDungeonRotation() const;
 
+	FORCEINLINE const UDungeonGraph* GetRooms() const { return Graph; }
+
 protected:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Dungeon Generator", meta = (DisplayName = "Rooms"))
 	UDungeonGraph* Graph;
