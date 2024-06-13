@@ -409,34 +409,37 @@ void UDungeonGraph::SynchronizeRooms()
 	CurrentState = EDungeonGraphState::None;
 }
 
-bool UDungeonGraph::AreRoomsLoaded() const
+bool UDungeonGraph::AreRoomsLoaded(int32& NbRoomLoaded) const
 {
+	NbRoomLoaded = 0;
 	for (URoom* Room : Rooms)
 	{
-		if (!Room->IsInstanceLoaded())
-			return false;
+		if (Room->IsInstanceLoaded())
+			NbRoomLoaded++;
 	}
-	return true;
+	return NbRoomLoaded >= Rooms.Num();
 }
 
-bool UDungeonGraph::AreRoomsUnloaded() const
+bool UDungeonGraph::AreRoomsUnloaded(int32& NbRoomUnloaded) const
 {
+	NbRoomUnloaded = 0;
 	for (URoom* Room : Rooms)
 	{
-		if (IsValid(Room) && !Room->IsInstanceUnloaded())
-			return false;
+		if (!IsValid(Room) || Room->IsInstanceUnloaded())
+			NbRoomUnloaded++;
 	}
-	return true;
+	return NbRoomUnloaded >= Rooms.Num();
 }
 
-bool UDungeonGraph::AreRoomsInitialized() const
+bool UDungeonGraph::AreRoomsInitialized(int32& NbRoomInitialized) const
 {
+	NbRoomInitialized = 0;
 	for (URoom* Room : Rooms)
 	{
-		if (!Room->IsInstanceInitialized())
-			return false;
+		if (Room->IsInstanceInitialized())
+			NbRoomInitialized++;
 	}
-	return true;
+	return NbRoomInitialized >= Rooms.Num();
 }
 
 void UDungeonGraph::RequestGeneration()
