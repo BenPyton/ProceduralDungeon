@@ -508,6 +508,7 @@ void ADungeonGenerator::SetState(EGenerationState NewState)
 
 void ADungeonGenerator::OnStateBegin(EGenerationState State)
 {
+	CachedTmpRoomCount = 0;
 	switch (State)
 	{
 	case EGenerationState::Unload:
@@ -552,7 +553,7 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 			SetState(EGenerationState::Unload);
 		break;
 	case EGenerationState::Unload:
-		if (Graph->AreRoomsUnloaded())
+		if (Graph->AreRoomsUnloaded(CachedTmpRoomCount))
 			SetState((HasAuthority() && Graph->IsRequestingGeneration()) ? EGenerationState::Generation : EGenerationState::Initialization);
 		break;
 	case EGenerationState::Generation:
@@ -562,7 +563,7 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 		SetState(EGenerationState::Load);
 		break;
 	case EGenerationState::Load:
-		if (Graph->AreRoomsInitialized())
+		if (Graph->AreRoomsInitialized(CachedTmpRoomCount))
 			SetState(EGenerationState::Idle);
 		break;
 	default:
@@ -748,6 +749,27 @@ int ADungeonGenerator::CountTotalRoomType(TArray<TSubclassOf<URoomData>> RoomTyp
 int ADungeonGenerator::GetNbRoom()
 {
 	return Graph->Count();
+}
+
+float ADungeonGenerator::GetProgress() const
+{
+	const int32 TotalRoom = Graph->Count();
+	switch (CurrentState)
+	{
+	case EGenerationState::Unload:
+		return (TotalRoom > 0)
+			? 0.5f * (static_cast<float>(CachedTmpRoomCount) / TotalRoom)
+			: 0.0f;
+	case EGenerationState::Generation:
+	case EGenerationState::Initialization:
+		return 0.5f;
+	case EGenerationState::Load:
+		return (TotalRoom > 0)
+			? 0.5f + 0.5f * (static_cast<float>(CachedTmpRoomCount) / TotalRoom)
+			: 0.5f;
+	default:
+		return 1.0f;
+	}
 }
 
 URoom* ADungeonGenerator::GetRoomByIndex(int64 Index) const

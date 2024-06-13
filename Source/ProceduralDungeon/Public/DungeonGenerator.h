@@ -193,6 +193,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator")
 	const FRandomStream& GetRandomStream() { return Random; }
 
+	// Returns the current generation progress.
+	UFUNCTION(BlueprintPure, Category = "Dungeon Generator")
+	float GetProgress() const;
+
 	URoom* GetRoomByIndex(int64 Index) const;
 
 	// ===== Events =====
@@ -308,6 +312,7 @@ public:
 	FQuat GetDungeonRotation() const;
 
 	FORCEINLINE const UDungeonGraph* GetRooms() const { return Graph; }
+	FORCEINLINE EGenerationState GetCurrentState() const { return CurrentState; }
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Dungeon Generator", meta = (DisplayName = "Rooms"))
@@ -342,4 +347,7 @@ private:
 
 	// Transient. Only used to detect when occlusion distance is changed.
 	uint32 PreviousOcclusionDistance {0};
+
+	// Transient. Used to count unloaded/loaded/initialized rooms during generation.
+	int32 CachedTmpRoomCount {0};
 };

@@ -153,9 +153,9 @@ protected:
 	// Sync Rooms and ReplicatedRooms arrays
 	void SynchronizeRooms();
 
-	bool AreRoomsLoaded() const;
-	bool AreRoomsUnloaded() const;
-	bool AreRoomsInitialized() const;
+	bool AreRoomsLoaded(int32& NbRoomLoaded) const;
+	bool AreRoomsUnloaded(int32& NbRoomUnloaded) const;
+	bool AreRoomsInitialized(int32& NbRoomInitialized) const;
 
 	void RequestGeneration();
 	void RequestUnload();
