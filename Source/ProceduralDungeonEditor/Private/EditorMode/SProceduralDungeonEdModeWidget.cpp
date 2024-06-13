@@ -474,7 +474,7 @@ FReply SProceduralDungeonEdModeWidget::RemoveInvalidDoors()
 	Data->Modify();
 	for (int i = Data->Doors.Num() - 1; i >= 0; --i)
 	{
-		if (!Data->IsDoorValid(i))
+		if (!Data->IsDoorValid(i) || Data->IsDoorDuplicate(i))
 			Data->Doors.RemoveAt(i);
 	}
 	GEditor->EndTransaction();

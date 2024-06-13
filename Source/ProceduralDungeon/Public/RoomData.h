@@ -92,6 +92,7 @@ public:
 
 #if !(UE_BUILD_SHIPPING) || WITH_EDITOR
 	bool IsDoorValid(int DoorIndex) const;
+	bool IsDoorDuplicate(int DoorIndex) const;
 #endif // !(UE_BUILD_SHIPPING) || WITH_EDITOR
 
 #if WITH_EDITOR

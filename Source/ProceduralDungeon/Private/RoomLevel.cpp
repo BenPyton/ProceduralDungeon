@@ -166,7 +166,7 @@ void ARoomLevel::Tick(float DeltaTime)
 		for (int i = 0; i < Data->GetNbDoor(); i++)
 		{
 			const bool bIsConnected = !bIsRoomValid || (bIsRoomDataValid && Room->IsConnected(i));
-			const bool bIsDoorValid = Data->IsDoorValid(i);
+			const bool bIsDoorValid = Data->IsDoorValid(i) && !Data->IsDoorDuplicate(i);
 			FDoorDef::DrawDebug(World, bIsDoorValid ? FColor::Blue : FColor::Orange, Data->Doors[i], RoomTransform * DungeonTransform, true, bIsConnected);
 		}
 	}

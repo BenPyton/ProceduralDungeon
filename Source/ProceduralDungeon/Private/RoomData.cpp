@@ -104,6 +104,17 @@ bool URoomData::IsDoorValid(int DoorIndex) const
 	}
 }
 
+bool URoomData::IsDoorDuplicate(int DoorIndex) const
+{
+	check(DoorIndex >= 0 && DoorIndex < Doors.Num());
+	for (int i = 0; i < Doors.Num(); ++i)
+	{
+		if (DoorIndex != i && Doors[i] == Doors[DoorIndex])
+			return true;
+	}
+	return false;
+}
+
 #endif // !(UE_BUILD_SHIPPING) || WITH_EDITOR
 
 #if WITH_EDITOR
@@ -157,13 +168,10 @@ EDataValidationResult URoomData::IsDataValid(FDataValidationContext& Context) co
 			}
 
 			// Check if there are no duplicated doors
-			for (int k = i + 1; k < Doors.Num(); ++k)
+			if (IsDoorDuplicate(i))
 			{
-				if (Doors[i] == Doors[k])
-				{
-					VALIDATION_LOG_ERROR(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has duplicated doors: %s."), *GetName(), *Doors[i].ToString())));
-					Result = EDataValidationResult::Invalid;
-				}
+				VALIDATION_LOG_ERROR(FText::FromString(FString::Printf(TEXT("Room data \"%s\" has duplicated doors: %s."), *GetName(), *Doors[i].ToString())));
+				Result = EDataValidationResult::Invalid;
 			}
 		}
 	}
