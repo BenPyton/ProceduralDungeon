@@ -27,6 +27,7 @@
 #include "Misc/AutomationTest.h"
 #include "RoomData.h"
 #include "UObject/StrongObjectPtr.h"
+#include "UObject/Package.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
