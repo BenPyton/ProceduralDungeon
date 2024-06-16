@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -128,6 +128,123 @@ bool FBoxMinAndMaxTest::RunTest(const FString& Parameters)
 		TestEqual(TEXT("Rotate(Box((-1,0,-1), (3,1,1)), S).Max == (2,1,1)"), RotBox1S.Max, FIntVector(2, 1, 1));
 		TestEqual(TEXT("Rotate(Box((-1,0,-1), (3,1,1)), W).Min == (0,-2,-1)"), RotBox1W.Min, FIntVector(0, -2, -1));
 		TestEqual(TEXT("Rotate(Box((-1,0,-1), (3,1,1)), W).Max == (1,2,1)"), RotBox1W.Max, FIntVector(1, 2, 1));
+	}
+
+	// IsInside(FBoxMinAndMax) Test
+	{
+		FBoxMinAndMax Bounds(FIntVector(-4, -5, -6), FIntVector(7, 8, 9));
+		FBoxMinAndMax Box(FIntVector(-1, -1, -1), FIntVector(1, 2, 3));
+
+		// Completely inside, no coincident face
+		TestTrue(*FString::Printf(TEXT("Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+
+		// Positive X
+		Box += FIntVector(6, 0, 0); // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[X+,A] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(1, 0, 0); // Intersecting
+		TestFalse(*FString::Printf(TEXT("[X+,B] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(1, 0, 0); // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[X+,C] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+
+		// Reset
+		Box = FBoxMinAndMax(FIntVector(-1, -1, -1), FIntVector(1, 2, 3));
+
+		// Positive Y
+		Box += FIntVector(0, 6, 0); // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[Y+,A] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(0, 1, 0); // Intersecting
+		TestFalse(*FString::Printf(TEXT("[Y+,B] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(0, 1, 0); // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[Y+,C] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+
+		// Reset
+		Box = FBoxMinAndMax(FIntVector(-1, -1, -1), FIntVector(1, 2, 3));
+
+		// Positive Z
+		Box += FIntVector(0, 0, 6); // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[Z+,A] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(0, 0, 1); // Intersecting
+		TestFalse(*FString::Printf(TEXT("[Z+,B] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(0, 0, 1); // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[Z+,C] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+
+		// Reset
+		Box = FBoxMinAndMax(FIntVector(-1, -1, -1), FIntVector(1, 2, 3));
+
+		// Negative X
+		Box += FIntVector(-3, 0, 0); // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[X-,A] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(-1, 0, 0); // Intersecting
+		TestFalse(*FString::Printf(TEXT("[X-,B] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(-1, 0, 0); // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[X-,C] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+
+		// Reset
+		Box = FBoxMinAndMax(FIntVector(-1, -1, -1), FIntVector(1, 2, 3));
+
+		// Negative Y
+		Box += FIntVector(0, -4, 0); // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[Y-,A] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(0, -2, 0); // Intersecting
+		TestFalse(*FString::Printf(TEXT("[Y-,B] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(0, -1, 0); // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[Y-,C] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+
+		// Reset
+		Box = FBoxMinAndMax(FIntVector(-1, -1, -1), FIntVector(1, 2, 3));
+
+		// Negative Z
+		Box += FIntVector(0, 0, -5); // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[Z-,A] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(0, 0, -3); // Intersecting
+		TestFalse(*FString::Printf(TEXT("[Z-,B] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+		Box += FIntVector(0, 0, -1); // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[Z-,C] Box%s IsInside Bounds%s"), *Box.ToString(), *Bounds.ToString()), Bounds.IsInside(Box));
+	}
+
+	// IsInside(FIntVector) Test
+	{
+		FBoxMinAndMax Bounds(FIntVector(-4, -5, -6), FIntVector(7, 8, 9));
+		FIntVector Cell {0};
+
+		// Completely inside, no coincident face
+		TestTrue(*FString::Printf(TEXT("Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+
+		// Positive X
+		Cell = {6, 0, 0}; // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[X+,A] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+		Cell = {7, 0, 0}; // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[X+,B] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+
+		// Negative X
+		Cell = {-4, 0, 0}; // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[X-,A] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+		Cell = {-5, 0, 0}; // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[X-,B] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+
+		// Positive Y
+		Cell = {0, 7, 0}; // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[Y+,A] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+		Cell = {0, 8, 0}; // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[Y+,B] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+
+		// Negative Y
+		Cell = {0, -5, 0}; // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[Y-,A] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+		Cell = {0, -6, 0}; // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[Y-,B] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+
+		// Positive Z
+		Cell = {0, 0, 8}; // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[Z+,A] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+		Cell = {0, 0, 9}; // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[Z+,B] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+
+		// Negative Z
+		Cell = {0, 0, -6}; // Inside but with coincident face
+		TestTrue(*FString::Printf(TEXT("[Z-,A] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
+		Cell = {0, 0, -7}; // Outside but with a coincident face
+		TestFalse(*FString::Printf(TEXT("[Z-,B] Cell(%s) IsInside Bounds%s"), *Cell.ToString(), *Bounds.ToString()), Bounds.IsInside(Cell));
 	}
 
 	return true;

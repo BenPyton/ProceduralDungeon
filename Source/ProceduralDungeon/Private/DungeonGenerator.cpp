@@ -273,6 +273,8 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 	Params.bIgnoreTouches = true;
 	Params.AddIgnoredActor(this);
 
+	const FBoxMinAndMax DungeonBounds = DungeonLimits.GetBox();
+
 	AddedRooms.Reset();
 	bool shouldContinue = false;
 	for (int i = 0; shouldContinue = ContinueToAddRoom(), i < nbDoor && shouldContinue; ++i)
@@ -284,8 +286,11 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 		FDoorDef doorDef = ParentRoom.GetRoomData()->Doors[i];
 		doorDef.Position = ParentRoom.RoomToWorld(doorDef.Position);
 		doorDef.Direction = ParentRoom.RoomToWorld(doorDef.Direction);
-		const FIntVector newRoomPos = doorDef.Position + ToIntVector(doorDef.Direction);
-		const EDoorDirection newRoomDoorDir = ~doorDef.Direction;
+
+		// Get the door definition for the next room
+		const FDoorDef newRoomDoor = doorDef.GetOpposite();
+		if (!DungeonBounds.IsInside(newRoomDoor.Position))
+			continue;
 
 		int nbTries = Dungeon::MaxRoomPlacementTryBeforeGivingUp();
 		URoom* newRoom = nullptr;
@@ -321,6 +326,19 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 				continue;
 			}
 
+			// Get only doors if the new room could fit in the dungeon bounds
+			for (int n = compatibleDoors.Num() - 1; n >= 0; --n)
+			{
+				if (!roomDef->IsRoomInBounds(DungeonBounds, compatibleDoors[n], newRoomDoor))
+					compatibleDoors.RemoveAt(n);
+			}
+
+			if (compatibleDoors.Num() <= 0)
+			{
+				DungeonLog_Warning("ChooseNextRoomData returned room data '%s' that could not fit in dungeon bounds.", *roomDef->GetName());
+				continue;
+			}
+
 			if (roomDef->RandomDoor || (doorIndex < 0))
 				doorIndex = compatibleDoors[Random.RandRange(0, compatibleDoors.Num() - 1)];
 			else if (!compatibleDoors.Contains(doorIndex))
@@ -332,7 +350,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 			// Create room from roomdef and set connections with current room
 			newRoom = NewObject<URoom>(this);
 			newRoom->Init(roomDef, this, InOutRoomList.Num());
-			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomPos, newRoomDoorDir);
+			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomDoor.Position, newRoomDoor.Direction);
 
 			if (bUseWorldCollisionChecks)
 			{
@@ -796,6 +814,22 @@ FVector ADungeonGenerator::GetDungeonOffset() const
 FQuat ADungeonGenerator::GetDungeonRotation() const
 {
 	return UseGeneratorTransform() ? GetActorQuat() : FQuat::Identity;
+}
+
+FBoxMinAndMax FBoundsParams::GetBox() const
+{
+	return FBoxMinAndMax(
+		FIntVector(
+			(bLimitMinX) ? -MinX : INT32_MIN,
+			(bLimitMinY) ? -MinY : INT32_MIN,
+			(bLimitMinZ) ? -MinZ : INT32_MIN
+		),
+		FIntVector(
+			(bLimitMaxX) ? MaxX + 1 : INT32_MAX,
+			(bLimitMaxY) ? MaxY + 1 : INT32_MAX,
+			(bLimitMaxZ) ? MaxZ + 1 : INT32_MAX
+		)
+	);
 }
 
 // ##############################

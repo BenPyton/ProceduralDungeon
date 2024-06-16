@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,6 +68,23 @@ FIntVector URoomData::GetSize() const
 FBoxMinAndMax URoomData::GetIntBounds() const
 {
 	return FBoxMinAndMax(FirstPoint, SecondPoint);
+}
+
+bool URoomData::IsRoomInBounds(const FBoxMinAndMax& Bounds, int DoorIndex, const FDoorDef& DoorDungeonPos) const
+{
+	const FIntVector BoundSize = Bounds.GetSize();
+	if (BoundSize.X == 0 || BoundSize.Y == 0 || BoundSize.Z == 0)
+		return false;
+
+	if (DoorIndex < 0 || DoorIndex >= Doors.Num())
+		return false;
+
+	const FDoorDef& Door = Doors[DoorIndex];
+	FBoxMinAndMax RoomBounds = GetIntBounds();
+	RoomBounds -= Door.Position;
+	RoomBounds.Rotate(DoorDungeonPos.Direction - Door.Direction);
+	RoomBounds += DoorDungeonPos.Position;
+	return Bounds.IsInside(RoomBounds);
 }
 
 #if !(UE_BUILD_SHIPPING) || WITH_EDITOR

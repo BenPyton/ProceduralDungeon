@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -118,6 +118,7 @@ public:
 	FVector GetDoorSize() const;
 	FString GetTypeName() const;
 	FString ToString() const;
+	FDoorDef GetOpposite() const;
 
 	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset = true);
 
@@ -129,6 +130,8 @@ public:
 
 // TODO: Use UE built-in TBox<FIntVector> instead?
 // The downside of doing that would be the Center and Extent computation that is slightly different...
+// Also, the IsInside with another box does not consider coincident faces as inside...
+// Also, operators + and += don't mean the same (extending box to include a point instead of shifting the box)...
 struct PROCEDURALDUNGEON_API FBoxMinAndMax
 {
 public:
@@ -140,8 +143,11 @@ public:
 	FBoxMinAndMax(const FIntVector& A, const FIntVector& B);
 
 	FIntVector GetSize() const;
-
 	FBoxCenterAndExtent ToCenterAndExtent() const;
+	bool IsInside(const FIntVector& Cell) const;
+	bool IsInside(const FBoxMinAndMax& Other) const;
+	void Rotate(const EDoorDirection& Rot);
+	FString ToString() const;
 
 	static bool Overlap(const FBoxMinAndMax& A, const FBoxMinAndMax& B);
 
@@ -149,6 +155,8 @@ public:
 	FBoxMinAndMax& operator-=(const FIntVector& X);
 	FBoxMinAndMax operator+(const FIntVector& X) const;
 	FBoxMinAndMax operator-(const FIntVector& X) const;
+	bool operator==(const FBoxMinAndMax& Other) const;
+	bool operator!=(const FBoxMinAndMax& Other) const;
 };
 
 FBoxMinAndMax PROCEDURALDUNGEON_API Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot);

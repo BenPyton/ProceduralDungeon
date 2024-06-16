@@ -47,6 +47,64 @@ enum class EGenerationResult : uint8
 	Success
 };
 
+USTRUCT(BlueprintType)
+struct FBoundsParams
+{
+	GENERATED_BODY()
+
+public:
+	// Enables the X limit in positive axis (north from the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (InlineEditConditionToggle))
+	bool bLimitMaxX {false};
+
+	// The X positive limit (north) of the dungeon in room units (starting from the origin of the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (EditCondition = "bLimitMaxX", UIMin = 0, ClampMin = 0))
+	int32 MaxX {0};
+
+	// Enables the X limit in negative axis (south from the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (InlineEditConditionToggle))
+	bool bLimitMinX {false};
+
+	// The X negative limit (south) of the dungeon in room units (starting from the origin of the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (EditCondition = "bLimitMinX", UIMin = 0, ClampMin = 0))
+	int32 MinX {0};
+
+	// Enables the Y limit in positive axis (east from the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (InlineEditConditionToggle))
+	bool bLimitMaxY {false};
+
+	// The Y positive limit (east) of the dungeon in room units (starting from the origin of the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (EditCondition = "bLimitMaxY", UIMin = 0, ClampMin = 0))
+	int32 MaxY {0};
+
+	// Enables the Y limit in negative axis (west from the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (InlineEditConditionToggle))
+	bool bLimitMinY {false};
+
+	// The Y negative limit (west) of the dungeon in room units (starting from the origin of the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (EditCondition = "bLimitMinY", UIMin = 0, ClampMin = 0))
+	int32 MinY {0};
+
+	// Enables the Z limit in positive axis (up from the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (InlineEditConditionToggle))
+	bool bLimitMaxZ {false};
+
+	// The Z positive limit (up) of the dungeon in room units (starting from the origin of the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (EditCondition = "bLimitMaxZ", UIMin = 0, ClampMin = 0))
+	int32 MaxZ {0};
+
+	// Enables the Z limit in negative axis (down from the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (InlineEditConditionToggle))
+	bool bLimitMinZ {false};
+
+	// The Z negative limit (down) of the dungeon in room units (starting from the origin of the first room).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Boundq Limits", meta = (EditCondition = "bLimitMinZ", UIMin = 0, ClampMin = 0))
+	int32 MinZ {0};
+
+public:
+	FBoxMinAndMax GetBox() const;
+};
+
 UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADungeonGenerator : public AActor
 {
@@ -289,6 +347,9 @@ public:
 	// (will only have effect if the deprecated CanLoop in the plugin settings is ticked too, until it is removed in a future version)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
 	bool bCanLoop {true};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
+	FBoundsParams DungeonLimits;
 
 	// If ticked, when trying to place a new room during a dungeon generation,
 	// a box overlap test will be made to make sure the room will not spawn
