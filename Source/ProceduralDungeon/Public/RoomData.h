@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2021, 2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,8 +50,6 @@ class PROCEDURALDUNGEON_API URoomData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
-	friend class UProceduralLevelStreaming;
-
 public:
 	UPROPERTY(EditInstanceOnly, Category = "Level")
 	TSoftObjectPtr<UWorld> Level {nullptr};
@@ -89,6 +87,8 @@ public:
 	FIntVector GetSize() const;
 	class FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
 	FBoxMinAndMax GetIntBounds() const;
+
+	bool IsRoomInBounds(const FBoxMinAndMax& Bounds, int DoorIndex, const FDoorDef& DoorDungeonPos) const;
 
 #if !(UE_BUILD_SHIPPING) || WITH_EDITOR
 	bool IsDoorValid(int DoorIndex) const;

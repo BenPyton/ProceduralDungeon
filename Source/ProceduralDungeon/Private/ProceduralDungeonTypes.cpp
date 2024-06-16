@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2023 Benoit Pelletier
+ * Copyright (c) 2019-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -199,6 +199,14 @@ FString FDoorDef::ToString() const
 	return FString::Printf(TEXT("(%d,%d,%d) [%s]"), Position.X, Position.Y, Position.Z, *DirectionName.ToString());
 }
 
+FDoorDef FDoorDef::GetOpposite() const
+{
+	FDoorDef OppositeDoor;
+	OppositeDoor.Position = Position + ToIntVector(Direction);
+	OppositeDoor.Direction = ~Direction;
+	return OppositeDoor;
+}
+
 FVector FDoorDef::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset)
 {
 	const FVector CellPosition = FVector(DoorCell);
@@ -260,6 +268,49 @@ FBoxCenterAndExtent FBoxMinAndMax::ToCenterAndExtent() const
 	return FBoxCenterAndExtent(Center, Extent.GetAbs());
 }
 
+bool FBoxMinAndMax::IsInside(const FIntVector& Cell) const
+{
+	return (Cell.X >= Min.X) && (Cell.X < Max.X)
+		&& (Cell.Y >= Min.Y) && (Cell.Y < Max.Y)
+		&& (Cell.Z >= Min.Z) && (Cell.Z < Max.Z);
+}
+
+bool FBoxMinAndMax::IsInside(const FBoxMinAndMax& Other) const
+{
+	return (Other.Min.X >= Min.X) && (Other.Max.X <= Max.X)
+		&& (Other.Min.Y >= Min.Y) && (Other.Max.Y <= Max.Y)
+		&& (Other.Min.Z >= Min.Z) && (Other.Max.Z <= Max.Z);
+}
+
+void FBoxMinAndMax::Rotate(const EDoorDirection& Rot)
+{
+	FIntVector Compensation = FIntVector::ZeroValue;
+	switch (Rot)
+	{
+	case EDoorDirection::East:
+		Compensation.X = 1;
+		break;
+	case EDoorDirection::West:
+		Compensation.Y = 1;
+		break;
+	case EDoorDirection::South:
+		Compensation.X = 1;
+		Compensation.Y = 1;
+		break;
+	default:
+		break;
+	}
+	const FIntVector A = ::Rotate(Min, Rot) + Compensation;
+	const FIntVector B = ::Rotate(Max, Rot) + Compensation;
+	Min = IntVector::Min(A, B);
+	Max = IntVector::Max(A, B);
+}
+
+FString FBoxMinAndMax::ToString() const
+{
+	return FString::Printf(TEXT("[(%d, %d, %d), (%d, %d, %d)]"), Min.X, Min.Y, Min.Z, Max.X, Max.Y, Max.Z);
+}
+
 bool FBoxMinAndMax::Overlap(const FBoxMinAndMax& A, const FBoxMinAndMax& B)
 {
 	return (A.Max.X > B.Min.X && A.Min.X < B.Max.X)
@@ -295,23 +346,19 @@ FBoxMinAndMax FBoxMinAndMax::operator-(const FIntVector& X) const
 	return NewBox;
 }
 
+bool FBoxMinAndMax::operator==(const FBoxMinAndMax& Other) const
+{
+	return (Min == Other.Min) && (Max == Other.Max);
+}
+
+bool FBoxMinAndMax::operator!=(const FBoxMinAndMax& Other) const
+{
+	return !FBoxMinAndMax::operator==(Other);
+}
+
 FBoxMinAndMax Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot)
 {
-	FIntVector Compensation = FIntVector::ZeroValue;
-	switch (Rot)
-	{
-	case EDoorDirection::East:
-		Compensation.X = 1;
-		break;
-	case EDoorDirection::West:
-		Compensation.Y = 1;
-		break;
-	case EDoorDirection::South:
-		Compensation.X = 1;
-		Compensation.Y = 1;
-		break;
-	default:
-		break;
-	}
-	return FBoxMinAndMax(Rotate(Box.Min, Rot) + Compensation, Rotate(Box.Max, Rot) + Compensation);
+	FBoxMinAndMax NewBox(Box);
+	NewBox.Rotate(Rot);
+	return NewBox;
 }
