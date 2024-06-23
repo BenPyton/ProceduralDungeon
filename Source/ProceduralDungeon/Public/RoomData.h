@@ -84,6 +84,9 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Room Data")
 	void InitializeRoom(URoom* Room, UDungeonGraph* Dungeon) const;
 
+	UFUNCTION(BlueprintNativeEvent, Category = "Room Data")
+	void CleanupRoom(URoom* Room, UDungeonGraph* Dungeon) const;
+
 	FIntVector GetSize() const;
 	class FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
 	FBoxMinAndMax GetIntBounds() const;

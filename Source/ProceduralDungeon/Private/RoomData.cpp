@@ -52,6 +52,10 @@ void URoomData::InitializeRoom_Implementation(URoom* Room, UDungeonGraph* Dungeo
 {
 }
 
+void URoomData::CleanupRoom_Implementation(URoom* Room, UDungeonGraph* Dungeon) const
+{
+}
+
 FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
 {
 	FBoxCenterAndExtent Bounds = GetIntBounds().ToCenterAndExtent();

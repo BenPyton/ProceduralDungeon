@@ -208,6 +208,13 @@ URoom* UDungeonGraph::GetRoomByIndex(int64 Index) const
 
 void UDungeonGraph::Clear()
 {
+	for (URoom* Room : Rooms)
+	{
+		check(IsValid(Room));
+		const URoomData* Data = Room->GetRoomData();
+		check(IsValid(Data));
+		Data->CleanupRoom(Room, this);
+	}
 	Rooms.Empty();
 }
 
