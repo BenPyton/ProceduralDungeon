@@ -294,11 +294,11 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 
 		int nbTries = Dungeon::MaxRoomPlacementTryBeforeGivingUp();
 		URoom* newRoom = nullptr;
+		int doorIndex = -1;
 		// Try to place a new room
 		do
 		{
 			nbTries--;
-			int doorIndex = -1;
 			URoomData* roomDef = ChooseNextRoomData(ParentRoom.GetRoomData(), doorDef, doorIndex);
 			if (!IsValid(roomDef))
 			{
@@ -352,37 +352,41 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 			newRoom->Init(roomDef, this, InOutRoomList.Num());
 			newRoom->SetPositionAndRotationFromDoor(doorIndex, newRoomDoor.Position, newRoomDoor.Direction);
 
-			if (bUseWorldCollisionChecks)
+			// Test if it fits in the place
+			bool bCanBePlaced = !URoom::Overlap(*newRoom, InOutRoomList);
+
+			// Check that it does not collide with the world too
+			if (bCanBePlaced && bUseWorldCollisionChecks)
 			{
 				const FBoxCenterAndExtent Bounds = newRoom->GetBounds();
 				const bool bCollideWithWorld = World->OverlapBlockingTestByChannel(DungeonTransform.TransformPosition(Bounds.Center), DungeonTransform.GetRotation(), ECC_WorldStatic, FCollisionShape::MakeBox(Bounds.Extent), Params);
-				if (bCollideWithWorld)
-				{
-					// The object will be automatically deleted by the GC
-					newRoom = nullptr;
-					continue;
-				}
+				bCanBePlaced &= !bCollideWithWorld;
 			}
 
-			// Test if it fits in the place
-			if (!URoom::Overlap(*newRoom, InOutRoomList))
-			{
-				// connect the doors to all possible existing rooms
-				URoom::Connect(*newRoom, doorIndex, ParentRoom, i);
-				if (bCanLoop && Dungeon::CanLoop())
-				{
-					newRoom->TryConnectToExistingDoors(InOutRoomList);
-				}
-				InOutRoomList.Add(newRoom);
-				AddedRooms.Add(newRoom);
-				OnRoomAdded(newRoom->GetRoomData());
-			}
-			else
+			if (!bCanBePlaced)
 			{
 				// The object will be automatically deleted by the GC
 				newRoom = nullptr;
 			}
 		} while (nbTries > 0 && newRoom == nullptr);
+
+		// A room can be placed
+		if (newRoom)
+		{
+			// connect the doors to all possible existing rooms
+			URoom::Connect(*newRoom, doorIndex, ParentRoom, i);
+			if (bCanLoop && Dungeon::CanLoop())
+			{
+				newRoom->TryConnectToExistingDoors(InOutRoomList);
+			}
+			InOutRoomList.Add(newRoom);
+			AddedRooms.Add(newRoom);
+			OnRoomAdded(newRoom->GetRoomData());
+		}
+		else // No room can be placed and all placement tries exhausted
+		{
+			OnFailedToAddRoom(ParentRoom.GetRoomData(), doorDef);
+		}
 	}
 
 	return shouldContinue;
@@ -689,6 +693,11 @@ void ADungeonGenerator::OnGenerationFailed_Implementation()
 void ADungeonGenerator::OnRoomAdded_Implementation(const URoomData* NewRoom)
 {
 	OnRoomAddedEvent.Broadcast(NewRoom);
+}
+
+void ADungeonGenerator::OnFailedToAddRoom_Implementation(const URoomData* FromRoom, const FDoorDef& FromDoor)
+{
+	OnFailedToAddRoomEvent.Broadcast(FromRoom, FromDoor);
 }
 
 // ===== Utility Functions =====
