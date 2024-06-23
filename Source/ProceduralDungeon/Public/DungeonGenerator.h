@@ -32,7 +32,8 @@
 #include "DungeonGenerator.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGenerationEvent);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRoomEvent, const URoomData*, NewRoom);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRoomEvent, const URoomData*, Room);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoomDoorEvent, const URoomData*, Room, const FDoorDef&, Door);
 
 class ADoor;
 class URoom;
@@ -196,6 +197,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "On Room Added"))
 	void OnRoomAdded(const URoomData* NewRoom);
 
+	// Called each time no room could have been placed at a door (all room placement tries have been exhausted).
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Failed To Add Room"))
+	void OnFailedToAddRoom(const URoomData* FromRoom, const FDoorDef& FromDoor);
+
 	// ===== Utility functions you can use in blueprint =====
 
 	// Return true if a specific RoomData is already in the dungeon
@@ -280,6 +285,10 @@ public:
 	// Those rooms can be destroyed without loading them if the generation try is not valid.
 	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FRoomEvent OnRoomAddedEvent;
+
+	// Called each time no room could have been placed at a door (all room placement tries have been exhausted).
+	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
+	FRoomDoorEvent OnFailedToAddRoomEvent;
 
 private:
 	// Create virtually the dungeon (no load nor initialization of room levels)
