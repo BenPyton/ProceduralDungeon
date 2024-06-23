@@ -42,6 +42,7 @@ struct FRoomConnection
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY()
 	TWeakObjectPtr<URoom> OtherRoom {nullptr};
 	int OtherDoorIndex {-1};
@@ -53,13 +54,16 @@ struct FCustomDataPair
 {
 	GENERATED_BODY()
 
+public:
 	UPROPERTY()
 	UClass* DataClass {nullptr};
 	UPROPERTY()
 	URoomCustomData* Data {nullptr};
 };
 
-UCLASS(BlueprintType)
+// The room instances of the dungeon.
+// Holds data specific to each room instance, e.g. location, direction, is player inside, room custom data, etc.
+UCLASS(BlueprintType, meta = (ShortToolTip = "The room instances of the dungeon."))
 class PROCEDURALDUNGEON_API URoom : public UReplicableObject
 {
 	GENERATED_BODY()
@@ -75,35 +79,50 @@ public:
 
 	URoom();
 
+	// Returns the room data asset of this room instance.
 	UFUNCTION(BlueprintPure, Category = "Room")
 	const URoomData* GetRoomData() const { return RoomData; }
 
 	const ADungeonGenerator* Generator() const { return GeneratorOwner.Get(); }
 	void SetPlayerInside(bool PlayerInside);
 	void SetVisible(bool Visible);
+	FORCEINLINE uint64 GetRoomID() const { return Id; }
 
+	// Is the player currently inside the room?
+	// A player can be in multiple rooms at once, for example when he stands at the door frame,
+	// the player's capsule is in both rooms.
 	UFUNCTION(BlueprintPure, Category = "Room")
 	FORCEINLINE bool IsPlayerInside() const { return bPlayerInside; }
 
+	// Is the room currently visible?
 	UFUNCTION(BlueprintPure, Category = "Room", meta = (CompactNodeTitle = "Is Visible"))
 	FORCEINLINE bool IsVisible() const { return bIsVisible; }
 
+	// Is the room locked?
+	// If it is, the doors will be locked (except if they have `Alway Unlocked`).
 	UFUNCTION(BlueprintPure, Category = "Room", meta = (CompactNodeTitle = "Is Locked"))
 	FORCEINLINE bool IsLocked() const { return bIsLocked; }
 
+	// Lock or unlock the room instance.
+	// Will lock/unlock the doors too (except if they have `Alway Unlocked`).
+	// @param lock Should the room be locked?
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Room")
 	void Lock(bool lock);
 
-	FORCEINLINE uint64 GetRoomID() const { return Id; }
-
-	bool CreateCustomData(const TSubclassOf<URoomCustomData>& DataType);
-
+	// Access to custom data of the room.
+	// @param DataType The type of the custom data to retrieve.
+	// @param Data The custom data found, or null if no custom data found.
+	// @return True if a custom data of the specified type has been found, false otherwise.
 	UFUNCTION(BlueprintCallable, Category = "Room", meta = (DisplayName = "Get Custom Data", ExpandBoolAsExecs = "ReturnValue", DeterminesOutputType = "DataType", DynamicOutputParam = "Data"))
 	bool GetCustomData_BP(TSubclassOf<URoomCustomData> DataType, URoomCustomData*& Data);
 
+	// Check if the room instance contains a custom data of a specific type.
+	// @param DataType The type of the custom data to check.
+	// @return True if the rooms has a custom data of the specified type, false otherwise.
 	UFUNCTION(BlueprintCallable, Category = "Room", meta = (DisplayName = "Has Custom Data", ExpandBoolAsExecs = "ReturnValue", AutoCreateRefTerm = "DataType"))
 	bool HasCustomData_BP(const TSubclassOf<URoomCustomData>& DataType);
 
+	bool CreateCustomData(const TSubclassOf<URoomCustomData>& DataType);
 	bool GetCustomData(const TSubclassOf<URoomCustomData>& DataType, URoomCustomData*& Data) const;
 	bool HasCustomData(const TSubclassOf<URoomCustomData>& DataType) const;
 
@@ -111,13 +130,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	FRandomStream GetRandomStream() const;
 
+	// Get the door actor from a specific index.
+	// @param DoorIndex The index of the door to retrieve.
+	// @return The door actor at the index, or null if the index is out of range.
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	ADoor* GetDoor(int DoorIndex) const;
 
+	// Fill an array with all the door actors connected to the room.
+	// @param OutDoors THIS IS NOT AN INPUT! This array will be emptied and then filled with the door actors. This is your result!
 	UFUNCTION(BlueprintPure = false, Category = "Room")
 	void GetAllDoors(UPARAM(ref) TArray<ADoor*>& OutDoors) const;
 
 	// Returns true if the door at DoorIndex is connected to another room.
+	// @param DoorIndex The index of the door to check.
 	UFUNCTION(BlueprintPure, Category = "Room")
 	bool IsDoorConnected(int DoorIndex) const;
 
@@ -130,12 +155,15 @@ public:
 	URoom* GetConnectedRoomAt(int DoorIndex) const;
 
 	// Returns all the room instances connected with this one.
+	// @param ConnectedRooms This array will be filled with the room instances.
 	UFUNCTION(BlueprintPure, Category = "Room")
 	void GetAllConnectedRooms(TArray<URoom*>& ConnectedRooms) const;
 
+	// Returns the world center position of the room.
 	UFUNCTION(BlueprintPure, Category = "Room")
 	FVector GetBoundsCenter() const;
 
+	// Returns the world size of the room.
 	UFUNCTION(BlueprintPure, Category = "Room")
 	FVector GetBoundsExtent() const;
 
@@ -170,8 +198,9 @@ private:
 	const FCustomDataPair* GetDataPair(const TSubclassOf<URoomCustomData>& DataType) const;
 
 protected:
-	// UReplicableObject interface
+	//~ Begin UReplicableObject Interface
 	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
+	//~ End UReplicableObject Interface
 
 public:
 	void Init(URoomData* RoomData, ADungeonGenerator* Generator, int32 RoomId);

@@ -48,7 +48,12 @@ enum class EGenerationResult : uint8
 	Success
 };
 
-USTRUCT(BlueprintType)
+// Holds the settings for the dungeon limits.
+// These values are expressed in Room cells, and are based on the origin of the first room (0,0,0).
+// For example, if the first room is only 1 room cell (`FirstPoint = (0,0,0)`, `SecondPoint = (1,1,1)`), then  this is the cell (0,0,0).
+// If you set a `MinY=2` et `MaxY=2`, then on the Y axis the dungeon can go from the cell -2 to cell 2,
+// Making an effective range of 5 cells, centered on the first room.
+USTRUCT(BlueprintType, meta = (ShortToolTip = "Holds the settings for the dungeon limits."))
 struct FBoundsParams
 {
 	GENERATED_BODY()
@@ -106,22 +111,22 @@ public:
 	FBoxMinAndMax GetBox() const;
 };
 
+// This is the main actor of the plugin. The dungeon generator is responsible to generate dungeons and replicate them over the network. 
 UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADungeonGenerator : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	ADungeonGenerator();
 
 protected:
-	// Called when the game starts or when spawned
+	//~ Begin AActor Interface
 	virtual void BeginPlay() override;
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaTime) override;
-
 	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
+	//~ End AActor Interface
 
 public:
 
@@ -250,9 +255,15 @@ public:
 	int GetNbRoom();
 
 	// Returns an array of room data with compatible at least one compatible door with the door data provided.
+	// @param bSuccess True if at least one compatible room data was found.
+	// @param CompatibleRooms Filled with all compatible room data found.
+	// @param RoomDataArray The list of room data to check for compatibility.
+	// @param DoorData The door used to check if a room is compatible.
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator")
 	void GetCompatibleRoomData(bool& bSuccess, TArray<URoomData*>& CompatibleRooms, const TArray<URoomData*>& RoomDataArray, const FDoorDef& DoorData);
 
+	// Access to the random stream of the procedural dungeon. You should always use this for the procedural generation.
+	// @return The random stream used by the dungeon generator.
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator")
 	const FRandomStream& GetRandomStream() { return Random; }
 

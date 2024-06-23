@@ -29,7 +29,8 @@
 #include "Engine/EngineTypes.h"
 #include "ProceduralDungeonSettings.generated.h"
 
-UCLASS(config = Game, defaultconfig)
+// Holds the plugin's settings.
+UCLASS(Config = Game, DefaultConfig)
 class PROCEDURALDUNGEON_API UProceduralDungeonSettings : public UObject
 {
 	GENERATED_BODY()
