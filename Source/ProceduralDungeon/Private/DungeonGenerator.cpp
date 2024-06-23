@@ -108,7 +108,6 @@ void ADungeonGenerator::Generate()
 	if (HasAuthority())
 	{
 		Graph->RequestGeneration();
-		// TODO: wake up here for dormancy
 	}
 }
 
@@ -118,7 +117,6 @@ void ADungeonGenerator::Unload()
 	if (HasAuthority())
 	{
 		Graph->RequestUnload();
-		// TODO: wake up here for dormancy
 	}
 }
 
@@ -138,8 +136,6 @@ void ADungeonGenerator::CreateDungeon()
 
 		// Reset generation data
 		OnGenerationInit();
-
-		// Create the first room
 		Graph->Clear();
 
 		// Create the list with the correct mode (depth or breadth)
@@ -164,6 +160,7 @@ void ADungeonGenerator::CreateDungeon()
 			continue;
 		}
 
+		// Create the first room
 		URoom* root = NewObject<URoom>(this);
 		root->Init(def, this, 0);
 		Graph->AddRoom(root);
@@ -235,6 +232,7 @@ void ADungeonGenerator::InstantiateRoom(URoom* Room)
 				FQuat InstanceDoorRot = GetDungeonRotation() * FRotator(0, 90 * (int8)DoorRot + Flipped * 180, 0).Quaternion();
 				FActorSpawnParameters SpawnParams;
 				SpawnParams.Owner = this;
+				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 				ADoor* Door = GetWorld()->SpawnActor<ADoor>(DoorClass, InstanceDoorPos, InstanceDoorRot.Rotator(), SpawnParams);
 
 				if (IsValid(Door))
