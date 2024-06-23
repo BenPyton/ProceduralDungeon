@@ -12,8 +12,8 @@
 Get the [latest release](https://github.com/BenPyton/ProceduralDungeon/releases) of the precompiled plugin compatible with your Unreal version.
 
 ### In the engine
-You have to extract the plugin inside your Unreal engine `Plugins` folder.\
-For instance: `C:\Program Files\Epic Games\UE_5.2\Engine\Plugins`
+You have to extract the plugin inside your Unreal engine `Plugins` folder (UE4) or `Plugins/Marketplace` folder (UE5).\
+For instance: `C:\Program Files\Epic Games\UE_5.2\Engine\Plugins\Marketplace`
 
 ### In your project
 You have to extract the plugin in the `Plugins` folder of your project.\
