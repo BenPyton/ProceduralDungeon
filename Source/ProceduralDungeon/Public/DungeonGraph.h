@@ -42,6 +42,8 @@ enum class EDungeonGraphState : uint8
 	NbState
 };
 
+// Holds the generated dungeon.
+// You can access the rooms using many functions.
 UCLASS(BlueprintType)
 class PROCEDURALDUNGEON_API UDungeonGraph : public UReplicableObject
 {

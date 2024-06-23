@@ -81,7 +81,6 @@ bool ADungeonGenerator::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* B
 	return bWroteSomething;
 }
 
-// Called when the game starts or when spawned
 void ADungeonGenerator::BeginPlay()
 {
 	Super::BeginPlay();
@@ -95,7 +94,6 @@ void ADungeonGenerator::EndPlay(EEndPlayReason::Type EndPlayReason)
 		UnloadAllRooms();
 }
 
-// Called every frame
 void ADungeonGenerator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
