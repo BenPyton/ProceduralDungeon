@@ -1,6 +1,7 @@
 [![Discord](https://img.shields.io/discord/1182461404092055574?logo=discord&logoColor=white&label=Discord&color=%235865F2)](https://discord.gg/YE2dPda2CC)
 
 [[Wiki Home Page|Home]]
+[API References](https://benpyton.github.io/ProceduralDungeon/api)
 
 ### Basics
 [[Installation]]\

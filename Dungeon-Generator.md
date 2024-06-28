@@ -22,39 +22,18 @@ Function | Description
 **On&#160;Room&#160;Added** | Called when a room is successfully added to the dungeon (but not spawned yet). The added room is destroyed when `Is Valid Dungeon` returns false (you may have to use *GenerationInit* to reset variables changed from this call).
 **Initialize&#160;Dungeon** | Called after `Continue To Add Room` returned false. Allows you to initialize room instances before validating the dungeon with `Is Valid Dungeon` (useful if you want for example locking some rooms and putting keys in other ones).
 
-## Functions you can call on the Dungeon Generator
+## Useful functions of the Dungeon Generator
 
-Function | Description
---- | ---
-**Generate** | Launch the generation of the dungeon (for multiplayer games, it starts the generation when called on the server, and does nothing when called on clients).
-**Unload** | Unload all exiting rooms and clear the dungeon.
-**Get&#160;Random&#160;Room&#160;Data** | Returns a room data chosen randomly from the provided array (deterministic with the dungeon generator seed).
-**Get&#160;Compatible&#160;Room&#160;Data** | Returns all room data (from the provided list) having at least one door compatible with the provided door type.
-**Get&#160;Random&#160;Stream** | Returns the dungeon random stream (useful to generate deterministically other random stuff).
+Aside the internal events you can override, there are some useful other functions the `Dungeon Generator` provides to you.\
+There are also the `Generate` and the `Unload` functions.
 
-## Functions you can call from the `Rooms` variable of the dungeon generator
+Take a look at the [API Documentation](https://benpyton.github.io/ProceduralDungeon/api/Classes/DungeonGenerator#nodes) for a list of all functions provided by the `Dungeon Generator`.
 
-Function | Description
---- | ---
-**Count** | Return the current number of room instances during the generation, or total number of room instances after generation.
-**Has&#160;Already&#160;Room&#160;Data** | Returns whether the dungeon contains at least one room of the specified room data.
-**Has&#160;Already&#160;One&#160;Room&#160;Data&#160;From** | Returns whether the dungeon contains at least one room of one of the specified room data.
-**Count&#160;Room&#160;Data** | Returns the number of room instances of the specified room data.
-**Count&#160;Total Room&#160;Data** | Returns the total number of room instances of all the specified room data.
-**Has&#160;Already Room&#160;Type** | Returns whether the dungeon contains at least one room of the specified room data ***class***.
-**Has&#160;Already&#160;One&#160;Room&#160;Type&#160;From** | Returns whether the dungeon contains at least one room of one of the specified room data ***classes***.
-**Count&#160;Room&#160;Type** | Returns the number of room instances of the specified room data ***class***.
-**Count&#160;Total&#160;Room&#160;Type** | Returns the total number of room instances of all the specified room data ***classes***.
-**Get&#160;All&#160;Rooms** | Returns an array containing all room instances of the generated dungeon.
-**Get&#160;All&#160;Rooms&#160;From&#160;Data** | Returns an array containing all room instances of a specific room data.
-**Get&#160;All&#160;Rooms&#160;From&#160;Data&#160;List** | Returns an array containing all room instances of any of the provided room data.
-**Get&#160;First&#160;Room&#160;From&#160;Data** | Returns the first found room instances of a specific room data (no specific order, can be any room in the dungeon).
-**Get&#160;All&#160;Rooms&#160;With&#160;Custom&#160;Data** | Returns an array containing all the room instances having a specific custom room data.
-**Get&#160;All&#160;Rooms&#160;With&#160;All&#160;Custom&#160;Data** | Returns an array containing all the rooms instances having all custom data provided. 
-**Get&#160;All&#160;Rooms&#160;With&#160;Any&#160;Custom&#160;Data** | Returns an array containing all the rooms instances having at least one of the custom data provided. 
-**Get&#160;Random&#160;Room** | Returns a random room instance from a list of room instances (deterministic with the dungeon generator seed).
-**Has&#160;Valid&#160;Path** | Returns whether a path exists between 2 room instances.
+## The `Rooms` variable, at the heart of the plugin
 
+The `Rooms` variable of the `Dungeon Generator` contains the list of all generated room instances.\
+You can search for specific room instances, count them, check a path exists between rooms, etc.
+Take a loook at the [API Documentation](https://benpyton.github.io/ProceduralDungeon/api/Classes/DungeonGraph#nodes) for a list of all functions provided by the `Rooms` variable.
 ## Generator settings
 The `Dungeon Generator` actor has some parameters grouped inside the `Procedural Generation` category:
 
