@@ -541,6 +541,7 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 		++Generation;
 		UpdateSeed();
 		CreateDungeon();
+		break;
 	case EGenerationState::Initialization:
 		DungeonLog_Info("======= Begin Dungeon Initialization =======");
 		Graph->SynchronizeRooms();
