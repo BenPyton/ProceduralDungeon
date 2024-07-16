@@ -25,6 +25,17 @@
 #include "ReplicableObject.h"
 #include "Engine/ActorChannel.h"
 #include "GameFramework/Actor.h"
+#include "ProceduralDungeonLog.h"
+#include "Utils/ReplicationUtils.h"
+
+
+namespace
+{
+	const TCHAR* GetWithPredicate(const TCHAR* Str, bool bPredicate)
+	{
+		return (bPredicate) ? Str : TEXT("");
+	}
+}
 
 bool UReplicableObject::ReplicateSubobject(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
 {
@@ -34,6 +45,66 @@ bool UReplicableObject::ReplicateSubobject(UActorChannel* Channel, FOutBunch* Bu
 	bWroteSomething |= Channel->ReplicateSubobject(this, *Bunch, *RepFlags);
 	return bWroteSomething;
 }
+
+void UReplicableObject::RegisterAsReplicable(bool bRegister, FRegisterSubObjectParams Params)
+{
+#if UE_WITH_SUBOBJECT_LIST
+	AActor* Owner = GetOwner();
+	if (!IsValid(Owner))
+	{
+		ensureMsgf(false, TEXT("Trying to %sregister %s as replicable subobject but actor owner is invalid."), ::GetWithPredicate(TEXT("un"), !bRegister), *GetNameSafe(this));
+		return;
+	}
+
+	if (!Owner->HasAuthority())
+		return;
+
+	// Ignores if owner does not use registered subobject list
+	if (!Owner->IsUsingRegisteredSubObjectList())
+		return;
+
+	if (Owner->IsReplicatedSubObjectRegistered(this) == bRegister)
+	{
+		ensureMsgf(false, TEXT("Trying to %sregister %s as replicable subobject in actor %s but it is already %sregistered."), ::GetWithPredicate(TEXT("un"), !bRegister), *GetNameSafe(this), *GetNameSafe(Owner), ::GetWithPredicate(TEXT("un"), !bRegister));
+		return;
+	}
+
+	DungeonLog_InfoSilent("%s Replicable Subobject: %s", (bRegister) ? TEXT("Register") : TEXT("Unregister"), *GetNameSafe(this));
+
+	if (bRegister)
+		Owner->AddReplicatedSubObject(this, Params.NetCondition);
+	else
+	{
+		switch (Params.UnregisterType)
+		{
+		case EUnregisterSubObjectType::Unregister:
+			Owner->RemoveReplicatedSubObject(this);
+			break;
+#if UE_VERSION_NEWER_THAN(5, 2, 0)
+		case EUnregisterSubObjectType::Destroy:
+			Owner->DestroyReplicatedSubObjectOnRemotePeers(this);
+			break;
+		case EUnregisterSubObjectType::TearOff:
+			Owner->TearOffReplicatedSubObjectOnRemotePeers(this);
+			break;
+#endif
+		default:
+			checkf(false, TEXT("Unimplemented case."));
+			break;
+		}
+	}
+
+	RegisterReplicableSubobjects(bRegister);
+#endif
+}
+
+#if UE_WITH_IRIS
+void UReplicableObject::RegisterReplicationFragments(UE::Net::FFragmentRegistrationContext& Context, UE::Net::EFragmentRegistrationFlags RegistrationFlags)
+{
+	// Build descriptors and allocate PropertyReplicationFragments for this object
+	UE::Net::FReplicationFragmentUtil::CreateAndRegisterFragmentsForObject(this, Context, RegistrationFlags);
+}
+#endif // UE_WITH_IRIS
 
 bool UReplicableObject::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
 {

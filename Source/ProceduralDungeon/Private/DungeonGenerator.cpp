@@ -69,9 +69,11 @@ ADungeonGenerator::ADungeonGenerator()
 void ADungeonGenerator::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ADungeonGenerator, Seed);
-	DOREPLIFETIME(ADungeonGenerator, Generation);
-	DOREPLIFETIME(ADungeonGenerator, Graph);
+
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+	DOREPLIFETIME_WITH_PARAMS(ADungeonGenerator, Seed, Params);
+	DOREPLIFETIME_WITH_PARAMS(ADungeonGenerator, Generation, Params);
 }
 
 bool ADungeonGenerator::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
@@ -81,10 +83,16 @@ bool ADungeonGenerator::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* B
 	return bWroteSomething;
 }
 
+void ADungeonGenerator::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	Graph->Generator = this;
+	Graph->RegisterAsReplicable(true);
+}
+
 void ADungeonGenerator::BeginPlay()
 {
 	Super::BeginPlay();
-	Graph->Generator = this;
 }
 
 void ADungeonGenerator::EndPlay(EEndPlayReason::Type EndPlayReason)

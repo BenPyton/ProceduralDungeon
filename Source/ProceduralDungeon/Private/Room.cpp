@@ -25,7 +25,7 @@
 #include "Room.h"
 #include "Door.h"
 #include "Engine/World.h"
-#include "Net/UnrealNetwork.h" // DOREPLIFETIME
+#include "Utils/ReplicationUtils.h"
 #include "RoomData.h"
 #include "RoomLevel.h"
 #include "ProceduralDungeonUtils.h"
@@ -51,8 +51,11 @@ void URoom::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePro
 	DOREPLIFETIME_CONDITION(URoom, Connections, COND_InitialOnly);
 	DOREPLIFETIME_CONDITION(URoom, GeneratorOwner, COND_InitialOnly);
 	DOREPLIFETIME_CONDITION(URoom, Id, COND_InitialOnly);
-	DOREPLIFETIME(URoom, bIsLocked);
-	DOREPLIFETIME(URoom, CustomData);
+
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+	DOREPLIFETIME_WITH_PARAMS(URoom, bIsLocked, Params);
+	DOREPLIFETIME_WITH_PARAMS(URoom, CustomData, Params);
 }
 
 bool URoom::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
@@ -63,6 +66,14 @@ bool URoom::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FRepli
 		bWroteSomething |= Pair.Data->ReplicateSubobject(Channel, Bunch, RepFlags);
 	}
 	return bWroteSomething;
+}
+
+void URoom::RegisterReplicableSubobjects(bool bRegister)
+{
+	for (const auto& Pair : CustomData)
+	{
+		Pair.Data->RegisterAsReplicable(bRegister);
+	}
 }
 
 void URoom::Init(URoomData* Data, ADungeonGenerator* Generator, int32 RoomId)
@@ -197,10 +208,9 @@ void URoom::OnInstanceLoaded()
 	DungeonLog_InfoSilent("[%s][R:%s][I:%s] Room loaded: %s", *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName());
 }
 
-void URoom::Lock(bool lock)
+void URoom::Lock(bool bLock)
 {
-	WakeUpOwnerActor();
-	bIsLocked = lock;
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(bIsLocked, bLock);
 	DungeonLog_InfoSilent("[%s] Room '%s' setting IsLocked: %s", *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False"));
 }
 
@@ -441,6 +451,7 @@ bool URoom::CreateCustomData(const TSubclassOf<URoomCustomData>& DataType)
 		return false;
 
 	CustomData.Add({DataType, NewObject<URoomCustomData>(GetOuter(), DataType)});
+	MARK_PROPERTY_DIRTY_FROM_NAME(URoom, CustomData, this);
 	return true;
 }
 

@@ -123,6 +123,7 @@ public:
 protected:
 	//~ Begin AActor Interface
 	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
@@ -396,7 +397,7 @@ public:
 	FORCEINLINE EGenerationState GetCurrentState() const { return CurrentState; }
 
 protected:
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Dungeon Generator", meta = (DisplayName = "Rooms"))
+	UPROPERTY(BlueprintReadOnly, Category = "Dungeon Generator", meta = (DisplayName = "Rooms"))
 	UDungeonGraph* Graph;
 
 private:

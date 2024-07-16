@@ -149,8 +149,10 @@ protected:
 	void GetRoomsByPredicate(TArray<URoom*>& OutRooms, TFunction<bool(const URoom*)> Predicate) const;
 	const URoom* FindFirstRoomByPredicate(TFunction<bool(const URoom*)> Predicate) const;
 
-	// UReplicableObject interface
+	//~ Begin UReplicableObject Interface
 	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
+	virtual void RegisterReplicableSubobjects(bool bRegister) override;
+	//~ End UReplicableObject Interface
 
 	// Sync Rooms and ReplicatedRooms arrays
 	void SynchronizeRooms();
