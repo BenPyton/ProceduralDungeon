@@ -592,7 +592,6 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 
 void ADungeonGenerator::OnStateEnd(EGenerationState State)
 {
-	FTimerHandle handle;
 	UNavigationSystemV1* nav = nullptr;
 	switch (State)
 	{
@@ -600,7 +599,8 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 		OnPreGeneration();
 		break;
 	case EGenerationState::Unload:
-		Graph->Clear();
+		if (HasAuthority())
+			Graph->Clear();
 		GetWorld()->FlushLevelStreaming();
 		GEngine->ForceGarbageCollection(true);
 		DungeonLog_Info("======= End Unload All Levels =======");
