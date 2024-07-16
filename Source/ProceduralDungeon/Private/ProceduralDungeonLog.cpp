@@ -32,16 +32,16 @@ namespace
 {
 	bool ShowLogsOnScreen(float& _duration)
 	{
-		UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
+		const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
 		_duration = Settings->PrintDebugDuration;
 		return Settings->OnScreenPrintDebug;
 	}
 }
 
-void LogOnScreen(const FString& Message, FColor Color)
+void LogOnScreen(const FString& Message, FColor Color, bool bForceOnScreen)
 {
 	float Duration;
-	if (ShowLogsOnScreen(Duration))
+	if (::ShowLogsOnScreen(Duration) || bForceOnScreen)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, Duration, Color, Message);
 	}

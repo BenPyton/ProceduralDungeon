@@ -30,36 +30,39 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogProceduralDungeon, Log, All);
 
-void LogOnScreen(const FString& Message, FColor Color);
+void LogOnScreen(const FString& Message, FColor Color, bool bForceOnScreen = false);
 
 #if NO_LOGGING
-#define _DungeonLog_PrivateImpl(ShowOnScreen, Color, Verbosity, Format, ...) {}
+#define _DungeonLog_PrivateImpl(...) {}
 #else
 // Private implementation. Dot not use it.
-#define _DungeonLog_PrivateImpl(ShowOnScreen, Color, Verbosity, Format, ...) \
+#define _DungeonLog_PrivateImpl(ShowOnScreen, ForceOnScreen, Detailed, Color, Verbosity, Format, ...) \
 { \
-	UE_LOG(LogProceduralDungeon, Verbosity, TEXT(Format), ##__VA_ARGS__) \
-	if (ShowOnScreen) \
-		LogOnScreen(FString::Printf(TEXT(Format), ##__VA_ARGS__), Color); \
+	if constexpr (Detailed) \
+		{ UE_LOG(LogProceduralDungeon, Verbosity, TEXT("[%s:%d] " Format), *FString(__FUNCTION__), __LINE__, ##__VA_ARGS__); } \
+	else \
+		{ UE_LOG(LogProceduralDungeon, Verbosity, TEXT(Format), ##__VA_ARGS__); } \
+	if constexpr (ShowOnScreen) \
+		LogOnScreen(FString::Printf(TEXT(Format), ##__VA_ARGS__), Color, ForceOnScreen); \
 }
 #endif // NO_LOGGING
 
 // Logs info message to output and on screen
 #define DungeonLog_Info(Format, ...) \
-	_DungeonLog_PrivateImpl(true, FColor::White, Log, Format, ##__VA_ARGS__)
+	_DungeonLog_PrivateImpl(true, false, false, FColor::White, Log, Format, ##__VA_ARGS__)
 
 // Logs info message *only* to output
 #define DungeonLog_InfoSilent(Format, ...) \
-	_DungeonLog_PrivateImpl(false, FColor::White, Log, Format, ##__VA_ARGS__)
+	_DungeonLog_PrivateImpl(false, false, false, FColor::White, Log, Format, ##__VA_ARGS__)
 
 // Logs warning message to output and on screen
 #define DungeonLog_Warning(Format, ...) \
-	_DungeonLog_PrivateImpl(true, FColor::Yellow, Warning, Format, ##__VA_ARGS__)
+	_DungeonLog_PrivateImpl(true, false, true, FColor::Yellow, Warning, Format, ##__VA_ARGS__)
 
 // Logs warning message *only* to output
 #define DungeonLog_WarningSilent(Format, ...) \
-	_DungeonLog_PrivateImpl(false, FColor::Yellow, Warning, Format, ##__VA_ARGS__)
+	_DungeonLog_PrivateImpl(false, false, true, FColor::Yellow, Warning, Format, ##__VA_ARGS__)
 
 // Logs error message to output and on screen
 #define DungeonLog_Error(Format, ...) \
-	_DungeonLog_PrivateImpl(true, FColor::Red, Error, Format, ##__VA_ARGS__)
+	_DungeonLog_PrivateImpl(true, true, true, FColor::Red, Error, Format, ##__VA_ARGS__)
