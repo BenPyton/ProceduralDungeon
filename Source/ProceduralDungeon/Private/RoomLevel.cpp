@@ -123,6 +123,7 @@ void ARoomLevel::BeginPlay()
 void ARoomLevel::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+	Room = nullptr;
 }
 
 // Update is called once per frame

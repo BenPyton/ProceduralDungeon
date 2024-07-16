@@ -11,7 +11,18 @@ public class ProceduralDungeon : ModuleRules
 		// Uncomment that to detect when there are missing includes in cpp files
 		//bUseUnity = false;
 		
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "NavigationSystem" });
-		PrivateDependencyModuleNames.AddRange(new string[] { "CoreUObject", "Engine" });
+		PublicDependencyModuleNames.AddRange(new string[] {
+			"Core",
+			"NavigationSystem",
+#if UE_5_2_OR_LATER
+			"IrisCore",
+#endif
+		});
+
+		PrivateDependencyModuleNames.AddRange(new string[] {
+			"Engine",
+			"CoreUObject",
+			"NetCore",
+		});
 	}
 }

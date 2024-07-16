@@ -57,6 +57,7 @@ void ObjectReplaced(const FCoreUObjectDelegates::FReplacementObjectMap& Replacem
 			continue;
 
 		URoom* RoomInstance = OldActor->GetRoom();
+		OldActor->Room = nullptr;
 		if (!IsValid(RoomInstance))
 			continue;
 

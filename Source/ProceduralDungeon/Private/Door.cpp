@@ -31,6 +31,7 @@
 #include "DungeonGenerator.h"
 #include "DoorType.h"
 #include "ProceduralDungeonUtils.h"
+#include "Utils/ReplicationUtils.h"
 
 ADoor::ADoor()
 {
@@ -46,10 +47,13 @@ ADoor::ADoor()
 void ADoor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ADoor, bShouldBeLocked);
-	DOREPLIFETIME(ADoor, bShouldBeOpen);
-	DOREPLIFETIME(ADoor, RoomA);
-	DOREPLIFETIME(ADoor, RoomB);
+
+	FDoRepLifetimeParams Params;
+	Params.bIsPushBased = true;
+	DOREPLIFETIME_WITH_PARAMS(ADoor, bShouldBeLocked, Params);
+	DOREPLIFETIME_WITH_PARAMS(ADoor, bShouldBeOpen, Params);
+	DOREPLIFETIME_WITH_PARAMS(ADoor, RoomA, Params);
+	DOREPLIFETIME_WITH_PARAMS(ADoor, RoomB, Params);
 }
 
 // Called every frame
@@ -114,23 +118,22 @@ void ADoor::Tick(float DeltaTime)
 void ADoor::SetConnectingRooms(URoom* _RoomA, URoom* _RoomB)
 {
 	check(HasAuthority());
-	FlushNetDormancy();
-	RoomA = _RoomA;
-	RoomB = _RoomB;
+	SET_ACTOR_REPLICATED_PROPERTY_VALUE(RoomA, _RoomA);
+	SET_ACTOR_REPLICATED_PROPERTY_VALUE(RoomB, _RoomB);
 }
 
-void ADoor::Open(bool open)
+void ADoor::Open(bool bOpen)
 {
 	if (!HasAuthority())
 		return;
-	FlushNetDormancy();
-	bShouldBeOpen = open;
+
+	SET_ACTOR_REPLICATED_PROPERTY_VALUE(bShouldBeOpen, bOpen);
 }
 
-void ADoor::Lock(bool lock)
+void ADoor::Lock(bool bLock)
 {
 	if (!HasAuthority())
 		return;
-	FlushNetDormancy();
-	bShouldBeLocked = lock;
+
+	SET_ACTOR_REPLICATED_PROPERTY_VALUE(bShouldBeLocked, bLock)
 }
