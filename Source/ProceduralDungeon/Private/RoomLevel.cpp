@@ -155,12 +155,18 @@ void ARoomLevel::Tick(float DeltaTime)
 
 		if (bIsRoomLocked)
 		{
-			FBox Box = Bounds.GetBox().TransformBy(DungeonTransform);
-
-			DrawDebugLine(World, Box.Min, Box.Max, FColor::Red);
-			DrawDebugLine(World, FVector(Box.Min.X, Box.Min.Y, Box.Max.Z), FVector(Box.Max.X, Box.Max.Y, Box.Min.Z), FColor::Red);
-			DrawDebugLine(World, FVector(Box.Min.X, Box.Max.Y, Box.Max.Z), FVector(Box.Max.X, Box.Min.Y, Box.Min.Z), FColor::Red);
-			DrawDebugLine(World, FVector(Box.Min.X, Box.Max.Y, Box.Min.Z), FVector(Box.Max.X, Box.Min.Y, Box.Max.Z), FColor::Red);
+			FBox Box = Bounds.GetBox();
+			const FVector& Min = Box.Min;
+			const FVector& Max = Box.Max;
+#ifdef T
+			static_assert(false, "T macro is already defined! Please change its name to avoid potential conflicts");
+#endif
+#define T(POINT) DungeonTransform.TransformPosition(POINT)
+			DrawDebugLine(World, T(Min), T(Max), FColor::Red);
+			DrawDebugLine(World, T(FVector(Min.X, Min.Y, Max.Z)), T(FVector(Max.X, Max.Y, Min.Z)), FColor::Red);
+			DrawDebugLine(World, T(FVector(Min.X, Max.Y, Max.Z)), T(FVector(Max.X, Min.Y, Min.Z)), FColor::Red);
+			DrawDebugLine(World, T(FVector(Min.X, Max.Y, Min.Z)), T(FVector(Max.X, Min.Y, Max.Z)), FColor::Red);
+#undef T
 		}
 
 		// Doors
