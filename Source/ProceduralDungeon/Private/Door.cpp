@@ -111,7 +111,13 @@ void ADoor::Tick(float DeltaTime)
 #if ENABLE_DRAW_DEBUG
 	// TODO: Place it in an editor module of the plugin
 	if (Dungeon::DrawDebug() && GetWorld()->WorldType == EWorldType::EditorPreview)
-		FDoorDef::DrawDebug(GetWorld(), FColor::Blue, UDoorType::GetSize(Type));
+	{
+		FDoorDef DoorDef;
+		DoorDef.Direction = EDoorDirection::NbDirection;
+		DoorDef.Type = Type;
+		FDoorDef::DrawDebug(GetWorld(), FColor::Blue, DoorDef);
+		//FDoorDef::DrawDebug(GetWorld(), FColor::Blue, UDoorType::GetSize(Type));
+	}
 #endif // ENABLE_DRAW_DEBUG
 }
 

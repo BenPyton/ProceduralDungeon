@@ -68,6 +68,7 @@ FIntVector PROCEDURALDUNGEON_API ToIntVector(const EDoorDirection& Direction);
 FVector PROCEDURALDUNGEON_API ToVector(const EDoorDirection& Direction);
 FQuat PROCEDURALDUNGEON_API ToQuaternion(const EDoorDirection& Direction);
 FIntVector PROCEDURALDUNGEON_API Rotate(const FIntVector& Pos, const EDoorDirection& Rot);
+FVector PROCEDURALDUNGEON_API Rotate(const FVector& Pos, const EDoorDirection& Rot);
 
 UENUM(BlueprintType, meta = (DisplayName = "Generation Type"))
 enum class EGenerationType : uint8
@@ -119,6 +120,7 @@ public:
 	FString GetTypeName() const;
 	FString ToString() const;
 	FDoorDef GetOpposite() const;
+	FBoxCenterAndExtent GetBounds(bool bIncludeOffset = true) const;
 
 	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool includeOffset = true);
 

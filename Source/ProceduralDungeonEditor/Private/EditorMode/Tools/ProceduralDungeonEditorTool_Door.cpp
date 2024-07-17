@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,12 +33,40 @@
 #include "RoomData.h"
 #include "Door.h"
 
+bool AreDoorsOverlapping(const FDoorDef& DoorA, const FDoorDef& DoorB)
+{
+	// If not in same direction, they will never overlap.
+	if (DoorA.Direction != DoorB.Direction)
+		return false;
+
+	// If same direction and position, then will always overlap.
+	if (DoorA.Position == DoorB.Position)
+		return true;
+
+	const FBoxCenterAndExtent DoorBoundsA = DoorA.GetBounds();
+	const FBoxCenterAndExtent DoorBoundsB = DoorB.GetBounds();
+	return Intersect(DoorBoundsA, DoorBoundsB);
+}
+
+bool IsPositionInside(const FDoorDef& Door, const FIntVector& Position)
+{
+	// If same position, then always inside.
+	if (Door.Position == Position)
+		return true;
+
+	const FVector RoomUnit = Dungeon::RoomUnit();
+	const FBoxCenterAndExtent DoorBounds = Door.GetBounds();
+	const FVector LocalDoorExtent = DoorBounds.Extent / RoomUnit;
+	const FVector RelativePosition = (FVector(Position) - (DoorBounds.Center / RoomUnit)).GetAbs();
+	return RelativePosition.X <= LocalDoorExtent.X && RelativePosition.Y <= LocalDoorExtent.Y && RelativePosition.Z <= LocalDoorExtent.Z;
+}
+
 bool IsDoorValid(const URoomData* Data, const FDoorDef& Door)
 {
 	check(IsValid(Data));
 	for (const FDoorDef& DoorDef : Data->Doors)
 	{
-		if (DoorDef == Door)
+		if (AreDoorsOverlapping(Door, DoorDef))
 			return false;
 	}
 	return true;
@@ -184,6 +212,26 @@ bool FProceduralDungeonEditorTool_Door::MouseMove(FEditorViewportClient* Viewpor
 	DoorPreview.Position = RoomCell;
 	DoorPreview.Direction = DoorDirection;
 	DoorPreview.Type = EdMode->Settings->DoorType;
+
+	auto Level = EdMode->GetLevel();
+	if (!Level.IsValid())
+		return false;
+
+	URoomData* Data = Level->Data;
+	check(IsValid(Data));
+
+	// Snap preview to existing door if RoomCell is inside
+	for (const FDoorDef& RoomDoor : Data->Doors)
+	{
+		if (RoomDoor.Direction != DoorPreview.Direction)
+			continue;
+
+		if (IsPositionInside(RoomDoor, DoorPreview.Position))
+		{
+			DoorPreview = RoomDoor;
+			break;
+		}
+	}
 
 	return false;
 }
