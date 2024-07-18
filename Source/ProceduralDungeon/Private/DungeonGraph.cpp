@@ -465,6 +465,16 @@ bool UDungeonGraph::AreRoomsInitialized(int32& NbRoomInitialized) const
 	return NbRoomInitialized >= Rooms.Num();
 }
 
+bool UDungeonGraph::AreRoomsReady() const
+{
+	for (URoom* Room : Rooms)
+	{
+		if (!(IsValid(Room) && Room->IsReady()))
+			return false;
+	}
+	return true;
+}
+
 void UDungeonGraph::RequestGeneration()
 {
 	check(GetOwner()->HasAuthority());
