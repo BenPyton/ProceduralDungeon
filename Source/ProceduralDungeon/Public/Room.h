@@ -45,7 +45,11 @@ struct FRoomConnection
 public:
 	UPROPERTY()
 	TWeakObjectPtr<URoom> OtherRoom {nullptr};
+
+	UPROPERTY()
 	int OtherDoorIndex {-1};
+
+	UPROPERTY()
 	ADoor* DoorInstance {nullptr};
 };
 
@@ -87,6 +91,7 @@ public:
 	void SetPlayerInside(bool PlayerInside);
 	void SetVisible(bool Visible);
 	FORCEINLINE uint64 GetRoomID() const { return Id; }
+	FORCEINLINE bool IsReady() const { return RoomData != nullptr; }
 
 	// Is the player currently inside the room?
 	// A player can be in multiple rooms at once, for example when he stands at the door frame,
@@ -168,19 +173,19 @@ public:
 	FVector GetBoundsExtent() const;
 
 private:
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_RoomData)
 	URoomData* RoomData {nullptr};
 
 	UPROPERTY(Replicated, Transient)
 	TArray<FCustomDataPair> CustomData;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_Connections)
 	TArray<FRoomConnection> Connections;
 
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ADungeonGenerator> GeneratorOwner {nullptr};
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_Id)
 	int64 Id {-1};
 
 	bool bPlayerInside {false};
@@ -189,12 +194,6 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_IsLocked)
 	bool bIsLocked {false};
 
-	UFUNCTION() // Needed macro for replication to work
-	void OnRep_IsLocked();
-
-	UFUNCTION() // needed macro for binding to delegate
-	void OnInstanceLoaded();
-
 	const FCustomDataPair* GetDataPair(const TSubclassOf<URoomCustomData>& DataType) const;
 
 protected:
@@ -202,6 +201,24 @@ protected:
 	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 	virtual void RegisterReplicableSubobjects(bool bRegister) override;
 	//~ End UReplicableObject Interface
+
+	void SetPosition(const FIntVector& NewPosition);
+	void SetDirection(EDoorDirection NewDirection);
+
+	UFUNCTION() // Needed macro for replication to work
+	void OnRep_RoomData();
+
+	UFUNCTION() // Needed macro for replication to work
+	void OnRep_Id();
+
+	UFUNCTION() // Needed macro for replication to work
+	void OnRep_Connections();
+
+	UFUNCTION() // Needed macro for replication to work
+	void OnRep_IsLocked();
+
+	UFUNCTION() // needed macro for binding to delegate
+	void OnInstanceLoaded();
 
 public:
 	void Init(URoomData* RoomData, ADungeonGenerator* Generator, int32 RoomId);

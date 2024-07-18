@@ -45,17 +45,20 @@ URoom::URoom()
 void URoom::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME_CONDITION(URoom, RoomData, COND_InitialOnly);
-	DOREPLIFETIME_CONDITION(URoom, Position, COND_InitialOnly);
-	DOREPLIFETIME_CONDITION(URoom, Direction, COND_InitialOnly);
-	DOREPLIFETIME_CONDITION(URoom, Connections, COND_InitialOnly);
-	DOREPLIFETIME_CONDITION(URoom, GeneratorOwner, COND_InitialOnly);
-	DOREPLIFETIME_CONDITION(URoom, Id, COND_InitialOnly);
 
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 	DOREPLIFETIME_WITH_PARAMS(URoom, bIsLocked, Params);
 	DOREPLIFETIME_WITH_PARAMS(URoom, CustomData, Params);
+
+	// InitialOnly is not called on newly created subobjects after the InitialCond of actor owner has already been called!!!
+	//Params.Condition = COND_InitialOnly;
+	DOREPLIFETIME_WITH_PARAMS(URoom, RoomData, Params);
+	DOREPLIFETIME_WITH_PARAMS(URoom, Position, Params);
+	DOREPLIFETIME_WITH_PARAMS(URoom, Direction, Params);
+	DOREPLIFETIME_WITH_PARAMS(URoom, Connections, Params);
+	DOREPLIFETIME_WITH_PARAMS(URoom, GeneratorOwner, Params);
+	DOREPLIFETIME_WITH_PARAMS(URoom, Id, Params);
 }
 
 bool URoom::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
@@ -78,15 +81,16 @@ void URoom::RegisterReplicableSubobjects(bool bRegister)
 
 void URoom::Init(URoomData* Data, ADungeonGenerator* Generator, int32 RoomId)
 {
-	RoomData = Data;
-	GeneratorOwner = Generator;
-	Id = RoomId;
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(RoomData, Data);
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(GeneratorOwner, Generator);
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Id, RoomId);
 	Instance = nullptr;
-	Position = FIntVector(0, 0, 0);
-	Direction = EDoorDirection::North;
+	SetPosition(FIntVector::ZeroValue);
+	SetDirection(EDoorDirection::North);
 
 	if (IsValid(RoomData))
 	{
+		MARK_PROPERTY_DIRTY_FROM_NAME(URoom, Connections, this);
 		for (int i = 0; i < RoomData->GetNbDoor(); i++)
 		{
 			Connections.Add(FRoomConnection());
@@ -109,6 +113,7 @@ void URoom::SetConnection(int Index, URoom* Room, int OtherIndex)
 	check(Index >= 0 && Index < Connections.Num());
 	Connections[Index].OtherRoom = Room;
 	Connections[Index].OtherDoorIndex = OtherIndex;
+	MARK_PROPERTY_DIRTY_FROM_NAME(URoom, Connections, this);
 }
 
 TWeakObjectPtr<URoom> URoom::GetConnection(int Index) const
@@ -214,9 +219,38 @@ void URoom::Lock(bool bLock)
 	DungeonLog_InfoSilent("[%s] Room '%s' setting IsLocked: %s", *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False"));
 }
 
+void URoom::SetPosition(const FIntVector& NewPosition)
+{
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Position, NewPosition);
+}
+
+void URoom::SetDirection(EDoorDirection NewDirection)
+{
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Direction, NewDirection);
+}
+
 void URoom::OnRep_IsLocked()
 {
 	DungeonLog_InfoSilent("[%s] Room '%s' IsLocked Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False"));
+}
+
+void URoom::OnRep_Id()
+{
+	DungeonLog_InfoSilent("[%s] Room '%s' Id Replicated: %d", *GetAuthorityName(), *GetNameSafe(this), Id);
+}
+
+void URoom::OnRep_RoomData()
+{
+	DungeonLog_InfoSilent("[%s] Room '%s' RoomData Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomData));
+}
+
+void URoom::OnRep_Connections()
+{
+	DungeonLog_InfoSilent("[%s] Room '%s' Connections Replicated", *GetAuthorityName(), *GetNameSafe(this));
+	for (const auto& Connection : Connections)
+	{
+		DungeonLog_InfoSilent("- Connected to %s (door id: %d)", *GetNameSafe(Connection.OtherRoom.Get()), Connection.OtherDoorIndex);
+	}
 }
 
 ARoomLevel* URoom::GetLevelScript() const
@@ -335,20 +369,20 @@ FBoxMinAndMax URoom::RoomToWorld(const FBoxMinAndMax& RoomBox) const
 void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)
 {
 	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
-	Direction = WorldRot - RoomData->Doors[DoorIndex].Direction;
+	SetDirection(WorldRot - RoomData->Doors[DoorIndex].Direction);
 }
 
 void URoom::SetPositionFromDoor(int DoorIndex, FIntVector WorldPos)
 {
 	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
-	Position = WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction);
+	SetPosition(WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction));
 }
 
 void URoom::SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot)
 {
 	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
-	Direction = WorldRot - RoomData->Doors[DoorIndex].Direction;
-	Position = WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction);
+	SetDirection(WorldRot - RoomData->Doors[DoorIndex].Direction);
+	SetPosition(WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction));
 }
 
 bool URoom::IsOccupied(FIntVector Cell)

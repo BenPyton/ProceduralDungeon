@@ -553,7 +553,6 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 	case EGenerationState::Initialization:
 		DungeonLog_Info("======= Begin Dungeon Initialization =======");
 		Graph->SynchronizeRooms();
-		UpdateOctree();
 		break;
 	case EGenerationState::Load:
 		DungeonLog_Info("======= Begin Load All Levels =======");
@@ -571,7 +570,6 @@ void ADungeonGenerator::OnStateBegin(EGenerationState State)
 
 void ADungeonGenerator::OnStateTick(EGenerationState State)
 {
-	int RoomCount = 0;
 	switch (State)
 	{
 	case EGenerationState::Idle:
@@ -587,7 +585,8 @@ void ADungeonGenerator::OnStateTick(EGenerationState State)
 		SetState(EGenerationState::Initialization);
 		break;
 	case EGenerationState::Initialization:
-		SetState(EGenerationState::Load);
+		if (Graph->AreRoomsReady())
+			SetState(EGenerationState::Load);
 		break;
 	case EGenerationState::Load:
 		if (Graph->AreRoomsInitialized(CachedTmpRoomCount))
@@ -618,6 +617,7 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 		break;
 	case EGenerationState::Initialization:
 		DungeonLog_Info("======= End Dungeon Initialization =======");
+		UpdateOctree();
 		break;
 	case EGenerationState::Load:
 		DungeonLog_Info("======= End Load All Levels =======");

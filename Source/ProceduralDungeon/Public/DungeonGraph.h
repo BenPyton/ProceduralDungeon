@@ -160,6 +160,7 @@ protected:
 	bool AreRoomsLoaded(int32& NbRoomLoaded) const;
 	bool AreRoomsUnloaded(int32& NbRoomUnloaded) const;
 	bool AreRoomsInitialized(int32& NbRoomInitialized) const;
+	bool AreRoomsReady() const;
 
 	void RequestGeneration();
 	void RequestUnload();
