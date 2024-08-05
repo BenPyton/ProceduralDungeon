@@ -393,7 +393,13 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 		}
 	}
 
-	return shouldContinue;
+	const bool bRoomLimitReached = InOutRoomList.Num() > Dungeon::RoomLimit();
+	if (bRoomLimitReached)
+	{
+		DungeonLog_Warning("Dungeon has reached the room limit of %d! Check your 'Continue To Add Room' to make sure your dungeon is not in an infinite loop, or increase the room limit in the plugin settings if this is intentional.", Dungeon::RoomLimit());
+	}
+
+	return shouldContinue && !bRoomLimitReached;
 }
 
 void ADungeonGenerator::LoadAllRooms()

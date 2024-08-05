@@ -35,6 +35,7 @@ UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer&
 	CanLoop = true;
 	MaxGenerationTry = 500;
 	MaxRoomPlacementTry = 10;
+	RoomLimit = 100;
 
 	// Occlusion settings
 	OcclusionCulling = true;

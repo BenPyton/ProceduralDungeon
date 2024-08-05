@@ -169,6 +169,12 @@ uint32 Dungeon::MaxRoomPlacementTryBeforeGivingUp()
 	return Settings->MaxRoomPlacementTry;
 }
 
+int32 Dungeon::RoomLimit()
+{
+	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
+	return Settings->RoomLimit;
+}
+
 void Dungeon::EnableOcclusionCulling(bool Enable)
 {
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
