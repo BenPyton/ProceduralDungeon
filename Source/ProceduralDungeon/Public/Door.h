@@ -48,9 +48,9 @@ public:
 	void SetConnectingRooms(URoom* RoomA, URoom* RoomB);
 
 	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Locked"))
-	FORCEINLINE bool IsLocked() { return bLocked; }
+	FORCEINLINE bool IsLocked() const { return bLocked; }
 	UFUNCTION(BlueprintPure, Category = "Door", meta = (CompactNodeTitle = "Is Open"))
-	FORCEINLINE bool IsOpen() { return bIsOpen; }
+	FORCEINLINE bool IsOpen() const { return bIsOpen; }
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Door")
 	void Open(bool open);
