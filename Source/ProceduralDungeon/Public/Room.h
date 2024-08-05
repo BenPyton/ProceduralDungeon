@@ -164,6 +164,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Room")
 	void GetAllConnectedRooms(TArray<URoom*>& ConnectedRooms) const;
 
+	// Returns the index of the provided room, or -1 if room is not connected.
+	UFUNCTION(BlueprintPure, Category = "Room")
+	int32 GetConnectedRoomIndex(const URoom* OtherRoom) const;
+
+	// Returns the door actor shared with the provided room.
+	// Returns null if the provided room is not connected with this.
+	UFUNCTION(BlueprintPure, Category = "Room")
+	void GetDoorsWith(const URoom* OtherRoom, TArray<ADoor*>& Doors) const;
+
 	// Returns the world center position of the room.
 	UFUNCTION(BlueprintPure, Category = "Room")
 	FVector GetBoundsCenter() const;

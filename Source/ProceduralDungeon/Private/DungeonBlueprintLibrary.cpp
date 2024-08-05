@@ -29,6 +29,10 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/Pawn.h"
+#include "Roomlevel.h"
+#include "Room.h"
+#include "RoomCustomData.h"
+#include "Engine/Engine.h" // GEngine
 
 bool UDungeonBlueprintLibrary::IsDoorOfType(const TSubclassOf<ADoor> DoorClass, const UDoorType* DoorType)
 {
@@ -39,6 +43,38 @@ bool UDungeonBlueprintLibrary::IsDoorOfType(const TSubclassOf<ADoor> DoorClass, 
 bool UDungeonBlueprintLibrary::CompareDataTableRows(const FDataTableRowHandle& A, const FDataTableRowHandle& B)
 {
 	return A == B;
+}
+
+URoom* UDungeonBlueprintLibrary::GetOwningRoom(const AActor* Target)
+{
+	if (!IsValid(Target))
+		return nullptr;
+
+	if (const ARoomLevel* SelfLevel = Cast<ARoomLevel>(Target))
+	{
+		return SelfLevel->Room;
+	}
+
+	ULevel* Level = Target->GetLevel();
+	if (!IsValid(Level))
+		return nullptr;
+
+	ARoomLevel* RoomLevel = Cast<ARoomLevel>(Level->GetLevelScriptActor());
+	if (!IsValid(RoomLevel))
+		return nullptr;
+
+	return RoomLevel->GetRoom();
+}
+
+bool UDungeonBlueprintLibrary::GetOwningRoomCustomData(const AActor* Target, TSubclassOf<URoomCustomData> CustomDataClass, URoomCustomData*& CustomData)
+{
+	CustomData = nullptr;
+	URoom* OwningRoom = GetOwningRoom(Target);
+	if (!IsValid(OwningRoom))
+		return false;
+
+	OwningRoom->GetCustomData(CustomDataClass, CustomData);
+	return IsValid(CustomData);
 }
 
 // ===== Plugin Settings Accessors =====

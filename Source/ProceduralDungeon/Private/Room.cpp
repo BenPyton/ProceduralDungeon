@@ -591,6 +591,26 @@ void URoom::GetAllConnectedRooms(TArray<URoom*>& ConnectedRooms) const
 	}
 }
 
+int32 URoom::GetConnectedRoomIndex(const URoom* OtherRoom) const
+{
+	for (int i = 0; i < Connections.Num(); ++i)
+	{
+		if (OtherRoom == Connections[i].OtherRoom.Get())
+			return i;
+	}
+	return -1;
+}
+
+void URoom::GetDoorsWith(const URoom* OtherRoom, TArray<ADoor*>& Doors) const
+{
+	Doors.Empty();
+	for (const auto& Connection : Connections)
+	{
+		if (OtherRoom == Connection.OtherRoom.Get())
+			Doors.Add(Connection.DoorInstance);
+	}
+}
+
 FVector URoom::GetBoundsCenter() const
 {
 	FVector Center = GetBounds().Center;

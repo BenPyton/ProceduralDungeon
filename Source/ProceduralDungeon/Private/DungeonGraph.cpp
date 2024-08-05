@@ -201,6 +201,21 @@ bool UDungeonGraph::HasValidPath(const URoom* From, const URoom* To, bool Ignore
 	return FindPath(From, To, nullptr, IgnoreLockedRooms);
 }
 
+int UDungeonGraph::NumberOfRoomBetween(const URoom* A, const URoom* B, bool IgnoreLockedRooms)
+{
+	TArray<const URoom*> Path;
+	FindPath(A, B, &Path, IgnoreLockedRooms);
+	return Path.Num();
+}
+
+bool UDungeonGraph::GetPathBetween(const URoom* A, const URoom* B, TArray<URoom*>& ResultPath, bool IgnoreLockedRooms)
+{
+	// @HACK: is it another alternative?
+	TArray<const URoom*>& Temp = reinterpret_cast<TArray<const URoom*>&>(ResultPath);
+	FindPath(A, B, &Temp, IgnoreLockedRooms);
+	return ResultPath.Num() > 0;
+}
+
 URoom* UDungeonGraph::GetRoomAt(FIntVector RoomCell) const
 {
 	return URoom::GetRoomAt(RoomCell, Rooms);
