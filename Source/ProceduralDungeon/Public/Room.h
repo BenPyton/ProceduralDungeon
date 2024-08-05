@@ -243,6 +243,7 @@ public:
 	bool IsInstanceLoaded() const;
 	bool IsInstanceUnloaded() const;
 	bool IsInstanceInitialized() const;
+	void CreateLevelComponents(ARoomLevel* LevelActor);
 
 	EDoorDirection GetDoorWorldOrientation(int DoorIndex);
 	FIntVector GetDoorWorldPosition(int DoorIndex);
