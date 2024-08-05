@@ -433,7 +433,20 @@ void ADungeonGenerator::UpdateRoomVisibility()
 	if (!IsValid(Player))
 		return;
 
-	FBox WorldPlayerBox = Player->GetComponentsBoundingBox();
+	// Copied from AActor::GetComponentsBoundingBox but check also collision response with the room object type
+	FBox WorldPlayerBox(ForceInit);
+	Player->ForEachComponent<UPrimitiveComponent>(/*bIncludeFromChildActors = */false
+		, [&](const UPrimitiveComponent* Component)
+		{
+			if (Component->IsRegistered()
+				&& Component->IsCollisionEnabled()
+				&& Component->GetCollisionResponseToChannel(Dungeon::RoomObjectType()) != ECollisionResponse::ECR_Ignore
+				)
+			{
+				WorldPlayerBox += Component->Bounds.GetBox();
+			}
+		});
+
 	FTransform Transform = UseGeneratorTransform() ? GetTransform() : FTransform::Identity;
 	WorldPlayerBox = WorldPlayerBox.InverseTransformBy(Transform);
 
