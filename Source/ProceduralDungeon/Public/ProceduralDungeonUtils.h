@@ -103,6 +103,7 @@ namespace Dungeon
 	ECollisionChannel PROCEDURALDUNGEON_API RoomObjectType();
 	uint32 PROCEDURALDUNGEON_API MaxGenerationTryBeforeGivingUp();
 	uint32 PROCEDURALDUNGEON_API MaxRoomPlacementTryBeforeGivingUp();
+	int32 PROCEDURALDUNGEON_API RoomLimit();
 
 	void PROCEDURALDUNGEON_API EnableOcclusionCulling(bool Enable);
 	void PROCEDURALDUNGEON_API SetOcclusionDistance(int32 Distance);

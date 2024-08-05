@@ -177,7 +177,7 @@ public:
 
 	// Initialize the room instances during the generation step
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator")
-	void InitializeDungeon(const class UDungeonGraph* Rooms);
+	void InitializeDungeon(const UDungeonGraph* Rooms);
 
 	// ===== Optional events =====
 
