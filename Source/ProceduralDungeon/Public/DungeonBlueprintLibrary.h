@@ -30,6 +30,9 @@
 #include "Engine/DataTable.h"
 #include "DungeonBlueprintLibrary.generated.h"
 
+class URoom;
+class URoomCustomData;
+
 UCLASS()
 class PROCEDURALDUNGEON_API UDungeonBlueprintLibrary : public UBlueprintFunctionLibrary
 {
@@ -41,6 +44,16 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Utilities", meta = (DisplayName = "Equal (Data Table Row Handle)", CompactNodeTitle = "=="))
 	static bool CompareDataTableRows(const FDataTableRowHandle& A, const FDataTableRowHandle& B);
+
+	// Returns the room instance the actor is in.
+	// If the actor is spawned at runtime or the owning level is not a room level, returns null.
+	UFUNCTION(BlueprintPure, Category = "Utilities|Procedural Dungeon", meta = (DefaultToSelf = "Target"))
+	static URoom* GetOwningRoom(const AActor* Target);
+
+	// Returns the first RoomCustomData of the provided type in the owning room.
+	// If no owning room or no custom data of this type, returns null.
+	UFUNCTION(BlueprintCallable, Category = "Utilities|Procedural Dungeon", meta = (DefaultToSelf = "Target", ExpandBoolAsExecs = "ReturnValue", DeterminesOutputType = "CustomDataClass", DynamicOutputParam = "CustomData"))
+	static bool GetOwningRoomCustomData(const AActor* Target, TSubclassOf<URoomCustomData> CustomDataClass, URoomCustomData*& CustomData);
 
 	// ===== DoorDirection Math Utility Functions =====
 

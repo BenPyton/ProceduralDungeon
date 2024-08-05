@@ -135,6 +135,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph", meta = (ReturnDisplayName = "Yes"))
 	bool HasValidPath(const URoom* From, const URoom* To, bool IgnoreLockedRooms = false);
 
+	// Returns the minimum number of connected rooms between A and B.
+	// Note: Could be pure, but since it can be heavy duty for large dungeons, keep it impure to avoid duplicate calls.
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph")
+	int NumberOfRoomBetween(const URoom* A, const URoom* B, bool IgnoreLockedRooms = false);
+
+	// Returns the path between A and B.
+	// Note: Could be pure, but since it can be heavy duty for large dungeons, keep it impure to avoid duplicate calls.
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph", meta = (ReturnDisplayName = "Has Path"))
+	bool GetPathBetween(const URoom* A, const URoom* B, TArray<URoom*>& ResultPath, bool IgnoreLockedRooms = false);
+
 	URoom* GetRoomAt(FIntVector RoomCell) const;
 	URoom* GetRoomByIndex(int64 Index) const;
 
