@@ -292,6 +292,16 @@ bool URoom::IsInstanceInitialized() const
 	return (IsValid(Script)) ? Script->IsInit() : false;
 }
 
+void URoom::CreateLevelComponents(ARoomLevel* LevelActor)
+{
+	for (const auto& Pair : CustomData)
+	{
+		if (!IsValid(Pair.Data))
+			continue;
+		Pair.Data->CreateLevelComponent(LevelActor);
+	}
+}
+
 EDoorDirection URoom::GetDoorWorldOrientation(int DoorIndex)
 {
 	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());

@@ -25,11 +25,22 @@
 #pragma once
 
 #include "ReplicableObject.h"
+#include "Templates/SubclassOf.h"
 #include "RoomCustomData.generated.h"
+
+class UActorComponent;
 
 // Base class for user custom data embedded in room instances
 UCLASS(Abstract, BlueprintType, Blueprintable)
 class PROCEDURALDUNGEON_API URoomCustomData : public UReplicableObject
 {
 	GENERATED_BODY()
+
+public:
+	void CreateLevelComponent(class ARoomLevel* LevelActor) const;
+
+private:
+	// Component to create and attach on the Level Script Actor of the instanced room.
+	UPROPERTY(EditAnywhere, Category = "Dungeon Rules", meta = (AllowAbstract = false, AllowPrivateAccess = true))
+	TSubclassOf<UActorComponent> LevelComponent {nullptr};
 };

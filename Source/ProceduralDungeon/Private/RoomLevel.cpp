@@ -117,6 +117,9 @@ void ARoomLevel::BeginPlay()
 
 	SetActorsVisible(Room->IsVisible());
 
+	// Create dynamic components from the RoomCustomData
+	Room->CreateLevelComponents(this);
+
 	bIsInit = true;
 }
 
