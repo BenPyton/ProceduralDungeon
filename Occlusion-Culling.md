@@ -2,6 +2,11 @@
 
 The occlusion culling system of this plugin consists of showing only the necessary rooms to avoid a lots of mesh drawing and thus improving performances.
 
+:::note
+This feature is badly named!
+There is no real "occlusion" computation done, the room visibilities are toggled even when there is no occlusion of the room.\
+I will rename that as `Room Culling` instead in a future version of the plugin, this is more accurate.
+:::
 
 :::warning
 Only the visibility of meshes is toggled. The ticking, animations, collisions, etc. are kept! So, the possible performance gain is on the rendering only!
