@@ -55,7 +55,7 @@ Here is the flowchart when we call `Generate` on a dungeon generator (or clients
 
 ## What you need to do
 First, read the [Installation](Installation.md) page to install the plugin.\
-Then, read and follow the instructions in the [Getting Started](Getting-Started.md) page.
+Then, read and follow the instructions in the [Getting Started](Creating-Rooms) page.
 
 You can get an [example project here](https://github.com/BenPyton/DungeonExample) if you want a minimal working project.
 

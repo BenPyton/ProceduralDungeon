@@ -1,3 +1,8 @@
+---
+pagination_prev: guides/Home
+pagination_next: guides/Plugin-Settings
+---
+
 <details>
 <summary>
 

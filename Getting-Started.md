@@ -1,5 +1,8 @@
 ---
-title: Getting Started
+title: Creating Rooms
+id: Creating-Rooms
+pagination_prev: guides/Plugin-Settings
+pagination_next: guides/Dungeon-Generator
 ---
 
 :::warning
@@ -98,7 +101,3 @@ This button will help you doing it automatically for all the selected volumes. Y
 When you resize the room bounds while some doors have already been placed, they can become invalid (turning orange) because they are inside or outside the room bounds.\
 You can't delete them from the viewport, and instead you would have to find them in the data asset and delete them here. This might be tedious to do as you don't have an easy way to know which door is which.\
 This button will help you by removing automatically all invalid doors of the room data asset.
-
-# Next Step
-
-After you created some rooms, you have to create a [dungeon generator actor and configure it](Dungeon-Generator.md) with your own generation rules.

@@ -1,3 +1,8 @@
+---
+pagination_prev: guides/Choose-First-Room-Data
+pagination_next: guides/Continue-To-Add-Room
+---
+
 # Choose Next Room
 
 This function is the main part of the procedural generation: it's where you set your own logic to generate your dungeon.\
@@ -48,8 +53,5 @@ You don't need an end room if you want another goal for your dungeon (eg. killin
 You don't need the player to spawn in the start room (or even have a specific room as a first room).
 You could for example have multiple rooms with a player start actor you choose from to spawn the player.\
 You can add any variables you want in your room data to add constraints on your generation rules (eg. add a room difficulty value so you can choose a hard room after an easy room).
-
-### **Next Step**
-The next step after choosing the rooms is [how to stop the generation](Continue-To-Add-Room.md).
 
 [1]: https://github.com/BenPyton/DungeonExample

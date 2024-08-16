@@ -1,9 +1,15 @@
+---
+displayed_sidebar: homeSidebar
+pagination_prev: guides/Plugin-Settings
+pagination_next: guides/Dungeon-Generator
+---
+
 # Room Architecture (plugin v1)
 
 :::warning
 This page is for plugin v1.x.x **only**.\
 If you use plugin v2.x.x, please read the [Room Architecture (plugin v2)](Room-Architecture) page instead.\
-If you use plugin v3.x.x, please read the [Getting Started](Getting-Started) page instead.
+If you use plugin v3.x.x, please read the [Getting Started](Creating-Rooms) page instead.
 :::
 
 ### Understanding the architecture

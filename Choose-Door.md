@@ -1,3 +1,8 @@
+---
+pagination_prev: guides/Is-Valid-Dungeon
+pagination_next: api/Classes/DungeonGenerator/Nodes/Generate/Generate
+---
+
 # Choose Door
 
 This function let you choose a [door actor](Door.md) to spawn between 2 rooms.\

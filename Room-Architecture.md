@@ -1,9 +1,15 @@
+---
+displayed_sidebar: homeSidebar
+pagination_prev: guides/Plugin-Settings
+pagination_next: guides/Choose-First-Room-Data
+---
+
 # Room Architecture (plugin v2)
 
 :::warning
 This page is for plugin version 2.X.X.\
 If you use plugin v1.X.X, please read the [Room Architecture (plugin v1)](Legacy-Room-Architecture) page instead.\
-If you use plugin v3.X.X, please read the [Getting Started](Getting-Started) page instead.
+If you use plugin v3.X.X, please read the [Getting Started](Creating-Rooms) page instead.
 :::
 
 ### **Understanding the architecture**
@@ -75,6 +81,3 @@ But keep in mind that a door has to be on the border of the room boundary (red b
 
 Door positions are expressed in room units and correspond to the "cell" of the room, and an orientation for the side of the "cell".
 For example, a room of unit 1\*1\*1 have only one "cell" at position (0,0,0). So any door in this room will have this position of (0,0,0) and the side of the "cell" will be selected with `North`, `East`, `West` and `South`.
-
-### **Next Step**
-The next step after creating the rooms is to define your generation rules, beginning with [the first room of your dungeon](Choose-First-Room-Data.md).

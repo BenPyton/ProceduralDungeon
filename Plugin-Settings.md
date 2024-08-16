@@ -1,3 +1,8 @@
+---
+pagination_prev: guides/Installation
+pagination_next: guides/Creating-Rooms
+---
+
 # Plugin Settings
 
 The plugin adds several project-wide settings to allow you to customize it to your needs.
