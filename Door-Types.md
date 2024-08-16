@@ -1,8 +1,10 @@
+# Door Types
+
 By default, the room data's doors are set with no door type.\
-In that case, they'll use the default door size from the [[Plugin Settings]].
+In that case, they'll use the default door size from the [plugin settings](Plugin-Settings.md).
 
 However, you can create door type assets to diversify your doors in the dungeon. Door types act like some tag system. A room can connect to another room's door only if it has the same door type.\
-You can check a room compatibility with a door before-hand with the `Get Compatible Room Data` function of the [[dungeon generator|Dungeon Generator]]. This function will return all room data with at least one door of the same type as the provided door.
+You can check a room compatibility with a door before-hand with the `Get Compatible Room Data` function of the [dungeon generator](Dungeon-Generator.md). This function will return all room data with at least one door of the same type as the provided door.
 
 Creating a door type is as simple as 2 clicks: right-click on your content browser and select `Procedural Dungeon` -> `Door Type`.
 

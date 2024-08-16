@@ -1,3 +1,5 @@
+# Plugin Settings
+
 The plugin adds several project-wide settings to allow you to customize it to your needs.
 
 The settings are split in 2 places, one for the runtime module and one for the editor module.
@@ -13,7 +15,7 @@ Setting | Description
 **Room&#160;Unit** | This is the size of a 1 unit room. Each room have a size made of a multiple of this unit. For instance, if you have a room unit of (1000, 1000, 400) and a room of size (3, 1, 2), this room will have in world unit a size of (3000, 1000, 800).
 **Default&#160;Door&#160;Size** | This is the size used by the debug draw to draw the doors. This is just a visual indication for you, it is not used during the generation process.
 **Door&#160;Offset** | You can add an offset on the Z-axis for the doors (eg. if you want to place a ground with a non-zero depth). This offset is a percentage between 0 and 1 of the room unit height.
-**Can&#160;Loop** | Enable possibility to link doors when they can.<br/>[*DEPRECATED*] This setting is deprecated and will be removed in a future version.<br/>Use the `Can Loop` variable in the [[Dungeon Generator]] instead.<br/>As long as this setting remains, it will act as a global toggle for the feature.<br/>You should keep it ticked if you want to get the same behavior as when it will be removed.
+**Can&#160;Loop** | Enable possibility to link doors when they can.<br/>[*DEPRECATED*] This setting is deprecated and will be removed in a future version.<br/>Use the `Can Loop` variable in the [Dungeon Generator](Dungeon-Generator.md) instead.<br/>As long as this setting remains, it will act as a global toggle for the feature.<br/>You should keep it ticked if you want to get the same behavior as when it will be removed.
 **Room&#160;Object&#160;Type** | The Object Type used by the room trigger box to test actor overlaps.<br/>By default it is set to `ECC_EngineTraceChannel6`, you cannot set that channel from the editor but you can from the `DefaultGame.ini` file if you want to revert back to the default value.<br/>You can create new [Object Type Channels](https://docs.unrealengine.com/4.27/en-US/InteractiveExperiences/Physics/Collision/HowTo/AddCustomCollisionType/) from your project settings if you want a special channel for the dungeon rooms, and have controls on which actors can interact with them.
 
 ![](Images/PluginRoomSettings.jpg)
@@ -22,9 +24,9 @@ Setting | Description
 *Note: These settings are badly named and should be referred as `Room Culling` instead. It will be changed in a future version.*
 Setting | Description
 ---|---
-**Enable&#160;Occlusion&#160;Culling** | This enables the occlusion culling system (see [[Occlusion Culling]] for more details).
+**Enable&#160;Occlusion&#160;Culling** | This enables the occlusion culling system (see [Occlusion Culling](Occlusion-Culling.md) for more details).
 **Occlusion&#160;Distance** | Define the distance (in number of connected rooms) of visible rooms from the player's room.
-**Occlude&#160;Dynamic&#160;Actors** | Set it if you want to have dynamic actors with a `RoomVisibility` component tracked in the rooms to show/hide them with the room occlusions (see [[Occlusion Culling]] for more details).
+**Occlude&#160;Dynamic&#160;Actors** | Set it if you want to have dynamic actors with a `RoomVisibility` component tracked in the rooms to show/hide them with the room occlusions (see [Occlusion Culling](Occlusion-Culling.md) for more details).
 
 ### Debug
 Setting | Description

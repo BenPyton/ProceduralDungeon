@@ -1,9 +1,11 @@
+# Choose Next Room
+
 This function is the main part of the procedural generation: it's where you set your own logic to generate your dungeon.\
 This function is run each time the generator tries to add a room to the dungeon.
 
 As input parameters:
 - `Current Room` is the room from which the generator will try to add the next room.\
-For example, the first time this function is called, the `Current Room` is the `RoomData` asset you have returned in the [[`Choose First Room Data`|Choose First Room Data]] function.
+For example, the first time this function is called, the `Current Room` is the `RoomData` asset you have returned in the [`Choose First Room`](Choose-First-Room-Data.md) function.
 - `Door Data` is the door on which the next room will be connected to.\
 You have access to its location (expressed in room units, not in unreal units!), its orientation and its `DoorType`.
 
@@ -48,6 +50,6 @@ You could for example have multiple rooms with a player start actor you choose f
 You can add any variables you want in your room data to add constraints on your generation rules (eg. add a room difficulty value so you can choose a hard room after an easy room).
 
 ### **Next Step**
-The next step after choosing the rooms is [[how to stop the generation|Continue To Add Room]].
+The next step after choosing the rooms is [how to stop the generation](Continue-To-Add-Room.md).
 
 [1]: https://github.com/BenPyton/DungeonExample

@@ -92,3 +92,5 @@ You can also extract the plugin in the `Plugins` folder of your project.\
 For instance: `D:\PathToYourProject\Plugins`
 
 </details>
+
+</details>

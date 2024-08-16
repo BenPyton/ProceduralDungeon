@@ -1,4 +1,6 @@
-This function let you choose a [[door actor|Door]] to spawn between 2 rooms.\
+# Choose Door
+
+This function let you choose a [door actor](Door.md) to spawn between 2 rooms.\
 If you don't want a door between the rooms you just have to return `none`.
 
 You should use the `Door Type` input to return a door of the correct type if you use multiple door types in your project.\
@@ -15,4 +17,4 @@ An example to spawn a simple door if both rooms are valid, or a wall if one of t
 ![](Images/ChooseDoor.jpg)
 
 ### **Next Step**
-The next step is to [[actually generate the dungeon by calling the Generate function|Dungeon Generator]].
+The next step is to [actually generate the dungeon by calling the Generate function](Dungeon-Generator.md).

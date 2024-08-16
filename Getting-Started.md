@@ -1,4 +1,10 @@
-${\color{orange}\boxed{WARNING}}$ This page is for plugin version 3.X.X and higher. If you use a version 2.X.X, please read the page [[Room Architecture]] instead.
+---
+title: Getting Started
+---
+
+:::warning
+This page is for plugin version 3.X.X and higher. If you use a version 2.X.X, please read the page [Room Architecture](Room-Architecture) instead.
+:::
 
 # Room Architecture
 
@@ -11,11 +17,11 @@ You can inherit from `RoomData` class in C++ or in Blueprint to add properties s
 
 But remember, you **must** create one level per room data (you can't use the same room level for multiple room data).
 
-Before anything else, you should set the [[plugin's settings|Plugin Settings]] to your desire:
+Before anything else, you should set the [plugin's settings](Plugin-Settings.md) to your desire:
 - Rooms are defined with a bounding box, so the plugin will not generate overlapping rooms.\
 The bounding box size is expressed in terms of Room Unit. The default is 1000x1000x400 unreal units.\
 You should define it first.
-- Doors have also a size to display with a debug box, so artists and designers can see at a glance the volume doors will occupy. There can be several [[types of door|Door Types]] with different sizes, but the default one is set in the [[plugin's settings|Plugin Settings]].\
+- Doors have also a size to display with a debug box, so artists and designers can see at a glance the volume doors will occupy. There can be several [types of door](Door-Types.md) with different sizes, but the default one is set in the [plugin's settings](Plugin-Settings.md).\
 However, the door size doesn't affect anything during the dungeon generation.
 
 # How to create a room
@@ -71,7 +77,7 @@ The `Size` tool will allows you to edit the room's bounding box by dragging poin
 ![](Images/SizeTool.gif)
 
 The `Door` tool will allows you to add or remove doors easily by clicking on your room bounding box in the viewport (left-click to add, right-click to remove).\
-If you want to place different [[door types|Door Types]], you can select the one you want in the selector beside the tool button.\
+If you want to place different [door types](Door-Types.md), you can select the one you want in the selector beside the tool button.\
 If none is selected, then the default door is used.
 
 ![](Images/DoorTool.gif)
@@ -86,7 +92,7 @@ When in `Dungeon Room` editor mode, you also have access to some utilities to ea
 In most cases, you'll end up with some volumes in your room levels that should be of the same size as the room.\
 For example, you could have a NavMesh Bounds Volume and a Post Process Volume. Making them the size of the room bounds might be tedious when doing it for many room levels.\
 This button will help you doing it automatically for all the selected volumes. You can also specify some margins to add on each side of the room with the `Margins` field beside the button.\
-(you can specify the default margins in the [[plugin's editor settings|Plugin Settings]])
+(you can specify the default margins in the [plugin's editor settings](Plugin-Settings.md))
 
 ### Remove All Invalid Doors
 When you resize the room bounds while some doors have already been placed, they can become invalid (turning orange) because they are inside or outside the room bounds.\
@@ -95,4 +101,4 @@ This button will help you by removing automatically all invalid doors of the roo
 
 # Next Step
 
-After you created some rooms, you have to create a [[dungeon generator actor and configure it|Dungeon Generator]] with your own generation rules.
+After you created some rooms, you have to create a [dungeon generator actor and configure it](Dungeon-Generator.md) with your own generation rules.

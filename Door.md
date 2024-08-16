@@ -1,3 +1,5 @@
+# Door
+
 The `Door` class is the base class for all doors spawned by the dungeon.
 
 You have to manage yourself how your doors open or close.\
@@ -8,7 +10,7 @@ If you want to place walls instead of doors when the rooms are not connected, yo
 
 You can lock or unlock a door to prevent players from opening the door if you want. You just need to call the `Lock` function for that.
 
-If you want to see the correct size depending on the [[door type|Door Types]] in the blueprint viewport of the actor, you have to set the `Type` variable of the door.
+If you want to see the correct size depending on the [door type](Door-Types.md) in the blueprint viewport of the actor, you have to set the `Type` variable of the door.
 
 ### Trigger Doors
 
@@ -16,7 +18,7 @@ The `TriggerDoor` class is a `Door` which will open or close depending of actors
 
 By default, all `Character` actors trigger the door, but you can change this behavior by overriding the `IsValidActor` function.
 
-[[Images/Door_IsValidActor.jpg]]
+![](Images/Door_IsValidActor.jpg)
 
 ### Multiplayer
 
@@ -26,7 +28,7 @@ However, you'll need to do your game network logic correctly to make doors work 
 For example, if you want to make a door that open/close on a player key press, you'll need to send an RPC from your `PlayerController` or your controlled `Pawn` in order to call your interaction function on you door to open/close it.\
 *(The screen below uses a generic interface to interact with any interactable actor. See the "Good Practice" section below on how to do it)*
 
-[[Images/Door_MultiInteract.jpg]]
+![](Images/Door_MultiInteract.jpg)
 
 ---
 

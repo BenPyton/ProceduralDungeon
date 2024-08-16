@@ -1,3 +1,17 @@
+---
+title: Guides
+sidebar_class_name: hidden
+---
+
+import DemoRoomSpawn from './Images/ProceduralDungeonDemo_RoomSpawn.gif';
+import DemoRoomA from './Images/ProceduralDungeonDemo_RoomA.gif';
+import DemoRoomB from './Images/ProceduralDungeonDemo_RoomB.gif';
+import DemoRoomC from './Images/ProceduralDungeonDemo_RoomC.gif';
+import DemoRoomD from './Images/ProceduralDungeonDemo_RoomD.gif';
+import DemoRoomExit from './Images/ProceduralDungeonDemo_RoomExit.gif';
+import DemoDungeon1 from './Images/ProceduralDungeonResult.gif';
+import DemoDungeon2 from './Images/ProceduralDungeonResult2.gif';
+
 # Procedural Dungeon Plugin
 
 ## Overview
@@ -7,13 +21,14 @@ The plugin then generate a dungeon that can be random or deterministic following
 
 ## Example
 
-Some hand-made rooms defined with bounds and doors:\
-<img src="Images/ProceduralDungeonDemo_RoomSpawn.gif" alt="Animated GIF" width="125"/>
-<img src="Images/ProceduralDungeonDemo_RoomA.gif" alt="Animated GIF" width="125"/>
-<img src="Images/ProceduralDungeonDemo_RoomB.gif" alt="Animated GIF" width="125"/>
-<img src="Images/ProceduralDungeonDemo_RoomC.gif" alt="Animated GIF" width="125"/>
-<img src="Images/ProceduralDungeonDemo_RoomD.gif" alt="Animated GIF" width="125"/>
-<img src="Images/ProceduralDungeonDemo_RoomExit.gif" alt="Animated GIF" width="125"/>
+Some hand-made rooms defined with bounds and doors:
+
+<img src={DemoRoomSpawn} alt="RoomSpawn" width="125"/>
+<img src={DemoRoomA} alt="RoomA" width="125"/>
+<img src={DemoRoomB} alt="RoomB" width="125"/>
+<img src={DemoRoomC} alt="RoomC" width="125"/>
+<img src={DemoRoomD} alt="RoomD" width="125"/>
+<img src={DemoRoomExit} alt="RoomExit" width="125"/>
 
 Some very simple generation rules:
 - A special room (red) used to spawn the player.
@@ -21,9 +36,10 @@ Some very simple generation rules:
 - Then a special room (purple) used as an end goal for the player.
 - Finally 10 other rooms chosen randomly.
 
-Possible results:\
-<img src="Images/ProceduralDungeonResult.gif" alt="Animated GIF" width="400"/>
-<img src="Images/ProceduralDungeonResult2.gif" alt="Animated GIF" width="400"/>
+Possible results:
+
+<img src={DemoDungeon1} alt="Result1" width="400"/>
+<img src={DemoDungeon2} alt="Result2" width="400"/>
 
 ## Lifecycle of a dungeon generation
 Before creating your rules, you should understand how the plugin works.\
@@ -35,14 +51,11 @@ A generation is made of 4 phases :
 
 Here is the flowchart when we call `Generate` on a dungeon generator (or clients update their room list):
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/wiki/BenPyton/ProceduralDungeon/Images/Flowchart_Dark_v3.svg">
-  <img alt="Procedural Generation Flowchart." src="https://raw.githubusercontent.com/wiki/BenPyton/ProceduralDungeon/Images/Flowchart_Light_v3.svg">
-</picture>
+![](Images/Flowchart_Dark_v3.svg)
 
 ## What you need to do
-First, read the [[Installation]] page to install the plugin.\
-Then, read and follow the instructions in the [[Getting Started]] page.
+First, read the [Installation](Installation.md) page to install the plugin.\
+Then, read and follow the instructions in the [Getting Started](Getting-Started.md) page.
 
 You can get an [example project here](https://github.com/BenPyton/DungeonExample) if you want a minimal working project.
 

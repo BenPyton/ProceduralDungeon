@@ -1,6 +1,8 @@
+# Room Custom Data
+
 You can add variables as much as you want in your `RoomData` assets. However they are only static variables shared by all room instances spawned with the same `RoomData`.
 
-Custom data are here to let you add variables and behaviors independents for each of the generated room instances. You **can *not*** set the value of their variables in room data assets, but you can initialize them during the [[Room Initialization]] phase of the dungeon.
+Custom data are here to let you add variables and behaviors independents for each of the generated room instances. You **can *not*** set the value of their variables in room data assets, but you can initialize them during the [Room Initialization](Room-Initialization.md) phase of the dungeon.
 
 ## Example usage
 

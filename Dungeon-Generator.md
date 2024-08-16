@@ -1,16 +1,18 @@
+# Dungeon Generator
+
 ## Create a dungeon generator
 
 The dungeon generator is an actor placed in your main level. It is responsible to generate the dungeon and spawn the room levels.\
 To create one, create a new blueprint, expand "All Classes" and type `DungeonGenerator`.
 
-The dungeon generator don't work directly by itself, you have to [[create data and levels for your rooms|Getting Started]] first.
+The dungeon generator don't work directly by itself, you have to [create data and levels for your rooms](Getting-Started.md) first.
 
 To be able to generate a dungeon, you also have to override some minimal functions:
-- [[Choose First Room Data]]
-- [[Choose Next Room Data]]
-- [[Continue To Add Room]]
-- [[Is Valid Dungeon]]
-- [[Choose Door]]
+- [Choose First Room Data](Choose-First-Room-Data.md)
+- [Choose Next Room Data](Choose-Next-Room-Data.md)
+- [Continue To Add Room](Continue-To-Add-Room.md)
+- [Is Valid Dungeon](Is-Valid-Dungeon.md)
+- [Choose Door](Choose-Door.md)
 
 There are some other functions you can override:
 Function | Description
@@ -54,7 +56,7 @@ This is an example using the same very basic generation rules defined in this wi
 #### Can Loop
 If checked, when a new room is placed in the dungeon, any door aligned with another door of other rooms will be connected.\
 If unchecked, only the door from the previous room (the one used to generate this room) will be connected.\
-*This parameter is only used when `Can Loop` from the project-wide [[settings|Plugin Settings]] is also checked.*
+*This parameter is only used when `Can Loop` from the project-wide [settings](Plugin-Settings.md) is also checked.*
 
 #### Seed Type
 - `Random`: at each generation, the seed is randomly chosen.

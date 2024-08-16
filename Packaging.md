@@ -1,3 +1,9 @@
+---
+title: Packaging
+---
+
+# Packaging your game with the plugin
+
 The [releases](https://github.com/BenPyton/ProceduralDungeon/releases) I provide contains only pre-compiled binaries for the Windows 64bits platform.
 
 You can use it directly to develop with the Unreal Engine Editor out of the box for both Blueprint-only and C++ projects.\
@@ -16,7 +22,7 @@ If you want to install the plugin in the engine, though, you will have to follow
 
 ## Packaging a Blueprint-only project
 
-If you want to package your Blueprint-only project for **another platform** than Windows, then you will have to compile the plugin for the target platforms you want and then [[install it like you did before|Installation]].
+If you want to package your Blueprint-only project for **another platform** than Windows, then you will have to compile the plugin for the target platforms you want and then [install it like you did before](Installation.md).
 
 To compile the plugin, you don't need to have an Unreal Engine project.\
 However, you will need to have the necessary development tools for the targeted platforms.\
