@@ -6,8 +6,10 @@ If you are not, then you'll have to handle it yourself in the `Post Generation` 
 
 ## How to configure the default Unreal's navigation system to work with the plugin?
 
-:::note
-It is using a **dynamic** navmesh only. Currently I don't know how to setup the project in a way to be able to use **static** navmeshes precomputed with each room. If you have any clue, please feel free to share it with me on the repo or the Discord.
+:::danger Limitations
+The plugin will work only using a **dynamic** navmesh!\
+Currently I don't know how to setup the project in a way to be able to use **static** navmeshes precomputed with each room.\
+If you have any clue, please feel free to share it with me on [**Github**](https://github.com/BenPyton/ProceduralDungeon/issues) or [**Discord**](https://discord.gg/YE2dPda2CC).
 :::
 
 First, There is a project setting you **must** change if you want the navmesh to be rebuild properly.\
@@ -23,4 +25,7 @@ After that, you can add a `Navmesh Bounds Volume` in each of your room levels, a
 Usually you would make the volume encompassing the whole room bounding box (red box).\
 The `RecastNavMesh` settings does not matter in the room levels, since they will be destroyed at the generation and only the one in the persistent level will be used to rebuild the navmesh.
 
-:warning: Be careful if you are using some [Geometry Brushes](Geometry-Brushes.md) to create a blockout of your level design, the navmesh will not generate correctly in the persistent level. you should convert them into static meshes to properly generate the navmesh.
+:::warning Be Careful
+If you are using some [Geometry Brushes](Geometry-Brushes.md) to create a blockout of your level design, the navmesh will not generate correctly in the persistent level.\
+You should convert them into static meshes to properly generate the navmesh.
+:::
