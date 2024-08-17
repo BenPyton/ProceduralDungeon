@@ -1,7 +1,7 @@
 # Multiplayer
 
 First off, be sure to have minimum knowledge of how multiplayer games work in Unreal Engine.\
-I would suggest you to read this [compendium][1] if not (it was written for UE4 but it's the same for UE5).
+I would suggest you to read this [compendium](https://cedric-neukirchen.net/docs/category/multiplayer-network-compendium) if not.
 
 ## Overview
 
@@ -33,7 +33,7 @@ See the multiplayer section of the [door wiki page](Door.md) for details on it.
 ### *Since Plugin v3.0*
 
 - **Actors** directly placed in room levels can be replicated like you would do with a normal unreal level.\
-However, you should not forget to replicate properly your actors (see the [compendium][1]).
+However, you should not forget to [replicate](https://cedric-neukirchen.net/docs/multiplayer-compendium/replication) properly your actors.
 
 ### *Before Plugin v3.0*
 
@@ -62,5 +62,3 @@ Here is how to setup the editor.\
 
 - Finally, close the settings window and click again on the arrow next to the Play button and choose `Standalone Game`.\
 ![](Images/Standalone.jpg)
-
-[1]: https://cedric-neukirchen.net/Downloads/Compendium/UE4_Network_Compendium_by_Cedric_eXi_Neukirchen.pdf
