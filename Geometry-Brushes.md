@@ -1,6 +1,6 @@
 # Geometry Brushes
 
-:::warning Limitations
+:::warning[Limitations]
 You can use geometry brushes to design your levels, but be aware that geometry brushes will **break** some features of the plugins.
 :::
 
