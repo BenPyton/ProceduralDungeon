@@ -33,7 +33,7 @@ I will use `D:/ProceduralDungeon` as example (the `.uplugin` should be located i
 
 After you've installed all the necessary toolchains and development, you will have to whitelist these platforms in the `.uplugin` file.\
 To do that, open the `ProceduralDungeon.uplugin` in a text editor, and add the platforms you want in the `WhitelistPlatforms` of the modules (put only the ones you want):
-```text
+```text title="ProceduralDungeon.uplugin"
 "WhitelistPlatforms": [
 	"Win64",
 	"Android",
@@ -46,7 +46,7 @@ To do that, open the `ProceduralDungeon.uplugin` in a text editor, and add the p
 Then, you will need to open a command prompt and run those commands (replace `RunUAT.bat` with `RunUAT.sh` if you are compiling *from* a Mac or Linux, **not** when you target those platforms from Windows).\
 In my example I'm using `C:\Epic Games\UE_5.2` as the installation directory of the Unreal Engine. Replace it with your own installation path.
 
-```cmd
+```cmd title="Command Prompt"
 > cd "C:\Epic Games\UE_5.2\Engine\Build\BatchFiles"
 > RunUAT.bat BuildPlugin -Plugin="D:\ProceduralDungeon\ProceduralDungeon.uplugin" -Package="D:\Output\ProceduralDungeon" -TargetPlatforms="Android"
 ```
