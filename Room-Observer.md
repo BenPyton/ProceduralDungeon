@@ -6,12 +6,14 @@ Thus, once placed on an actor, you just have to bind to the component delegates 
 *Only actors that don't ignore the [`Room Object Type`](Plugin-Settings.md) collision channel will trigger the events.*
 
 ## Room Observer Component
+
 Place this component on your actors if they **can move between rooms** *or* **are not placed in room levels**.
 
 This component implements the [Room Visitor](Room-Visitor.md) interface to detect whenever the actor enters/exits room to bind automatically to the delegates.
 So, the actor with this component needs to be setup to overlap with the [`Room Object Type`](Plugin-Settings.md) collision channel.
 
 ## Static Room Observer Component
+
 Use this one if your actors **will never get out of their room** *and* **are placed in room levels**.
 
 This component will bind to its parent level at `Begin Play` and unbind at `End Play` automatically.

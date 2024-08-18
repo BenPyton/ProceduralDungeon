@@ -33,4 +33,3 @@ You can do the same thing here than in the `Initialize Room` above. You'll just 
 The example below shows a way to initialize just one `Secret Room` in the dungeon:
 
 ![](Images/DungeonInitializeRoom.jpg)
-

@@ -38,11 +38,12 @@ However, you should not forget to [replicate](https://cedric-neukirchen.net/docs
 ### *Before Plugin v3.0*
 
 - **Actors** directly placed in room levels are not replicated. If you want to have some actors (like enemies, chests, NPCs, etc.) and want them replicated, you need to make some workarounds.\
-My suggestion: 
-	- In your actor you want replicated, check the `Replicates` field.
-	- Create and place a spawner actor in your room level. This spawner is not replicated.
-	- In the `BeginPlay` of the spawner, check if it's server-side (with the `HasAuthority` function) before spawning the real actor you want.
-	- Spawn the actor if previous point is true. The spawned actor will spawns on all clients too and will be replicated properly.
+My suggestion:
+
+- In your actor you want replicated, check the `Replicates` field.
+- Create and place a spawner actor in your room level. This spawner is not replicated.
+- In the `BeginPlay` of the spawner, check if it's server-side (with the `HasAuthority` function) before spawning the real actor you want.
+- Spawn the actor if previous point is true. The spawned actor will spawns on all clients too and will be replicated properly.
 
 ![](Images/MultiSpawner.jpg)
 

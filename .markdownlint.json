@@ -1,0 +1,11 @@
+{
+    "default": true,
+    "no-inline-html": false,
+    "line-length": false,
+    "no-alt-text": false,
+    "single-title": false,
+    "heading-increment": false,
+    "no-hard-tabs": {"code_blocks": false},
+    "ul-style": {"style": "dash"},
+    "ol-prefix": false
+}

@@ -20,14 +20,13 @@ And if so you get one if its spawned chest actor to add the boss key in it.
 This example can be done another ways too.
 For example we could instead do something cleaner if we use an inventory system.\
 We could then have a `ChestCustomData` containing a list of item to put in the room chests.\
-Then we could just add a boss key item inside that will be used during the level's begin play to put it inside one of the chest actors of the room. 
+Then we could just add a boss key item inside that will be used during the level's begin play to put it inside one of the chest actors of the room.
 
 ## Create and using Custom Data
 
 To create a custom data, right-click in your content browser and select `Blueprint Class`, then expand the `All Classes` and type in "Custom Data", then select `RoomCustomData` to create a new child blueprint.
 
 ![](Images/CreateCustomData.gif)
-
 
 You can do whatever you want in it like any other blueprint classes.\
 You can then assign them in the `Custom Data` array of the `RoomData` assets you want.

@@ -20,6 +20,3 @@ You certainly want to set an always closed door, or a door actor that act as a "
 
 An example to spawn a simple door if both rooms are valid, or a wall if one of them is not valid (assuming there is only one door type):
 ![](Images/ChooseDoor.jpg)
-
-### **Next Step**
-The next step is to [actually generate the dungeon by calling the Generate function](Dungeon-Generator.md).

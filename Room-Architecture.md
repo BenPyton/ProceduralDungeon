@@ -7,12 +7,15 @@ pagination_next: guides/Choose-First-Room-Data
 # Room Architecture (plugin v2)
 
 :::warning
+
 This page is for plugin version 2.X.X.\
 If you use plugin v1.X.X, please read the [Room Architecture (plugin v1)](Legacy-Room-Architecture) page instead.\
 If you use plugin v3.X.X, please read the [Getting Started](Creating-Rooms) page instead.
+
 :::
 
 ### **Understanding the architecture**
+
 **Each** room is composed by 2 objects : the level and the data.\
 ![](Images/DataAndLevel.jpg)
 
@@ -23,6 +26,7 @@ You can inherit from `RoomData` to add properties specific to your dungeon.
 But remember, you **must** create one level per room (you can't use the same room level for multiple room data).
 
 ### **How to create a room**
+
 First, create a new Unreal level that will contains the actors and meshes of your rooms.
 
 Then you can create a new blueprint *class* that inherits from `RoomData`.\
@@ -54,6 +58,7 @@ There you have successfully created one room.\
 Remember, you ***must*** create 1 level and 1 data ***per*** room.
 
 ### **Room Parameters**
+
 If you have followed the previous steps to create a room, then you should have something like this:\
 ![](Images/BasicRoom.jpg)
 
@@ -75,6 +80,7 @@ For example, if you want more fine tuning, you can make 1 unit room equals 1cm\*
 ![](Images/Settings.jpg)
 
 ### **Adding doors to your rooms**
+
 You can add as many door as you want in your room, and the entrance will be chosen randomly at generation (if checked in the `RoomData` instance) or will be the first door (index 0).\
 But keep in mind that a door has to be on the border of the room boundary (red box), not inside, and the arrow have to point to the outside of the room boundary.\
 ![](Images/DoorRightPosition.jpg)

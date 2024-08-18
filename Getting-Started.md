@@ -6,12 +6,15 @@ pagination_next: guides/Dungeon-Generator
 ---
 
 :::warning
+
 This page is for plugin version 3.X.X and higher. If you use a version 2.X.X, please read the page [Room Architecture](Room-Architecture) instead.
+
 :::
 
 # Room Architecture
 
-**Each** room is composed by 2 assets : the level and the data.\
+**Each** room is composed by 2 assets : the level and the data.
+
 ![](Images/DataAndLevel_UE5.jpg)
 
 The level is a classic Unreal Engine level in which you design your room as you like.\
@@ -21,6 +24,7 @@ You can inherit from `RoomData` class in C++ or in Blueprint to add properties s
 But remember, you **must** create one level per room data (you can't use the same room level for multiple room data).
 
 Before anything else, you should set the [plugin's settings](Plugin-Settings.md) to your desire:
+
 - Rooms are defined with a bounding box, so the plugin will not generate overlapping rooms.\
 The bounding box size is expressed in terms of Room Unit. The default is 1000x1000x400 unreal units.\
 You should define it first.
@@ -35,7 +39,8 @@ If you want specific data in your rooms, you can create a new child blueprint of
 *(You can do this step only once for all your room data, or you can skip it if you don't need specific data for your rooms)*\
 
 To create a new `RoomData` **class**, right-click in content browser and select `Blueprint Class`.\
-Then expand the `All Classes` and type "RoomData" in the search bar. You can then select it.\
+Then expand the `All Classes` and type "RoomData" in the search bar. You can then select it.
+
 ![](Images/CreateRoomData.jpg)
 
 After doing so, you can add your own data inside this blueprint class (for example an integer representing the difficulty of the room). You can also make multiple `RoomData` blueprint classes, but I will don't tell you how Unreal works here ;)
@@ -49,7 +54,7 @@ If you have created child blueprints of room data, you can pick the one you want
 ![](Images/CreateRoomData_v3.gif)
 
 I don't recommend editing the data directly by opening it from the content browser.\
-You will be able to do it in a later step below. 
+You will be able to do it in a later step below.
 
 ### Step 2 - Creating and editing a Room Level (one per room)
 
@@ -92,12 +97,14 @@ When in `Dungeon Room` editor mode, you also have access to some utilities to ea
 ![](Images/EditorModeUtilities.jpg)
 
 ### Update Selected Volumes
+
 In most cases, you'll end up with some volumes in your room levels that should be of the same size as the room.\
 For example, you could have a NavMesh Bounds Volume and a Post Process Volume. Making them the size of the room bounds might be tedious when doing it for many room levels.\
 This button will help you doing it automatically for all the selected volumes. You can also specify some margins to add on each side of the room with the `Margins` field beside the button.\
 (you can specify the default margins in the [plugin's editor settings](Plugin-Settings.md))
 
 ### Remove All Invalid Doors
+
 When you resize the room bounds while some doors have already been placed, they can become invalid (turning orange) because they are inside or outside the room bounds.\
 You can't delete them from the viewport, and instead you would have to find them in the data asset and delete them here. This might be tedious to do as you don't have an easy way to know which door is which.\
 This button will help you by removing automatically all invalid doors of the room data asset.

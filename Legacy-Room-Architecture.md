@@ -7,12 +7,15 @@ pagination_next: guides/Dungeon-Generator
 # Room Architecture (plugin v1)
 
 :::warning
+
 This page is for plugin v1.x.x **only**.\
 If you use plugin v2.x.x, please read the [Room Architecture (plugin v2)](Room-Architecture) page instead.\
 If you use plugin v3.x.x, please read the [Getting Started](Creating-Rooms) page instead.
+
 :::
 
 ### Understanding the architecture
+
 Rooms are composed by 2 objects : the level and the data.\
 ![](Images/DataAndLevel(Legacy).jpg)
 
@@ -21,6 +24,7 @@ The data is an asset of type `RoomData` that define the room properties.\
 You can inherit from `RoomData` to add properties specific to your dungeon.
 
 ### How to create a room
+
 First, create a new Unreal level.
 
 Then create a new blueprint that inherit from `RoomData`.\
@@ -45,6 +49,7 @@ Then in the data field of this blueprint set your room data you've just created.
 There you have successfully created your room.
 
 ### Room Parameters
+
 If you have followed the previous steps to create a room, then you should have something like this:\
 ![](Images/BasicRoom.jpg)
 

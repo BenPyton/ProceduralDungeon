@@ -17,7 +17,9 @@ Console Variable | Arguments | Description
 `pd.Debug.Log.OnScreen` | boolean | Enable/disable the on-screen logging of the plugin.
 `pd.Debug.Log.Duration` | float | Change the on-screen logging duration (in seconds) of the plugin.
 
+<!-- markdownlint-disable MD024 -->
 ## Console Commands
+<!-- markdownlint-enable MD024 -->
 
 Here a list of *all* console commands added by the plugin:
 

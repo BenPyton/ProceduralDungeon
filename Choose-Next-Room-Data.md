@@ -9,12 +9,14 @@ This function is the main part of the procedural generation: it's where you set 
 This function is run each time the generator tries to add a room to the dungeon.
 
 As input parameters:
+
 - `Current Room` is the room from which the generator will try to add the next room.\
 For example, the first time this function is called, the `Current Room` is the `RoomData` asset you have returned in the [`Choose First Room`](Choose-First-Room-Data.md) function.
 - `Door Data` is the door on which the next room will be connected to.\
 You have access to its location (expressed in room units, not in unreal units!), its orientation and its `DoorType`.
 
 As output:
+
 - `Return Value` is the `Room Data` asset you want to add as the next room. The value must be non-null and have at least one compatible door with `Door Data`.
 - `Door Index` is the index of the door (from the `Room Data` asset your return) used to connect with the `Current Room`.\
 If the index is negative, it will choose a random compatible door.\
@@ -49,9 +51,9 @@ If the conditions are not fulfilled for either of rooms, then I do my generic ru
 
 The rules I explained as an example in these steps are extremely simple.\
 Remember that you can do whatever you want!\
-You don't need an end room if you want another goal for your dungeon (eg. killing all the mobs).\
+You don't need an end room if you want another goal for your dungeon (e.g. killing all the mobs).\
 You don't need the player to spawn in the start room (or even have a specific room as a first room).
 You could for example have multiple rooms with a player start actor you choose from to spawn the player.\
-You can add any variables you want in your room data to add constraints on your generation rules (eg. add a room difficulty value so you can choose a hard room after an easy room).
+You can add any variables you want in your room data to add constraints on your generation rules (e.g. add a room difficulty value so you can choose a hard room after an easy room).
 
 [1]: https://github.com/BenPyton/DungeonExample

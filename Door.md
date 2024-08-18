@@ -39,6 +39,7 @@ The screen above uses a custom interface called `IInteractable` to generalized t
 **This section is not specific to the `Door` class of this plugin**, but I will explain briefly how to use an interface in Unreal blueprint for those who are not familiar with this concept.
 
 First, you have to create the interface class and populate it with some functions. For the example, I called it `IInteractable` (the first `I` is a naming convention for interfaces) and I put two functions inside it:
+
 - `CanInteract` which takes an `Actor` (named `Caller`) in input if I need to check some things before interacting, and returns a `bool` (true if `Caller`is able to interact).
 - `Interact` which takes also the `Caller` actor as input, and do the actual interaction on the `IInteractable` actor.
 

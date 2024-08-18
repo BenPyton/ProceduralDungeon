@@ -19,4 +19,3 @@ To see the correct door size in the `Door` actor blueprint viewport, you have to
 
 **`Description`**\
 This is just some description only visible in the asset. Not used anywhere else.
-

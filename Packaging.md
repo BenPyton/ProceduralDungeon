@@ -33,6 +33,7 @@ I will use `D:/ProceduralDungeon` as example (the `.uplugin` should be located i
 
 After you've installed all the necessary toolchains and development, you will have to whitelist these platforms in the `.uplugin` file.\
 To do that, open the `ProceduralDungeon.uplugin` in a text editor, and add the platforms you want in the `WhitelistPlatforms` of the modules (put only the ones you want):
+
 ```text title="ProceduralDungeon.uplugin"
 "WhitelistPlatforms": [
 	"Win64",
