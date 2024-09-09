@@ -431,11 +431,7 @@ void ADungeonGenerator::UnloadAllRooms()
 
 void ADungeonGenerator::UpdateRoomVisibility()
 {
-	APlayerController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (!IsValid(Controller))
-		return;
-
-	APawn* Player = Controller->GetPawnOrSpectator();
+	APawn* Player = GetVisibilityPawn();
 	if (!IsValid(Player))
 		return;
 
@@ -704,6 +700,15 @@ bool ADungeonGenerator::ContinueToAddRoom_Implementation()
 
 void ADungeonGenerator::InitializeDungeon_Implementation(const UDungeonGraph* Rooms)
 {
+}
+
+APawn* ADungeonGenerator::GetVisibilityPawn_Implementation()
+{
+	APlayerController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (!IsValid(Controller))
+		return nullptr;
+
+	return Controller->GetPawnOrSpectator();
 }
 
 void ADungeonGenerator::OnPreGeneration_Implementation()
