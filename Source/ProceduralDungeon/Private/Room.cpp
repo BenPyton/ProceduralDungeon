@@ -213,6 +213,14 @@ void URoom::OnInstanceLoaded()
 	DungeonLog_InfoSilent("[%s][R:%s][I:%s] Room loaded: %s", *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName());
 }
 
+void URoom::ForceVisibility(bool bForce)
+{
+	const bool bWasVisible = IsVisible();
+	bForceVisible = bForce;
+	if (bWasVisible != IsVisible())
+		UpdateVisibility();
+}
+
 void URoom::Lock(bool bLock)
 {
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(bIsLocked, bLock);
@@ -227,6 +235,27 @@ void URoom::SetPosition(const FIntVector& NewPosition)
 void URoom::SetDirection(EDoorDirection NewDirection)
 {
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Direction, NewDirection);
+}
+
+void URoom::UpdateVisibility() const
+{
+	const bool bNewVisibility = IsVisible();
+
+	if (Dungeon::UseLegacyOcclusion())
+	{
+		ARoomLevel* LevelScript = GetLevelScript();
+		if (IsValid(LevelScript))
+			LevelScript->SetActorsVisible(bNewVisibility);
+	}
+	else if (IsValid(Instance))
+	{
+		// TODO: make the level be visible again, I don't know why it is not visible although
+		// the Visible and Loaded of StreamingLevel are correctly set to true 
+		// and the Loaded of Level instance inside it is also set to true...
+		// In the meantime, only the legacy version will remains.
+		//Instance->SetShouldBeVisible(bNewVisibility);
+		//Instance->BroadcastLevelVisibleStatus(Instance->GetWorld(), Instance->GetWorldAssetPackageFName(), bNewVisibility);
+	}
 }
 
 void URoom::OnRep_IsLocked()
@@ -455,26 +484,10 @@ FTransform URoom::GetTransform() const
 
 void URoom::SetVisible(bool Visible)
 {
-	if (Visible == bIsVisible)
-		return;
-
+	const bool bWasVisible = IsVisible();
 	bIsVisible = Visible;
-
-	if (Dungeon::UseLegacyOcclusion())
-	{
-		ARoomLevel* LevelScript = GetLevelScript();
-		if (IsValid(LevelScript))
-			LevelScript->SetActorsVisible(Visible);
-	}
-	else if (IsValid(Instance))
-	{
-		// TODO: make the level be visible again, I don't know why it is not visible although
-		// the Visible and Loaded of StreamingLevel are correctly set to true 
-		// and the Loaded of Level instance inside it is also set to true...
-		// In the meantime, only the legacy version will remains.
-		//Instance->SetShouldBeVisible(Visible);
-		//Instance->BroadcastLevelVisibleStatus(Instance->GetWorld(), Instance->GetWorldAssetPackageFName(), Visible);
-	}
+	if (bWasVisible != IsVisible())
+		UpdateVisibility();
 }
 
 void URoom::SetPlayerInside(bool PlayerInside)
