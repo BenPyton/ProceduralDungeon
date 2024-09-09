@@ -101,7 +101,11 @@ public:
 
 	// Is the room currently visible?
 	UFUNCTION(BlueprintPure, Category = "Room", meta = (CompactNodeTitle = "Is Visible"))
-	FORCEINLINE bool IsVisible() const { return bIsVisible; }
+	FORCEINLINE bool IsVisible() const { return bIsVisible || bForceVisible; }
+
+	// Force the room to be veisible
+	UFUNCTION(BlueprintCallable, Category = "Room")
+	void ForceVisibility(bool bForce);
 
 	// Is the room locked?
 	// If it is, the doors will be locked (except if they have `Alway Unlocked`).
@@ -199,6 +203,7 @@ private:
 
 	bool bPlayerInside {false};
 	bool bIsVisible {true};
+	bool bForceVisible {false};
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsLocked)
 	bool bIsLocked {false};
@@ -213,6 +218,7 @@ protected:
 
 	void SetPosition(const FIntVector& NewPosition);
 	void SetDirection(EDoorDirection NewDirection);
+	void UpdateVisibility() const;
 
 	UFUNCTION() // Needed macro for replication to work
 	void OnRep_RoomData();
