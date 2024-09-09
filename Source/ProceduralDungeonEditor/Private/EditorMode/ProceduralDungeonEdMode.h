@@ -26,9 +26,9 @@
 
 #include "EdMode.h"
 #include "ProceduralDungeonEdTypes.h"
+#include "EditorMode/Tools/ProceduralDungeonEditorTool.h"
 
 class ARoomLevel;
-class FProceduralDungeonEditorTool;
 class ULevelScriptBlueprint;
 
 class FProceduralDungeonEdMode : public FEdMode
