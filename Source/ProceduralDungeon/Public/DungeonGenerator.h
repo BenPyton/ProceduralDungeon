@@ -175,9 +175,17 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Continue To Add Room"))
 	bool ContinueToAddRoom();
 
+	// ===== Optional functions to override =====
+
 	// Initialize the room instances during the generation step
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator")
 	void InitializeDungeon(const UDungeonGraph* Rooms);
+
+	// Returns which pawn is used for the room culling system.
+	// This pawn will also affect the PlayerInside variable of the rooms.
+	// By default returns GetPlayerController(0)->GetPawnOrSpectator().
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator")
+	APawn* GetVisibilityPawn();
 
 	// ===== Optional events =====
 
