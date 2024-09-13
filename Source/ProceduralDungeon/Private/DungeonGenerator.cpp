@@ -623,6 +623,14 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 	{
 	case EGenerationState::Idle:
 		OnPreGeneration();
+
+		nav = UNavigationSystemV1::GetCurrent(GetWorld());
+		if (nullptr != nav)
+		{
+			// Lock navmesh rebuild, so we don't trigger a rebuild for each room loaded/unloaded
+			DungeonLog_Info("Lock navmesh rebuild");
+			nav->AddNavigationBuildLock(ENavigationBuildLock::Custom);
+		}
 		break;
 	case EGenerationState::Unload:
 		if (HasAuthority())
@@ -646,6 +654,10 @@ void ADungeonGenerator::OnStateEnd(EGenerationState State)
 		if (nullptr != nav)
 		{
 			DungeonLog_Info("Rebuild navmesh");
+			nav->RemoveNavigationBuildLock(ENavigationBuildLock::Custom);
+
+			// With a dynamic navmesh, we don't need anymore to call Build explicitly
+			// Moreover, removing the build lock triggers a rebuild itself.
 			nav->CancelBuild();
 			nav->Build();
 		}
