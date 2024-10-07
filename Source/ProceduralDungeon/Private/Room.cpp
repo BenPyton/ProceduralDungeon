@@ -615,6 +615,17 @@ bool URoom::AreAllDoorsConnected() const
 	return true;
 }
 
+int URoom::CountConnectedDoors() const
+{
+	int ConnectedDoors = 0;
+	for (const auto& Connection : Connections)
+	{
+		if (Connection.OtherRoom != nullptr)
+			++ConnectedDoors;
+	}
+	return ConnectedDoors;
+}
+
 URoom* URoom::GetConnectedRoomAt(int DoorIndex) const
 {
 	if (!Connections.IsValidIndex(DoorIndex))
