@@ -27,7 +27,10 @@
 #include "CoreMinimal.h"
 #include "DungeonGeneratorBase.h"
 #include "BoundsParams.h"
+#include "UObject/ScriptInterface.h"
 #include "DungeonGenerator.generated.h"
+
+class IReadOnlyRoom;
 
 // This is the main actor of the plugin. The dungeon generator is responsible to generate dungeons and replicate them over the network. 
 UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon", HideFunctions = "StartNewDungeon,FinalizeDungeon,CreateRoomInstance,TryPlaceRoom,AddRoomToDungeon", meta = (KismetHideOverrides = "CreateDungeon", HideFunctions = "CreateRoomInstance,TryPlaceRoom,AddRoomToDungeon"))
@@ -51,7 +54,8 @@ public:
 	URoomData* ChooseFirstRoomData();
 
 	/** Return the RoomData that will be connected to the Current Room
-	* @param CurrentRoom The room from wich the generator will connect the next room.
+	* @param CurrentRoom [DEPRECATED] Use CurrentRoomInstance->GetRoomData instead.
+	* @param CurrentRoomInstance The room instance to which the generator will connect the next room. This interface allows access only to some data.
 	* @param DoorData The door of the CurrentRoom on which the next room will be connected (its location in room units, its orientation and its type).
 	* @param DoorIndex The index of the door used on the next room to connect to the CurrentRoom.
 	* Use -1 for a random (compatible) door, or the door index from the RoomData door array (0 is the first door).
@@ -59,7 +63,7 @@ public:
 	* @return The room data asset used to instantiate the new room instance (must not be null)
 	*/
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Next Room", ReturnDisplayName="Room Data", AutoCreateRefTerm = "DoorIndex"))
-	URoomData* ChooseNextRoomData(const URoomData* CurrentRoom, const FDoorDef& DoorData, int& DoorIndex);
+	URoomData* ChooseNextRoomData(const URoomData* CurrentRoom, const TScriptInterface<IReadOnlyRoom>& CurrentRoomInstance, const FDoorDef& DoorData, int& DoorIndex);
 
 	// Condition to validate a dungeon Generation
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Is Valid Dungeon"))
