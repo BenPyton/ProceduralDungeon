@@ -39,6 +39,7 @@
 class URoom;
 class UDungeonGraph;
 class URoomCustomData;
+class UDoorType;
 
 #if WITH_EDITOR
 class URoomData;
@@ -81,13 +82,39 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Room Data")
 	bool HasCompatibleDoor(const FDoorDef& DoorData) const;
 
+	UFUNCTION(BlueprintPure, Category = "Room Data")
+	void GetCompatibleDoors(const FDoorDef& DoorData, TArray<int>& CompatibleDoors) const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Data")
+	bool HasDoorOfType(UDoorType* DoorType) const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Data")
+	bool HasAnyDoorOfType(const TArray<UDoorType*>& DoorTypes) const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Data")
+	bool HasAllDoorOfType(const TArray<UDoorType*>& DoorTypes) const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Data")
+	bool HasCustomData(TSubclassOf<URoomCustomData> CustomDataClass) const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Data")
+	bool HasAnyCustomData(const TArray<TSubclassOf<URoomCustomData>>& CustomDataList) const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Data")
+	bool HasAllCustomData(const TArray < TSubclassOf<URoomCustomData>>& CustomDataList) const;
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Room Data")
 	void InitializeRoom(URoom* Room, UDungeonGraph* Dungeon) const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Room Data")
 	void CleanupRoom(URoom* Room, UDungeonGraph* Dungeon) const;
 
+	UFUNCTION(BlueprintPure, Category = "Room Data")
 	FIntVector GetSize() const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Data")
+	int GetVolume() const;
+
 	class FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
 	FBoxMinAndMax GetIntBounds() const;
 

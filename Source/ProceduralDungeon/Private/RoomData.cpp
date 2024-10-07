@@ -27,6 +27,7 @@
 #include "RoomCustomData.h"
 #include "ProceduralDungeonTypes.h"
 #include "ProceduralDungeonUtils.h"
+#include "DoorType.h"
 #include "Math/GenericOctree.h" // FBoxCenterAndExtent
 
 #if !USE_LEGACY_DATA_VALIDATION
@@ -48,6 +49,71 @@ bool URoomData::HasCompatibleDoor(const FDoorDef& DoorData) const
 	return false;
 }
 
+void URoomData::GetCompatibleDoors(const FDoorDef& DoorData, TArray<int>& CompatibleDoors) const
+{
+	CompatibleDoors.Empty();
+	for (int i = 0; i < Doors.Num(); ++i)
+	{
+		if (FDoorDef::AreCompatible(Doors[i], DoorData))
+			CompatibleDoors.Add(i);
+	}
+}
+
+bool URoomData::HasDoorOfType(UDoorType* DoorType) const
+{
+	for (const auto& Door : Doors)
+	{
+		if (Door.Type == DoorType)
+			return true;
+	}
+	return false;
+}
+
+bool URoomData::HasAnyDoorOfType(const TArray<UDoorType*>& DoorTypes) const
+{
+	for (const auto& Door : Doors)
+	{
+		if (DoorTypes.Contains(Door.Type))
+			return true;
+	}
+	return false;
+}
+
+bool URoomData::HasAllDoorOfType(const TArray<UDoorType*>& DoorTypes) const
+{
+	TSet<UDoorType*> AllDoorTypes(DoorTypes);
+	for (const auto& Door : Doors)
+	{
+		AllDoorTypes.Remove(Door.Type);
+	}
+	return AllDoorTypes.IsEmpty();
+}
+
+bool URoomData::HasCustomData(TSubclassOf<URoomCustomData> CustomDataClass) const
+{
+	return CustomData.Contains(CustomDataClass);
+}
+
+bool URoomData::HasAnyCustomData(const TArray<TSubclassOf<URoomCustomData>>& CustomDataList) const
+{
+	for (const auto& CustomDataClass : CustomDataList)
+	{
+		if (HasCustomData(CustomDataClass))
+			return true;
+	}
+	return false;
+}
+
+bool URoomData::HasAllCustomData(const TArray<TSubclassOf<URoomCustomData>>& CustomDataList) const
+{
+	for (const auto& CustomDataClass : CustomDataList)
+	{
+		if (!HasCustomData(CustomDataClass))
+			return false;
+	}
+	return true;
+}
+
 void URoomData::InitializeRoom_Implementation(URoom* Room, UDungeonGraph* Dungeon) const
 {
 }
@@ -67,6 +133,12 @@ FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
 FIntVector URoomData::GetSize() const
 {
 	return GetIntBounds().GetSize();
+}
+
+int URoomData::GetVolume() const
+{
+	FIntVector Size = GetSize();
+	return Size.X * Size.Y * Size.Z;
 }
 
 FBoxMinAndMax URoomData::GetIntBounds() const
