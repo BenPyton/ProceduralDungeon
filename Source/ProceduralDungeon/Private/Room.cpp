@@ -79,7 +79,7 @@ void URoom::RegisterReplicableSubobjects(bool bRegister)
 	}
 }
 
-void URoom::Init(URoomData* Data, ADungeonGenerator* Generator, int32 RoomId)
+void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId)
 {
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(RoomData, Data);
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(GeneratorOwner, Generator);
@@ -433,27 +433,49 @@ bool URoom::IsOccupied(FIntVector Cell)
 		&& local.Z >= Bounds.Min.Z && local.Z < Bounds.Max.Z;
 }
 
-void URoom::TryConnectToExistingDoors(TArray<URoom*>& RoomList)
+bool URoom::TryConnectDoor(int DoorIndex, const TArray<URoom*>& RoomList)
 {
+	// Check if already connected.
+	if (IsConnected(DoorIndex))
+		return true;
+
+	// Get the room in front of the door if any.
+	EDoorDirection DoorDir = GetDoorWorldOrientation(DoorIndex);
+	FIntVector AdjacentCell = GetDoorWorldPosition(DoorIndex) + ToIntVector(DoorDir);
+	URoom* OtherRoom = GetRoomAt(AdjacentCell, RoomList);
+	if (!IsValid(OtherRoom))
+	{
+		return false;
+	}
+
+	// Get the door index of the other room if any.
+	int OtherDoorIndex = OtherRoom->GetDoorIndexAt(AdjacentCell, ~DoorDir);
+	if (OtherDoorIndex < 0) // -1 if no door
+	{
+		return false;
+	}
+
+	// Check door compatibility.
+	const FDoorDef& ThisDoor = RoomData->Doors[DoorIndex];
+	const FDoorDef& OtherDoor = OtherRoom->RoomData->Doors[OtherDoorIndex];
+	if (!FDoorDef::AreCompatible(ThisDoor, OtherDoor))
+	{
+		return false;
+	}
+
+	// Finally connect the doors.
+	Connect(*this, DoorIndex, *OtherRoom, OtherDoorIndex);
+	return true;
+}
+
+bool URoom::TryConnectToExistingDoors(const TArray<URoom*>& RoomList)
+{
+	bool HasConnection = false;
 	for (int i = 0; i < RoomData->GetNbDoor(); ++i)
 	{
-		if (IsConnected(i))
-			continue;
-
-		EDoorDirection dir = GetDoorWorldOrientation(i);
-		FIntVector pos = GetDoorWorldPosition(i) + ToIntVector(dir);
-		URoom* otherRoom = GetRoomAt(pos, RoomList);
-
-		if (IsValid(otherRoom))
-		{
-			int j = otherRoom->GetDoorIndexAt(pos, ~dir);
-			if (j >= 0 // -1 if no door
-				&& FDoorDef::AreCompatible(RoomData->Doors[i], otherRoom->RoomData->Doors[j]))
-			{
-				Connect(*this, i, *otherRoom, j);
-			}
-		}
+		HasConnection |= TryConnectDoor(i, RoomList);
 	}
+	return HasConnection;
 }
 
 FBoxCenterAndExtent URoom::GetBounds() const
@@ -639,8 +661,7 @@ FVector URoom::GetBoundsCenter() const
 	FVector Center = GetBounds().Center;
 	if (GeneratorOwner.IsValid())
 	{
-		FTransform DungeonTransform(GeneratorOwner->GetDungeonRotation(), GeneratorOwner->GetDungeonOffset());
-		Center = DungeonTransform.TransformPosition(Center);
+		Center = GeneratorOwner->GetDungeonTransform().TransformPositionNoScale(Center);
 	}
 	return Center;
 }
