@@ -30,7 +30,7 @@
 #include "Math/GenericOctree.h" // for FBoxCenterAndExtent (required for UE5.0)
 #include "Room.generated.h"
 
-class ADungeonGenerator;
+class ADungeonGeneratorBase;
 class ARoomLevel;
 class URoomData;
 class ADoor;
@@ -87,7 +87,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Room")
 	const URoomData* GetRoomData() const { return RoomData; }
 
-	const ADungeonGenerator* Generator() const { return GeneratorOwner.Get(); }
+	const ADungeonGeneratorBase* Generator() const { return GeneratorOwner.Get(); }
 	void SetPlayerInside(bool PlayerInside);
 	void SetVisible(bool Visible);
 	FORCEINLINE uint64 GetRoomID() const { return Id; }
@@ -196,7 +196,7 @@ private:
 	TArray<FRoomConnection> Connections;
 
 	UPROPERTY(Replicated)
-	TWeakObjectPtr<ADungeonGenerator> GeneratorOwner {nullptr};
+	TWeakObjectPtr<ADungeonGeneratorBase> GeneratorOwner {nullptr};
 
 	UPROPERTY(ReplicatedUsing = OnRep_Id)
 	int64 Id {-1};
@@ -236,7 +236,7 @@ protected:
 	void OnInstanceLoaded();
 
 public:
-	void Init(URoomData* RoomData, ADungeonGenerator* Generator, int32 RoomId);
+	void Init(URoomData* RoomData, ADungeonGeneratorBase* Generator, int32 RoomId);
 
 	bool IsConnected(int Index) const;
 	void SetConnection(int Index, URoom* Room, int OtherDoorIndex);
@@ -258,7 +258,8 @@ public:
 	bool IsDoorInstanced(int DoorIndex);
 	void SetDoorInstance(int DoorIndex, ADoor* Door);
 	int GetOtherDoorIndex(int DoorIndex);
-	void TryConnectToExistingDoors(TArray<URoom*>& RoomList);
+	bool TryConnectDoor(int DoorIndex, const TArray<URoom*>& RoomList);
+	bool TryConnectToExistingDoors(const TArray<URoom*>& RoomList);
 
 	FIntVector WorldToRoom(const FIntVector& WorldPos) const;
 	FIntVector RoomToWorld(const FIntVector& RoomPos) const;

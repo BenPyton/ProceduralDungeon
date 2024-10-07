@@ -31,7 +31,7 @@
 class URoom;
 class URoomData;
 class URoomCustomData;
-class ADungeonGenerator;
+class ADungeonGeneratorBase;
 
 UENUM()
 enum class EDungeonGraphState : uint8
@@ -49,7 +49,7 @@ class PROCEDURALDUNGEON_API UDungeonGraph : public UReplicableObject
 {
 	GENERATED_BODY()
 
-	friend ADungeonGenerator;
+	friend ADungeonGeneratorBase;
 
 public:
 	UDungeonGraph();
@@ -188,5 +188,5 @@ private:
 	void OnRep_Rooms();
 
 	EDungeonGraphState CurrentState {EDungeonGraphState::None};
-	TWeakObjectPtr<ADungeonGenerator> Generator {nullptr};
+	TWeakObjectPtr<ADungeonGeneratorBase> Generator {nullptr};
 };
