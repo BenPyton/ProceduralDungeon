@@ -111,6 +111,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta = (DisplayName = "Room Count", CompactNodeTitle = "Room Count", DeprecatedFunction, DeprecationMessage = "Use the same function from the Rooms variable."))
 	int GetNbRoom();
 
+	// Must be called in "Choose Next Room" function to be used.
+	// Tell explicitely the generator we don't want to place a room for a specific door.
+	// No error will be thrown when returning a null room data and no further room placement tries occur for this door (skip directly to the next door).
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
+	void DiscardRoom() { bDiscardRoom = true; }
+
 private:
 	// Adds some new rooms linked to ParentRoom into Rooms list output
 	// AddedRooms contains only the new rooms added to Rooms list
@@ -132,4 +138,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
 	FBoundsParams DungeonLimits;
+
+	// If true, returning null in ChooseNextRoom is the same as calling DiscardRoom.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation", AdvancedDisplay)
+	bool bAutoDiscardRoomIfNull = false;
+
+	// Flag to explicitely tell we don't want to place a room.
+	bool bDiscardRoom = false;
 };

@@ -154,11 +154,20 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 		do
 		{
 			nbTries--;
+			bDiscardRoom = false;
 			URoomData* roomDef = ChooseNextRoomData(ParentRoom.GetRoomData(), &ParentRoom, doorDef, doorIndex);
 			if (!IsValid(roomDef))
 			{
-				DungeonLog_Error("ChooseNextRoomData returned null.");
-				continue;
+				bDiscardRoom |= bAutoDiscardRoomIfNull;
+				if (bDiscardRoom)
+				{
+					break;
+				}
+				else
+				{
+					DungeonLog_Error("ChooseNextRoomData returned null.");
+					continue;
+				}
 			}
 
 			if (doorIndex >= roomDef->Doors.Num())
@@ -212,6 +221,10 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 				newRoom = nullptr;
 			}
 		} while (nbTries > 0 && newRoom == nullptr);
+
+		// If we explicitely want to not place a room, then goes to next door
+		if (bDiscardRoom)
+			continue;
 
 		// Plugin-wide setting is deprecated, will be removed in v4.0
 		const bool bConnectAllDoors = bCanLoop && Dungeon::CanLoop();
