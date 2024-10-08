@@ -1,7 +1,7 @@
 ---
 toc_min_heading_level: 2
 toc_max_heading_level: 2
-pagination_prev: guides/Home
+pagination_prev: guides/Introduction
 pagination_next: guides/Plugin-Settings
 ---
 

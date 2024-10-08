@@ -1,7 +1,13 @@
 # Multiplayer
 
-First off, be sure to have minimum knowledge of how multiplayer games work in Unreal Engine.\
-I would suggest you to read this [compendium](https://cedric-neukirchen.net/docs/category/multiplayer-network-compendium) if not.
+:::info[Prerequisites]
+
+This guide assumes you have minimum knowledge about multiplayer in Unreal Engine.\
+It does not aim to teach you how to create multiplayer games in Unreal.
+
+If you are new to multiplayer in Unreal Engine, I would suggest you to read this [Multiplayer Network Compendium](https://cedric-neukirchen.net/docs/category/multiplayer-network-compendium).
+
+:::
 
 ## Overview
 
