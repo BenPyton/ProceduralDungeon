@@ -27,7 +27,6 @@
 #include "CoreMinimal.h"
 #include "DungeonGeneratorBase.h"
 #include "BoundsParams.h"
-#include "UObject/ScriptInterface.h"
 #include "DungeonGenerator.generated.h"
 
 class IReadOnlyRoom;
