@@ -56,9 +56,9 @@ You can find an example project [here](https://github.com/BenPyton/DungeonExampl
 
 ## How to use it
 
-Go to the [Getting Started](https://github.com/BenPyton/ProceduralDungeon/wiki/Getting-Started) page to begin to work with the plugin.
+Go to the [Getting Started](https://benpyton.github.io/ProceduralDungeon/guides/Installation) page to begin to work with the plugin.
 
-If you want more details about how it works internally, you can read the [wiki](https://github.com/BenPyton/ProceduralDungeon/wiki/Home).
+If you want more details about how it works internally, you can read the [wiki](https://BenPyton.github.io/ProceduralDungeon/guides/Home).
 
 You can also join the [Discord server][1] dedicated to this plugin if you want to ask question or get help from the community.
 
@@ -66,7 +66,7 @@ You can also join the [Discord server][1] dedicated to this plugin if you want t
 
 Install it like any other Unreal Engine plugin.
 
-If you have any trouble with installation, read the [Installation](https://github.com/BenPyton/ProceduralDungeon/wiki/Installation) page of the wiki.
+If you have any trouble with installation, read the [Installation](https://benpyton.github.io/ProceduralDungeon/guides/Installation) page of the wiki.
 
 ## FAQ
 
@@ -124,8 +124,8 @@ If you have any trouble with installation, read the [Installation](https://githu
 <summary><b>How does the occlusion culling work for multiplayer?</b></summary>
 
 > The occlusion culling is client side. It will show only the room where the local player is and any adjacent rooms.\
-> You can read further details about the occlusion culling system of this plugin from the [wiki page](https://github.com/BenPyton/ProceduralDungeon/wiki/Occlusion-Culling).\
-> You can also disable the occlusion culling from the [plugin's settings](https://github.com/BenPyton/ProceduralDungeon/wiki/Plugin-Settings) and do it yourself in another way.
+> You can read further details about the occlusion culling system of this plugin from the [wiki page](https://benpyton.github.io/ProceduralDungeon/guides/Occlusion-Culling).\
+> You can also disable the occlusion culling from the [plugin's settings](https://benpyton.github.io/ProceduralDungeon/guides/Plugin-Settings) and do it yourself in another way.
 
 </details>
 
@@ -144,7 +144,7 @@ If you have any trouble with installation, read the [Installation](https://githu
 <summary><b>Can I have some sort of flow to the dungeon? Like have a secret room spawn only once and have boss rooms only spawn 4 rooms?</b></summary>
 
 > Yes, you can define the flow you want for your dungeon. It is the purpose of the plugin.\
-> There is the function [`ChooseNextRoomData`](https://github.com/BenPyton/ProceduralDungeon/wiki/Choose-Next-Room-Data) where you define what I call your "rules" of the dungeon.\
+> There is the function [`ChooseNextRoomData`](https://benpyton.github.io/ProceduralDungeon/guides/Choose-Next-Room-Data) where you define what I call your "rules" of the dungeon.\
 > You can, for example, check a minimum number of room before spawning a secret room, and then don't spawn it if you already have one in the dungeon.
 
 </details>
@@ -153,7 +153,7 @@ If you have any trouble with installation, read the [Installation](https://githu
 <summary><b>Can I increase the difficulty of the dungeon? Lets say room level 1 is easy and room level 5 is hard, can I tell the dungeon to not go from level 1 to level 5?</b></summary>
 
 > Of course, you can. To do that sort of thing, you should create a child blueprint of `RoomData` class to add new parameters like a `DifficultyLevel`, which you can set value for each rooms in your `RoomData` assets.\
-> Then for example, in your [`ChooseNextRoomData`](https://github.com/BenPyton/ProceduralDungeon/wiki/Choose-Next-Room-Data) function you can choose a room depending on its difficulty level compared to the difficulty level of the previous room.
+> Then for example, in your [`ChooseNextRoomData`](https://benpyton.github.io/ProceduralDungeon/guides/Choose-Next-Room-Data) function you can choose a room depending on its difficulty level compared to the difficulty level of the previous room.
 
 </details>
 
