@@ -66,7 +66,7 @@ public:
 };
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI, BlueprintType, meta = (CannotImplementInterfaceInBlueprint))
+UINTERFACE(MinimalAPI, BlueprintType, NotBlueprintable, meta = (CannotImplementInterfaceInBlueprint, Tooltip = "Allow access to only some members of Room instances during the generation process."))
 class UReadOnlyRoom : public UInterface
 {
 	GENERATED_BODY()
@@ -81,6 +81,11 @@ public:
 	// Returns the room data asset of this room instance.
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	virtual const URoomData* GetRoomData() const { return nullptr; }
+
+	// Returns the unique ID (per-dungeon) of the room.
+	// The first room has ID 0 and then it increases in the order of placed room.
+	UFUNCTION(BlueprintCallable, Category = "Room")
+	virtual int64 GetRoomID() const { return -1ll; }
 
 	// Returns the world extents (half size) of the room.
 	UFUNCTION(BlueprintCallable, Category = "Room")
@@ -127,6 +132,7 @@ public:
 
 	//~ Begin IReadOnlyRoom Interface
 	virtual const URoomData* GetRoomData() const override { return RoomData; }
+	virtual int64 GetRoomID() const override{ return Id; }
 	virtual FIntVector GetPosition() const { return Position; }
 	virtual EDoorDirection GetDirection() const { return Direction; }
 	virtual bool AreAllDoorsConnected() const override;
@@ -138,7 +144,6 @@ public:
 	const ADungeonGeneratorBase* Generator() const { return GeneratorOwner.Get(); }
 	void SetPlayerInside(bool PlayerInside);
 	void SetVisible(bool Visible);
-	FORCEINLINE uint64 GetRoomID() const { return Id; }
 	FORCEINLINE bool IsReady() const { return RoomData != nullptr; }
 
 	// Is the player currently inside the room?
