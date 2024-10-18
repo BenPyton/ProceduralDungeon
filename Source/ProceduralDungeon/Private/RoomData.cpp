@@ -86,7 +86,7 @@ bool URoomData::HasAllDoorOfType(const TArray<UDoorType*>& DoorTypes) const
 	{
 		AllDoorTypes.Remove(Door.Type);
 	}
-	return AllDoorTypes.IsEmpty();
+	return AllDoorTypes.Num() <= 0;
 }
 
 bool URoomData::HasCustomData(TSubclassOf<URoomCustomData> CustomDataClass) const
