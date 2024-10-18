@@ -1,6 +1,6 @@
 ---
 pagination_prev: guides/Is-Valid-Dungeon
-pagination_next: api/Classes/DungeonGenerator/Nodes/Generate/Generate
+pagination_next: guides/Packaging
 ---
 
 # Choose Door
@@ -19,4 +19,5 @@ One of the room class input can be null if there is no room connected to it.
 You certainly want to set an always closed door, or a door actor that act as a "wall".
 
 An example to spawn a simple door if both rooms are valid, or a wall if one of them is not valid (assuming there is only one door type):
+
 ![](Images/ChooseDoor.jpg)
