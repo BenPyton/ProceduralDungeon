@@ -14,7 +14,7 @@ Also, if you are a new to programming languages in general, you should read [the
 :::warning[Before using the plugin]
 
 The procedural level generation in any game is part of the level design step of game development.\
-So, before starting to use this plugin, I strongly recommend you to first implement your [3C's](BestPractices/Workflows/3Cs.md) in Unreal Engine.\
+So, before starting to use this plugin, I strongly recommend you to first implement your [3C's](Best-Practices/Workflows/3Cs.md) in Unreal Engine.\
 Because the very first settings of the plugin you will define should be based on 2 of the 3 C's:
 
 - how your character moves (speed, jump, attacks, etc.)
