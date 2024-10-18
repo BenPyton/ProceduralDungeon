@@ -2,11 +2,24 @@
 
 If you struggle creating the dungeons you want, this page will help you getting a good basic workflow to design and code the dungeon you want to generate.
 
-:::note
+:::info
 
 To illustrate the workflow, I'll use a simple example: a mall-like dungeon.\
 This is only to help you understand the process behind creating your code based on a desired result.\
 You can do anything else you want, you just have to follow the same steps.
+
+:::
+
+:::tip
+
+Remember that you can do whatever you want!
+
+You don't need an end room if you want another goal for your dungeon (e.g. killing all the mobs).
+
+You don't need the player to spawn in the start room (or even have a specific room as a first room).
+You could for example have multiple rooms with a player start actor you choose from to spawn the player.
+
+You can add any variables you want in your room data to add constraints on your generation rules (e.g. add a room difficulty value so you can choose a hard room after an easy room).
 
 :::
 
