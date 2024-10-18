@@ -183,7 +183,7 @@ bool ADungeonGeneratorBase::AddRoomToDungeon(URoom* const& Room, const TArray<in
 
 	bool bConnected = false;
 	// Connect the doors if provided, otherwise try to connect all possible doors
-	if (DoorsToConnect.IsEmpty())
+	if (DoorsToConnect.Num() <= 0)
 	{
 		bConnected = Room->TryConnectToExistingDoors(Graph->GetAllRooms());
 	}

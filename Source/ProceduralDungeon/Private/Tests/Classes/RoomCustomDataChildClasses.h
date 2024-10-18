@@ -25,19 +25,19 @@
 #include "RoomCustomData.h"
 #include "RoomCustomDataChildClasses.generated.h"
 
-UCLASS(NotBlueprintable, NotBlueprintType, Hidden, meta = (HiddenNode))
+UCLASS(NotBlueprintable, NotBlueprintType, HideDropdown, meta = (HiddenNode))
 class UCustomDataA : public URoomCustomData
 {
 	GENERATED_BODY()
 };
 
-UCLASS(NotBlueprintable, NotBlueprintType, Hidden, meta = (HiddenNode))
+UCLASS(NotBlueprintable, NotBlueprintType, HideDropdown, meta = (HiddenNode))
 class UCustomDataB : public URoomCustomData
 {
 	GENERATED_BODY()
 };
 
-UCLASS(NotBlueprintable, NotBlueprintType, Hidden, meta = (HiddenNode))
+UCLASS(NotBlueprintable, NotBlueprintType, HideDropdown, meta = (HiddenNode))
 class UCustomDataC : public URoomCustomData
 {
 	GENERATED_BODY()
