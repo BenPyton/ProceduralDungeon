@@ -53,7 +53,7 @@ ADungeonGeneratorBase::ADungeonGeneratorBase()
 	bAlwaysRelevant = true;
 	bReplicates = true;
 	NetPriority = 10.0f;
-	NetUpdateFrequency = 20;
+	SetNetUpdateFrequency(20);
 	NetDormancy = ENetDormancy::DORM_DormantAll;
 
 	Graph = CreateDefaultSubobject<UDungeonGraph>(TEXT("Dungeon Rooms"));

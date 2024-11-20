@@ -26,10 +26,11 @@
 #include "Containers/UnrealString.h"
 #include "Misc/AutomationTest.h"
 #include "ProceduralDungeonTypes.h"
+#include "TestUtils.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDoorDirectionTest, "ProceduralDungeon.Types.DoorDirection", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::SmokeFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDoorDirectionTest, "ProceduralDungeon.Types.DoorDirection", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::SmokeFilter)
 
 bool FDoorDirectionTest::RunTest(const FString& Parameters)
 {

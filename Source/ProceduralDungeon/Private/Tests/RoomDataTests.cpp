@@ -30,10 +30,11 @@
 #include "./Classes/RoomCustomDataChildClasses.h"
 #include "UObject/StrongObjectPtr.h"
 #include "UObject/Package.h"
+#include "TestUtils.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRoomDataTests, "ProceduralDungeon.Types.RoomData", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRoomDataTests, "ProceduralDungeon.Types.RoomData", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::EngineFilter)
 
 // Utility to create door type
 #define CREATE_DATA_ASSET(VAR_TYPE, VAR_NAME) \
@@ -333,5 +334,9 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 
 	return true;
 }
+
+#undef CREATE_DATA_ASSET
+#undef CREATE_ROOM_DATA
+#undef ADD_DOOR
 
 #endif //WITH_DEV_AUTOMATION_TESTS
