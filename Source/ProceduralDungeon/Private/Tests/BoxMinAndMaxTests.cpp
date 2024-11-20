@@ -26,10 +26,11 @@
 #include "Containers/UnrealString.h"
 #include "Misc/AutomationTest.h"
 #include "ProceduralDungeonTypes.h"
+#include "TestUtils.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBoxMinAndMaxTest, "ProceduralDungeon.Types.BoxMinAndMax", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::SmokeFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBoxMinAndMaxTest, "ProceduralDungeon.Types.BoxMinAndMax", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::SmokeFilter)
 
 bool FBoxMinAndMaxTest::RunTest(const FString& Parameters)
 {

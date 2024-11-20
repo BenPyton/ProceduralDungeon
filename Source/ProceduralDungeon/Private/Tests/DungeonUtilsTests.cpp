@@ -26,10 +26,11 @@
 #include "Containers/UnrealString.h"
 #include "Misc/AutomationTest.h"
 #include "ProceduralDungeonUtils.h"
+#include "TestUtils.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonUtilsTest, "ProceduralDungeon.Utils.WeightedMaps", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::SmokeFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonUtilsTest, "ProceduralDungeon.Utils.WeightedMaps", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::SmokeFilter)
 
 bool FDungeonUtilsTest::RunTest(const FString& Parameters)
 {

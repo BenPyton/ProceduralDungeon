@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2023 Benoit Pelletier
+* Copyright (c) 2023-2024 Benoit Pelletier
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -29,10 +29,11 @@
 #include "Room.h"
 #include "RoomData.h"
 #include "UObject/StrongObjectPtr.h"
+#include "TestUtils.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonGraphTest, "ProceduralDungeon.Types.DungeonGraph", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonGraphTest, "ProceduralDungeon.Types.DungeonGraph", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::EngineFilter)
 
 #define INIT_TEST(Graph) \
 	TStrongObjectPtr<UDungeonGraph> Graph(NewObject<UDungeonGraph>(GetTransientPackage(), #Graph)); \
@@ -182,5 +183,11 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 
 	return true;
 }
+
+#undef INIT_TEST
+#undef CLEAN_TEST
+#undef CREATE_ROOM
+#undef CREATE_ROOM_DATA
+#undef DUMMY_PATH
 
 #endif //WITH_DEV_AUTOMATION_TESTS
