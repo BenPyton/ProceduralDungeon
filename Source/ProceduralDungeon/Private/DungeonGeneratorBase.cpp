@@ -38,6 +38,10 @@
 
 uint32 ADungeonGeneratorBase::GeneratorCount = 0;
 
+#if UE_VERSION_OLDER_THAN(5, 5, 0)
+#define SetNetUpdateFrequency(X) NetUpdateFrequency = X
+#endif
+
 // Sets default values
 ADungeonGeneratorBase::ADungeonGeneratorBase()
 {
