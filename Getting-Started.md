@@ -13,6 +13,13 @@ This page is for plugin version 3.X.X and higher. If you use a version 2.X.X, pl
 
 # Room Architecture
 
+<!-- BEGIN IMPORTS -->
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<!-- END IMPORTS -->
+
 **Each** room is composed by 2 assets : the level and the data.
 
 ![](Images/DataAndLevel_UE5.jpg)
@@ -33,28 +40,56 @@ However, the door size doesn't affect anything during the dungeon generation.
 
 # How to create a room
 
-### Step 0 - Creating a RoomData blueprint class (optional)
+### Step 0 - Creating a `RoomData` child class (optional but recommended)
 
 If you want specific data in your rooms, you can create a new child blueprint of from `RoomData`.\
 *(You can do this step only once for all your room data, or you can skip it if you don't need specific data for your rooms)*\
 
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
+
 To create a new `RoomData` **class**, right-click in content browser and select `Blueprint Class`.\
 Then expand the `All Classes` and type "RoomData" in the search bar. You can then select it.
 
+After doing so, you can add your own data inside this blueprint class (for example an integer representing the difficulty of the room).
+
 ![](Images/CreateRoomData.jpg)
 
-After doing so, you can add your own data inside this blueprint class (for example an integer representing the difficulty of the room). You can also make multiple `RoomData` blueprint classes, but I will don't tell you how Unreal works here ;)
+<!-- [END TAB ITEM] Blueprint --> </TabItem>
+<!-- [BEGIN TAB ITEM] C++ --> <TabItem value="cpp" label="C++">
 
-### Step 1 - Creating a RoomData asset (one per room)
+```cpp
+UCLASS()
+class AMyRoomData : public ARoomData
+{
+    GENERATED_BODY()
+public:
+    // This variables is just for example purpose.
+    // You can add whatever variables your rooms need in your project.
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My Room Data")
+    int32 DifficultyLevel {0};
+}
+```
+
+<!-- [END TAB ITEM] C++ --> </TabItem>
+<!-- [END TABS] Blueprint | C++ --> </Tabs>
+
+ You can also make multiple `RoomData` child classes, but I won't tell you how Unreal works here! 😉
+
+### Step 1 - Creating a `RoomData` asset (one per room)
 
 The first required thing to do is to create a `RoomData` asset.\
 It is done simply by right-clicking in your content browser, then choosing `Procedural Dungeon` -> `Room Data`.\
-If you have created child blueprints of room data, you can pick the one you want here.
+If you have created at least one child class of `RoomData`, you can pick the one you want here.
 
 ![](Images/CreateRoomData_v3.gif)
 
+:::info
+
 I don't recommend editing the data directly by opening it from the content browser.\
 You will be able to do it in a later step below.
+
+:::
 
 ### Step 2 - Creating and editing a Room Level (one per room)
 
