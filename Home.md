@@ -47,26 +47,13 @@ Possible results:
 <img src={DemoDungeon1} alt="Result1" width="400"/>
 <img src={DemoDungeon2} alt="Result2" width="400"/>
 
-## Lifecycle of a dungeon generation
-
-Before creating your rules, you should understand how the plugin works.\
-A generation is made of 4 phases :
-
-- **Idle**: the generator just wait until a change occurs
-- **Unload**: the previous room levels unload (destroying level's actors, etc.)
-- **Create Dungeon**: (*server only*) the generator creates a 'virtual' dungeon (your rules are defined here)
-- **Load**: the room levels load and initialize (spawning actors, etc. and call to `BeginPlay` of room's level blueprints)
-
-Here is the flowchart when we call `Generate` on a dungeon generator (or clients update their room list):
-
-![](Images/Flowchart_Dark_v3.svg)
-
 ## What you need to do
 
 First, read the [Installation](Installation.md) page to install the plugin.\
-Then, read and follow the instructions in the [Getting Started](Creating-Rooms) page.
+Then, read and follow the instructions in the [Getting Started](Getting-Started.md) page. This will give you a minimal working dungeon.\
+You can then read the `Advanced Features` section to know what the plugin has to offer on top of the basics.
 
-You can get an [example project here](https://github.com/BenPyton/DungeonExample) if you want a minimal working project.
+An [example project](https://github.com/BenPyton/DungeonExample) is available if you want to try a minimal working project.
 
 You can also join the [Discord server](https://discord.gg/YE2dPda2CC) dedicated to this plugin if you want to ask question or get help from the community.
 
