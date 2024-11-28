@@ -1,3 +1,7 @@
+---
+slug: /guides/Room-Observer
+---
+
 # Room Observer
 
 The room observer components allows actors to be notified whenever any actor enters or exits a room.\
@@ -27,4 +31,4 @@ Just add the component on any actor, and then bind to its delegate the way you w
 Here a simple example of a "fog of war" actor that will hide/show itself when the player enters/exits its room.
 It is an actor placed directly in the room level and will never move to another room, so I attached a `Static Room Observer` on it.
 
-![](Images/RoomObserver.png)
+![](../Images/RoomObserver.png)

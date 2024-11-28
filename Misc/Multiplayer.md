@@ -1,3 +1,7 @@
+---
+slug: /guides/Multiplayer
+---
+
 # Multiplayer
 
 :::info[Prerequisites]
@@ -14,7 +18,7 @@ If you are new to multiplayer in Unreal Engine, I would suggest you to read this
 The first important thing to know is that only the server will generate the dungeon.\
 The clients will replicate the room instance list from the server and then load/unload accordingly the levels.
 
-![](Images/Flowchart_Dark_v3.svg)
+![](../Images/Flowchart_Dark_v4.svg)
 
 If you look at the state machine above, both server and client start in a state `idle`.
 
@@ -51,7 +55,7 @@ My suggestion:
 - In the `BeginPlay` of the spawner, check if it's server-side (with the `HasAuthority` function) before spawning the real actor you want.
 - Spawn the actor if previous point is true. The spawned actor will spawns on all clients too and will be replicated properly.
 
-![](Images/MultiSpawner.jpg)
+![](../Images/MultiSpawner.jpg)
 
 ## Multiplayer in Editor
 
@@ -62,10 +66,10 @@ Here is how to setup the editor.\
 *(Some options could be in another place on newer version, but they are all here)*
 
 - First, you have to click on the arrow next to the play button and go to `Advance Settings`.\
-![](Images/AdvanceSettings.jpg)
+![](../Images/AdvanceSettings.jpg)
 
 - Then in `Multiplayer Options`, set `Number of Players` to 2, uncheck the `Use Single Process` box and set the `Editor Multiplyer Mode` to `Listen Server` or `Client`.\
-![](Images/MultiOptions.jpg)
+![](../Images/MultiOptions.jpg)
 
 - Finally, close the settings window and click again on the arrow next to the Play button and choose `Standalone Game`.\
-![](Images/Standalone.jpg)
+![](../Images/Standalone.jpg)

@@ -1,3 +1,7 @@
+---
+slug: /guides/Geometry-Brushes
+---
+
 # Geometry Brushes
 
 :::warning[Limitations]
@@ -13,4 +17,4 @@ The second thing is, for an obscure reason to me, the navmesh will not be genera
 So, as long as you are just designing you rooms, you can use geometry brushes.\
 However, if you want to use those rooms in your generated dungeon, you should convert them in static meshes first (see the gif below) in order to have all the functionalities of the plugin to work properly.
 
-![](Images/ConvertGeomBrushToStaticMesh.gif)
+![](../Images/ConvertGeomBrushToStaticMesh.gif)

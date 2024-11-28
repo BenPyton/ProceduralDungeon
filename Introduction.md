@@ -1,5 +1,5 @@
 ---
-pagination_next: guides/Installation
+pagination_next: guides/Getting-Started/Installation
 ---
 
 # Introduction

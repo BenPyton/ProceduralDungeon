@@ -1,3 +1,7 @@
+---
+slug: /guides/Room-Visitor
+---
+
 # Room Visitor
 
 The `Room Visitor` is an [interface](https://dev.epicgames.com/community/learning/tutorials/bLXe/interfaces-bp-c) used to add behaviors to your actors or components when they enter or exit a room.
@@ -12,7 +16,7 @@ Just add the interface like any other interface in Blueprint or C++, and impleme
 
 For example, this is a simple implementation in Blueprint to keep a reference of the rooms an actor is in (stored in an array called `Cached Room Array`).
 
-![](Images/RoomVisitor.png)
+![](../Images/RoomVisitor.png)
 
 ## Differences with [`Room Observer`](Room-Observer.md) component
 

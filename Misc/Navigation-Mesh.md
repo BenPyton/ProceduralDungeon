@@ -1,3 +1,7 @@
+---
+slug: /guides/Navigation-Mesh
+---
+
 # Navmesh Generation
 
 If you are using the default unreal navigation system ([UNavigationSystemV1](https://docs.unrealengine.com/5.0/en-US/basic-navigation-in-unreal-engine/)), then the navigation mesh is automatically rebuild after each dungeon generation if you setup your project as described below.
@@ -17,7 +21,7 @@ If you have any clue, please feel free to share it with me on [**Github**](https
 First, There is a project setting you **must** change if you want the navmesh to be rebuild properly.\
 Go to `Project Settings > Engine > Navigation Mesh` and set the `Runtime Generation` to `Dynamic`:
 
-![](Images/NavMeshSettings.jpg)
+![](../Images/NavMeshSettings.jpg)
 
 Then, you need to place a `Navmesh Bounds Volume` in your "master" level (the persistent level which contains your `DungeonGenerator` actor).\
 Its location and size doesn't matter, it just need to be there.\

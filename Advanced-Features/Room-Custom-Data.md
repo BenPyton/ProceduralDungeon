@@ -1,3 +1,7 @@
+---
+slug: /guides/Room-Custom-Data
+---
+
 # Room Custom Data
 
 You can add variables as much as you want in your `RoomData` assets. However they are only static variables shared by all room instances spawned with the same `RoomData`.
@@ -26,15 +30,15 @@ Then we could just add a boss key item inside that will be used during the level
 
 To create a custom data, right-click in your content browser and select `Blueprint Class`, then expand the `All Classes` and type in "Custom Data", then select `RoomCustomData` to create a new child blueprint.
 
-![](Images/CreateCustomData.gif)
+![](../Images/CreateCustomData.gif)
 
 You can do whatever you want in it like any other blueprint classes.\
 You can then assign them in the `Custom Data` array of the `RoomData` assets you want.
 
-![](Images/AssignCustomData.gif)
+![](../Images/AssignCustomData.gif)
 
 As said above, you can't set variables of the custom data directly from the data asset.\
 However, you can get a reference of the instantiated custom data from anywhere you have a access to a room instance, with the `Get Custom Data` function of the room instance.
 For example you can access from the `Room` getter in the room level blueprint.
 
-![](Images/CustomDataUsage.jpg)
+![](../Images/CustomDataUsage.jpg)

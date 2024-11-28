@@ -1,6 +1,7 @@
 ---
-pagination_prev: guides/Dungeon-Generator
-pagination_next: guides/Choose-Next-Room-Data
+slug: /guides/Choose-First-Room-Data
+pagination_prev: guides/Getting-Started/Generating-Dungeon/Dungeon-Generator
+pagination_next: guides/Getting-Started/Generating-Dungeon/Choose-Next-Room-Data
 ---
 
 # Choose First Room
@@ -28,7 +29,7 @@ Here an example where we always set the same room as the first room dungeon:
 <!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
-![](Images/ChooseFirstRoomData.jpg)
+![](../../Images/ChooseFirstRoomData.jpg)
 
 <!-- [END TAB ITEM] Blueprint --> </TabItem>
 <!-- [BEGIN TAB ITEM] C++ --> <TabItem value="cpp" label="C++">

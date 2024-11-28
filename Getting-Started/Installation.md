@@ -1,8 +1,9 @@
 ---
+slug: /guides/Installation
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 pagination_prev: guides/Introduction
-pagination_next: guides/Plugin-Settings
+pagination_next: guides/Getting-Started/Plugin-Settings
 ---
 
 <!-- markdownlint-disable MD041 -->

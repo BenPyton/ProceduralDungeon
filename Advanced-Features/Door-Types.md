@@ -1,3 +1,7 @@
+---
+slug: /guides/Door-Types
+---
+
 # Door Types
 
 By default, the room data's doors are set with no door type.\
@@ -8,7 +12,7 @@ You can check a room compatibility with a door before-hand with the `Get Compati
 
 Creating a door type is as simple as 2 clicks: right-click on your content browser and select `Procedural Dungeon` -> `Door Type`.
 
-![](Images/CreateDoorType.gif)
+![](../Images/CreateDoorType.gif)
 
 The door type asset has some variables in it, but none of them are used during the dungeon generation.
 

@@ -1,5 +1,5 @@
 ---
-title: Packaging
+slug: /guides/Packaging
 ---
 
 # Packaging your game with the plugin

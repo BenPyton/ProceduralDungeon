@@ -1,6 +1,7 @@
 ---
-pagination_prev: guides/Choose-First-Room-Data
-pagination_next: guides/Continue-To-Add-Room
+slug: /guides/Choose-Next-Room-Data
+pagination_prev: guides/Getting-Started/Generating-Dungeon/Choose-First-Room-Data
+pagination_next: guides/Getting-Started/Generating-Dungeon/Continue-To-Add-Room
 ---
 
 # Choose Next Room
@@ -43,7 +44,7 @@ Here an example of a simple dungeon made by `NbRoom` randomly chosen standard ro
 <!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
-![](Images/ChooseNextRoomData.jpg)
+![](../../Images/ChooseNextRoomData.jpg)
 
 <!-- [END TAB ITEM] Blueprint --> </TabItem>
 <!-- [BEGIN TAB ITEM] C++ --> <TabItem value="cpp" label="C++">

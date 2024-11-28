@@ -1,6 +1,7 @@
 ---
-pagination_prev: guides/Continue-To-Add-Room
-pagination_next: guides/Choose-Door
+slug: /guides/Is-Valid-Dungeon
+pagination_prev: guides/Getting-Started/Generating-Dungeon/Continue-To-Add-Room
+pagination_next: guides/Getting-Started/Generating-Dungeon/Choose-Door
 ---
 
 # Is Valid Dungeon
@@ -23,7 +24,7 @@ Here an example where we check if the dungeon has an exit:
 <!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
-![](Images/IsValidDungeon.jpg)
+![](../../Images/IsValidDungeon.jpg)
 
 <!-- [END TAB ITEM] Blueprint --> </TabItem>
 <!-- [BEGIN TAB ITEM] C++ --> <TabItem value="cpp" label="C++">

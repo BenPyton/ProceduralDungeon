@@ -1,3 +1,7 @@
+---
+slug: /guides/Occlusion-Culling
+---
+
 # Occlusion Culling
 
 The occlusion culling system of this plugin consists of showing only the necessary rooms to avoid a lots of mesh drawing and thus improving performances.

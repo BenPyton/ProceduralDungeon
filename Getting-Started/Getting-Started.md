@@ -1,8 +1,9 @@
 ---
-title: Creating Rooms
+slug: /guides/Creating-Rooms
 id: Creating-Rooms
-pagination_prev: guides/Plugin-Settings
-pagination_next: guides/Dungeon-Generator
+title: Creating Rooms
+pagination_prev: guides/Getting-Started/Plugin-Settings
+pagination_next: guides/Getting-Started/Generating-Dungeon/Dungeon-Generator
 ---
 
 :::warning
@@ -22,7 +23,7 @@ import TabItem from '@theme/TabItem';
 
 **Each** room is composed by 2 assets : the level and the data.
 
-![](Images/DataAndLevel_UE5.jpg)
+![](../Images/DataAndLevel_UE5.jpg)
 
 The level is a classic Unreal Engine level in which you design your room as you like.\
 The data is an asset of type `RoomData` that defines the room properties (size, doors, etc.).\
@@ -53,7 +54,7 @@ Then expand the `All Classes` and type "RoomData" in the search bar. You can the
 
 After doing so, you can add your own data inside this blueprint class (for example an integer representing the difficulty of the room).
 
-![](Images/CreateRoomData.jpg)
+![](../Images/CreateRoomData.jpg)
 
 <!-- [END TAB ITEM] Blueprint --> </TabItem>
 <!-- [BEGIN TAB ITEM] C++ --> <TabItem value="cpp" label="C++">
@@ -88,7 +89,7 @@ The first required thing to do is to create a `RoomData` asset.\
 It is done simply by right-clicking in your content browser, then choosing `Procedural Dungeon` -> `Room Data`.\
 If you have created at least one child class of `RoomData`, you can pick the one you want here.
 
-![](Images/CreateRoomData_v3.gif)
+![](../Images/CreateRoomData_v3.gif)
 
 :::info
 
@@ -103,7 +104,7 @@ Now you have to create a new Unreal level by right-clicking in your content brow
 
 Open your newly created level, then select the `Dungeon Room` editor mode.
 
-![](Images/SelectDungeonRoomMode.gif)
+![](../Images/SelectDungeonRoomMode.gif)
 
 If your level is not already reparented to the `RoomLevel` script blueprint (most likely the case), the editor mode will propose you to reparent it with a button.\
 Click on it, and now you should have a `Data` field where you have to choose your newly created `RoomData` asset above.
@@ -111,7 +112,7 @@ Click on it, and now you should have a `Data` field where you have to choose you
 The details of the asset will show up below the level's `Data` field.\
 To complete the mandatory settings, you have to set the data's `Level` field to your current level (if not the case an error message is displayed).
 
-![](Images/RoomBasicSetup.gif)
+![](../Images/RoomBasicSetup.gif)
 
 Now you can design your room as you want, and update the `RoomData` accordingly with the help of the tools described below.
 
@@ -119,23 +120,23 @@ Now you can design your room as you want, and update the `RoomData` accordingly 
 
 When in `Dungeon Room` editor mode, you have access to 2 tools to ease your room data manipulation.
 
-![](Images/ToolSelection.gif)
+![](../Images/ToolSelection.gif)
 
 The `Size` tool will allows you to edit the room's bounding box by dragging points in the viewport.
 
-![](Images/SizeTool.gif)
+![](../Images/SizeTool.gif)
 
 The `Door` tool will allows you to add or remove doors easily by clicking on your room bounding box in the viewport (left-click to add, right-click to remove).\
 If you want to place different [door types](Door-Types.md), you can select the one you want in the selector beside the tool button.\
 If none is selected, then the default door is used.
 
-![](Images/DoorTool.gif)
+![](../Images/DoorTool.gif)
 
 # Utility Functions
 
 When in `Dungeon Room` editor mode, you also have access to some utilities to ease your room creation.
 
-![](Images/EditorModeUtilities.jpg)
+![](../Images/EditorModeUtilities.jpg)
 
 ### Update Selected Volumes
 

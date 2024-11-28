@@ -1,6 +1,7 @@
 ---
-pagination_prev: guides/Is-Valid-Dungeon
-pagination_next: guides/Packaging
+slug: /guides/Choose-Door
+pagination_prev: guides/Getting-Started/Generating-Dungeon/Is-Valid-Dungeon
+pagination_next: guides/Getting-Started/Packaging
 ---
 
 # Choose Door
@@ -30,7 +31,7 @@ An example to spawn a simple door if both rooms are valid, or a wall if one of t
 <!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
-![](Images/ChooseDoor.jpg)
+![](../../Images/ChooseDoor.jpg)
 
 <!-- [END TAB ITEM] Blueprint --> </TabItem>
 <!-- [BEGIN TAB ITEM] C++ --> <TabItem value="cpp" label="C++">

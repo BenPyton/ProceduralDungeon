@@ -1,3 +1,7 @@
+---
+slug: /guides/Door
+---
+
 # Door
 
 The `Door` class is the base class for all doors spawned by the dungeon.
@@ -18,7 +22,7 @@ The `TriggerDoor` class is a `Door` which will open or close depending of actors
 
 By default, all `Character` actors trigger the door, but you can change this behavior by overriding the `IsValidActor` function.
 
-![](Images/Door_IsValidActor.jpg)
+![](../Images/Door_IsValidActor.jpg)
 
 ### Multiplayer
 
@@ -28,7 +32,7 @@ However, you'll need to do your game network logic correctly to make doors work 
 For example, if you want to make a door that open/close on a player key press, you'll need to send an RPC from your `PlayerController` or your controlled `Pawn` in order to call your interaction function on you door to open/close it.\
 *(The screen below uses a generic interface to interact with any interactable actor. See the "Good Practice" section below on how to do it)*
 
-![](Images/Door_MultiInteract.jpg)
+![](../Images/Door_MultiInteract.jpg)
 
 ---
 

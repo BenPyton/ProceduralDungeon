@@ -1,7 +1,7 @@
 ---
 displayed_sidebar: homeSidebar
-pagination_prev: guides/Plugin-Settings
-pagination_next: guides/Choose-First-Room-Data
+pagination_prev: guides/Getting-Started/Plugin-Settings
+pagination_next: guides/Getting-Started/Generating-Dungeon/Choose-First-Room-Data
 ---
 
 # Room Architecture (plugin v2)

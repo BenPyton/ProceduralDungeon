@@ -1,7 +1,7 @@
 ---
 displayed_sidebar: homeSidebar
-pagination_prev: guides/Plugin-Settings
-pagination_next: guides/Dungeon-Generator
+pagination_prev: guides/Getting-Started/Plugin-Settings
+pagination_next: guides/Getting-Started/Generating-Dungeon/Dungeon-Generator
 ---
 
 # Room Architecture (plugin v1)

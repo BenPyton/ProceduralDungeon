@@ -1,6 +1,7 @@
 ---
-pagination_prev: guides/Creating-Rooms
-pagination_next: guides/Choose-First-Room-Data
+slug: /guides/Dungeon-Generator
+pagination_prev: guides/Getting-Started/Creating-Rooms
+pagination_next: guides/Getting-Started/Generating-Dungeon/Choose-First-Room-Data
 ---
 
 # Dungeon Generator
@@ -33,7 +34,7 @@ Function | Description
 
 ## Understanding the internals of the Dungeon Generator
 
-![](Images/Flowchart_Dark_v4.svg)
+![](../../Images/Flowchart_Dark_v4.svg)
 
 This flowchart shows how all functions are pieced together.\
 A generation is made of 4 phases :
@@ -60,7 +61,7 @@ Take a look at the [API Documentation](https://benpyton.github.io/ProceduralDung
 
 The `Dungeon Generator` actor has some parameters grouped inside the `Procedural Generation` category:
 
-![](Images/GeneratorSettings.jpg)
+![](../../Images/GeneratorSettings.jpg)
 
 #### `Use Generator Transform`
 
@@ -75,7 +76,7 @@ This will result in a dungeon more linear with shorter dead ends.
 
 This is an example using the same very basic generation rules defined in this wiki. We just set a counter of 20 rooms to add the end room. So with depth first we have a lot of rooms to reach the end but dead-ends of only 1 room each. And with the breadth first, we have less rooms until the end, but the dead-ends are the same length of the path to reach the end (some dead-ends are shorter because the algorithm can't place a room after).
 
-![](Images/DepthBreadth.jpg)
+![](../../Images/DepthBreadth.jpg)
 
 #### `Can Loop`
 

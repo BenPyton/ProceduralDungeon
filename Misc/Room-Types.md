@@ -1,3 +1,7 @@
+---
+slug: /guides/Room-Types
+---
+
 # Room Types
 
 There is no built-in room type system provided by the plugin, because it mainly depends on the game you are creating.
@@ -27,16 +31,16 @@ If you want a hierarchical type system (meaning having "groups" of types, sub-ty
 
 This is what the class diagram (the hierarchy of the classes) should looks like:
 
-![Room Types Hierarchy](Images/RoomTypesHierarchy.png)
+![Room Types Hierarchy](../Images/RoomTypesHierarchy.png)
 
 The dotted classes is to show the optional sub-types.
 Here how it looks like in your editor (blue are the child classes, pink are the asset instances of these classes) :
 
-![](Images/RoomTypes_ChildClassAssets.png)
+![](../Images/RoomTypes_ChildClassAssets.png)
 
 If you want to check what type of room you have in your `Choose Next Room`, you must cast the room data into the class you want. You can then also access to the variables specific to this blueprint class if you want.
 
-![](Images/RoomTypes_ChildClassComparison.png)
+![](../Images/RoomTypes_ChildClassComparison.png)
 
 ---
 
@@ -53,13 +57,13 @@ You can use whatever variable type you want:
 - An integer is sufficient (room type 0, room type 1, etc.) but not very practical.
 - A `Name` can be used, but is error-prone because you must not make a typo when typing it in the data asset.
 - An enum is the best choice for a simple type. It's an integer variable with labels, and you have a dropdown to select it so you can't misspelled the names. However, you can't have hierarchical room type. You can set multiple types per room by making the variable an array.
-![](Images/RoomTypes_VarEnumComparison.png)
+![](../Images/RoomTypes_VarEnumComparison.png)
 
 - A `Gameplay Tag` is like an enum, but also provides a hierarchical information. For example, you can create a tag `Room.Corridor.Large` and `Room.Corridor.Small` and you can test for any corridor type by testing the tag `Room.Corridor`. You can also use a `Gameplay Tag Container` variable to allow multiple types per room.
-![](Images/RoomTypes_VarGameplayTagComparison.png)
+![](../Images/RoomTypes_VarGameplayTagComparison.png)
 
 - A `Data Asset` is also usable, like the `Door Type` system of the plugin. You can create a child class of `Data Asset` (we can name it `Room Type`) then create different asset instances of the data asset class. Then you can reference these `Room Type` data assets in a variable in your `Room Data` assets. This solution allows you to add data to those room types (but shared by all rooms of same type).
-![](Images/RoomTypes_VarDataAssetComparison.png)
+![](../Images/RoomTypes_VarDataAssetComparison.png)
 
 ---
 
@@ -77,4 +81,4 @@ You can use the built-in `Room Data` class directly for you room data assets, wi
 
 It can be less performant than the other solutions when you have a lot of room data in your arrays, but this can be fixed easily by using sets instead of arrays. (sets are unordered as opposed to arrays, but are much faster to add/remove or check existence of an item in it with large amount of items).
 
-![](Images/RoomTypes_ArraysComparison.png)
+![](../Images/RoomTypes_ArraysComparison.png)

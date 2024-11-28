@@ -1,6 +1,7 @@
 ---
-pagination_prev: guides/Choose-Next-Room-Data
-pagination_next: guides/Is-Valid-Dungeon
+slug: /guides/Continue-To-Add-Room
+pagination_prev: guides/Getting-Started/Generating-Dungeon/Choose-Next-Room-Data
+pagination_next: guides/Getting-Started/Generating-Dungeon/Is-Valid-Dungeon
 ---
 
 # Continue To Add Room
@@ -25,7 +26,7 @@ Here an example where we stop the generation as soon as the end room has been pl
 <!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
-![](Images/ContinueAddingRoom.jpg)
+![](../../Images/ContinueAddingRoom.jpg)
 
 <!-- [END TAB ITEM] Blueprint --> </TabItem>
 <!-- [BEGIN TAB ITEM] C++ --> <TabItem value="cpp" label="C++">

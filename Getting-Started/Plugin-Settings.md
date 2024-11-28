@@ -1,6 +1,7 @@
 ---
-pagination_prev: guides/Installation
-pagination_next: guides/Creating-Rooms
+slug: /guides/Plugin-Settings
+pagination_prev: guides/Getting-Started/Installation
+pagination_next: guides/Getting-Started/Creating-Rooms
 ---
 
 # Plugin Settings
@@ -13,7 +14,7 @@ The settings are split in 2 places, one for the runtime module and one for the e
 
 You can find the runtime settings in the `Project Settings` -> `Plugins` -> `Procedural Dungeon` (see screenshot below).
 
-![](Images/PluginSettings.jpg)
+![](../Images/PluginSettings.jpg)
 
 ### General
 
@@ -25,11 +26,12 @@ Setting | Description
 **Can&#160;Loop** | Enable possibility to link doors when they can.<br/>[*DEPRECATED*] This setting is deprecated and will be removed in a future version.<br/>Use the `Can Loop` variable in the [Dungeon Generator](Dungeon-Generator.md) instead.<br/>As long as this setting remains, it will act as a global toggle for the feature.<br/>You should keep it ticked if you want to get the same behavior as when it will be removed.
 **Room&#160;Object&#160;Type** | The Object Type used by the room trigger box to test actor overlaps.<br/>By default it is set to `ECC_EngineTraceChannel6`, you cannot set that channel from the editor but you can from the `DefaultGame.ini` file if you want to revert back to the default value.<br/>You can create new [Object Type Channels](https://docs.unrealengine.com/4.27/en-US/InteractiveExperiences/Physics/Collision/HowTo/AddCustomCollisionType/) from your project settings if you want a special channel for the dungeon rooms, and have controls on which actors can interact with them.
 
-![](Images/PluginRoomSettings.jpg)
+![](../Images/PluginRoomSettings.jpg)
 
 ### Occlusion Culling
 
 *Note: These settings are badly named and should be referred as `Room Culling` instead. It will be changed in a future version.*
+
 Setting | Description
 ---|---
 **Enable&#160;Occlusion&#160;Culling** | This enables the occlusion culling system (see [Occlusion Culling](Occlusion-Culling.md) for more details).
@@ -52,7 +54,7 @@ Setting | Description
 
 You can find the editor related settings in the `Project Settings` -> `Editor` -> `Procedural Dungeon` (see screenshot below).
 
-![](Images/PluginEditorSettings.jpg)
+![](../Images/PluginEditorSettings.jpg)
 
 <!-- markdownlint-disable MD024 -->
 ### General
