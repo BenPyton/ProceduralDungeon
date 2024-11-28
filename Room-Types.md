@@ -1,11 +1,11 @@
 # Room Types
 
-There is no built-in room type system, because it depends mainly on the game.
+There is no built-in room type system provided by the plugin, because it mainly depends on the game you are creating.
 
 However, you have several ways to implement it yourself.\
 Here some of them:
 
-- Different child `Room Data` classes
+- Hierarchy of `Room Data` child classes
 - Variable in your base `Room Data` class
 - Arrays of `Room Data`
 

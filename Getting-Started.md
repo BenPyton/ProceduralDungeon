@@ -76,6 +76,12 @@ public:
 
  You can also make multiple `RoomData` child classes, but I won't tell you how Unreal works here! 😉
 
+:::tip
+
+Although not mandatory to use the plugin, creating at least one child class of `RoomData` allows you to implement a [room type](Room-Types.md) system in your project (either with a variable in your child class or by creating multiple child classes).
+
+:::
+
 ### Step 1 - Creating a `RoomData` asset (one per room)
 
 The first required thing to do is to create a `RoomData` asset.\
