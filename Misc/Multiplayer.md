@@ -38,7 +38,7 @@ However, a lot more data will be sent over the network, especially if you have a
 
 - **Doors** are properly replicated over the network.\
 However, you still need to do some logic correctly on your project in order to make it work properly.\
-See the multiplayer section of the [door wiki page](Door.md) for details on it.
+See the multiplayer section of the [door wiki page](../Getting-Started/Door.md) for details on it.
 
 ### *Since Plugin v3.0*
 

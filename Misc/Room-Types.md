@@ -25,7 +25,7 @@ You can create different child blueprint classes of the `Room Data` class.
 
 I would always recommend to create a common blueprint class deriving from the `Room Data` class of the plugin, so you can add whatever project-specific variables in it which are shared by all your rooms.
 
-Then, you can create child classes of this common class for each type of room in your dungeon (for example "Shop" and "Corridor" for the dungeon example I've used [here](Best-Practices/Workflows/Dungeon-Generation-Algorithm.md)).
+Then, you can create child classes of this common class for each type of room in your dungeon (for example "Shop" and "Corridor" for the dungeon example I've used [here](../Best-Practices/Workflows/Dungeon-Generation-Algorithm.md)).
 
 If you want a hierarchical type system (meaning having "groups" of types, sub-types, etc.) you can create child classes of those types. For example, you could have "Large Corridor" and "Small Corridor" deriving from the "Corridor" type.
 

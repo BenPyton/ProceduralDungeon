@@ -36,7 +36,7 @@ Before anything else, you should set the [plugin's settings](Plugin-Settings.md)
 - Rooms are defined with a bounding box, so the plugin will not generate overlapping rooms.\
 The bounding box size is expressed in terms of Room Unit. The default is 1000x1000x400 unreal units.\
 You should define it first.
-- Doors have also a size to display with a debug box, so artists and designers can see at a glance the volume doors will occupy. There can be several [types of door](Door-Types.md) with different sizes, but the default one is set in the [plugin's settings](Plugin-Settings.md).\
+- Doors have also a size to display with a debug box, so artists and designers can see at a glance the volume doors will occupy. There can be several [types of door](../Advanced-Features/Door-Types.md) with different sizes, but the default one is set in the [plugin's settings](Plugin-Settings.md).\
 However, the door size doesn't affect anything during the dungeon generation.
 
 # How to create a room
@@ -79,7 +79,7 @@ public:
 
 :::tip
 
-Although not mandatory to use the plugin, creating at least one child class of `RoomData` allows you to implement a [room type](Room-Types.md) system in your project (either with a variable in your child class or by creating multiple child classes).
+Although not mandatory to use the plugin, creating at least one child class of `RoomData` allows you to implement a [room type](../Misc/Room-Types.md) system in your project (either with a variable in your child class or by creating multiple child classes).
 
 :::
 
@@ -127,7 +127,7 @@ The `Size` tool will allows you to edit the room's bounding box by dragging poin
 ![](../Images/SizeTool.gif)
 
 The `Door` tool will allows you to add or remove doors easily by clicking on your room bounding box in the viewport (left-click to add, right-click to remove).\
-If you want to place different [door types](Door-Types.md), you can select the one you want in the selector beside the tool button.\
+If you want to place different [door types](../Advanced-Features/Door-Types.md), you can select the one you want in the selector beside the tool button.\
 If none is selected, then the default door is used.
 
 ![](../Images/DoorTool.gif)

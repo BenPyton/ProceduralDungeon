@@ -49,8 +49,8 @@ Possible results:
 
 ## What you need to do
 
-First, read the [Installation](Installation.md) page to install the plugin.\
-Then, read and follow the instructions in the [Getting Started](Getting-Started.md) page. This will give you a minimal working dungeon.\
+First, read the [Installation](Getting-Started/Installation.md) page to install the plugin.\
+Then, read and follow the instructions in the [Getting Started](Getting-Started/Getting-Started.md) page. This will give you a minimal working dungeon.\
 You can then read the `Advanced Features` section to know what the plugin has to offer on top of the basics.
 
 An [example project](https://github.com/BenPyton/DungeonExample) is available if you want to try a minimal working project.

@@ -35,7 +35,7 @@ If you set a value, it will take the door at the same index in your `Room Data` 
 
 :::warning[How to code my specific use case?]
 
-If you struggle to write the code in this function, I would suggest you to read [this page](Best-Practices/Workflows/Dungeon-Generation-Algorithm.md) to better understand the process of writing the code for this function.
+If you struggle to write the code in this function, I would suggest you to read [this page](../../Best-Practices/Workflows/Dungeon-Generation-Algorithm.md) to better understand the process of writing the code for this function.
 
 :::
 

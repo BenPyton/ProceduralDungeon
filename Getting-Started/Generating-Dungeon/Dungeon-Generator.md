@@ -82,7 +82,7 @@ This is an example using the same very basic generation rules defined in this wi
 
 If checked, when a new room is placed in the dungeon, any door aligned with another door of other rooms will be connected.\
 If unchecked, only the door from the previous room (the one used to generate this room) will be connected.\
-*This parameter is only used when `Can Loop` from the project-wide [settings](Plugin-Settings.md) is also checked.*
+*This parameter is only used when `Can Loop` from the project-wide [settings](../Plugin-Settings.md) is also checked.*
 
 #### `Seed Type`
 

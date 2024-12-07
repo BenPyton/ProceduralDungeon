@@ -7,14 +7,14 @@ slug: /guides/Room-Observer
 The room observer components allows actors to be notified whenever any actor enters or exits a room.\
 The components bind themselves to the `Room Level`'s `On Actor Enter Room` and `On Actor Exit Room` delegates and then call their own `On Actor Enter Room` and `On Actor Exit Room` delegates.\
 Thus, once placed on an actor, you just have to bind to the component delegates to be notified when those events occur.\
-*Only actors that don't ignore the [`Room Object Type`](Plugin-Settings.md) collision channel will trigger the events.*
+*Only actors that don't ignore the [`Room Object Type`](../Getting-Started/Plugin-Settings.md) collision channel will trigger the events.*
 
 ## Room Observer Component
 
 Place this component on your actors if they **can move between rooms** *or* **are not placed in room levels**.
 
 This component implements the [Room Visitor](Room-Visitor.md) interface to detect whenever the actor enters/exits room to bind automatically to the delegates.
-So, the actor with this component needs to be setup to overlap with the [`Room Object Type`](Plugin-Settings.md) collision channel.
+So, the actor with this component needs to be setup to overlap with the [`Room Object Type`](../Getting-Started/Plugin-Settings.md) collision channel.
 
 ## Static Room Observer Component
 

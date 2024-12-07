@@ -6,7 +6,7 @@ slug: /guides/Navigation-Mesh
 
 If you are using the default unreal navigation system ([UNavigationSystemV1](https://docs.unrealengine.com/5.0/en-US/basic-navigation-in-unreal-engine/)), then the navigation mesh is automatically rebuild after each dungeon generation if you setup your project as described below.
 
-If you are not, then you'll have to handle it yourself in the `Post Generation` event of the [dungeon generator](Dungeon-Generator.md) and you can ignore the rest of this page.
+If you are not, then you'll have to handle it yourself in the `Post Generation` event of the [dungeon generator](../Getting-Started/Generating-Dungeon/Dungeon-Generator.md) and you can ignore the rest of this page.
 
 ## How to configure the default Unreal's navigation system to work with the plugin?
 

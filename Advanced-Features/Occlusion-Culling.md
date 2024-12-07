@@ -20,7 +20,7 @@ Only the visibility of meshes is toggled. The ticking, animations, collisions, e
 
 :::
 
-You can toggle this system on or off in the [Plugin Settings](Plugin-Settings.md) alongside some other occlusion settings:
+You can toggle this system on or off in the [Plugin Settings](../Getting-Started/Plugin-Settings.md) alongside some other occlusion settings:
 
 - The `occlusion distance` determine how many rooms are visible from the player's room.
 - `Occlude dynamic actors` allows dynamic actors spawned after the dungeon generation and/or moving between rooms to be occluded with the rooms by the plugin. You'll also have to put a `Room Visibility Component` on those actors.
@@ -29,7 +29,7 @@ You can toggle this system on or off in the [Plugin Settings](Plugin-Settings.md
 
 The dungeon generator actor will keep track of the local player (`GetPlayerController(0)`) to know in which room it is located (referred later as the `Current Player Room`).
 
-Then, the generator actor will toggle the visibility state of the `Current Player Room` and its directly connected rooms, and their own directly connected rooms, etc. based on the `Occlusion Distance` in the [Plugin Settings](Plugin-Settings.md) (`1` is only the `Current Player Room`, `2` is its direct connected rooms, etc.).
+Then, the generator actor will toggle the visibility state of the `Current Player Room` and its directly connected rooms, and their own directly connected rooms, etc. based on the `Occlusion Distance` in the [Plugin Settings](../Getting-Started/Plugin-Settings.md) (`1` is only the `Current Player Room`, `2` is its direct connected rooms, etc.).
 
 Each room will then toggle the visibility of their owned actors (the ones placed directly in their level).\
 If an actor is spawned during runtime, it will not belongs to any room level, and so their visibility will not be toggled.\
@@ -41,7 +41,7 @@ However, if you want this dynamic actor to be occluded properly with the rooms, 
 
 :::warning
 
-[Geometry Brushes](Geometry-Brushes.md) can't have there visibility toggled, and so can't be hidden by the occlusion culling system.
+[Geometry Brushes](../Misc/Geometry-Brushes.md) can't have there visibility toggled, and so can't be hidden by the occlusion culling system.
 You should convert them into static meshes in order to make them occluded correctly with the rooms.
 
 :::
@@ -50,7 +50,7 @@ You should convert them into static meshes in order to make them occluded correc
 
 This actor component allows the actor to be tracked by the dungeon's rooms and so be occluded with them.
 
-You need to toggle on `Occlude Dynamic Actors` in the [Plugin Settings](Plugin-Settings.md) in order to make it working.
+You need to toggle on `Occlude Dynamic Actors` in the [Plugin Settings](../Getting-Started/Plugin-Settings.md) in order to make it working.
 
 What is available from this component:
 
