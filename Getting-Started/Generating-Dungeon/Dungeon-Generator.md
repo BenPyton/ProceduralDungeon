@@ -44,6 +44,10 @@ A generation is made of 4 phases :
 - **`Create Dungeon`**: (*server only*) This is the critical part of the code. This function creates virtually the dungeon (meaning the room levels are not yet instantiated). Your generation rules are defined here.
 - **`Load`**: the room levels are loading and initializing (spawning actors, etc. and call to `BeginPlay` of room's level blueprints)
 
+The `Create Dungeon` function is the heart of the generation algorithm.\
+The flowchart of this function shown above is the default behavior: starting with a first room then adding rooms to existing ones through unconnected doors.\
+If you have some needs that could not be fulfilled with this approach, you can [write your own custom `Create Dungeon` function](../../Advanced-Features/Custom-Create-Dungeon.md).
+
 ## Useful functions of the Dungeon Generator
 
 Aside the internal events you can override, there are some useful other functions the `Dungeon Generator` provides to you.\
