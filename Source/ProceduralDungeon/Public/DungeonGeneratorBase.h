@@ -155,13 +155,14 @@ public:
 
 	// Access to the random stream of the procedural dungeon. You should always use this for the procedural generation.
 	// @return The random stream used by the dungeon generator.
-	UFUNCTION(BlueprintPure, Category = "Dungeon Generator")
+	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta = (DeprecatedFunction, DeprecationMessage = "This one is buggy, use the `Random Stream` variable getter instead."))
 	const FRandomStream& GetRandomStream() { return Random; }
 
 	// Returns the current generation progress.
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator")
 	float GetProgress() const;
 
+	// @TODO: remove this function and use Graph->GetRoomByIndex() instead.
 	URoom* GetRoomByIndex(int64 Index) const;
 
 	// ===== Events =====
@@ -304,6 +305,7 @@ private:
 
 	static uint32 GeneratorCount;
 
+	UPROPERTY(BlueprintReadOnly, Category = "Dungeon Generator", meta = (DisplayName = "Random Stream", AllowPrivateAccess = true))
 	FRandomStream Random;
 
 	UPROPERTY(Transient)
