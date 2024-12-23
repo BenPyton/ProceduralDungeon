@@ -32,15 +32,10 @@
 #include "ProceduralDungeonLog.h"
 #include "DungeonGenerator.h"
 #include "RoomCustomData.h"
+#include "RoomConnection.h"
 #include "Engine/Engine.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "Misc/EngineVersionComparison.h"
-
-URoom::URoom()
-	: Super()
-	, Connections()
-{
-}
 
 void URoom::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -91,10 +86,7 @@ void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId
 	if (IsValid(RoomData))
 	{
 		MARK_PROPERTY_DIRTY_FROM_NAME(URoom, Connections, this);
-		for (int i = 0; i < RoomData->GetNbDoor(); i++)
-		{
-			Connections.Add(FRoomConnection());
-		}
+		Connections.SetNum(RoomData->GetNbDoor());
 	}
 	else
 	{
@@ -102,36 +94,48 @@ void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId
 	}
 }
 
-bool URoom::IsConnected(int Index) const
+bool URoom::IsConnected(int32 DoorIndex) const
 {
-	check(Index >= 0 && Index < Connections.Num());
-	return Connections[Index].OtherRoom != nullptr;
+	return GetConnectedRoom(DoorIndex) != nullptr;
 }
 
-void URoom::SetConnection(int Index, URoom* Room, int OtherIndex)
+void URoom::SetConnection(int32 DoorIndex, URoomConnection* Conn)
 {
-	check(Index >= 0 && Index < Connections.Num());
-	Connections[Index].OtherRoom = Room;
-	Connections[Index].OtherDoorIndex = OtherIndex;
+	check(Connections.IsValidIndex(DoorIndex));
+	check(Connections[DoorIndex] == nullptr);
+	check(Conn != nullptr && (Conn->GetRoomA() == this || Conn->GetRoomB() == this));
+	Connections[DoorIndex] = Conn;
 	MARK_PROPERTY_DIRTY_FROM_NAME(URoom, Connections, this);
 }
 
-TWeakObjectPtr<URoom> URoom::GetConnection(int Index) const
+TWeakObjectPtr<URoom> URoom::GetConnectedRoom(int32 DoorIndex) const
 {
-	check(Index >= 0 && Index < Connections.Num());
-	return Connections[Index].OtherRoom;
+	check(Connections.IsValidIndex(DoorIndex));
+	return URoomConnection::GetOtherRoom(Connections[DoorIndex].Get(), this);
 }
 
-int URoom::GetFirstEmptyConnection() const
+int32 URoom::GetFirstEmptyConnection() const
 {
 	for (int i = 0; i < Connections.Num(); ++i)
 	{
-		if (Connections[i].OtherRoom == nullptr)
+		if (Connections[i] == nullptr)
 		{
 			return i;
 		}
 	}
 	return -1;
+}
+
+void URoom::GetAllEmptyConnections(TArray<int32>& EmptyConnections) const
+{
+	EmptyConnections.Empty();
+	for (int i = 0; i < Connections.Num(); ++i)
+	{
+		if (Connections[i] == nullptr)
+		{
+			EmptyConnections.Add(i);
+		}
+	}
 }
 
 void URoom::Instantiate(UWorld* World)
@@ -278,7 +282,10 @@ void URoom::OnRep_Connections()
 	DungeonLog_InfoSilent("[%s] Room '%s' Connections Replicated", *GetAuthorityName(), *GetNameSafe(this));
 	for (const auto& Connection : Connections)
 	{
-		DungeonLog_InfoSilent("- Connected to %s (door id: %d)", *GetNameSafe(Connection.OtherRoom.Get()), Connection.OtherDoorIndex);
+		if (Connection == nullptr)
+			continue;
+		// This may show 'None' for all rooms depending on the order of those weakptr resolutions.
+		DungeonLog_InfoSilent("- %s (%d) <-> %s (%d)", *GetNameSafe(Connection->GetRoomA().Get()), Connection->GetRoomADoorId(), *GetNameSafe(Connection->GetRoomB().Get()), Connection->GetRoomBDoorId());
 	}
 }
 
@@ -331,16 +338,21 @@ void URoom::CreateLevelComponents(ARoomLevel* LevelActor)
 	}
 }
 
-EDoorDirection URoom::GetDoorWorldOrientation(int DoorIndex)
+EDoorDirection URoom::GetDoorWorldOrientation(int DoorIndex) const
 {
-	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	check(IsDoorIndexValid(DoorIndex));
 	return RoomData->Doors[DoorIndex].Direction + Direction;
 }
 
-FIntVector URoom::GetDoorWorldPosition(int DoorIndex)
+FIntVector URoom::GetDoorWorldPosition(int DoorIndex) const
 {
-	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	check(IsDoorIndexValid(DoorIndex));
 	return RoomToWorld(RoomData->Doors[DoorIndex].Position);
+}
+
+bool URoom::IsDoorIndexValid(int32 DoorIndex) const
+{
+	return DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num();
 }
 
 int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot)
@@ -357,22 +369,10 @@ int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot)
 	return -1;
 }
 
-bool URoom::IsDoorInstanced(int DoorIndex)
+int URoom::GetOtherDoorIndex(int32 DoorIndex)
 {
-	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
-	return IsValid(Connections[DoorIndex].DoorInstance);
-}
-
-void URoom::SetDoorInstance(int DoorIndex, ADoor* Door)
-{
-	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
-	Connections[DoorIndex].DoorInstance = Door;
-}
-
-int URoom::GetOtherDoorIndex(int DoorIndex)
-{
-	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
-	return Connections[DoorIndex].OtherDoorIndex;
+	check(IsDoorIndexValid(DoorIndex));
+	return URoomConnection::GetOtherDoorId(Connections[DoorIndex].Get(), this);
 }
 
 FIntVector URoom::WorldToRoom(const FIntVector& WorldPos) const
@@ -407,19 +407,19 @@ FBoxMinAndMax URoom::RoomToWorld(const FBoxMinAndMax& RoomBox) const
 
 void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)
 {
-	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	check(IsDoorIndexValid(DoorIndex));
 	SetDirection(WorldRot - RoomData->Doors[DoorIndex].Direction);
 }
 
 void URoom::SetPositionFromDoor(int DoorIndex, FIntVector WorldPos)
 {
-	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	check(IsDoorIndexValid(DoorIndex));
 	SetPosition(WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction));
 }
 
 void URoom::SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot)
 {
-	check(DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num());
+	check(IsDoorIndexValid(DoorIndex));
 	SetDirection(WorldRot - RoomData->Doors[DoorIndex].Direction);
 	SetPosition(WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction));
 }
@@ -431,51 +431,6 @@ bool URoom::IsOccupied(FIntVector Cell)
 	return local.X >= Bounds.Min.X && local.X < Bounds.Max.X
 		&& local.Y >= Bounds.Min.Y && local.Y < Bounds.Max.Y
 		&& local.Z >= Bounds.Min.Z && local.Z < Bounds.Max.Z;
-}
-
-bool URoom::TryConnectDoor(int DoorIndex, const TArray<URoom*>& RoomList)
-{
-	// Check if already connected.
-	if (IsConnected(DoorIndex))
-		return true;
-
-	// Get the room in front of the door if any.
-	EDoorDirection DoorDir = GetDoorWorldOrientation(DoorIndex);
-	FIntVector AdjacentCell = GetDoorWorldPosition(DoorIndex) + ToIntVector(DoorDir);
-	URoom* OtherRoom = GetRoomAt(AdjacentCell, RoomList);
-	if (!IsValid(OtherRoom))
-	{
-		return false;
-	}
-
-	// Get the door index of the other room if any.
-	int OtherDoorIndex = OtherRoom->GetDoorIndexAt(AdjacentCell, ~DoorDir);
-	if (OtherDoorIndex < 0) // -1 if no door
-	{
-		return false;
-	}
-
-	// Check door compatibility.
-	const FDoorDef& ThisDoor = RoomData->Doors[DoorIndex];
-	const FDoorDef& OtherDoor = OtherRoom->RoomData->Doors[OtherDoorIndex];
-	if (!FDoorDef::AreCompatible(ThisDoor, OtherDoor))
-	{
-		return false;
-	}
-
-	// Finally connect the doors.
-	Connect(*this, DoorIndex, *OtherRoom, OtherDoorIndex);
-	return true;
-}
-
-bool URoom::TryConnectToExistingDoors(const TArray<URoom*>& RoomList)
-{
-	bool HasConnection = false;
-	for (int i = 0; i < RoomData->GetNbDoor(); ++i)
-	{
-		HasConnection |= TryConnectDoor(i, RoomList);
-	}
-	return HasConnection;
 }
 
 FBoxCenterAndExtent URoom::GetBounds() const
@@ -578,11 +533,11 @@ FRandomStream URoom::GetRandomStream() const
 	return GeneratorOwner->GetRandomStream();
 }
 
-ADoor* URoom::GetDoor(int DoorIndex) const
+ADoor* URoom::GetDoor(int32 DoorIndex) const
 {
 	if (!Connections.IsValidIndex(DoorIndex))
 		return nullptr;
-	return Connections[DoorIndex].DoorInstance;
+	return URoomConnection::GetDoorInstance(Connections[DoorIndex].Get());
 }
 
 void URoom::GetAllDoors(TArray<ADoor*>& OutDoors) const
@@ -590,8 +545,9 @@ void URoom::GetAllDoors(TArray<ADoor*>& OutDoors) const
 	OutDoors.Reset();
 	for (const auto& Connection : Connections)
 	{
-		if (Connection.DoorInstance)
-			OutDoors.Add(Connection.DoorInstance);
+		ADoor* Door = URoomConnection::GetDoorInstance(Connection.Get());
+		if (IsValid(Door))
+			OutDoors.Add(Door);
 	}
 }
 
@@ -602,14 +558,14 @@ bool URoom::IsDoorConnected(int DoorIndex) const
 		DungeonLog_WarningSilent("Door index out of bounds.");
 		return false;
 	}
-	return Connections[DoorIndex].OtherRoom != nullptr;
+	return IsConnected(DoorIndex);
 }
 
 bool URoom::AreAllDoorsConnected() const
 {
 	for (const auto& Connection : Connections)
 	{
-		if (Connection.OtherRoom == nullptr)
+		if (URoomConnection::GetOtherRoom(Connection.Get(), this) == nullptr)
 			return false;
 	}
 	return true;
@@ -620,7 +576,7 @@ int URoom::CountConnectedDoors() const
 	int ConnectedDoors = 0;
 	for (const auto& Connection : Connections)
 	{
-		if (Connection.OtherRoom != nullptr)
+		if (URoomConnection::GetOtherRoom(Connection.Get(), this) == nullptr)
 			++ConnectedDoors;
 	}
 	return ConnectedDoors;
@@ -633,7 +589,7 @@ URoom* URoom::GetConnectedRoomAt(int DoorIndex) const
 		DungeonLog_WarningSilent("Door index out of bounds.");
 		return nullptr;
 	}
-	return Connections[DoorIndex].OtherRoom.Get();
+	return GetConnectedRoom(DoorIndex).Get();
 }
 
 void URoom::GetAllConnectedRooms(TArray<URoom*>& ConnectedRooms) const
@@ -641,8 +597,8 @@ void URoom::GetAllConnectedRooms(TArray<URoom*>& ConnectedRooms) const
 	ConnectedRooms.Empty();
 	for (const auto& Connection : Connections)
 	{
-		URoom* ConnectedRoom = Connection.OtherRoom.Get();
-		if (ConnectedRoom)
+		URoom* ConnectedRoom = URoomConnection::GetOtherRoom(Connection.Get(), this);
+		if (IsValid(ConnectedRoom))
 			ConnectedRooms.Add(ConnectedRoom);
 	}
 }
@@ -651,7 +607,7 @@ int32 URoom::GetConnectedRoomIndex(const URoom* OtherRoom) const
 {
 	for (int i = 0; i < Connections.Num(); ++i)
 	{
-		if (OtherRoom == Connections[i].OtherRoom.Get())
+		if (OtherRoom == URoomConnection::GetOtherRoom(Connections[i].Get(), this))
 			return i;
 	}
 	return -1;
@@ -662,8 +618,12 @@ void URoom::GetDoorsWith(const URoom* OtherRoom, TArray<ADoor*>& Doors) const
 	Doors.Empty();
 	for (const auto& Connection : Connections)
 	{
-		if (OtherRoom == Connection.OtherRoom.Get())
-			Doors.Add(Connection.DoorInstance);
+		if (OtherRoom != URoomConnection::GetOtherRoom(Connection.Get(), this))
+			continue;
+
+		ADoor* Door = URoomConnection::GetDoorInstance(Connection.Get());
+		if (IsValid(Door))
+			Doors.Add(Door);
 	}
 }
 
@@ -701,12 +661,6 @@ bool URoom::Overlap(const URoom& Room, const TArray<URoom*>& RoomList)
 		}
 	}
 	return overlap;
-}
-
-void URoom::Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB)
-{
-	RoomA.SetConnection(DoorA, &RoomB, DoorB);
-	RoomB.SetConnection(DoorB, &RoomA, DoorA);
 }
 
 URoom* URoom::GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList)

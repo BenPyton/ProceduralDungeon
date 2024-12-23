@@ -103,21 +103,21 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			Room7->Lock(true);
 
 			// first line
-			URoom::Connect(*Room0, 0, *Room1, 1);
-			URoom::Connect(*Room1, 0, *Room2, 1);
-			URoom::Connect(*Room2, 0, *Room3, 1);
-			URoom::Connect(*Room3, 0, *Room4, 1);
-			URoom::Connect(*Room4, 0, *Room5, 1);
+			Graph->Connect(Room0, 0, Room1, 1);
+			Graph->Connect(Room1, 0, Room2, 1);
+			Graph->Connect(Room2, 0, Room3, 1);
+			Graph->Connect(Room3, 0, Room4, 1);
+			Graph->Connect(Room4, 0, Room5, 1);
 
 			// second line
-			URoom::Connect(*Room6, 0, *Room7, 0);
-			URoom::Connect(*Room8, 0, *Room9, 1);
-			URoom::Connect(*Room9, 0, *Room10, 0);
+			Graph->Connect(Room6, 0, Room7, 0);
+			Graph->Connect(Room8, 0, Room9, 1);
+			Graph->Connect(Room9, 0, Room10, 0);
 
 			// transversal
-			URoom::Connect(*Room1, 2, *Room7, 1);
-			URoom::Connect(*Room2, 2, *Room8, 1);
-			URoom::Connect(*Room4, 2, *Room10, 1);
+			Graph->Connect(Room1, 2, Room7, 1);
+			Graph->Connect(Room2, 2, Room8, 1);
+			Graph->Connect(Room4, 2, Room10, 1);
 
 			// Used to test path output for some scenarios
 			TArray<const URoom*> Path;
