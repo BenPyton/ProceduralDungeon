@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2024 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,6 @@
 #include "GameFramework/Actor.h"
 #include "ProceduralDungeonLog.h"
 #include "Utils/ReplicationUtils.h"
-
 
 namespace
 {
@@ -129,10 +128,10 @@ AActor* UReplicableObject::GetOwner() const
 
 FString UReplicableObject::GetAuthorityName() const
 {
-	AActor* OwnerActor = Cast<AActor>(GetOuter());
-	if (!OwnerActor)
-		return TEXT("INVALID");
-	return OwnerActor->HasAuthority() ? TEXT("Server") : TEXT("Client");
+	AActor* Owner = GetOwner();
+	if (!Owner)
+		return TEXT("NO_OWNER_ACTOR");
+	return Owner->HasAuthority() ? TEXT("Server") : TEXT("Client");
 }
 
 void UReplicableObject::WakeUpOwnerActor()
