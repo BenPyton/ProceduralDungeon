@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,11 +26,13 @@
 
 #include "ReplicableObject.h"
 #include "Templates/SubclassOf.h"
+#include "Templates/Function.h"
 #include "DungeonGraph.generated.h"
 
 class URoom;
 class URoomData;
 class URoomCustomData;
+class URoomConnection;
 class ADungeonGeneratorBase;
 
 UENUM()
@@ -51,15 +53,26 @@ class PROCEDURALDUNGEON_API UDungeonGraph : public UReplicableObject
 
 	friend ADungeonGeneratorBase;
 
+#if WITH_DEV_AUTOMATION_TESTS
+	friend class FDungeonGraphTest;
+#endif
+
 public:
 	UDungeonGraph();
 	void AddRoom(URoom* Room);
 	void InitRooms();
 	void Clear();
 
+	bool TryConnectDoor(URoom* Room, int32 DoorIndex);
+	bool TryConnectToExistingDoors(URoom* Room);
+
 	bool HasRooms() const { return Rooms.Num() > 0; }
 	bool IsDirty() const { return CurrentState != EDungeonGraphState::None; }
 	bool IsRequestingGeneration() const { return CurrentState == EDungeonGraphState::RequestGeneration; }
+
+	// This function will call the ChooseDoorFunc for each room connection to choose the door to spawn.
+	using ChooseDoorSignature = TFunction<TSubclassOf<class ADoor>(const URoomData*, const URoomData*, const class UDoorType*, bool&)>;
+	void ChooseDoors(ChooseDoorSignature ChooseDoorFunc);
 
 	// Returns all rooms
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
@@ -154,6 +167,8 @@ public:
 
 	static bool FindPath(const URoom* From, const URoom* To, TArray<const URoom*>* OutPath = nullptr, bool IgnoreLocked = false);
 
+	const TArray<URoomConnection*>& GetAllConnections() const { return RoomConnections; }
+
 protected:
 	int CountRoomByPredicate(TFunction<bool(const URoom*)> Predicate) const;
 	void GetRoomsByPredicate(TArray<URoom*>& OutRooms, TFunction<bool(const URoom*)> Predicate) const;
@@ -167,17 +182,26 @@ protected:
 	// Sync Rooms and ReplicatedRooms arrays
 	void SynchronizeRooms();
 
+	// Create and store a new connection between two rooms in RoomConnections.
+	void Connect(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB);
+
 	bool AreRoomsLoaded(int32& NbRoomLoaded) const;
 	bool AreRoomsUnloaded(int32& NbRoomUnloaded) const;
 	bool AreRoomsInitialized(int32& NbRoomInitialized) const;
 	bool AreRoomsReady() const;
 
+	// @TODO: Doesn't make sense to have them in UDungeonGraph class.
+	// We should use instead a bDirty flag when the room list changed.
+	// And the Generate/Unload/etc. should be managed in the ADungeonGenerator.
 	void RequestGeneration();
 	void RequestUnload();
 
 private:
 	UPROPERTY(Transient)
 	TArray<URoom*> Rooms;
+
+	UPROPERTY(Replicated, Transient)
+	TArray<URoomConnection*> RoomConnections;
 
 	// This array is synchronized with the server
 	// We keep it separated to be able to unload previous rooms on clients
@@ -188,5 +212,11 @@ private:
 	void OnRep_Rooms();
 
 	EDungeonGraphState CurrentState {EDungeonGraphState::None};
+
+	// @TODO: Make something to decouple the ADungeonGenerator from the UDungeonGraph.
+	// It is currently used only to get its random stream in the `Get Random Room` function.
+	// We could instead either:
+	// - Use an interface that provides a random stream => good way to not induce breaking changes in the code.
+	// - Pass the random stream as an input to that function => will need to make some changes in existing projects.
 	TWeakObjectPtr<ADungeonGeneratorBase> Generator {nullptr};
 };

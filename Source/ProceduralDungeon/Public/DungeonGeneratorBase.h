@@ -228,6 +228,9 @@ private:
 	// Instantiate a room in the scene
 	void InstantiateRoom(URoom* Room);
 
+	// Instantiate a door in the scene
+	void SpawnAllDoors();
+
 	// Load all room levels
 	void LoadAllRooms();
 
@@ -307,9 +310,6 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Dungeon Generator", meta = (DisplayName = "Random Stream", AllowPrivateAccess = true))
 	FRandomStream Random;
-
-	UPROPERTY(Transient)
-	TArray<class ADoor*> DoorList;
 
 	EGenerationState CurrentState {EGenerationState::Idle};
 	uint32 UniqueId;

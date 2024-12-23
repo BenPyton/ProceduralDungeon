@@ -29,6 +29,7 @@
 #include "NavigationSystem.h"
 #include "RoomData.h"
 #include "Room.h"
+#include "RoomConnection.h"
 #include "Door.h"
 #include "ProceduralDungeonUtils.h"
 #include "ProceduralDungeonLog.h"
@@ -189,13 +190,13 @@ bool ADungeonGeneratorBase::AddRoomToDungeon(URoom* const& Room, const TArray<in
 	// Connect the doors if provided, otherwise try to connect all possible doors
 	if (DoorsToConnect.Num() <= 0)
 	{
-		bConnected = Room->TryConnectToExistingDoors(Graph->GetAllRooms());
+		bConnected = Graph->TryConnectToExistingDoors(Room);
 	}
 	else
 	{
 		for (int DoorIndex : DoorsToConnect)
 		{
-			bConnected |= Room->TryConnectDoor(DoorIndex, Graph->GetAllRooms());
+			bConnected |= Graph->TryConnectDoor(Room, DoorIndex);
 		}
 	}
 
@@ -228,53 +229,28 @@ void ADungeonGeneratorBase::InstantiateRoom(URoom* Room)
 {
 	// Instantiate room
 	Room->Instantiate(GetWorld());
+}
 
-	// Spawn only doors on server
+void ADungeonGeneratorBase::SpawnAllDoors()
+{
+	// Spawn doors only on server
+	// They will be replicated on the clients
 	if (!HasAuthority())
 		return;
 
-	for (int i = 0; i < Room->GetConnectionCount(); i++)
+	Graph->ChooseDoors([this](const URoomData* RoomA, const URoomData* RoomB, const UDoorType* DoorType, bool& bFlipped) {
+		return ChooseDoor(RoomA, RoomB, DoorType, bFlipped);
+	});
+
+	for (auto* RoomConnection : Graph->GetAllConnections())
 	{
-		// Get next room
-		URoom* r = Room->GetConnection(i).Get();
-		FIntVector DoorCell = Room->GetDoorWorldPosition(i);
-		EDoorDirection DoorRot = Room->GetDoorWorldOrientation(i);
-		int j = Room->GetOtherDoorIndex(i);
-
-		// Don't instantiate door if it's the parent
-		if (!Room->IsDoorInstanced(i))
-		{
-			bool Flipped = false;
-			TSubclassOf<ADoor> DoorClass = ChooseDoor(Room->GetRoomData(), nullptr != r ? r->GetRoomData() : nullptr, Room->GetRoomData()->Doors[i].Type, Flipped);
-
-			if (nullptr != DoorClass)
-			{
-				FVector InstanceDoorPos = GetDungeonRotation().RotateVector(FDoorDef::GetRealDoorPosition(DoorCell, DoorRot)) + GetDungeonOffset();
-				FQuat InstanceDoorRot = GetDungeonRotation() * FRotator(0, 90 * (int8)DoorRot + Flipped * 180, 0).Quaternion();
-				FActorSpawnParameters SpawnParams;
-				SpawnParams.Owner = this;
-				SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-				ADoor* Door = GetWorld()->SpawnActor<ADoor>(DoorClass, InstanceDoorPos, InstanceDoorRot.Rotator(), SpawnParams);
-
-				if (IsValid(Door))
-				{
-					DoorList.Add(Door);
-					Door->SetConnectingRooms(Room, r);
-					Room->SetDoorInstance(i, Door);
-					if (IsValid(r))
-					{
-						r->SetDoorInstance(j, Door);
-					}
-				}
-				else
-				{
-					DungeonLog_Error("Failed to spawn Door, make sure you set door actor to always spawning.");
-				}
-			}
-		}
+		if (RoomConnection->IsDoorInstanced())
+			continue;
+		RoomConnection->InstantiateDoor(GetWorld(), this, UseGeneratorTransform());
 	}
 }
 
+// @TODO: Maybe move this function to UDungeonGraph?
 void ADungeonGeneratorBase::LoadAllRooms()
 {
 	// When a level is correct, load all rooms
@@ -282,17 +258,23 @@ void ADungeonGeneratorBase::LoadAllRooms()
 	{
 		InstantiateRoom(Room);
 	}
+
+	SpawnAllDoors();
 }
 
+// @TODO: Maybe move this function to UDungeonGraph?
 void ADungeonGeneratorBase::UnloadAllRooms()
 {
 	if (HasAuthority())
 	{
-		for (ADoor* Door : DoorList)
+		for (auto* RoomConnection : Graph->GetAllConnections())
 		{
-			Door->Destroy();
+			ADoor* Door = RoomConnection->GetDoorInstance();
+			if (IsValid(Door))
+			{
+				Door->Destroy();
+			}
 		}
-		DoorList.Empty();
 	}
 
 	for (URoom* Room : Graph->GetAllRooms())

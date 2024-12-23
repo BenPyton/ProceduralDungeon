@@ -30,6 +30,7 @@
 #include "Room.h"
 #include "RoomData.h"
 #include "RoomCustomData.h"
+#include "RoomConnection.h"
 #include "Engine/Level.h"
 #include "Engine/LevelStreamingDynamic.h"
 
@@ -44,6 +45,7 @@ void UDungeonGraph::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 	DOREPLIFETIME_WITH_PARAMS(UDungeonGraph, ReplicatedRooms, Params);
+	DOREPLIFETIME_WITH_PARAMS(UDungeonGraph, RoomConnections, Params);
 }
 
 bool UDungeonGraph::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
@@ -54,6 +56,11 @@ bool UDungeonGraph::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch
 		check(Room);
 		bWroteSomething |= Room->ReplicateSubobject(Channel, Bunch, RepFlags);
 	}
+	for (URoomConnection* Conn : RoomConnections)
+	{
+		check(Conn);
+		bWroteSomething |= Conn->ReplicateSubobject(Channel, Bunch, RepFlags);
+	}
 	return bWroteSomething;
 }
 
@@ -62,6 +69,11 @@ void UDungeonGraph::RegisterReplicableSubobjects(bool bRegister)
 	for (URoom* Room : ReplicatedRooms)
 	{
 		Room->RegisterAsReplicable(bRegister);
+	}
+
+	for (URoomConnection* Conn : RoomConnections)
+	{
+		Conn->RegisterAsReplicable(bRegister);
 	}
 }
 
@@ -72,23 +84,111 @@ void UDungeonGraph::AddRoom(URoom* Room)
 
 void UDungeonGraph::InitRooms()
 {
-	// First create custom data for all rooms
+	// We split the for loops to ensure custom data are created for all rooms before initializing them
+
+	// First create empty connections for remaining unconnected doors
+	TArray<int32> EmptyConnections;
 	for (URoom* Room : Rooms)
 	{
 		check(IsValid(Room));
+		Room->GetAllEmptyConnections(EmptyConnections);
+		for (int32 DoorIndex : EmptyConnections)
+		{
+			Connect(Room, DoorIndex, nullptr, -1);
+		}
+	}
+
+	// Create custom data for all rooms
+	for (URoom* Room : Rooms)
+	{
 		const URoomData* Data = Room->GetRoomData();
 		check(IsValid(Data));
 		for (auto Datum : Data->CustomData)
 			Room->CreateCustomData(Datum);
 	}
 
-	// Then we can initialize them all
+	// Finally we can initialize them all
 	for (URoom* Room : Rooms)
 	{
 		// No need to check validity here
 		const URoomData* Data = Room->GetRoomData();
 		Data->InitializeRoom(Room, this);
 	}
+}
+
+bool UDungeonGraph::TryConnectDoor(URoom* Room, int32 DoorIndex)
+{
+	check(IsValid(Room));
+
+	// Check if already connected.
+	if (Room->IsConnected(DoorIndex))
+		return true;
+
+	// Get the room in front of the door if any.
+	EDoorDirection DoorDir = Room->GetDoorWorldOrientation(DoorIndex);
+	FIntVector AdjacentCell = Room->GetDoorWorldPosition(DoorIndex) + ToIntVector(DoorDir);
+	URoom* OtherRoom = GetRoomAt(AdjacentCell);
+	if (!IsValid(OtherRoom))
+	{
+		return false;
+	}
+
+	// Get the door index of the other room if any.
+	int OtherDoorIndex = OtherRoom->GetDoorIndexAt(AdjacentCell, ~DoorDir);
+	if (OtherDoorIndex < 0) // -1 if no door
+	{
+		return false;
+	}
+
+	// Check door compatibility.
+	const FDoorDef& ThisDoor = Room->GetRoomData()->Doors[DoorIndex];
+	const FDoorDef& OtherDoor = OtherRoom->GetRoomData()->Doors[OtherDoorIndex];
+	if (!FDoorDef::AreCompatible(ThisDoor, OtherDoor))
+	{
+		return false;
+	}
+
+	// Finally connect the doors.
+	Connect(Room, DoorIndex, OtherRoom, OtherDoorIndex);
+	return true;
+}
+
+bool UDungeonGraph::TryConnectToExistingDoors(URoom* Room)
+{
+	bool HasConnection = false;
+	for (int i = 0; i < Room->GetRoomData()->GetNbDoor(); ++i)
+	{
+		HasConnection |= TryConnectDoor(Room, i);
+	}
+	return HasConnection;
+}
+
+void UDungeonGraph::ChooseDoors(ChooseDoorSignature ChooseDoorFunc)
+{
+	for (auto* Conn : RoomConnections)
+	{
+		check(IsValid(Conn));
+
+		const URoom* RoomA = Conn->GetRoomA().Get();
+		const URoom* RoomB = Conn->GetRoomB().Get();
+
+		const URoomData* RoomAData = (IsValid(RoomA)) ? RoomA->GetRoomData() : nullptr;
+		const URoomData* RoomBData = (IsValid(RoomB)) ? RoomB->GetRoomData() : nullptr;
+
+		const UDoorType* DoorType = URoomConnection::GetDoorType(Conn);
+
+		bool bFlipped = false;
+		TSubclassOf<ADoor> DoorClass = ChooseDoorFunc(RoomAData, RoomBData, DoorType, bFlipped);
+		Conn->SetDoorClass(DoorClass, bFlipped);
+	}
+}
+
+void UDungeonGraph::Connect(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB)
+{
+	URoomConnection* NewConnection = URoomConnection::CreateConnection(RoomA, DoorA, RoomB, DoorB, this, RoomConnections.Num());
+	RoomConnections.Add(NewConnection);
+	DungeonLog_InfoSilent("Connected %s (%d) to %s (%d)", *GetNameSafe(RoomA), DoorA, *GetNameSafe(RoomB), DoorB);
+	MARK_PROPERTY_DIRTY_FROM_NAME(UDungeonGraph, RoomConnections, this);
 }
 
 void UDungeonGraph::GetAllRoomsFromData(const URoomData* Data, TArray<URoom*>& OutRooms)
@@ -241,6 +341,8 @@ void UDungeonGraph::Clear()
 		Data->CleanupRoom(Room, this);
 	}
 	Rooms.Empty();
+
+	RoomConnections.Empty();
 }
 
 int UDungeonGraph::CountRoomByPredicate(TFunction<bool(const URoom*)> Predicate) const
@@ -292,7 +394,7 @@ void UDungeonGraph::TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* Out
 			Func(currentRoom);
 			for (int i = 0; i < currentRoom->GetConnectionCount(); ++i)
 			{
-				URoom* nextRoom = currentRoom->GetConnection(i).Get();
+				URoom* nextRoom = currentRoom->GetConnectedRoom(i).Get();
 				if (IsValid(nextRoom) && !closedList.Contains(nextRoom))
 					openList.Add(nextRoom);
 			}
@@ -316,7 +418,7 @@ bool BFS_Cycle(TQueue<const URoom*>& Queue, TSet<const URoom*>& MarkedThis, cons
 	// for each neighbor, if not locked or marked, add it to queue and mark it
 	for (int i = 0; OutCommon == nullptr && i < Current->GetConnectionCount(); ++i)
 	{
-		Next = Current->GetConnection(i).Get();
+		Next = Current->GetConnectedRoom(i).Get();
 		if (Next && (IgnoreLocked || !Next->IsLocked()) && !MarkedThis.Contains(Next))
 		{
 			ParentMap.Add(Next, Current);

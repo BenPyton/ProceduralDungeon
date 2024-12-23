@@ -38,22 +38,6 @@ class URoomCustomData;
 class ULevelStreamingDynamic;
 
 USTRUCT()
-struct FRoomConnection
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY()
-	TWeakObjectPtr<URoom> OtherRoom {nullptr};
-
-	UPROPERTY()
-	int OtherDoorIndex {-1};
-
-	UPROPERTY()
-	ADoor* DoorInstance {nullptr};
-};
-
-USTRUCT()
 struct FCustomDataPair
 {
 	GENERATED_BODY()
@@ -128,8 +112,6 @@ public:
 	UPROPERTY(Replicated)
 	EDoorDirection Direction {EDoorDirection::NbDirection};
 
-	URoom();
-
 	//~ Begin IReadOnlyRoom Interface
 	virtual const URoomData* GetRoomData() const override { return RoomData; }
 	virtual int64 GetRoomID() const override{ return Id; }
@@ -196,7 +178,7 @@ public:
 	// @param DoorIndex The index of the door to retrieve.
 	// @return The door actor at the index, or null if the index is out of range.
 	UFUNCTION(BlueprintCallable, Category = "Room")
-	ADoor* GetDoor(int DoorIndex) const;
+	ADoor* GetDoor(int32 DoorIndex) const;
 
 	// Fill an array with all the door actors connected to the room.
 	// @param OutDoors THIS IS NOT AN INPUT! This array will be emptied and then filled with the door actors. This is your result!
@@ -234,7 +216,7 @@ private:
 	TArray<FCustomDataPair> CustomData;
 
 	UPROPERTY(ReplicatedUsing = OnRep_Connections)
-	TArray<FRoomConnection> Connections;
+	TArray<TWeakObjectPtr<class URoomConnection>> Connections;
 
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ADungeonGeneratorBase> GeneratorOwner {nullptr};
@@ -279,11 +261,6 @@ protected:
 public:
 	void Init(URoomData* RoomData, ADungeonGeneratorBase* Generator, int32 RoomId);
 
-	bool IsConnected(int Index) const;
-	void SetConnection(int Index, URoom* Room, int OtherDoorIndex);
-	TWeakObjectPtr<URoom> GetConnection(int Index) const;
-	int GetFirstEmptyConnection() const;
-
 	void Instantiate(UWorld* World);
 	void Destroy();
 	ARoomLevel* GetLevelScript() const;
@@ -292,15 +269,19 @@ public:
 	bool IsInstanceInitialized() const;
 	void CreateLevelComponents(ARoomLevel* LevelActor);
 
-	EDoorDirection GetDoorWorldOrientation(int DoorIndex);
-	FIntVector GetDoorWorldPosition(int DoorIndex);
-	int GetConnectionCount() const { return Connections.Num(); }
-	int GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot);
-	bool IsDoorInstanced(int DoorIndex);
-	void SetDoorInstance(int DoorIndex, ADoor* Door);
-	int GetOtherDoorIndex(int DoorIndex);
-	bool TryConnectDoor(int DoorIndex, const TArray<URoom*>& RoomList);
-	bool TryConnectToExistingDoors(const TArray<URoom*>& RoomList);
+	EDoorDirection GetDoorWorldOrientation(int DoorIndex) const;
+	FIntVector GetDoorWorldPosition(int DoorIndex) const;
+
+	int32 GetConnectionCount() const { return Connections.Num(); }
+	bool IsConnected(int32 DoorIndex) const;
+	void SetConnection(int32 DoorIndex, URoomConnection* Conn);
+	TWeakObjectPtr<URoom> GetConnectedRoom(int32 DoorIndex) const;
+	int32 GetFirstEmptyConnection() const;
+	void GetAllEmptyConnections(TArray<int32>& EmptyConnections) const;
+
+	bool IsDoorIndexValid(int32 DoorIndex) const;
+	int32 GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot);
+	int32 GetOtherDoorIndex(int32 DoorIndex);
 
 	FIntVector WorldToRoom(const FIntVector& WorldPos) const;
 	FIntVector RoomToWorld(const FIntVector& RoomPos) const;
@@ -322,7 +303,6 @@ public:
 	static bool Overlap(const URoom& A, const URoom& B);
 	static bool Overlap(const URoom& Room, const TArray<URoom*>& RoomList);
 
-	static void Connect(URoom& RoomA, int DoorA, URoom& RoomB, int DoorB);
 	static URoom* GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList);
 
 private:
