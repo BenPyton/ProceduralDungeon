@@ -50,7 +50,17 @@ enum class EGenerationResult : uint8
 	Success
 };
 
-// This is the main actor of the plugin. The dungeon generator is responsible to generate dungeons and replicate them over the network. 
+UENUM(meta = (Bitflags))
+enum class EGeneratorFlags
+{
+	None			= 0,
+	Generating		= 1 << 0,
+	All				= 0b1 // add new 1 for each new flags
+};
+ENUM_CLASS_FLAGS(EGeneratorFlags);
+
+// This is the main actor of the plugin. The dungeon generator is responsible to generate dungeons and replicate them over the network.
+// This base class is abstract. You need to override the `CreateDungeon` function to write your own generation algorithm.
 UCLASS(Abstract, NotBlueprintable, BlueprintType, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADungeonGeneratorBase : public AActor
 {
@@ -225,17 +235,9 @@ protected:
 	bool AddRoomToDungeon(URoom* const& Room);
 
 private:
-	// Instantiate a room in the scene
-	void InstantiateRoom(URoom* Room);
-
-	// Instantiate a door in the scene
-	void SpawnAllDoors();
-
-	// Load all room levels
-	void LoadAllRooms();
-
-	// unload all room levels
-	void UnloadAllRooms();
+	// Choose the door classes for all room connections.
+	// This must happen *after* Graph->InitRooms() to be able to choose door class for unconnected doors.
+	void ChooseDoorClasses();
 
 	// Update the rooms visibility based on the player position
 	void UpdateRoomVisibility();
@@ -248,6 +250,8 @@ private:
 
 	// Initialize the seed depending on the seed type setting
 	void UpdateSeed();
+
+	bool IsGenerating() const { return EnumHasAllFlags(Flags, EGeneratorFlags::Generating); }
 
 	// ===== FSM =====
 
@@ -312,6 +316,7 @@ private:
 	FRandomStream Random;
 
 	EGenerationState CurrentState {EGenerationState::Idle};
+	EGeneratorFlags Flags {EGeneratorFlags::None};
 	uint32 UniqueId;
 
 	UPROPERTY(Replicated, Transient)

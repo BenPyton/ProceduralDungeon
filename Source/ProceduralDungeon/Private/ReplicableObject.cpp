@@ -48,7 +48,7 @@ bool UReplicableObject::ReplicateSubobject(UActorChannel* Channel, FOutBunch* Bu
 void UReplicableObject::RegisterAsReplicable(bool bRegister, FRegisterSubObjectParams Params)
 {
 #if UE_WITH_SUBOBJECT_LIST
-	AActor* Owner = GetOwner();
+	AActor* Owner = GetTypedOuter<AActor>();
 	if (!IsValid(Owner))
 	{
 		ensureMsgf(false, TEXT("Trying to %sregister %s as replicable subobject but actor owner is invalid."), ::GetWithPredicate(TEXT("un"), !bRegister), *GetNameSafe(this));
@@ -118,25 +118,23 @@ UWorld* UReplicableObject::GetWorld() const
 	return Outer->GetWorld();
 }
 
-AActor* UReplicableObject::GetOwner() const
+bool UReplicableObject::HasAuthority() const
 {
-	UObject* Outer = GetOuter();
-	while (Outer && !Outer->IsA<AActor>())
-		Outer = Outer->GetOuter();
-	return Cast<AActor>(Outer);
+	AActor* Owner = GetTypedOuter<AActor>();
+	if (!Owner)
+		return false;
+	return Owner->HasAuthority();
 }
 
 FString UReplicableObject::GetAuthorityName() const
 {
-	AActor* Owner = GetOwner();
-	if (!Owner)
-		return TEXT("NO_OWNER_ACTOR");
-	return Owner->HasAuthority() ? TEXT("Server") : TEXT("Client");
+	return HasAuthority() ? TEXT("Server") : TEXT("Client");
 }
+
 
 void UReplicableObject::WakeUpOwnerActor()
 {
-	AActor* Owner = GetOwner();
+	AActor* Owner = GetTypedOuter<AActor>();
 	if (!IsValid(Owner))
 		return;
 

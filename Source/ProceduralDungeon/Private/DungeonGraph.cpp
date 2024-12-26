@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@
 #include "RoomData.h"
 #include "RoomCustomData.h"
 #include "RoomConnection.h"
+#include "Door.h"
 #include "Engine/Level.h"
 #include "Engine/LevelStreamingDynamic.h"
 
@@ -161,26 +162,6 @@ bool UDungeonGraph::TryConnectToExistingDoors(URoom* Room)
 		HasConnection |= TryConnectDoor(Room, i);
 	}
 	return HasConnection;
-}
-
-void UDungeonGraph::ChooseDoors(ChooseDoorSignature ChooseDoorFunc)
-{
-	for (auto* Conn : RoomConnections)
-	{
-		check(IsValid(Conn));
-
-		const URoom* RoomA = Conn->GetRoomA().Get();
-		const URoom* RoomB = Conn->GetRoomB().Get();
-
-		const URoomData* RoomAData = (IsValid(RoomA)) ? RoomA->GetRoomData() : nullptr;
-		const URoomData* RoomBData = (IsValid(RoomB)) ? RoomB->GetRoomData() : nullptr;
-
-		const UDoorType* DoorType = URoomConnection::GetDoorType(Conn);
-
-		bool bFlipped = false;
-		TSubclassOf<ADoor> DoorClass = ChooseDoorFunc(RoomAData, RoomBData, DoorType, bFlipped);
-		Conn->SetDoorClass(DoorClass, bFlipped);
-	}
 }
 
 void UDungeonGraph::Connect(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB)
@@ -529,7 +510,7 @@ void CopyRooms(TArray<URoom*>& To, TArray<URoom*>& From)
 
 void UDungeonGraph::SynchronizeRooms()
 {
-	AActor* Owner = GetOwner();
+	AActor* Owner = GetTypedOuter<AActor>();
 	if (!IsValid(Owner))
 		return;
 
@@ -546,7 +527,7 @@ void UDungeonGraph::SynchronizeRooms()
 		CopyRooms(Rooms, ReplicatedRooms);
 	}
 
-	CurrentState = EDungeonGraphState::None;
+	bIsDirty = false;
 }
 
 bool UDungeonGraph::AreRoomsLoaded(int32& NbRoomLoaded) const
@@ -592,16 +573,53 @@ bool UDungeonGraph::AreRoomsReady() const
 	return true;
 }
 
-void UDungeonGraph::RequestGeneration()
+void UDungeonGraph::SpawnAllDoors()
 {
-	check(GetOwner()->HasAuthority());
-	CurrentState = EDungeonGraphState::RequestGeneration;
+	// Spawn doors only on server
+	// They will be replicated on the clients
+	if (!HasAuthority())
+		return;
+
+	checkf(Generator.IsValid(), TEXT("Spawning dungeon's doors is only available with a ADungeonGenerator outer."));
+
+	for (auto* RoomConnection : RoomConnections)
+	{
+		if (RoomConnection->IsDoorInstanced())
+			continue;
+		RoomConnection->InstantiateDoor(GetWorld(), Generator.Get(), Generator->UseGeneratorTransform());
+	}
 }
 
-void UDungeonGraph::RequestUnload()
+void UDungeonGraph::LoadAllRooms()
 {
-	check(GetOwner()->HasAuthority());
-	CurrentState = EDungeonGraphState::RoomListChanged;
+	// When a level is correct, load all rooms
+	for (URoom* Room : Rooms)
+	{
+		Room->Instantiate(GetWorld());
+	}
+
+	SpawnAllDoors();
+}
+
+void UDungeonGraph::UnloadAllRooms()
+{
+	if (HasAuthority())
+	{
+		for (auto* RoomConnection : RoomConnections)
+		{
+			ADoor* Door = RoomConnection->GetDoorInstance();
+			if (IsValid(Door))
+			{
+				Door->Destroy();
+			}
+		}
+	}
+
+	for (URoom* Room : Rooms)
+	{
+		check(Room);
+		Room->Destroy();
+	}
 }
 
 void UDungeonGraph::OnRep_Rooms()
@@ -617,5 +635,5 @@ void UDungeonGraph::OnRep_Rooms()
 	}
 
 	DungeonLog_InfoSilent("Trigger Dungeon Reload!");
-	CurrentState = EDungeonGraphState::RoomListChanged;
+	MarkDirty();
 }
