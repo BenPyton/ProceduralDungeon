@@ -98,7 +98,7 @@ void ADungeonGeneratorBase::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	if(EndPlayReason == EEndPlayReason::Destroyed)
-		UnloadAllRooms();
+		Graph->UnloadAllRooms();
 }
 
 void ADungeonGeneratorBase::Tick(float DeltaTime)
@@ -110,19 +110,22 @@ void ADungeonGeneratorBase::Tick(float DeltaTime)
 void ADungeonGeneratorBase::Generate()
 {
 	// Do it only on server, do nothing on clients
-	if (HasAuthority())
-	{
-		Graph->RequestGeneration();
-	}
+	if (!HasAuthority())
+		return;
+
+	EnumAddFlags(Flags, EGeneratorFlags::Generating);
 }
 
 void ADungeonGeneratorBase::Unload()
 {
 	// Do it only on server, do nothing on clients
 	if (HasAuthority())
-	{
-		Graph->RequestUnload();
-	}
+		return
+
+	// Mark graph as if the room list have been modified.
+	// Doing so will not trigger the generation phase,
+	// thus the resulting dungeon will be empty.
+	Graph->MarkDirty();
 }
 
 void ADungeonGeneratorBase::StartNewDungeon()
@@ -225,62 +228,26 @@ bool ADungeonGeneratorBase::CreateDungeon_Implementation()
 	return false;
 }
 
-void ADungeonGeneratorBase::InstantiateRoom(URoom* Room)
+void ADungeonGeneratorBase::ChooseDoorClasses()
 {
-	// Instantiate room
-	Room->Instantiate(GetWorld());
-}
-
-void ADungeonGeneratorBase::SpawnAllDoors()
-{
-	// Spawn doors only on server
-	// They will be replicated on the clients
 	if (!HasAuthority())
 		return;
 
-	Graph->ChooseDoors([this](const URoomData* RoomA, const URoomData* RoomB, const UDoorType* DoorType, bool& bFlipped) {
-		return ChooseDoor(RoomA, RoomB, DoorType, bFlipped);
-	});
-
-	for (auto* RoomConnection : Graph->GetAllConnections())
+	for (auto* Conn : Graph->GetAllConnections())
 	{
-		if (RoomConnection->IsDoorInstanced())
-			continue;
-		RoomConnection->InstantiateDoor(GetWorld(), this, UseGeneratorTransform());
-	}
-}
+		check(IsValid(Conn));
 
-// @TODO: Maybe move this function to UDungeonGraph?
-void ADungeonGeneratorBase::LoadAllRooms()
-{
-	// When a level is correct, load all rooms
-	for (URoom* Room : Graph->GetAllRooms())
-	{
-		InstantiateRoom(Room);
-	}
+		const URoom* RoomA = Conn->GetRoomA().Get();
+		const URoom* RoomB = Conn->GetRoomB().Get();
 
-	SpawnAllDoors();
-}
+		const URoomData* RoomAData = (IsValid(RoomA)) ? RoomA->GetRoomData() : nullptr;
+		const URoomData* RoomBData = (IsValid(RoomB)) ? RoomB->GetRoomData() : nullptr;
 
-// @TODO: Maybe move this function to UDungeonGraph?
-void ADungeonGeneratorBase::UnloadAllRooms()
-{
-	if (HasAuthority())
-	{
-		for (auto* RoomConnection : Graph->GetAllConnections())
-		{
-			ADoor* Door = RoomConnection->GetDoorInstance();
-			if (IsValid(Door))
-			{
-				Door->Destroy();
-			}
-		}
-	}
+		const UDoorType* DoorType = URoomConnection::GetDoorType(Conn);
 
-	for (URoom* Room : Graph->GetAllRooms())
-	{
-		check(Room);
-		Room->Destroy();
+		bool bFlipped = false;
+		TSubclassOf<ADoor> DoorClass = ChooseDoor(RoomAData, RoomBData, DoorType, bFlipped);
+		Conn->SetDoorClass(DoorClass, bFlipped);
 	}
 }
 
@@ -411,7 +378,7 @@ void ADungeonGeneratorBase::OnStateBegin(EGenerationState State)
 		DungeonLog_Info("======= Begin Unload All Levels =======");
 		Reset();
 		DungeonLog_Info("Nb Room To Unload: %d", Graph->Count());
-		UnloadAllRooms();
+		Graph->UnloadAllRooms();
 		break;
 	case EGenerationState::Generation:
 		DungeonLog_Info("======= Begin Dungeon Generation =======");
@@ -432,7 +399,11 @@ void ADungeonGeneratorBase::OnStateBegin(EGenerationState State)
 	case EGenerationState::Load:
 		DungeonLog_Info("======= Begin Load All Levels =======");
 		DungeonLog_Info("Nb Room To Load: %d", Graph->Count());
-		LoadAllRooms();
+		// I've placed `ChooseDoor` here to keep same behavior as before,
+		// but it could be moved during the generation step in a future version
+		// (e.g. in the `FinalizeDungeon` function)
+		ChooseDoorClasses();
+		Graph->LoadAllRooms();
 		break;
 	case EGenerationState::Idle:
 		DungeonLog_Info("======= Ready To Play =======");
@@ -449,12 +420,12 @@ void ADungeonGeneratorBase::OnStateTick(EGenerationState State)
 	{
 	case EGenerationState::Idle:
 		UpdateRoomVisibility();
-		if (Graph->IsDirty())
+		if (Graph->IsDirty() || IsGenerating())
 			SetState(EGenerationState::Unload);
 		break;
 	case EGenerationState::Unload:
 		if (Graph->AreRoomsUnloaded(CachedTmpRoomCount))
-			SetState((HasAuthority() && Graph->IsRequestingGeneration()) ? EGenerationState::Generation : EGenerationState::Initialization);
+			SetState((HasAuthority() && IsGenerating()) ? EGenerationState::Generation : EGenerationState::Initialization);
 		break;
 	case EGenerationState::Generation:
 		SetState(EGenerationState::Initialization);
@@ -504,6 +475,8 @@ void ADungeonGeneratorBase::OnStateEnd(EGenerationState State)
 		break;
 	case EGenerationState::Load:
 		DungeonLog_Info("======= End Load All Levels =======");
+
+		EnumRemoveFlags(Flags, EGeneratorFlags::Generating);
 
 		// Try to rebuild the navmesh
 		nav = UNavigationSystemV1::GetCurrent(GetWorld());

@@ -69,8 +69,6 @@ public:
 
 	//~ End UObject Interface
 
-	AActor* GetOwner() const;
-
 	// To be called in place of Channel->ReplicateSubobject(...)
 	// Considered as "Legacy" (used when "Use Registered Subobject List" is false in the actor owner).
 	bool ReplicateSubobject(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags);
@@ -89,6 +87,9 @@ protected:
 	// Override this to register subobjects of this one as replicable.
 	// Used when "Use Registered Subobject List" is true in the actor owner.
 	virtual void RegisterReplicableSubobjects(bool bRegister) {}
+
+	// Returns true if the owning actor has authority
+	bool HasAuthority() const;
 
 	// Returns "Server" or "Client" based on HasAuthority() result.
 	FString GetAuthorityName() const;

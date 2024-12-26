@@ -35,15 +35,6 @@ class URoomCustomData;
 class URoomConnection;
 class ADungeonGeneratorBase;
 
-UENUM()
-enum class EDungeonGraphState : uint8
-{
-	None,
-	RoomListChanged,
-	RequestGeneration,
-	NbState
-};
-
 // Holds the generated dungeon.
 // You can access the rooms using many functions.
 UCLASS(BlueprintType)
@@ -67,12 +58,7 @@ public:
 	bool TryConnectToExistingDoors(URoom* Room);
 
 	bool HasRooms() const { return Rooms.Num() > 0; }
-	bool IsDirty() const { return CurrentState != EDungeonGraphState::None; }
-	bool IsRequestingGeneration() const { return CurrentState == EDungeonGraphState::RequestGeneration; }
-
-	// This function will call the ChooseDoorFunc for each room connection to choose the door to spawn.
-	using ChooseDoorSignature = TFunction<TSubclassOf<class ADoor>(const URoomData*, const URoomData*, const class UDoorType*, bool&)>;
-	void ChooseDoors(ChooseDoorSignature ChooseDoorFunc);
+	bool IsDirty() const { return bIsDirty; }
 
 	// Returns all rooms
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
@@ -190,11 +176,11 @@ protected:
 	bool AreRoomsInitialized(int32& NbRoomInitialized) const;
 	bool AreRoomsReady() const;
 
-	// @TODO: Doesn't make sense to have them in UDungeonGraph class.
-	// We should use instead a bDirty flag when the room list changed.
-	// And the Generate/Unload/etc. should be managed in the ADungeonGenerator.
-	void RequestGeneration();
-	void RequestUnload();
+	void SpawnAllDoors();
+	void LoadAllRooms();
+	void UnloadAllRooms();
+
+	void MarkDirty() { bIsDirty = true; }
 
 private:
 	UPROPERTY(Transient)
@@ -211,7 +197,7 @@ private:
 	UFUNCTION()
 	void OnRep_Rooms();
 
-	EDungeonGraphState CurrentState {EDungeonGraphState::None};
+	bool bIsDirty {false};
 
 	// @TODO: Make something to decouple the ADungeonGenerator from the UDungeonGraph.
 	// It is currently used only to get its random stream in the `Get Random Room` function.
