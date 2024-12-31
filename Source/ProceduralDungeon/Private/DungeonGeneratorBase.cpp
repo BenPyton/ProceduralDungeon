@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -231,6 +231,9 @@ bool ADungeonGeneratorBase::CreateDungeon_Implementation()
 void ADungeonGeneratorBase::ChooseDoorClasses()
 {
 	if (!HasAuthority())
+		return;
+
+	if (!IsGenerating())
 		return;
 
 	for (auto* Conn : Graph->GetAllConnections())
@@ -616,7 +619,7 @@ void ADungeonGeneratorBase::SetSeed(int32 NewSeed)
 	bShouldIncrement = false; // avoid incrementing when SeedType is AutoIncrement
 }
 
-int32 ADungeonGeneratorBase::GetSeed()
+int32 ADungeonGeneratorBase::GetSeed() const
 {
 	return static_cast<int32>(Seed);
 }

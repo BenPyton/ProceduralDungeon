@@ -186,3 +186,28 @@ void Dungeon::SetOcclusionDistance(int32 Distance)
 	UProceduralDungeonSettings* Settings = GetMutableDefault<UProceduralDungeonSettings>();
 	Settings->OcclusionDistance = Distance;
 }
+
+uint64 Concat(uint32 A, uint32 B)
+{
+	return (static_cast<uint64>(A) << 32) | static_cast<uint64>(B);
+}
+
+uint32 Random::Guid2Seed(FGuid Guid, int64 Salt)
+{
+	//// CAUTION: This function must not be modified if not necessary!
+	//// Or else it will break behaviour compatibility with previous versions of the plugin!
+
+	// Using PCG-RXS-M-XS found in this paper: https://www.pcg-random.org/pdf/hmc-cs-2014-0905.pdf (p. 45)
+
+	// Creating a 64bit states from the 128bit Guid and the salt.
+	const uint64 Part1 = Concat(Guid.A, Guid.B);
+	const uint64 Part2 = Concat(Guid.C, Guid.D);
+	uint64 State = Part1 ^ Part2 ^ Salt;
+
+	// Applying PCG-RXS-M-XS to create much more variations from the salt.
+	const uint8 Count = State >> 59;	// Extracting the highest 5 bits for the random xorshift below (64-5=59)
+	State ^= State >> (5 + Count);		// [RXS] Random xorshift (at least 5 to leave the highest 5 bits untouched)
+	State *= 12605985483714917081u;		// [M] Multiplication with a really big odd number
+	State ^= State >> 43;				// [XS] Xorshifting 1/3 of the top bits to the 1/3 of the lower bits
+	return static_cast<uint32>(State ^ (State >> 32)); // Folding the top half for the result on the bottom half to convert into a 32bit output.
+}

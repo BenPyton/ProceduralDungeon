@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -166,7 +166,7 @@ public:
 	// Access to the random stream of the procedural dungeon. You should always use this for the procedural generation.
 	// @return The random stream used by the dungeon generator.
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta = (DeprecatedFunction, DeprecationMessage = "This one is buggy, use the `Random Stream` variable getter instead."))
-	const FRandomStream& GetRandomStream() { return Random; }
+	const FRandomStream& GetRandomStream() const { return Random; }
 
 	// Returns the current generation progress.
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator")
@@ -289,7 +289,7 @@ public:
 	void SetSeed(int32 NewSeed);
 
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle = "Seed"))
-	int32 GetSeed();
+	int32 GetSeed() const;
 
 	uint32 GetUniqueId() const { return UniqueId; }
 	uint64 GetGeneration() const { return Generation; }
@@ -317,6 +317,8 @@ private:
 
 	EGenerationState CurrentState {EGenerationState::Idle};
 	EGeneratorFlags Flags {EGeneratorFlags::None};
+
+	// @TODO: maybe remove the unique ID to use a Guid instead?
 	uint32 UniqueId;
 
 	UPROPERTY(Replicated, Transient)
