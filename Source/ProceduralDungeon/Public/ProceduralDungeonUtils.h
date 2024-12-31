@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -107,6 +107,11 @@ namespace Dungeon
 
 	void PROCEDURALDUNGEON_API EnableOcclusionCulling(bool Enable);
 	void PROCEDURALDUNGEON_API SetOcclusionDistance(int32 Distance);
+}
+
+namespace Random
+{
+	uint32 PROCEDURALDUNGEON_API Guid2Seed(FGuid Guid, int64 Salt);
 }
 
 namespace World

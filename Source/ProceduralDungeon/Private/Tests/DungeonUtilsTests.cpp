@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Benoit Pelletier
+ * Copyright (c) 2024-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,9 +30,9 @@
 
 #if WITH_DEV_AUTOMATION_TESTS
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonUtilsTest, "ProceduralDungeon.Utils.WeightedMaps", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::SmokeFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonUtilsTest_WeightedMap, "ProceduralDungeon.Utils.WeightedMaps", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::SmokeFilter)
 
-bool FDungeonUtilsTest::RunTest(const FString& Parameters)
+bool FDungeonUtilsTest_WeightedMap::RunTest(const FString& Parameters)
 {
 	// Built-in types test
 	{
@@ -75,6 +75,111 @@ bool FDungeonUtilsTest::RunTest(const FString& Parameters)
 	}
 
 	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonUtilsTest_Guid2Seed, "ProceduralDungeon.Utils.Guid2Seed.Simple", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::SmokeFilter)
+
+bool FDungeonUtilsTest_Guid2Seed::RunTest(const FString& Parameters)
+{
+	// Guid to Random Seed Tests
+	{
+		FGuid Guid1(0x12345678U, 0x9ABCDEF0U, 0x0FEDCBA9U, 0x87654321U);
+		FGuid Guid2(0x08F7E6D5U, 0xC4B3A291U, 0x192A3B4CU, 0x5D6E7F80U);
+		int64 Salt1 = 1;
+		int64 Salt2 = 2;
+
+		TestTrue(TEXT("Same Guid and Salt should return same Seed (1)"), Random::Guid2Seed(Guid1, Salt1) == Random::Guid2Seed(Guid1, Salt1));
+		TestTrue(TEXT("Same Guid and Salt should return same Seed (2)"), Random::Guid2Seed(Guid2, Salt2) == Random::Guid2Seed(Guid2, Salt2));
+		TestTrue(TEXT("Same Guid but different Salt should return different Seeds (1)"), Random::Guid2Seed(Guid1, Salt1) != Random::Guid2Seed(Guid1, Salt2));
+		TestTrue(TEXT("Same Guid but different Salt should return different Seeds (2)"), Random::Guid2Seed(Guid2, Salt1) != Random::Guid2Seed(Guid2, Salt2));
+		TestTrue(TEXT("Different Guid but same Salt should return different Seeds (1)"), Random::Guid2Seed(Guid1, Salt1) != Random::Guid2Seed(Guid2, Salt1));
+		TestTrue(TEXT("Different Guid but same Salt should return different Seeds (2)"), Random::Guid2Seed(Guid1, Salt2) != Random::Guid2Seed(Guid2, Salt2));
+		TestTrue(TEXT("Different Guid and Salt should return different Seeds (1)"), Random::Guid2Seed(Guid1, Salt1) != Random::Guid2Seed(Guid2, Salt2));
+		TestTrue(TEXT("Different Guid and Salt should return different Seeds (2)"), Random::Guid2Seed(Guid1, Salt2) != Random::Guid2Seed(Guid2, Salt1));
+	}
+
+	return true;
+}
+
+BEGIN_DEFINE_SPEC(FGuid2SeedStatisticalTests, "ProceduralDungeon.Utils.Guid2Seed.Stats", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::EngineFilter)
+struct FTestParams
+{
+	FGuid Guid;
+	int32 NbElements;
+	int32 NbSamples;
+	double CriticalValue;
+};
+
+using SampleArrayType = int32[];
+
+static TUniquePtr<SampleArrayType> GenerateSamples(const FTestParams& Params)
+{
+	TUniquePtr<SampleArrayType> Occurences(new int32[Params.NbElements] {0});
+	for (int32 i = 0; i < Params.NbSamples; ++i)
+	{
+		// Create a random stream with only the salt modified.
+		// This will simulate an actor in a room level generating its first random number
+		// in each of the room instances (where only the room ID changes)
+		FRandomStream RNG(Random::Guid2Seed(Params.Guid, i));
+		Occurences[RNG.RandRange(0, Params.NbElements - 1)]++;
+	}
+	return Occurences;
+}
+
+static bool PassChiSquaredTest(const FTestParams& Params, SampleArrayType Samples)
+{
+	const double Expected = static_cast<double>(Params.NbSamples) / Params.NbElements;
+	double X2 = 0;
+	for (int i = 0; i < Params.NbElements; ++i)
+	{
+		const double Delta = Samples[i] - Expected;
+		X2 += (Delta * Delta) / Expected;
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("Chi Squared result %d: %f / %f"), Params.NbElements, X2, Params.CriticalValue);
+	return X2 < Params.CriticalValue;
+}
+END_DEFINE_SPEC(FGuid2SeedStatisticalTests)
+
+void FGuid2SeedStatisticalTests::Define()
+{
+	Describe(TEXT("Chi Squared Test"), [this]()
+	{
+		FTestParams Params;
+		Params.NbSamples = 1'000'000'000;
+
+		TArray<FGuid> GuidsToTest = {
+			FGuid(),
+			FGuid(0x12345678U, 0x9ABCDEF0U, 0x0FEDCBA9U, 0x87654321U),
+			FGuid(0x08F7E6D5U, 0xC4B3A291U, 0x192A3B4CU, 0x5D6E7F80U),
+		};
+
+		for (const auto& Guid : GuidsToTest)
+		{
+			Params.Guid = Guid;
+			Describe(FString::Printf(TEXT("with Guid %s"), *Guid.ToString()), [this, Params]() mutable {
+
+				// The test cases we want to check for each Guid.
+				// First value is the number of elements in the generated samples.
+				// Second value is the critical value for the Chi Squared test (with p-value of 5%)
+				TArray<TTuple<int32, double>> TestCases = {
+					{10, 16.91898},
+					{100, 123.22522},
+					{1000, 1073.64265},
+				};
+
+				for (const auto& TestCase : TestCases)
+				{
+					Params.NbElements = TestCase.Key;
+					Params.CriticalValue = TestCase.Value;
+					It(FString::Printf(TEXT("with %d elements"), Params.NbElements), [this, Params]()
+					{
+						TUniquePtr<SampleArrayType> Samples = GenerateSamples(Params);
+						TestTrue(TEXT("Pass"), PassChiSquaredTest(Params, Samples.Get()));
+					});
+				}
+			});
+		}
+	});
 }
 
 #endif //WITH_DEV_AUTOMATION_TESTS
