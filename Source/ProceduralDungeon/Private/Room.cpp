@@ -33,6 +33,10 @@
 #include "DungeonGenerator.h"
 #include "RoomCustomData.h"
 #include "RoomConnection.h"
+#include "Interfaces/RoomContainer.h"
+#include "Interfaces/GeneratorProvider.h"
+#include "Interfaces/RoomActorGuid.h"
+#include "Utils/DungeonSaveUtils.h"
 #include "Engine/Engine.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "Misc/EngineVersionComparison.h"
@@ -83,7 +87,7 @@ void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId
 	SetPosition(FIntVector::ZeroValue);
 	SetDirection(EDoorDirection::North);
 
-	if (IsValid(RoomData))
+	if (RoomData.IsValid())
 	{
 		MARK_PROPERTY_DIRTY_FROM_NAME(URoom, Connections, this);
 		Connections.SetNum(RoomData->GetNbDoor());
@@ -142,7 +146,7 @@ void URoom::Instantiate(UWorld* World)
 {
 	if (Instance == nullptr)
 	{
-		if (!IsValid(RoomData))
+		if (RoomData.IsNull())
 		{
 			DungeonLog_Error("Failed to instantiate the room: it has no RoomData.");
 			return;
@@ -214,6 +218,14 @@ void URoom::OnInstanceLoaded()
 
 	Script->Init(this);
 
+	// @TODO: Would be great to deserialize saved actors here.
+	// However, the actors at this time are not the final actors spawned in the room level.
+	// So they lose their deserialized values when the real spawn occurs at a later time.
+	//if (SaveData.IsValid())
+	//{
+	//	SerializeLevelActors(*SaveData, true);
+	//}
+
 	DungeonLog_InfoSilent("[%s][R:%s][I:%s] Room loaded: %s", *GetAuthorityName(), *GetName(), *GetNameSafe(Instance), *Instance->GetWorldAssetPackageName());
 }
 
@@ -228,7 +240,7 @@ void URoom::ForceVisibility(bool bForce)
 void URoom::Lock(bool bLock)
 {
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(bIsLocked, bLock);
-	DungeonLog_InfoSilent("[%s] Room '%s' setting IsLocked: %s", *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False"));
+	DungeonLog_Debug("[%s] Room '%s' setting IsLocked: %s", *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False"));
 }
 
 void URoom::SetPosition(const FIntVector& NewPosition)
@@ -264,28 +276,28 @@ void URoom::UpdateVisibility() const
 
 void URoom::OnRep_IsLocked()
 {
-	DungeonLog_InfoSilent("[%s] Room '%s' IsLocked Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False"));
+	DungeonLog_Debug("[%s] Room '%s' IsLocked Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), bIsLocked ? TEXT("True") : TEXT("False"));
 }
 
 void URoom::OnRep_Id()
 {
-	DungeonLog_InfoSilent("[%s] Room '%s' Id Replicated: %d", *GetAuthorityName(), *GetNameSafe(this), Id);
+	DungeonLog_Debug("[%s] Room '%s' Id Replicated: %d", *GetAuthorityName(), *GetNameSafe(this), Id);
 }
 
 void URoom::OnRep_RoomData()
 {
-	DungeonLog_InfoSilent("[%s] Room '%s' RoomData Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomData));
+	DungeonLog_Debug("[%s] Room '%s' RoomData Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomData.Get()));
 }
 
 void URoom::OnRep_Connections()
 {
-	DungeonLog_InfoSilent("[%s] Room '%s' Connections Replicated", *GetAuthorityName(), *GetNameSafe(this));
+	DungeonLog_Debug("[%s] Room '%s' Connections Replicated", *GetAuthorityName(), *GetNameSafe(this));
 	for (const auto& Connection : Connections)
 	{
 		if (Connection == nullptr)
 			continue;
 		// This may show 'None' for all rooms depending on the order of those weakptr resolutions.
-		DungeonLog_InfoSilent("- %s (%d) <-> %s (%d)", *GetNameSafe(Connection->GetRoomA().Get()), Connection->GetRoomADoorId(), *GetNameSafe(Connection->GetRoomB().Get()), Connection->GetRoomBDoorId());
+		DungeonLog_Debug("- %s (%d) <-> %s (%d)", *GetNameSafe(Connection->GetRoomA().Get()), Connection->GetRoomADoorId(), *GetNameSafe(Connection->GetRoomB().Get()), Connection->GetRoomBDoorId());
 	}
 }
 
@@ -435,19 +447,19 @@ bool URoom::IsOccupied(FIntVector Cell)
 
 FBoxCenterAndExtent URoom::GetBounds() const
 {
-	check(IsValid(RoomData));
+	check(RoomData.IsValid());
 	return RoomData->GetBounds(GetTransform());
 }
 
 FBoxCenterAndExtent URoom::GetLocalBounds() const
 {
-	check(IsValid(RoomData));
+	check(RoomData.IsValid());
 	return RoomData->GetBounds();
 }
 
 FBoxMinAndMax URoom::GetIntBounds() const
 {
-	check(IsValid(RoomData));
+	check(RoomData.IsValid());
 	return RoomToWorld(RoomData->GetIntBounds());
 }
 
@@ -487,6 +499,17 @@ bool URoom::CreateCustomData(const TSubclassOf<URoomCustomData>& DataType)
 	CustomData.Add({DataType, NewObject<URoomCustomData>(GetOuter(), DataType)});
 	MARK_PROPERTY_DIRTY_FROM_NAME(URoom, CustomData, this);
 	return true;
+}
+
+bool URoom::CreateAllCustomData()
+{
+	check(RoomData.IsValid());
+	bool bSucceeded = true;
+	for (auto Datum : RoomData->CustomData)
+	{
+		bSucceeded &= CreateCustomData(Datum);
+	}
+	return bSucceeded;
 }
 
 bool URoom::GetCustomData_BP(TSubclassOf<URoomCustomData> DataType, URoomCustomData*& Data)
@@ -640,6 +663,203 @@ FVector URoom::GetBoundsCenter() const
 FVector URoom::GetBoundsExtent() const
 {
 	return GetBounds().Extent;
+}
+
+bool URoom::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading)
+{
+	check(!SaveData.IsValid());
+	SaveData = MakeUnique<FSaveData>();
+
+	if (!bIsLoading)
+	{
+		SaveData->ConnectionIds.SetNum(Connections.Num());
+		for (int i = 0; i < Connections.Num(); ++i)
+		{
+			SaveData->ConnectionIds[i] = (Connections[i].IsValid()) ? Connections[i]->GetID() : -1;
+		}
+
+		// Serializing the room actors *only* during the save here.
+		// They will be deserialized at a later time when loading a dungeon, once the room instance is spawned.
+		SerializeLevelActors(*SaveData, bIsLoading);
+	}
+
+	int32 NumCustomData = CustomData.Num();
+	FStructuredArchiveArray CustomDataRecords = Record.EnterArray(TEXT("CustomData"), NumCustomData);
+	CustomData.SetNum(NumCustomData);
+
+	for (int32 i = 0; i < NumCustomData; i++)
+	{
+		FStructuredArchive::FRecord CustomDataRecord = CustomDataRecords.EnterElement().EnterRecord();
+		SerializeUClass(CustomDataRecord.EnterField(TEXT("Class")), CustomData[i].DataClass);
+
+		if (bIsLoading)
+		{
+			CustomData[i].Data = NewObject<URoomCustomData>(GetOuter(), CustomData[i].DataClass);
+		}
+
+		FStructuredArchive::FRecord PropertiesRecord = CustomDataRecord.EnterRecord(TEXT("Data"));
+		SerializeUObject(PropertiesRecord, CustomData[i].Data, bIsLoading);
+	}
+
+	Record.EnterField(TEXT("ConnectionIds")) << SaveData->ConnectionIds;
+	Record.EnterField(TEXT("LevelActor")) << SaveData->LevelActor;
+	Record.EnterField(TEXT("Actors")) << SaveData->Actors;
+
+	if (!bIsLoading)
+	{
+		// When saving, no need to keep the data anymore.
+		SaveData.Reset();
+	}
+
+	return false;
+}
+
+bool URoom::FixupReferences(UObject* Context)
+{
+	const IGeneratorProvider* GeneratorProvider = Cast<IGeneratorProvider>(Context);
+	if (!GeneratorProvider)
+	{
+		DungeonLog_Error("Failed to fixup references: Context '%s' does not implements interface IGeneratorProvider.", *GetNameSafe(Context));
+		return false;
+	}
+
+	GeneratorOwner = GeneratorProvider->GetGenerator();
+	if (!GeneratorOwner.IsValid())
+	{
+		DungeonLog_WarningSilent("Failed to fixup references: Generator is invalid.", *GetNameSafe(Context));
+		return false;
+	}
+
+	const IRoomContainer* Container = Cast<IRoomContainer>(Context);
+	if (!Container)
+	{
+		DungeonLog_Error("Failed to fixup references: Context '%s' does not implements interface IRoomContainer.", *GetNameSafe(Context));
+		return false;
+	}
+
+	if (!SaveData.IsValid())
+	{
+		DungeonLog_Error("Failed to fixup references: SaveData is null.");
+		return false;
+	}
+
+	Connections.SetNum(SaveData->ConnectionIds.Num());
+	for (int i = 0; i < SaveData->ConnectionIds.Num(); ++i)
+	{
+		int32 ConnectionIndex = SaveData->ConnectionIds[i];
+		if (ConnectionIndex < 0)
+			continue;
+
+		URoomConnection* Connection = Container->GetConnectionByIndex(ConnectionIndex);
+		if (!IsValid(Connection))
+		{
+			DungeonLog_Error("Failed to fixup references: Connection with index %d not found.", ConnectionIndex);
+			continue;
+		}
+
+		Connections[i] = Connection;
+		DungeonLog_Debug("Fixed up connection: %s (id: %d)", *GetNameSafe(Connection), ConnectionIndex);
+	}
+	
+	return true;
+}
+
+void URoom::PreSaveDungeon_Implementation()
+{
+	DispatchCallbackToSavedLevelActors(&IDungeonSaveInterface::DispatchPreSaveEvent);
+}
+
+void URoom::PostLoadDungeon_Implementation()
+{
+	check(SaveData);
+
+	// @TODO: Find a way to do it in the `OnInstanceLoaded` function.
+	SerializeLevelActors(*SaveData, true);
+
+	// The loading is finished, we can safely reset the saved data.
+	SaveData.Reset();
+
+	DispatchCallbackToSavedLevelActors(&IDungeonSaveInterface::DispatchPostLoadEvent);
+}
+
+bool URoom::SerializeLevelActors(FSaveData& Data, bool bIsLoading)
+{
+	if (!IsValid(Instance))
+	{
+		DungeonLog_Error("Can't save/load room instance's actors: Instance is invalid.");
+		return false;
+	}
+
+	ULevel* Level = Instance->GetLoadedLevel();
+	if (!IsValid(Level))
+	{
+		DungeonLog_Error("Can't save/load room instance's actors: Level is invalid.");
+		return false;
+	}
+
+	ARoomLevel* LevelScript = GetLevelScript();
+	checkf(IsValid(LevelScript), TEXT("RoomInstance must be loaded and the LevelScript valid when calling SerializeLevelScript"));
+	SerializeUObject(Data.LevelActor, LevelScript, bIsLoading);
+
+	for (auto& Actor : Level->Actors)
+	{
+		if (!IsValid(Actor))
+		{
+			DungeonLog_WarningSilent("An actor is invalid in the loaded room '%s'.", *GetNameSafe(Level));
+			continue;
+		}
+
+		if (Actor == LevelScript)
+			continue;
+
+		UObject* GuidImplementer = IRoomActorGuid::GetImplementer(Actor);
+		if (!IsValid(GuidImplementer))
+			continue;
+
+		if (!IRoomActorGuid::Execute_ShouldSaveActor(GuidImplementer))
+			continue;
+
+		FGuid ActorGuid = IRoomActorGuid::Execute_GetGuid(GuidImplementer);
+		if (!ActorGuid.IsValid())
+		{
+			DungeonLog_Error("Actor Id is invalid for actor '%s'. Make sure you've implemented properly your 'RoomActorGuid::GetGuid'!", *GetNameSafe(Actor));
+			continue;
+		}
+
+		DungeonLog_Debug("Serializing Actor %s (%s)", *GetFullNameSafe(Actor), *ActorGuid.ToString());
+
+		if (!bIsLoading)
+		{
+			TArray<uint8>& ActorData = Data.Actors.Add(ActorGuid);
+			SerializeUObject(ActorData, Actor, false);
+		}
+		else if(TArray<uint8>* ActorData = Data.Actors.Find(ActorGuid))
+		{
+			SerializeUObject(*ActorData, Actor, true);
+		}
+	}
+
+	return true;
+}
+
+void URoom::DispatchCallbackToSavedLevelActors(TFunction<void(AActor*)> Callback) const
+{
+	DungeonLog_Debug("Room dispatch callback to actors.");
+	if (!IsValid(Instance))
+		return;
+
+	ULevel* Level = Instance->GetLoadedLevel();
+	if (!IsValid(Level))
+		return;
+
+	for (auto& Actor : Level->Actors)
+	{
+		if (!Actor->Implements<UDungeonSaveInterface>())
+			continue;
+
+		DungeonLog_Debug("- Dispatch to actor: %s.", *GetNameSafe(Actor));
+		Callback(Actor);
+	}
 }
 
 // AABB Overlapping

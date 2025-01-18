@@ -26,6 +26,7 @@
 #include "Components/ActorComponent.h"
 #include "Components/SceneComponent.h"
 #include "RoomLevel.h"
+#include "Utils/DungeonSaveUtils.h"
 
 UActorComponent* CreateComponentOnInstance(AActor* ActorInstance, TSubclassOf<UActorComponent> ComponentClass, USceneComponent* OptionalParentForSceneComponent = nullptr)
 {
@@ -67,10 +68,76 @@ UActorComponent* CreateComponentOnInstance(AActor* ActorInstance, TSubclassOf<UA
 	return NewComp;
 }
 
-void URoomCustomData::CreateLevelComponent(ARoomLevel* LevelActor) const
+void URoomCustomData::CreateLevelComponent(ARoomLevel* LevelActor)
 {
 	if (!LevelComponent)
 		return;
 
-	CreateComponentOnInstance(LevelActor, LevelComponent);
+	LevelComponentInstance = CreateComponentOnInstance(LevelActor, LevelComponent);
+	if (!LevelComponentInstance.IsValid())
+	{
+		DungeonLog_Error("Failed to create component '%s' on room level '%s'.", *GetNameSafe(LevelComponent), *GetNameSafe(LevelActor));
+	}
+}
+
+bool URoomCustomData::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading)
+{
+	// Nothing more to serialize if no component
+	if (nullptr == LevelComponent)
+		return true;
+
+	SavedData = MakeUnique<FSaveData>();
+
+	if (!bIsLoading)
+	{
+		// Serialize component data
+		if (LevelComponentInstance.IsValid())
+		{
+			SerializeUObject(SavedData->ComponentData, LevelComponentInstance.Get(), false);
+		}
+	}
+
+	Record.EnterField(TEXT("ComponentData")) << SavedData->ComponentData;
+
+	if (!bIsLoading)
+	{
+		// No need to keep the data after saving
+		SavedData.Reset();
+	}
+
+	return true;
+}
+
+void URoomCustomData::PreSaveDungeon_Implementation()
+{
+	if (!LevelComponentInstance.IsValid())
+		return;
+
+	if (LevelComponentInstance->Implements<UDungeonSaveInterface>())
+	{
+		IDungeonSaveInterface::Execute_PreSaveDungeon(LevelComponentInstance.Get());
+	}
+}
+
+void URoomCustomData::PostLoadDungeon_Implementation()
+{
+	if (!SavedData.IsValid())
+		return;
+
+	// Deserialize component data
+	if (LevelComponentInstance.IsValid())
+	{
+		SerializeUObject(SavedData->ComponentData, LevelComponentInstance.Get(), true);
+	}
+	else
+	{
+		DungeonLog_Error("Failed to deserialize component data for '%s' in room custom data '%s'", *GetNameSafe(LevelComponent), *GetNameSafe(this));
+	}
+
+	SavedData.Reset();
+
+	if (LevelComponentInstance.IsValid() && LevelComponentInstance->Implements<UDungeonSaveInterface>())
+	{
+		IDungeonSaveInterface::Execute_PostLoadDungeon(LevelComponentInstance.Get());
+	}
 }

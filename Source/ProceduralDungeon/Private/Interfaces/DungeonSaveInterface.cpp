@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Benoit Pelletier
+ * Copyright (c) 2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,36 @@
  * SOFTWARE.
  */
 
-#include "RoomVisibilityComponent.h"
+#include "Interfaces/DungeonSaveInterface.h"
 #include "ProceduralDungeonUtils.h"
 #include "ProceduralDungeonLog.h"
-#include "RoomLevel.h"
 
-URoomVisibilityComponent::URoomVisibilityComponent()
-	: Super()
+void IDungeonSaveInterface::DispatchPreSaveEvent(UObject* Obj)
 {
+	check(IsValid(Obj));
+	DungeonLog_Debug("[BEGIN] Dispatch 'Dungeon Pre Save' events from object '%s'.", *GetNameSafe(Obj));
+
+	ObjectUtils::DispatchToObjectAndSubobjects(Obj, [](UObject* O) {
+		if (IsValid(O) && O->Implements<UDungeonSaveInterface>())
+		{
+			IDungeonSaveInterface::Execute_PreSaveDungeon(O);
+		}
+	});
+
+	DungeonLog_Debug("[END] Dispatch 'Dungeon Post Load' events from object '%s'.", *GetNameSafe(Obj));
 }
 
-void URoomVisibilityComponent::OnRoomEnter_Implementation(ARoomLevel* RoomLevel)
+void IDungeonSaveInterface::DispatchPostLoadEvent(UObject* Obj)
 {
-	DungeonLog_Debug("[Visibility] '%s' Enters Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, true);
-}
+	check(IsValid(Obj));
+	DungeonLog_Debug("[BEGIN] Dispatch 'Dungeon Post Load' events from object '%s'.", *GetNameSafe(Obj));
 
-void URoomVisibilityComponent::OnRoomExit_Implementation(ARoomLevel* RoomLevel)
-{
-	DungeonLog_Debug("[Visibility] '%s' Exits Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, false);
+	ObjectUtils::DispatchToObjectAndSubobjects(Obj, [](UObject* O) {
+		if (IsValid(O) && O->Implements<UDungeonSaveInterface>())
+		{
+			IDungeonSaveInterface::Execute_PostLoadDungeon(O);
+		}
+	});
+
+	DungeonLog_Debug("[END] Dispatch 'Dungeon Post Load' events from object '%s'.", *GetNameSafe(Obj));
 }

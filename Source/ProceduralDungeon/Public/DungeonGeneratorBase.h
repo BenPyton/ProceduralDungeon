@@ -31,6 +31,7 @@
 #include "ProceduralDungeonTypes.h"
 #include "CollisionQueryParams.h"
 #include "UObject/ScriptInterface.h"
+#include "Serialization/Archive.h"
 #include "DungeonGeneratorBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FGenerationEvent);
@@ -53,11 +54,29 @@ enum class EGenerationResult : uint8
 UENUM(meta = (Bitflags))
 enum class EGeneratorFlags
 {
-	None			= 0,
-	Generating		= 1 << 0,
-	All				= 0b1 // add new 1 for each new flags
+	None				= 0,
+	Generating			= 1 << 0,
+	LoadSavedDungeon	= 1 << 1,
+	All					= 0b11 // add new 1 for each new flags
 };
 ENUM_CLASS_FLAGS(EGeneratorFlags);
+
+// Holds the data for saving a dungeon state
+USTRUCT(BlueprintType)
+struct FDungeonSaveData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintReadOnly)
+	FGuid GeneratorId;
+
+	UPROPERTY()
+	TArray<uint8> Data {};
+
+	friend FArchive& operator<<(FArchive& Ar, FDungeonSaveData& Data);
+	friend void operator<<(FStructuredArchiveSlot Slot, FDungeonSaveData& Data);
+};
 
 // This is the main actor of the plugin. The dungeon generator is responsible to generate dungeons and replicate them over the network.
 // This base class is abstract. You need to override the `CreateDungeon` function to write your own generation algorithm.
@@ -71,12 +90,14 @@ public:
 
 protected:
 	//~ Begin AActor Interface
-	virtual void BeginPlay() override;
 	virtual void PostInitializeComponents() override;
 	virtual void EndPlay(EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaTime) override;
 	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
+	virtual void PostActorCreated() override;
 	//~ End AActor Interface
+
+	void SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading);
 
 public:
 
@@ -89,6 +110,14 @@ public:
 	// Do nothing when called on clients
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Dungeon Generator")
 	void Unload();
+
+	UFUNCTION(BlueprintPure = false)
+	void SaveDungeon(FDungeonSaveData& SaveData);
+
+	UFUNCTION(BlueprintCallable)
+	void LoadDungeon(const FDungeonSaveData& SaveData);
+
+	void SerializeDungeon(FArchive& Archive);
 
 	// ===== Methods that should be overriden in blueprint =====
 
@@ -175,6 +204,12 @@ public:
 	// @TODO: remove this function and use Graph->GetRoomByIndex() instead.
 	URoom* GetRoomByIndex(int64 Index) const;
 
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator", meta = (WorldContext = "WorldContextObject"))
+	static void SaveAllDungeons(const UObject* WorldContextObject, TArray<FDungeonSaveData>& SavedData);
+
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator", meta = (WorldContext = "WorldContextObject"))
+	static void LoadAllDungeons(const UObject* WorldContextObject, const TArray<FDungeonSaveData>& SavedData);
+
 	// ===== Events =====
 
 	// Called once before anything else when generating a new dungeon.
@@ -252,6 +287,7 @@ private:
 	void UpdateSeed();
 
 	bool IsGenerating() const { return EnumHasAllFlags(Flags, EGeneratorFlags::Generating); }
+	bool IsLoadingSavedDungeon() const { return EnumHasAllFlags(Flags, EGeneratorFlags::LoadSavedDungeon); }
 
 	// ===== FSM =====
 
@@ -263,18 +299,18 @@ private:
 public:
 	// If ticked, the rooms location and rotation will be relative to this actor transform.
 	// If unticked, the rooms will be placed relatively to the world's origin.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Procedural Generation")
 	bool bUseGeneratorTransform;
 
 	// How to handle the seed at each generation call.
 	// Random: Generate and use a random seed.
 	// Auto Increment: Use Seed for first generation, and increment it by SeedIncrement in each subsequent generation.
 	// Fixed: Use only Seed for each generation.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation|Seed")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Procedural Generation|Seed")
 	ESeedType SeedType;
 
 	// The increment number for each subsequent dungeon generation when SeedType is AutoIncrement.
-	UPROPERTY(EditAnywhere, Category = "Procedural Generation|Seed", meta = (EditCondition = "SeedType==ESeedType::AutoIncrement", EditConditionHides, DisplayAfter = "Seed"))
+	UPROPERTY(EditAnywhere, SaveGame, Category = "Procedural Generation|Seed", meta = (EditCondition = "SeedType==ESeedType::AutoIncrement", EditConditionHides, DisplayAfter = "Seed"))
 	uint32 SeedIncrement;
 
 	// If ticked, when trying to place a new room during a dungeon generation,
@@ -282,7 +318,7 @@ public:
 	// inside existing meshes in the persistent world.
 	// This is a heavy work and should be ticked only when necessary.
 	// Does not have impact during gameplay. Only during the generation process.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation", AdvancedDisplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Procedural Generation", AdvancedDisplay)
 	bool bUseWorldCollisionChecks {false};
 
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
@@ -306,19 +342,30 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Dungeon Generator", meta = (DisplayName = "Rooms"))
 	UDungeonGraph* Graph;
 
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, NonPIEDuplicateTransient, TextExportTransient, Category = "GUID")
+	FGuid Id;
+
 private:
-	UPROPERTY(Replicated, EditAnywhere, Category = "Procedural Generation|Seed", meta = (EditCondition = "SeedType!=ESeedType::Random", EditConditionHides))
+	UPROPERTY(Replicated, EditAnywhere, SaveGame, Category = "Procedural Generation|Seed", meta = (EditCondition = "SeedType!=ESeedType::Random", EditConditionHides))
 	uint32 Seed;
 
+	// @TODO: It's useless if we remove the UniqueId in favor to the Guid.
 	static uint32 GeneratorCount;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Dungeon Generator", meta = (DisplayName = "Random Stream", AllowPrivateAccess = true))
 	FRandomStream Random;
 
+#if WITH_EDITORONLY_DATA
+	// If true the dungeon will be saved in a human readable json format.
+	// *WARNING*: This is only available in editor and dev builds and will not change anything in packaged builds. It should be used for debugging purposes only.
+	UPROPERTY(EditAnywhere, AdvancedDisplay, Category = "Procedural Generation", meta = (AllowPrivateAccess = true))
+	bool bUseJsonSave {false};
+#endif
+
 	EGenerationState CurrentState {EGenerationState::Idle};
 	EGeneratorFlags Flags {EGeneratorFlags::None};
 
-	// @TODO: maybe remove the unique ID to use a Guid instead?
+	// @TODO: maybe remove the unique ID to use only the Guid instead?
 	uint32 UniqueId;
 
 	UPROPERTY(Replicated, Transient)

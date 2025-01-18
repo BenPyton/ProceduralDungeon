@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Benoit Pelletier
+ * Copyright (c) 2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,34 @@
  * SOFTWARE.
  */
 
-#include "RoomVisibilityComponent.h"
-#include "ProceduralDungeonUtils.h"
-#include "ProceduralDungeonLog.h"
-#include "RoomLevel.h"
+#pragma once
 
-URoomVisibilityComponent::URoomVisibilityComponent()
-	: Super()
-{
-}
+#include "CoreMinimal.h"
+#include "UObject/Interface.h"
+#include "DungeonCustomSerialization.generated.h"
 
-void URoomVisibilityComponent::OnRoomEnter_Implementation(ARoomLevel* RoomLevel)
+// This class does not need to be modified.
+UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
+class UDungeonCustomSerialization : public UInterface
 {
-	DungeonLog_Debug("[Visibility] '%s' Enters Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, true);
-}
+	GENERATED_BODY()
+};
 
-void URoomVisibilityComponent::OnRoomExit_Implementation(ARoomLevel* RoomLevel)
+/**
+ * 
+ */
+class PROCEDURALDUNGEON_API IDungeonCustomSerialization
 {
-	DungeonLog_Debug("[Visibility] '%s' Exits Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, false);
-}
+	GENERATED_BODY()
+
+	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
+public:
+	// Serialize non-trivial object properties (e.g. UObject pointers)
+	virtual bool SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading) = 0;
+
+	// Fixup object references after loading
+	virtual bool FixupReferences(UObject* Context) { return true; }
+
+	// Calls FixupReferences on Obj and its subobjects.
+	static bool DispatchFixupReferences(UObject* Obj, UObject* Context);
+};

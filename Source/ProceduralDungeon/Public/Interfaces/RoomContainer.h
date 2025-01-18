@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Benoit Pelletier
+ * Copyright (c) 2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,30 @@
  * SOFTWARE.
  */
 
-#include "RoomVisibilityComponent.h"
-#include "ProceduralDungeonUtils.h"
-#include "ProceduralDungeonLog.h"
-#include "RoomLevel.h"
+#pragma once
 
-URoomVisibilityComponent::URoomVisibilityComponent()
-	: Super()
-{
-}
+#include "CoreMinimal.h"
+#include "UObject/Interface.h"
+#include "RoomContainer.generated.h"
 
-void URoomVisibilityComponent::OnRoomEnter_Implementation(ARoomLevel* RoomLevel)
-{
-	DungeonLog_Debug("[Visibility] '%s' Enters Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, true);
-}
+class URoom;
+class URoomConnection;
 
-void URoomVisibilityComponent::OnRoomExit_Implementation(ARoomLevel* RoomLevel)
+UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
+class URoomContainer : public UInterface
 {
-	DungeonLog_Debug("[Visibility] '%s' Exits Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, false);
-}
+	GENERATED_BODY()
+};
+
+/**
+ * Common interface for all containers that holds rooms and their connections.
+ * Currently used to get back references in URoom and URoomConnection when loaded from a saved dungeon.
+ */
+class PROCEDURALDUNGEON_API IRoomContainer
+{
+	GENERATED_BODY()
+
+public:
+	virtual URoom* GetRoomByIndex(int64 Index) const = 0;
+	virtual URoomConnection* GetConnectionByIndex(int32 Index) const = 0;
+};

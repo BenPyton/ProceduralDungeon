@@ -25,6 +25,10 @@
 #pragma once
 
 #include "ReplicableObject.h"
+#include "Interfaces/RoomContainer.h"
+#include "Interfaces/GeneratorProvider.h"
+#include "Interfaces/DungeonCustomSerialization.h"
+#include "Interfaces/DungeonSaveInterface.h"
 #include "Templates/SubclassOf.h"
 #include "Templates/Function.h"
 #include "DungeonGraph.generated.h"
@@ -38,7 +42,7 @@ class ADungeonGeneratorBase;
 // Holds the generated dungeon.
 // You can access the rooms using many functions.
 UCLASS(BlueprintType)
-class PROCEDURALDUNGEON_API UDungeonGraph : public UReplicableObject
+class PROCEDURALDUNGEON_API UDungeonGraph : public UReplicableObject, public IRoomContainer, public IGeneratorProvider, public IDungeonCustomSerialization, public IDungeonSaveInterface
 {
 	GENERATED_BODY()
 
@@ -49,7 +53,27 @@ class PROCEDURALDUNGEON_API UDungeonGraph : public UReplicableObject
 #endif
 
 public:
-	UDungeonGraph();
+	//~ Begin IRoomContainer Interface
+	// Returns the room instance with the provided index.
+	// Returns null if no room exists with the provided index.
+	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
+	virtual URoom* GetRoomByIndex(int64 Index) const final;
+
+	virtual URoomConnection* GetConnectionByIndex(int32 Index) const override;
+	//~ End IRoomContainer Interface
+
+	//~ Begin IDungeonCustomSerialization Interface
+	virtual bool SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading) override;
+	//~ End IDungeonCustomSerialization Interface
+
+	//~ Begin IDungeonSaveInterface Interface
+	virtual void PostLoadDungeon_Implementation() override;
+	//~ End IDungeonSaveInterface Interface
+
+	//~ Begin IGeneratorProvider Interface
+	virtual ADungeonGeneratorBase* GetGenerator() const override { return Generator.Get(); }
+	//~ End IGeneratorProvider Interface
+
 	void AddRoom(URoom* Room);
 	void InitRooms();
 	void Clear();
@@ -145,7 +169,6 @@ public:
 	bool GetPathBetween(const URoom* A, const URoom* B, TArray<URoom*>& ResultPath, bool IgnoreLockedRooms = false);
 
 	URoom* GetRoomAt(FIntVector RoomCell) const;
-	URoom* GetRoomByIndex(int64 Index) const;
 
 	// Returns in OutRooms all the rooms in the Distance from each InRooms and optionally apply Func on each rooms.
 	// Distance is the number of room connection between 2 rooms, not the distance in any unit.
@@ -167,6 +190,10 @@ protected:
 
 	// Sync Rooms and ReplicatedRooms arrays
 	void SynchronizeRooms();
+
+	// Replace existing room array from the one loaded in saved data.
+	// This does nothing if there is no data loaded from a saved dungeon.
+	void RetrieveRoomsFromLoadedData();
 
 	// Create and store a new connection between two rooms in RoomConnections.
 	void Connect(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB);
@@ -205,4 +232,13 @@ private:
 	// - Use an interface that provides a random stream => good way to not induce breaking changes in the code.
 	// - Pass the random stream as an input to that function => will need to make some changes in existing projects.
 	TWeakObjectPtr<ADungeonGeneratorBase> Generator {nullptr};
+
+private:
+	struct FSaveData
+	{
+		TArray<URoom*> Rooms;
+		TArray<URoomConnection*> Connections;
+	};
+
+	TUniquePtr<FSaveData> SavedData {nullptr};
 };

@@ -25,27 +25,22 @@
 #include "Interfaces/RoomActorGuid.h"
 #include "ProceduralDungeonLog.h"
 
-FGuid IRoomActorGuid::GetActorGuid(AActor* Actor)
+UObject* IRoomActorGuid::GetImplementer(AActor* Actor)
 {
 	if (!IsValid(Actor))
-		return FGuid();
+		return nullptr;
 
-	FGuid ActorGuid = (Actor->Implements<URoomActorGuid>()) ? IRoomActorGuid::Execute_GetGuid(Actor) : FGuid();
-	if (!ActorGuid.IsValid())
+	if (Actor->Implements<URoomActorGuid>())
+		return Actor;
+
+	const auto Components = Actor->GetComponentsByInterface(URoomActorGuid::StaticClass());
+	if (Components.Num() <= 0)
+		return nullptr;
+
+	if (Components.Num() > 1)
 	{
-		const auto Components = Actor->GetComponentsByInterface(URoomActorGuid::StaticClass());
-		for (const auto* Component : Components)
-		{
-			if (!ActorGuid.IsValid())
-			{
-				ActorGuid = IRoomActorGuid::Execute_GetGuid(Component);
-			}
-			else
-			{
-				DungeonLog_WarningSilent("Multiple components have a RoomActorGuid implemented. Remove the unnecessary ones to prevent any confusion!");
-			}
-		}
+		DungeonLog_WarningSilent("Multiple components have a RoomActorGuid interface. Remove the unnecessary ones to prevent any confusion!");
 	}
 
-	return ActorGuid;
+	return Components[0];
 }

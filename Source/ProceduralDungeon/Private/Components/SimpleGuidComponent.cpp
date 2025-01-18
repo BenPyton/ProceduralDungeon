@@ -61,6 +61,11 @@ FGuid USimpleGuidComponent::GetGuid_Implementation() const
 	return Guid;
 }
 
+bool USimpleGuidComponent::ShouldSaveActor_Implementation() const
+{
+	return bSaveActorInDungeon;
+}
+
 void USimpleGuidComponent::Serialize(FArchive& Ar)
 {
 	LOG_GUID_INFO("[%s.SimpleGuidComponent] Serialize(Ar) Component (%s)", *GetNameSafe(GetOwner()), Ar.IsLoading() ? TEXT("load") : TEXT("save"));

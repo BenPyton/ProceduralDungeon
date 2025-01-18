@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Benoit Pelletier
+ * Copyright (c) 2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,30 @@
  * SOFTWARE.
  */
 
-#include "RoomVisibilityComponent.h"
-#include "ProceduralDungeonUtils.h"
-#include "ProceduralDungeonLog.h"
-#include "RoomLevel.h"
+#pragma once
 
-URoomVisibilityComponent::URoomVisibilityComponent()
-	: Super()
-{
-}
+#include "CoreMinimal.h"
+#include "UObject/Interface.h"
+#include "GeneratorProvider.generated.h"
 
-void URoomVisibilityComponent::OnRoomEnter_Implementation(ARoomLevel* RoomLevel)
+UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
+class UGeneratorProvider : public UInterface
 {
-	DungeonLog_Debug("[Visibility] '%s' Enters Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, true);
-}
+	GENERATED_BODY()
+};
 
-void URoomVisibilityComponent::OnRoomExit_Implementation(ARoomLevel* RoomLevel)
+/**
+ * Interface for classes that give access to a ADungeonGeneratorBase instance.
+ * @TODO: Currently only used to resolve URoom::GeneratorOwner references when loading a saved dungeon.
+ * It would be better in a future version to decouple the URoom from the DungeonGenerator and instead
+ * pass some Interface references to the functions needed (currently a Transform and a RandomStream).
+ * I just want to say that this interface is just temporary and must not be used by users of the plugin,
+ * as it will certainly be removed in a near future version of the plugin.
+ */
+class IGeneratorProvider
 {
-	DungeonLog_Debug("[Visibility] '%s' Exits Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, false);
-}
+	GENERATED_BODY()
+
+public:
+	virtual class ADungeonGeneratorBase* GetGenerator() const = 0;
+};

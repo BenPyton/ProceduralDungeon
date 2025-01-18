@@ -26,36 +26,40 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "RoomActorGuid.generated.h"
+#include "DungeonSaveInterface.generated.h"
 
 UINTERFACE(BlueprintType, Blueprintable)
-class URoomActorGuid : public UInterface
+class UDungeonSaveInterface : public UInterface
 {
 	GENERATED_BODY()
 };
 
 /**
- * Interface for all saveable actors placed in room levels
- * The guid must be constant across game sessions to be able to save/load the actors.
- * It can be placed on ActorComponents too, but the interface on the Actor itself will be prioritized.
- * Only the first component found that implements the interface will be used. Make sure to have only one to prevent any confusions.
+ * Interface to add some events to the saved actors/objects during the save/load process of the dungeon.
  */
-class PROCEDURALDUNGEON_API IRoomActorGuid
+class PROCEDURALDUNGEON_API IDungeonSaveInterface
 {
 	GENERATED_BODY()
 
 public:
-	// Return the guid associated with this actor.
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Room Actor Id")
-	FGuid GetGuid() const;
+	// Called just before serializing this object into the dungeon save.
+	// Useful to initialize some saved variables based on actor states.
+	UFUNCTION(BlueprintNativeEvent, Category = "Procedural Dungeon")
+	void DungeonPreSerialize(bool bIsLoading);
 
-	// Returns true if the actor should be included in the saved dungeon.
-	// Returns false to just use a Guid without the need to include the actor in saved games.
-	UFUNCTION(BlueprintNativeEvent, Category = "Room Actor Id")
-	bool ShouldSaveActor() const;
+	// Called just after deserializing this object from the dungeon save
+	// Useful to initialize some actor states based on saved variables.
+	UFUNCTION(BlueprintNativeEvent, Category = "Procedural Dungeon")
+	void DungeonPostSerialize(bool bIsLoading);
 
-	// Return the object implementing the IRoomActorGuid interface from the provided actor.
-	// It can be implemented on the Actor itself or its components.
-	// If both, the actor implementation will be returned.
-	static UObject* GetImplementer(AActor* Actor);
+	// Called first before saving the dungeon
+	UFUNCTION(BlueprintNativeEvent, Category = "Procedural Dungeon")
+	void PreSaveDungeon();
+
+	// Called last after loading the dungeon
+	UFUNCTION(BlueprintNativeEvent, Category = "Procedural Dungeon")
+	void PostLoadDungeon();
+
+	static void DispatchPreSaveEvent(UObject* Obj);
+	static void DispatchPostLoadEvent(UObject* Obj);
 };

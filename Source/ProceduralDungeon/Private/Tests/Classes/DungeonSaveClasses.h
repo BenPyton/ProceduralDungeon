@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2025 Benoit Pelletier
+ * Copyright (c) 2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,48 +22,54 @@
  * SOFTWARE.
  */
 
-#pragma once
-
-#include "ReplicableObject.h"
+#include "CoreUObject.h"
 #include "Interfaces/DungeonCustomSerialization.h"
 #include "Interfaces/DungeonSaveInterface.h"
-#include "Templates/SubclassOf.h"
-#include "RoomCustomData.generated.h"
+#include "DungeonSaveClasses.generated.h"
 
-class UActorComponent;
-
-// Base class for user custom data embedded in room instances
-UCLASS(Abstract, BlueprintType, Blueprintable)
-class PROCEDURALDUNGEON_API URoomCustomData : public UReplicableObject, public IDungeonCustomSerialization, public IDungeonSaveInterface
+UCLASS(NotBlueprintable, NotBlueprintType, HideDropdown, meta = (HiddenNode))
+class USaveTestObject : public UObject, public IDungeonCustomSerialization, public IDungeonSaveInterface
 {
 	GENERATED_BODY()
 
 public:
-	void CreateLevelComponent(class ARoomLevel* LevelActor);
-
 	//~ Begin IDungeonCustomSerialization Interface
-	virtual bool SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading) override;
+	virtual bool SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading) override
+	{
+		OrderOfExecution += (bIsLoading) ? TEXT("X") : TEXT("C");
+		Record.EnterField(TEXT("NativeTest")) << TestSerializeObjectFunction;
+		return true;
+	}
 	//~ End IDungeonCustomSerialization Interface
 
 	//~ Begin IDungeonSaveInterface Interface
-	virtual void PreSaveDungeon_Implementation() override;
-	virtual void PostLoadDungeon_Implementation() override;
+	virtual void PreSaveDungeon_Implementation() override
+	{
+		OrderOfExecution += TEXT("A");
+	}
+
+	virtual void DungeonPreSerialize_Implementation(bool bIsLoading) override
+	{
+		OrderOfExecution += (bIsLoading) ? TEXT("W") : TEXT("B");
+	}
+
+	virtual void DungeonPostSerialize_Implementation(bool bIsLoading) override
+	{
+		OrderOfExecution += (bIsLoading) ? TEXT("Y") : TEXT("D");
+	}
+
+	virtual void PostLoadDungeon_Implementation() override
+	{
+		OrderOfExecution += TEXT("Z");
+	}
 	//~ End IDungeonSaveInterface Interface
 
-private:
-	// Component to create and attach on the Level Script Actor of the instanced room.
-	UPROPERTY(EditAnywhere, Category = "Dungeon Rules", meta = (AllowAbstract = false, AllowPrivateAccess = true))
-	TSubclassOf<UActorComponent> LevelComponent {nullptr};
+public:
+	UPROPERTY(SaveGame)
+	int32 TestSaveGameFlag {0};
 
-	// Keep a reference to the created component instance
-	UPROPERTY(Transient)
-	TWeakObjectPtr<UActorComponent> LevelComponentInstance {nullptr};
+	int32 TestSerializeObjectFunction {0};
 
-private:
-	struct FSaveData
-	{
-		TArray<uint8> ComponentData;
-	};
-
-	TUniquePtr<FSaveData> SavedData;
+	UPROPERTY();
+	FString OrderOfExecution {};
 };

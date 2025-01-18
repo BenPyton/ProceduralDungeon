@@ -47,6 +47,10 @@ void LogOnScreen(const FString& Message, FColor Color, bool bForceOnScreen = fal
 }
 #endif // NO_LOGGING
 
+// Logs error message to output and on screen
+#define DungeonLog_Debug(Format, ...) \
+	_DungeonLog_PrivateImpl(false, false, true, FColor::White, VeryVerbose, Format, ##__VA_ARGS__)
+
 // Logs info message to output and on screen
 #define DungeonLog_Info(Format, ...) \
 	_DungeonLog_PrivateImpl(true, false, false, FColor::White, Log, Format, ##__VA_ARGS__)

@@ -33,13 +33,13 @@ URoomObserverComponent::URoomObserverComponent()
 
 void URoomObserverComponent::OnRoomEnter_Implementation(ARoomLevel* RoomLevel)
 {
-	DungeonLog_InfoSilent("Observer Component '%s' Enters Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
+	DungeonLog_Debug("[Observer] '%s' Enters Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
 	BindToLevel(RoomLevel, true);
 }
 
 void URoomObserverComponent::OnRoomExit_Implementation(ARoomLevel* RoomLevel)
 {
-	DungeonLog_InfoSilent("Observer Component '%s' Exits Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
+	DungeonLog_Debug("[Observer] '%s' Exits Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
 	BindToLevel(RoomLevel, false);
 }
 

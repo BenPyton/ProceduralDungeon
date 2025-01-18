@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,15 +28,19 @@
 #include "GameFramework/Actor.h"
 #include "ProceduralDungeonTypes.h"
 #include "Math/GenericOctree.h" // for FBoxCenterAndExtent (required for UE5.0)
+#include "Interfaces/DungeonCustomSerialization.h"
+#include "Interfaces/DungeonSaveInterface.h"
+#include "UObject/SoftObjectPtr.h"
+#include "RoomData.h" // for TSoftObjectPtr to compile. @TODO: Would be great to find a way to not include it
 #include "Room.generated.h"
 
 class ADungeonGeneratorBase;
 class ARoomLevel;
-class URoomData;
 class ADoor;
 class URoomCustomData;
 class ULevelStreamingDynamic;
 
+// I made this struct instead of a map to allow replication over network.
 USTRUCT()
 struct FCustomDataPair
 {
@@ -99,7 +103,7 @@ public:
 // The room instances of the dungeon.
 // Holds data specific to each room instance, e.g. location, direction, is player inside, room custom data, etc.
 UCLASS(BlueprintType, meta = (ShortToolTip = "The room instances of the dungeon."))
-class PROCEDURALDUNGEON_API URoom : public UReplicableObject, public IReadOnlyRoom
+class PROCEDURALDUNGEON_API URoom : public UReplicableObject, public IReadOnlyRoom, public IDungeonCustomSerialization, public IDungeonSaveInterface
 {
 	GENERATED_BODY()
 
@@ -107,13 +111,13 @@ public:
 	// TODO: Make them private
 	UPROPERTY()
 	ULevelStreamingDynamic* Instance {nullptr};
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, SaveGame)
 	FIntVector Position {0};
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, SaveGame)
 	EDoorDirection Direction {EDoorDirection::NbDirection};
 
 	//~ Begin IReadOnlyRoom Interface
-	virtual const URoomData* GetRoomData() const override { return RoomData; }
+	virtual const URoomData* GetRoomData() const override { return RoomData.Get(); }
 	virtual int64 GetRoomID() const override{ return Id; }
 	virtual FIntVector GetPosition() const { return Position; }
 	virtual EDoorDirection GetDirection() const { return Direction; }
@@ -122,6 +126,16 @@ public:
 	virtual FVector GetBoundsCenter() const override;
 	virtual FVector GetBoundsExtent() const override;
 	//~ End IReadOnlyRoom Interface
+
+	//~ Begin IDungeonCustomSerialization Interface
+	virtual bool SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading) override;
+	virtual bool FixupReferences(UObject* Context) override;
+	//~ End IDungeonCustomSerialization Interface
+
+	//~ Begin IDungeonSaveInterface Interface
+	virtual void PreSaveDungeon_Implementation() override;
+	virtual void PostLoadDungeon_Implementation() override;
+	//~ End IDungeonSaveInterface Interface
 
 	const ADungeonGeneratorBase* Generator() const { return GeneratorOwner.Get(); }
 	void SetPlayerInside(bool PlayerInside);
@@ -167,11 +181,13 @@ public:
 	bool HasCustomData_BP(const TSubclassOf<URoomCustomData>& DataType);
 
 	bool CreateCustomData(const TSubclassOf<URoomCustomData>& DataType);
+	bool CreateAllCustomData();
 	bool GetCustomData(const TSubclassOf<URoomCustomData>& DataType, URoomCustomData*& Data) const;
 	bool HasCustomData(const TSubclassOf<URoomCustomData>& DataType) const;
 
 	// Returns the RandomStream from the Dungeon Generator
-	UFUNCTION(BlueprintCallable, Category = "Room")
+	// [DEPRECATED] Use a DeterministicRandom component on actors instead.
+	UFUNCTION(BlueprintCallable, Category = "Room", meta = (DeprecatedFunction, DeprecationMessage = "Use a DeterministicRandom component on actors instead."))
 	FRandomStream GetRandomStream() const;
 
 	// Get the door actor from a specific index.
@@ -209,8 +225,8 @@ public:
 	void GetDoorsWith(const URoom* OtherRoom, TArray<ADoor*>& Doors) const;
 
 private:
-	UPROPERTY(ReplicatedUsing = OnRep_RoomData)
-	URoomData* RoomData {nullptr};
+	UPROPERTY(ReplicatedUsing = OnRep_RoomData, SaveGame)
+	TSoftObjectPtr<URoomData> RoomData {nullptr};
 
 	UPROPERTY(Replicated, Transient)
 	TArray<FCustomDataPair> CustomData;
@@ -221,14 +237,14 @@ private:
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ADungeonGeneratorBase> GeneratorOwner {nullptr};
 
-	UPROPERTY(ReplicatedUsing = OnRep_Id)
+	UPROPERTY(ReplicatedUsing = OnRep_Id, SaveGame)
 	int64 Id {-1};
 
 	bool bPlayerInside {false};
 	bool bIsVisible {true};
 	bool bForceVisible {false};
 
-	UPROPERTY(ReplicatedUsing = OnRep_IsLocked)
+	UPROPERTY(ReplicatedUsing = OnRep_IsLocked, SaveGame)
 	bool bIsLocked {false};
 
 	const FCustomDataPair* GetDataPair(const TSubclassOf<URoomCustomData>& DataType) const;
@@ -309,4 +325,22 @@ private:
 	// Utility functions to load/unload level instances
 	static ULevelStreamingDynamic* LoadInstance(UObject* WorldContextObject, const TSoftObjectPtr<UWorld>& Level, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation);
 	static void UnloadInstance(ULevelStreamingDynamic* Instance);
+
+private:
+	using FActorSaveDataMap = TMap<FGuid, TArray<uint8>>;
+
+	// This struct holds the data applied at later stages of the loading process.
+	// For example, it holds the connection indices, that will be used later to resolve the connection references.
+	struct FSaveData
+	{
+		TArray<int32> ConnectionIds;
+		TArray<uint8> LevelActor;
+		FActorSaveDataMap Actors;
+	};
+
+	// This is a unique ptr so we have a data only when we need it.
+	TUniquePtr<FSaveData> SaveData {nullptr};
+
+	bool SerializeLevelActors(FSaveData& Data, bool bIsLoading);
+	void DispatchCallbackToSavedLevelActors(TFunction<void(AActor*)> Callback) const;
 };
