@@ -362,6 +362,11 @@ private:
 	bool bUseJsonSave {false};
 #endif
 
+	// If true, the generator will manage the default UE navmesh system to rebuild it at the end of a generation.
+	// If false, the generator will do nothing with the navigation system.
+	UPROPERTY(EditAnywhere, AdvancedDisplay, Category = "Procedural Generation", meta = (AllowPrivateAccess = true))
+	bool bRebuildNavmesh {true};
+
 	EGenerationState CurrentState {EGenerationState::Idle};
 	EGeneratorFlags Flags {EGeneratorFlags::None};
 
