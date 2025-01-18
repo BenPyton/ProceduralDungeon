@@ -168,7 +168,7 @@ void URoom::Instantiate(UWorld* World)
 		{
 			offset = GeneratorOwner->GetDungeonOffset();
 			rotation = GeneratorOwner->GetDungeonRotation();
-			InstanceName.Appendf(TEXT("_%d_%d"), GeneratorOwner->GetUniqueId(), GeneratorOwner->GetGeneration());
+			InstanceName.Appendf(TEXT("_%s_%d"), *GeneratorOwner->GetGuid().ToString(), GeneratorOwner->GetSeed());
 		}
 		InstanceName.Appendf(TEXT("_%d"), Id);
 

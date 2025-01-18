@@ -42,8 +42,6 @@
 #include "DungeonSaveProxyArchive.h"
 #include "Utils/DungeonSaveUtils.h"
 
-uint32 ADungeonGeneratorBase::GeneratorCount = 0;
-
 #if UE_VERSION_OLDER_THAN(5, 5, 0)
 #define SetNetUpdateFrequency(X) NetUpdateFrequency = X
 #endif
@@ -79,7 +77,6 @@ ADungeonGeneratorBase::ADungeonGeneratorBase()
 	SeedType = ESeedType::Random;
 	Seed = 123456789; // default Seed
 	SeedIncrement = 123456; // default Seed increment
-	UniqueId = GeneratorCount++; // TODO: make it better than a static increment. It can be increased very quickly in editor when we move an actor.
 	bUseGeneratorTransform = false;
 
 	bAlwaysRelevant = true;
@@ -99,7 +96,6 @@ void ADungeonGeneratorBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	FDoRepLifetimeParams Params;
 	Params.bIsPushBased = true;
 	DOREPLIFETIME_WITH_PARAMS(ADungeonGeneratorBase, Seed, Params);
-	DOREPLIFETIME_WITH_PARAMS(ADungeonGeneratorBase, Generation, Params);
 }
 
 bool ADungeonGeneratorBase::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
@@ -504,7 +500,6 @@ void ADungeonGeneratorBase::OnStateBegin(EGenerationState State)
 		DungeonLog_Info("======= Begin Dungeon Generation =======");
 		check(HasAuthority()); // should never generate on clients!
 		FlushNetDormancy();
-		++Generation;
 		UpdateSeed();
 		if (!CreateDungeon())
 		{

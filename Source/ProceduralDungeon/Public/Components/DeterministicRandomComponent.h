@@ -44,6 +44,8 @@ protected:
 	virtual void OnRegister() override;
 	//~ End UActorComponent Interface
 
+	static int32 GenerateDeterministicSeed(AActor* Actor);
+
 	// This is the C++ accessor.
 	const FRandomStream& GetRandom() const { return Random; }
 

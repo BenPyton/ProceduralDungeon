@@ -327,8 +327,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dungeon Generator", meta = (CompactNodeTitle = "Seed"))
 	int32 GetSeed() const;
 
-	uint32 GetUniqueId() const { return UniqueId; }
-	uint64 GetGeneration() const { return Generation; }
+	FGuid GetGuid() const { return Id; }
 
 	inline bool UseGeneratorTransform() const { return bUseGeneratorTransform; }
 	FVector GetDungeonOffset() const;
@@ -349,9 +348,6 @@ private:
 	UPROPERTY(Replicated, EditAnywhere, SaveGame, Category = "Procedural Generation|Seed", meta = (EditCondition = "SeedType!=ESeedType::Random", EditConditionHides))
 	uint32 Seed;
 
-	// @TODO: It's useless if we remove the UniqueId in favor to the Guid.
-	static uint32 GeneratorCount;
-
 	UPROPERTY(BlueprintReadOnly, Category = "Dungeon Generator", meta = (DisplayName = "Random Stream", AllowPrivateAccess = true))
 	FRandomStream Random;
 
@@ -369,12 +365,6 @@ private:
 
 	EGenerationState CurrentState {EGenerationState::Idle};
 	EGeneratorFlags Flags {EGeneratorFlags::None};
-
-	// @TODO: maybe remove the unique ID to use only the Guid instead?
-	uint32 UniqueId;
-
-	UPROPERTY(Replicated, Transient)
-	uint64 Generation {0};
 
 	// Set to avoid adding increment the seed after we've set manually the seed
 	bool bShouldIncrement {false};
