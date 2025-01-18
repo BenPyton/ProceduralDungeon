@@ -578,7 +578,7 @@ void ADungeonGeneratorBase::OnStateEnd(EGenerationState State)
 		OnPreGeneration();
 
 		nav = UNavigationSystemV1::GetCurrent(GetWorld());
-		if (nullptr != nav)
+		if (nullptr != nav && bRebuildNavmesh)
 		{
 			// Lock navmesh rebuild, so we don't trigger a rebuild for each room loaded/unloaded
 			DungeonLog_Debug("Lock navmesh update/rebuild");
@@ -612,7 +612,7 @@ void ADungeonGeneratorBase::OnStateEnd(EGenerationState State)
 
 		// Try to rebuild the navmesh
 		nav = UNavigationSystemV1::GetCurrent(GetWorld());
-		if (nullptr != nav)
+		if (nullptr != nav && bRebuildNavmesh)
 		{
 			DungeonLog_Info("Rebuild navmesh");
 
