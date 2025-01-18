@@ -54,13 +54,13 @@ void UDeterministicRandomComponent::OnRegister()
 		}
 	}
 
-	FGuid ActorGuid = IRoomActorGuid::GetActorGuid(OwnerActor);
-	if (!ActorGuid.IsValid())
+	FGuid ActorGuid;
+	UObject* GuidImplementer = IRoomActorGuid::GetImplementer(OwnerActor);
+	if (IsValid(GuidImplementer))
 	{
-		DungeonLog_WarningSilent("Missing RoomActorGuid Interface implementation on actor '%s' or its components.", *GetNameSafe(OwnerActor));
-		return;
+		ActorGuid = IRoomActorGuid::Execute_GetGuid(GuidImplementer);
 	}
 
 	Random.Initialize(Random::Guid2Seed(ActorGuid, Salt));
-	DungeonLog_InfoSilent("[%s.DeterministicRandom] Initial seed set to: %d.", *GetNameSafe(OwnerActor), Random.GetInitialSeed());
+	DungeonLog_Debug("[%s] Initial seed set to: %d.", *GetNameSafe(OwnerActor), Random.GetInitialSeed());
 }

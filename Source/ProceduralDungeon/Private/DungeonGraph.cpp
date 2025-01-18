@@ -34,11 +34,7 @@
 #include "Door.h"
 #include "Engine/Level.h"
 #include "Engine/LevelStreamingDynamic.h"
-
-UDungeonGraph::UDungeonGraph()
-	: Super()
-{
-}
+#include "Utils/DungeonSaveUtils.h"
 
 void UDungeonGraph::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -78,6 +74,38 @@ void UDungeonGraph::RegisterReplicableSubobjects(bool bRegister)
 	}
 }
 
+URoomConnection* UDungeonGraph::GetConnectionByIndex(int32 Index) const
+{
+	if (!RoomConnections.IsValidIndex(Index))
+	{
+		DungeonLog_WarningSilent("Invalid index %d for RoomConnections.", Index);
+		return nullptr;
+	}
+	return RoomConnections[Index];
+}
+
+bool UDungeonGraph::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading)
+{
+	SavedData = MakeUnique<FSaveData>();
+
+	if (!bIsLoading)
+	{
+		SavedData->Rooms = TArray<URoom*>(Rooms);
+		SavedData->Connections = TArray<URoomConnection*>(RoomConnections);
+	}
+
+	SerializeUObjectArray(Record, TEXT("Rooms"), SavedData->Rooms, bIsLoading, this);
+	SerializeUObjectArray(Record, TEXT("Connections"), SavedData->Connections, bIsLoading, this);
+
+	return true;
+}
+
+void UDungeonGraph::PostLoadDungeon_Implementation()
+{
+	// Load has ended, we can safely reset the saved data.
+	SavedData.Reset();
+}
+
 void UDungeonGraph::AddRoom(URoom* Room)
 {
 	Rooms.Add(Room);
@@ -102,10 +130,8 @@ void UDungeonGraph::InitRooms()
 	// Create custom data for all rooms
 	for (URoom* Room : Rooms)
 	{
-		const URoomData* Data = Room->GetRoomData();
-		check(IsValid(Data));
-		for (auto Datum : Data->CustomData)
-			Room->CreateCustomData(Datum);
+		// @TODO: Maybe could be done during the `Room->Init()` instead?
+		Room->CreateAllCustomData();
 	}
 
 	// Finally we can initialize them all
@@ -164,11 +190,28 @@ bool UDungeonGraph::TryConnectToExistingDoors(URoom* Room)
 	return HasConnection;
 }
 
+void UDungeonGraph::RetrieveRoomsFromLoadedData()
+{
+	if (Rooms.Num() > 0)
+	{
+		DungeonLog_Error("Trying to retrieve loaded rooms while previous ones are not unloaded!");
+		return;
+	}
+
+	if (!SavedData.IsValid())
+		return;
+
+	Rooms = TArray<URoom*>(SavedData->Rooms);
+	RoomConnections = TArray<URoomConnection*>(SavedData->Connections);
+
+	IDungeonCustomSerialization::DispatchFixupReferences(this, this);
+}
+
 void UDungeonGraph::Connect(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB)
 {
 	URoomConnection* NewConnection = URoomConnection::CreateConnection(RoomA, DoorA, RoomB, DoorB, this, RoomConnections.Num());
 	RoomConnections.Add(NewConnection);
-	DungeonLog_InfoSilent("Connected %s (%d) to %s (%d)", *GetNameSafe(RoomA), DoorA, *GetNameSafe(RoomB), DoorB);
+	DungeonLog_Debug("Connected %s (%d) to %s (%d)", *GetNameSafe(RoomA), DoorA, *GetNameSafe(RoomB), DoorB);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UDungeonGraph, RoomConnections, this);
 }
 
@@ -502,7 +545,7 @@ void CopyRooms(TArray<URoom*>& To, TArray<URoom*>& From)
 	for (URoom* Room : From)
 	{
 		if(Room->Instance)
-			DungeonLog_InfoSilent("[%s] Loaded Level: %s", *GetNameSafe(Room), *GetNameSafe(Room->Instance->GetLoadedLevel()));
+			DungeonLog_Debug("[%s] Loaded Level: %s", *GetNameSafe(Room), *GetNameSafe(Room->Instance->GetLoadedLevel()));
 	}
 
 	To = TArray<URoom*>(From);
@@ -624,16 +667,16 @@ void UDungeonGraph::UnloadAllRooms()
 
 void UDungeonGraph::OnRep_Rooms()
 {
-	DungeonLog_InfoSilent("Replicated Rooms Changed! (length: %d)", ReplicatedRooms.Num());
+	DungeonLog_Debug("Replicated Rooms Changed! (length: %d)", ReplicatedRooms.Num());
 	for (int i = 0; i < ReplicatedRooms.Num(); ++i)
 	{
 		// Trigger Room List Changed only when all received rooms are valid
 		if (!IsValid(ReplicatedRooms[i]))
 			return;
 
-		DungeonLog_InfoSilent("Replicated Room [%d]: %s", i, *GetNameSafe(ReplicatedRooms[i]));
+		DungeonLog_Debug("Replicated Room [%d]: %s", i, *GetNameSafe(ReplicatedRooms[i]));
 	}
 
-	DungeonLog_InfoSilent("Trigger Dungeon Reload!");
+	DungeonLog_Debug("Trigger Dungeon Reload!");
 	MarkDirty();
 }

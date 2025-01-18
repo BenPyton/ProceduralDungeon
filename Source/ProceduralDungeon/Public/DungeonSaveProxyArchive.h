@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Benoit Pelletier
+ * Copyright (c) 2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,36 @@
  * SOFTWARE.
  */
 
-#include "RoomVisibilityComponent.h"
-#include "ProceduralDungeonUtils.h"
-#include "ProceduralDungeonLog.h"
-#include "RoomLevel.h"
+#pragma once
 
-URoomVisibilityComponent::URoomVisibilityComponent()
-	: Super()
-{
-}
+#include "Serialization/ObjectAndNameAsStringProxyArchive.h"
+#include "Templates/SubclassOf.h"
+#include "Serialization/StructuredArchive.h"
 
-void URoomVisibilityComponent::OnRoomEnter_Implementation(ARoomLevel* RoomLevel)
+// Archive proxy specialized for the dungeon.
+struct FDungeonSaveProxyArchive : public FObjectAndNameAsStringProxyArchive
 {
-	DungeonLog_Debug("[Visibility] '%s' Enters Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, true);
-}
+public:
+	FDungeonSaveProxyArchive(FArchive& InInnerArchive)
+		: FObjectAndNameAsStringProxyArchive(InInnerArchive, true)
+	{
+		ArIsSaveGame = true;
+		//ArNoDelta = true;
+	}
 
-void URoomVisibilityComponent::OnRoomExit_Implementation(ARoomLevel* RoomLevel)
-{
-	DungeonLog_Debug("[Visibility] '%s' Exits Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, false);
-}
+	virtual FArchive& operator<<(FSoftObjectPath& Value) override
+	{
+		// Calls Value.SerializePath()
+		FObjectAndNameAsStringProxyArchive::operator<<(Value);
+
+		UE_LOG(LogTemp, Warning, TEXT("Custom serialization of a SoftObjectPath!"));
+
+		// If we have a defined core redirect, make sure that it's applied
+		if (IsLoading() && !Value.IsNull())
+		{
+			Value.FixupCoreRedirects();
+		}
+
+		return *this;
+	}
+};

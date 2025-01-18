@@ -26,6 +26,8 @@
 
 #include "ReplicableObject.h"
 #include "ProceduralDungeonTypes.h"
+#include "Interfaces/DungeonCustomSerialization.h"
+#include "Interfaces/DungeonSaveInterface.h"
 #include "RoomConnection.generated.h"
 
 class URoom;
@@ -33,9 +35,20 @@ class ADoor;
 
 // A DungeonGraph subobject that represents a connection between two rooms.
 UCLASS()
-class URoomConnection : public UReplicableObject
+class PROCEDURALDUNGEON_API URoomConnection : public UReplicableObject, public IDungeonCustomSerialization, public IDungeonSaveInterface
 {
 	GENERATED_BODY()
+
+public:
+	//~ Begin IDungeonCustomSerialization Interface
+	virtual bool SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading) override;
+	virtual bool FixupReferences(UObject* Context) override;
+	//~ End IDungeonCustomSerialization Interface
+
+	//~ Begin IDungeonSaveInterface Interface
+	virtual void PreSaveDungeon_Implementation() override;
+	virtual void PostLoadDungeon_Implementation() override;
+	//~ End IDungeonSaveInterface Interface
 
 public:
 	int32 GetID() const;
@@ -69,27 +82,38 @@ private:
 	void OnRep_RoomB();
 
 private:
-	UPROPERTY(ReplicatedUsing = OnRep_ID)
+	UPROPERTY(ReplicatedUsing = OnRep_ID, SaveGame)
 	int32 ID {-1};
 
 	UPROPERTY(ReplicatedUsing = OnRep_RoomA)
 	TWeakObjectPtr<URoom> RoomA {nullptr};
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, SaveGame)
 	int32 RoomADoorId {-1};
 
 	UPROPERTY(ReplicatedUsing = OnRep_RoomB)
 	TWeakObjectPtr<URoom> RoomB {nullptr};
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, SaveGame)
 	int32 RoomBDoorId {-1};
 
 	UPROPERTY()
 	TSubclassOf<ADoor> DoorClass {nullptr};
 
-	UPROPERTY()
+	UPROPERTY(SaveGame)
 	bool bFlipped {false};
 
 	UPROPERTY(Replicated, Transient)
 	TWeakObjectPtr<ADoor> DoorInstance {nullptr};
+
+private:
+	// Store temporary data used only during saving/loading the game
+	struct FSaveData
+	{
+		int64 RoomAID {-1};
+		int64 RoomBID {-1};
+		TArray<uint8> DoorSavedData;
+	};
+
+	TUniquePtr<FSaveData> SaveData {nullptr};
 };

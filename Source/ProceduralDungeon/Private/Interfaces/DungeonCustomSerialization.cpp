@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Benoit Pelletier
+ * Copyright (c) 2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,23 @@
  * SOFTWARE.
  */
 
-#include "RoomVisibilityComponent.h"
-#include "ProceduralDungeonUtils.h"
+#include "Interfaces/DungeonCustomSerialization.h"
 #include "ProceduralDungeonLog.h"
-#include "RoomLevel.h"
+#include "ProceduralDungeonUtils.h"
 
-URoomVisibilityComponent::URoomVisibilityComponent()
-	: Super()
+bool IDungeonCustomSerialization::DispatchFixupReferences(UObject* Obj, UObject* Context)
 {
-}
+	check(IsValid(Obj));
+	DungeonLog_Debug("[BEGIN] Dispatch 'Fixup References' function from object '%s'.", *GetNameSafe(Obj));
 
-void URoomVisibilityComponent::OnRoomEnter_Implementation(ARoomLevel* RoomLevel)
-{
-	DungeonLog_Debug("[Visibility] '%s' Enters Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, true);
-}
+	ObjectUtils::DispatchToObjectAndSubobjects(Obj, [Context](UObject* O) {
+		auto* Custom = Cast<IDungeonCustomSerialization>(O);
+		if (nullptr != Custom)
+		{
+			Custom->FixupReferences(Context);
+		}
+	});
 
-void URoomVisibilityComponent::OnRoomExit_Implementation(ARoomLevel* RoomLevel)
-{
-	DungeonLog_Debug("[Visibility] '%s' Exits Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, false);
+	DungeonLog_Debug("[END] Dispatch 'Fixup References' function from object '%s'.", *GetNameSafe(Obj));
+	return true;
 }

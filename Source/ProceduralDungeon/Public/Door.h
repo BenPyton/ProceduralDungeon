@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,9 @@ public:
 
 	const UDoorType* GetDoorType() const { return Type; }
 
+	bool ShouldBeOpened() const { return bShouldBeOpen; }
+	bool ShouldBeLocked() const { return bShouldBeLocked; }
+
 protected:
 	UFUNCTION()
 	virtual void OnDoorLock() {}
@@ -85,10 +88,10 @@ protected:
 	bool bLocked {false};
 	bool bIsOpen {false};
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, SaveGame)
 	bool bShouldBeLocked {false};
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, SaveGame)
 	bool bShouldBeOpen {false};
 
 	// The two connected rooms to this door
@@ -97,10 +100,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Door")
 	URoom* RoomB {nullptr};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door", meta = (DisplayName = "Always Visible"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Door", meta = (DisplayName = "Always Visible"))
 	bool bAlwaysVisible {false};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door", meta = (DisplayName = "Always Unlocked"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Door", meta = (DisplayName = "Always Unlocked"))
 	bool bAlwaysUnlocked {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door", meta = (DisplayName = "Door Type"))

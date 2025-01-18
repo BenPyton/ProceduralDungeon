@@ -63,7 +63,7 @@ void ObjectReplaced(const FCoreUObjectDelegates::FReplacementObjectMap& Replacem
 
 		// Fixup Room reference not properly carried over during actor replacement process
 		NewActor->Init(RoomInstance);
-		DungeonLog_InfoSilent("Fixed Room reference ('%s' -> '%s')", *GetNameSafe(OldActor), *GetNameSafe(NewActor));
+		DungeonLog_Debug("Fixed Room reference ('%s' -> '%s')", *GetNameSafe(OldActor), *GetNameSafe(NewActor));
 	}
 }
 #endif
@@ -76,7 +76,7 @@ void FProceduralDungeonModule::StartupModule()
 
 #if ACTOR_REPLACEMENT_FIX_HACK
 	ObjectReplacedHandle = FCoreUObjectDelegates::OnObjectsReinstanced.AddStatic(ObjectReplaced);
-	DungeonLog_InfoSilent("Use Actor Replacement Hack");
+	DungeonLog_Debug("Use Actor Replacement Hack");
 #endif
 }
 

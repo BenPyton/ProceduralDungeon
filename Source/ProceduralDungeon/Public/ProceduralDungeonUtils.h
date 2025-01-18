@@ -114,10 +114,10 @@ namespace Random
 	uint32 PROCEDURALDUNGEON_API Guid2Seed(FGuid Guid, int64 Salt);
 }
 
-namespace World
+namespace WorldUtils
 {
-	template<class T>
-	static void FindAllActors(UWorld* InWorld, TArray<T*>& OutActors)
+	template<class T UE_REQUIRES(TIsDerivedFrom<T, AActor>::Value)>
+	void FindAllActors(UWorld* InWorld, TArray<T*>& OutActors)
 	{
 		OutActors.Empty();
 		for (TActorIterator<T> It(InWorld); It; ++It)
@@ -127,8 +127,8 @@ namespace World
 		}
 	}
 
-	template<class T>
-	static void FindAllActorsByPredicate(UWorld* InWorld, TArray<T*>& OutActors, TFunction<bool(const T*)> Predicate)
+	template<class T UE_REQUIRES(TIsDerivedFrom<T, AActor>::Value)>
+	void FindAllActorsByPredicate(UWorld* InWorld, TArray<T*>& OutActors, TFunction<bool(const T*)> Predicate)
 	{
 		OutActors.Empty();
 		for (TActorIterator<T> It(InWorld); It; ++It)
@@ -140,4 +140,20 @@ namespace World
 			}
 		}
 	}
+
+	template<typename U, class T UE_REQUIRES(TIsDerivedFrom<T, AActor>::Value)>
+	void MapActors(UWorld* InWorld, TMap<U, T*>& OutActorMap, TFunction<U(const T*)> MapFunction)
+	{
+		OutActorMap.Empty();
+		for (TActorIterator<T> It(InWorld); It; ++It)
+		{
+			T* Actor = *It;
+			OutActorMap.Add(MapFunction(Actor), Actor);
+		}
+	}
+}
+
+namespace ObjectUtils
+{
+	void PROCEDURALDUNGEON_API DispatchToObjectAndSubobjects(UObject* Obj, TFunction<void(UObject*)> Func, int32 Depth = 0);
 }

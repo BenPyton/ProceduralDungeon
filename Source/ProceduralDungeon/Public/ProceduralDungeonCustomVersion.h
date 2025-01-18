@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Benoit Pelletier
+ * Copyright (c) 2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,26 @@
  * SOFTWARE.
  */
 
-#include "RoomVisibilityComponent.h"
-#include "ProceduralDungeonUtils.h"
-#include "ProceduralDungeonLog.h"
-#include "RoomLevel.h"
+#pragma once
 
-URoomVisibilityComponent::URoomVisibilityComponent()
-	: Super()
-{
-}
+#include "CoreMinimal.h"
+#include "Misc/Guid.h"
 
-void URoomVisibilityComponent::OnRoomEnter_Implementation(ARoomLevel* RoomLevel)
+// Custom serialization version for Procedural Dungeon
+struct FProceduralDungeonCustomVersion
 {
-	DungeonLog_Debug("[Visibility] '%s' Enters Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, true);
-}
+	enum Type
+	{
+		// Before any version changes were made
+		InitialVersion = 0,
 
-void URoomVisibilityComponent::OnRoomExit_Implementation(ARoomLevel* RoomLevel)
-{
-	DungeonLog_Debug("[Visibility] '%s' Exits Room: %s", *GetNameSafe(GetOwner()), *GetNameSafe(RoomLevel));
-	RegisterVisibilityDelegate(RoomLevel, false);
-}
+		// -----<new versions can be added above this line>-------------------------------------------------
+		VersionPlusOne,
+		LatestVersion = VersionPlusOne - 1
+	};
+
+	// The GUID for this custom version number
+	PROCEDURALDUNGEON_API const static FGuid GUID;
+
+	FProceduralDungeonCustomVersion() = delete;
+};

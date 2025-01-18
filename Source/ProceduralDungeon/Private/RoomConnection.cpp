@@ -30,6 +30,8 @@
 #include "Utils/ReplicationUtils.h"
 #include "ProceduralDungeonLog.h"
 #include "Engine/Engine.h"
+#include "Interfaces/RoomContainer.h"
+#include "Utils/DungeonSaveUtils.h"
 
 void URoomConnection::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -45,6 +47,81 @@ void URoomConnection::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME_WITH_PARAMS(URoomConnection, RoomB, Params);
 	DOREPLIFETIME_WITH_PARAMS(URoomConnection, RoomBDoorId, Params);
 	DOREPLIFETIME_WITH_PARAMS(URoomConnection, DoorInstance, Params);
+}
+
+
+bool URoomConnection::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading)
+{
+	check(!SaveData.IsValid());
+	SaveData = MakeUnique<FSaveData>();
+
+	if (!bIsLoading)
+	{
+		TSoftObjectPtr<URoom> RoomAWeak(RoomA.Get());
+		TSoftObjectPtr<URoom> RoomBWeak(RoomB.Get());
+		SaveData->RoomAID = RoomA.IsValid() ? RoomA->GetRoomID() : -1;
+		SaveData->RoomBID = RoomB.IsValid() ? RoomB->GetRoomID() : -1;
+
+		// Serializing the door instance's properties only during the save here.
+		// The properties will be loaded back when the door is spawned.
+		SerializeUObject(SaveData->DoorSavedData, DoorInstance.Get(), false);
+	}
+
+	Record.EnterField(TEXT("RoomA")) << SaveData->RoomAID;
+	Record.EnterField(TEXT("RoomB")) << SaveData->RoomBID;
+
+	Record.EnterField(TEXT("DoorClass")) << DoorClass;
+	Record.EnterField(TEXT("DoorProperties")) << SaveData->DoorSavedData;
+
+	if (bIsLoading)
+	{
+		DungeonLog_Debug("[%s] Loaded DoorClass: %s", *GetNameSafe(this), *GetNameSafe(DoorClass));
+	}
+
+	if (!bIsLoading)
+	{
+		// No need to keep the saved data after saving.
+		SaveData.Reset();
+	}
+
+	return true;
+}
+
+bool URoomConnection::FixupReferences(UObject* Context)
+{
+	check(SaveData.IsValid());
+
+	auto* RoomContainer = Cast<IRoomContainer>(Context);
+	if (RoomContainer == nullptr)
+	{
+		DungeonLog_Error("[%s] Failed to fixup RoomConnection references: Context is not a RoomContainer.", *GetNameSafe(this));
+		return false;
+	}
+
+	RoomA = RoomContainer->GetRoomByIndex(SaveData->RoomAID);
+	RoomB = RoomContainer->GetRoomByIndex(SaveData->RoomBID);
+
+	DungeonLog_Debug("[%s] Fixed up RoomConnection references: RoomA=%s, RoomB=%s", *GetNameSafe(this), *GetNameSafe(RoomA.Get()), *GetNameSafe(RoomB.Get()));
+
+	return true;
+}
+
+void URoomConnection::PreSaveDungeon_Implementation()
+{
+	if (DoorInstance.IsValid() && DoorInstance->Implements<UDungeonSaveInterface>())
+	{
+		IDungeonSaveInterface::Execute_PreSaveDungeon(DoorInstance.Get());
+	}
+}
+
+void URoomConnection::PostLoadDungeon_Implementation()
+{
+	SaveData.Reset();
+
+	if (DoorInstance.IsValid() && DoorInstance->Implements<UDungeonSaveInterface>())
+	{
+		IDungeonSaveInterface::Execute_PostLoadDungeon(DoorInstance.Get());
+	}
 }
 
 int32 URoomConnection::GetID() const
@@ -154,22 +231,29 @@ ADoor* URoomConnection::InstantiateDoor(UWorld* World, AActor* Owner, bool bUseO
 	Door->SetConnectingRooms(RoomA.Get(), RoomB.Get());
 	DoorInstance = Door;
 
+	if (SaveData.IsValid())
+	{
+		// Load door data back if we have some saved data.
+		SerializeUObject(SaveData->DoorSavedData, Door, true);
+		DungeonLog_Info("Loaded saved data for door '%s' (open: %d, lock: %d)", *GetNameSafe(Door), Door->ShouldBeOpened(), Door->ShouldBeLocked());
+	}
+
 	return Door;
 }
 
 void URoomConnection::OnRep_ID()
 {
-	DungeonLog_InfoSilent("[%s] RoomConnection '%s' ID replicated: %d", *GetAuthorityName(), *GetNameSafe(this), ID);
+	DungeonLog_Debug("[%s] RoomConnection '%s' ID replicated: %d", *GetAuthorityName(), *GetNameSafe(this), ID);
 }
 
 void URoomConnection::OnRep_RoomA()
 {
-	DungeonLog_InfoSilent("[%s] RoomConnection '%s' RoomA replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomA.Get()));
+	DungeonLog_Debug("[%s] RoomConnection '%s' RoomA replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomA.Get()));
 }
 
 void URoomConnection::OnRep_RoomB()
 {
-	DungeonLog_InfoSilent("[%s] RoomConnection '%s' RoomB replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomB.Get()));
+	DungeonLog_Debug("[%s] RoomConnection '%s' RoomB replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomB.Get()));
 }
 
 URoom* URoomConnection::GetOtherRoom(const URoomConnection* Conn, const URoom* FromRoom)

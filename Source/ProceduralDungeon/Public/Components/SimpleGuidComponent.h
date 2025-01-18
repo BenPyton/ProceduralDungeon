@@ -54,6 +54,7 @@ protected:
 
 	//~ Begin IRoomActorGuid Interface
 	virtual FGuid GetGuid_Implementation() const override;
+	virtual bool ShouldSaveActor_Implementation() const override;
 	//~ End IRoomActorGuid Interface
 
 	// Unfortunately I can't place them in the #if block below. UE will complain about it.
@@ -77,4 +78,7 @@ protected:
 public:
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, NonPIEDuplicateTransient, TextExportTransient, Category = "Guid")
 	FGuid Guid;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Dungeon Save")
+	bool bSaveActorInDungeon {true};
 };

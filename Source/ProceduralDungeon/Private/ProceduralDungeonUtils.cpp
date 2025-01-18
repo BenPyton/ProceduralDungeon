@@ -25,6 +25,7 @@
 #include "ProceduralDungeonUtils.h"
 #include "ProceduralDungeonSettings.h"
 #include "Room.h"
+#include "ProceduralDungeonLog.h"
 
 FIntVector IntVector::Min(const FIntVector& A, const FIntVector& B)
 {
@@ -210,4 +211,22 @@ uint32 Random::Guid2Seed(FGuid Guid, int64 Salt)
 	State *= 12605985483714917081u;		// [M] Multiplication with a really big odd number
 	State ^= State >> 43;				// [XS] Xorshifting 1/3 of the top bits to the 1/3 of the lower bits
 	return static_cast<uint32>(State ^ (State >> 32)); // Folding the top half for the result on the bottom half to convert into a 32bit output.
+}
+
+void ObjectUtils::DispatchToObjectAndSubobjects(UObject* Obj, TFunction<void(UObject*)> Func, int32 Depth)
+{
+	// Calls the function on the object itself.
+	DungeonLog_Debug("[%d] - Dispatch function to object '%s'.", Depth, *GetNameSafe(Obj));
+	Func(Obj);
+
+	// Get all direct subobjects of this object.
+	TArray<UObject*> Subobjects;
+	GetObjectsWithOuter(Obj, Subobjects, /*bIncludeNestedObjects = */false);
+
+	++Depth;
+	// Recursively dispatch to all subobjects found.
+	for (UObject* Sub : Subobjects)
+	{
+		DispatchToObjectAndSubobjects(Sub, Func, Depth);
+	}
 }
