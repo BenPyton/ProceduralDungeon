@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,24 +61,47 @@ void ADoor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// Update door visibility
-	// TODO: this should not work with multiplayer games, because bHidden is replicated!
-	// It works only because it is updated each frame on clients too!
-	// The behavior will change if update in an event instead!
-	// So, I should find another way to hide the actor... (avoiding if possible RootComponent::SetVisible)
-	SetActorHiddenInGame(Dungeon::OcclusionCulling()
-		&& (!bAlwaysVisible
-		&& (!IsValid(RoomA) || (!RoomA->IsVisible()))
-		&& (!IsValid(RoomB) || (!RoomB->IsVisible()))));
+	// Tells if the door actor has been spawned by the dungeon generator or not.
+	// At least one of the room is valid when spawned by the dungeon generator.
+	// Both rooms are invalid if door has been spawned by another way.
+	const bool bSpawnedByDungeon = IsValid(RoomA) || IsValid(RoomB);
+
+	// The door manages itself its own visibility only when it has been spawned by the dungeon generator.
+	// If the door is placed in a RoomLevel or spawned by the user in other means, it is the responsibility
+	// of the RoomLevel or the user to manage the door's visibility.
+	if (bSpawnedByDungeon)
+	{
+		const bool bRoomAVisible = IsValid(RoomA) && RoomA->IsVisible();
+		const bool bRoomBVisible = IsValid(RoomB) && RoomB->IsVisible();
+
+		// Update door visibility
+		// A door is hidden ONLY when ALL those conditions are met:
+		// - The Room Culling is enabled.
+		// - The door is not `Always Visible`.
+		// - Both connected rooms are not visible.
+		// @TODO: this should not work with multiplayer games, because bHidden is replicated!
+		// It works only because it is updated each frame on clients too!
+		// The behavior will change if bHidden is updated once in a wile by an event instead!
+		// So, I should find another way to hide the actor... (avoiding if possible RootComponent::SetVisible)
+		SetActorHiddenInGame(Dungeon::OcclusionCulling()
+			&& !bAlwaysVisible
+			&& !(bRoomAVisible || bRoomBVisible)
+		);
+	}
 
 	// Update door's lock state
+	// A door is locked when ALL those conditions are met:
+	// - The door is not `Always Unlocked`.
+	// - The user tells the door should be locked.
+	// - The door is spawned by the dungeon generator AND one of the connected rooms is locked or missing.
 	const bool bPrevLocked = bLocked;
-	bLocked = !bAlwaysUnlocked && (bShouldBeLocked ||
-			  ((!IsValid(RoomA) || RoomA->IsLocked())
-			|| (!IsValid(RoomB) || RoomB->IsLocked())));
+	const bool bRoomALocked = !IsValid(RoomA) || RoomA->IsLocked();
+	const bool bRoomBLocked = !IsValid(RoomB) || RoomB->IsLocked();
+	bLocked = !bAlwaysUnlocked && (bShouldBeLocked || (bSpawnedByDungeon && (bRoomALocked || bRoomBLocked)));
 
 	if (bLocked != bPrevLocked)
 	{
+		DungeonLog_Debug("Door %s locked: %d", *GetNameSafe(this), bLocked);
 		if (bLocked)
 		{
 			OnDoorLock();
@@ -96,6 +119,7 @@ void ADoor::Tick(float DeltaTime)
 	bIsOpen = bShouldBeOpen && !bLocked;
 	if (bIsOpen != bPrevIsOpen)
 	{
+		DungeonLog_Debug("Door %s open: %d", *GetNameSafe(this), bIsOpen);
 		if (bIsOpen)
 		{
 			OnDoorOpen();
