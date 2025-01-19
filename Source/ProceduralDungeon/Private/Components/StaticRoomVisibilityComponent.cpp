@@ -47,7 +47,7 @@ void UStaticRoomVisibilityComponent::EndPlay(EEndPlayReason::Type Reason)
 
 bool UStaticRoomVisibilityComponent::IsVisible()
 {
-	return Dungeon::OccludeDynamicActors() ? VisibilityEnablers.Num() > 0: true;
+	return (Dungeon::OcclusionCulling() && Dungeon::OccludeDynamicActors()) ? VisibilityEnablers.Num() > 0: true;
 }
 
 void UStaticRoomVisibilityComponent::SetVisible(UObject* Owner, bool Visible)
