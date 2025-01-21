@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -149,6 +149,7 @@ public:
 	bool IsInside(const FIntVector& Cell) const;
 	bool IsInside(const FBoxMinAndMax& Other) const;
 	void Rotate(const EDoorDirection& Rot);
+	void Extend(const FBoxMinAndMax& Other);
 	FString ToString() const;
 
 	static bool Overlap(const FBoxMinAndMax& A, const FBoxMinAndMax& B);

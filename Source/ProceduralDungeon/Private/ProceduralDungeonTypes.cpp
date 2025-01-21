@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -342,6 +342,12 @@ void FBoxMinAndMax::Rotate(const EDoorDirection& Rot)
 	const FIntVector B = ::Rotate(Max, Rot) + Compensation;
 	Min = IntVector::Min(A, B);
 	Max = IntVector::Max(A, B);
+}
+
+void FBoxMinAndMax::Extend(const FBoxMinAndMax& Other)
+{
+	Min = IntVector::Min(Min, Other.Min);
+	Max = IntVector::Max(Max, Other.Max);
 }
 
 FString FBoxMinAndMax::ToString() const

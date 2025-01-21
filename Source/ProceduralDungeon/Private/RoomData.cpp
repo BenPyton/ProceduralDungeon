@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -124,10 +124,7 @@ void URoomData::CleanupRoom_Implementation(URoom* Room, UDungeonGraph* Dungeon) 
 
 FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
 {
-	FBoxCenterAndExtent Bounds = GetIntBounds().ToCenterAndExtent();
-	Bounds.Center = Transform.TransformPosition(Dungeon::RoomUnit() * Bounds.Center);
-	Bounds.Extent = Transform.TransformVector(Dungeon::RoomUnit() * Bounds.Extent).GetAbs();
-	return Bounds;
+	return Dungeon::ToWorld(GetIntBounds(), Transform);
 }
 
 FIntVector URoomData::GetSize() const

@@ -35,6 +35,7 @@
 #include "Engine/Level.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "Utils/DungeonSaveUtils.h"
+#include "ProceduralDungeonUtils.h"
 
 void UDungeonGraph::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -109,6 +110,7 @@ void UDungeonGraph::PostLoadDungeon_Implementation()
 void UDungeonGraph::AddRoom(URoom* Room)
 {
 	Rooms.Add(Room);
+	UpdateBounds(Room);
 }
 
 void UDungeonGraph::InitRooms()
@@ -205,6 +207,8 @@ void UDungeonGraph::RetrieveRoomsFromLoadedData()
 	RoomConnections = TArray<URoomConnection*>(SavedData->Connections);
 
 	IDungeonCustomSerialization::DispatchFixupReferences(this, this);
+
+	RebuildBounds();
 }
 
 void UDungeonGraph::Connect(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB)
@@ -345,6 +349,28 @@ URoom* UDungeonGraph::GetRoomAt(FIntVector RoomCell) const
 	return URoom::GetRoomAt(RoomCell, Rooms);
 }
 
+FVector UDungeonGraph::GetDungeonBoundsCenter() const
+{
+	FTransform Transform = Generator.IsValid() ? Generator->GetDungeonTransform() : FTransform::Identity;
+	return GetDungeonBounds(Transform).Center;
+}
+
+FVector UDungeonGraph::GetDungeonBoundsExtent() const
+{
+	FTransform Transform = Generator.IsValid() ? Generator->GetDungeonTransform() : FTransform::Identity;
+	return GetDungeonBounds(Transform).Extent;
+}
+
+FBoxCenterAndExtent UDungeonGraph::GetDungeonBounds(const FTransform& Transform) const
+{
+	return Dungeon::ToWorld(Bounds, Transform);
+}
+
+FBoxMinAndMax UDungeonGraph::GetIntBounds() const
+{
+	return Bounds;
+}
+
 URoom* UDungeonGraph::GetRoomByIndex(int64 Index) const
 {
 	for (URoom* Room : Rooms)
@@ -367,6 +393,8 @@ void UDungeonGraph::Clear()
 	Rooms.Empty();
 
 	RoomConnections.Empty();
+
+	RebuildBounds();
 }
 
 int UDungeonGraph::CountRoomByPredicate(TFunction<bool(const URoom*)> Predicate) const
@@ -568,6 +596,7 @@ void UDungeonGraph::SynchronizeRooms()
 	else
 	{
 		CopyRooms(Rooms, ReplicatedRooms);
+		RebuildBounds();
 	}
 
 	bIsDirty = false;
@@ -662,6 +691,21 @@ void UDungeonGraph::UnloadAllRooms()
 	{
 		check(Room);
 		Room->Destroy();
+	}
+}
+
+void UDungeonGraph::UpdateBounds(const URoom* Room)
+{
+	check(IsValid(Room));
+	Bounds.Extend(Room->GetIntBounds());
+}
+
+void UDungeonGraph::RebuildBounds()
+{
+	Bounds = FBoxMinAndMax();
+	for (const URoom* Room : Rooms)
+	{
+		UpdateBounds(Room);
 	}
 }
 

@@ -31,6 +31,7 @@
 #include "Interfaces/DungeonSaveInterface.h"
 #include "Templates/SubclassOf.h"
 #include "Templates/Function.h"
+#include "ProceduralDungeonTypes.h"
 #include "DungeonGraph.generated.h"
 
 class URoom;
@@ -170,6 +171,20 @@ public:
 
 	URoom* GetRoomAt(FIntVector RoomCell) const;
 
+	// Returns the center of the bounding box of the dungeon.
+	// @see GetDungeonBoundsExtents
+	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
+	FVector GetDungeonBoundsCenter() const;
+
+	// Returns the extent (half size) of the bounding box of the dungeon.
+	// @see GetDungeonBoundsCenter
+	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
+	FVector GetDungeonBoundsExtent() const;
+
+	// Returns the computed dungeon bounds.
+	class FBoxCenterAndExtent GetDungeonBounds(const FTransform& Transform = FTransform::Identity) const;
+	struct FBoxMinAndMax GetIntBounds() const;
+
 	// Returns in OutRooms all the rooms in the Distance from each InRooms and optionally apply Func on each rooms.
 	// Distance is the number of room connection between 2 rooms, not the distance in any unit.
 	static void TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* OutRooms, uint32 Distance, TFunction<void(URoom*)> Func);
@@ -209,6 +224,12 @@ protected:
 
 	void MarkDirty() { bIsDirty = true; }
 
+	// Extends the bounds if necessary to include the provided room.
+	void UpdateBounds(const URoom* Room);
+
+	// Recreate the bounds using the whole room list.
+	void RebuildBounds();
+
 private:
 	UPROPERTY(Transient)
 	TArray<URoom*> Rooms;
@@ -232,6 +253,9 @@ private:
 	// - Use an interface that provides a random stream => good way to not induce breaking changes in the code.
 	// - Pass the random stream as an input to that function => will need to make some changes in existing projects.
 	TWeakObjectPtr<ADungeonGeneratorBase> Generator {nullptr};
+
+	// Transient. The computed bounds of the dungeon. Updated each time the room list changes.
+	FBoxMinAndMax Bounds;
 
 private:
 	struct FSaveData

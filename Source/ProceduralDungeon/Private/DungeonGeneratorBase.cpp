@@ -41,6 +41,7 @@
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "DungeonSaveProxyArchive.h"
 #include "Utils/DungeonSaveUtils.h"
+#include "DrawDebugHelpers.h"
 
 #if UE_VERSION_OLDER_THAN(5, 5, 0)
 #define SetNetUpdateFrequency(X) NetUpdateFrequency = X
@@ -270,7 +271,7 @@ bool ADungeonGeneratorBase::TryPlaceRoom(URoom* const& Room, int DoorIndex, cons
 	Room->SetPositionAndRotationFromDoor(DoorIndex, TargetDoor.Position, TargetDoor.Direction);
 
 	// Test if it fits in the place
-	bool bCanBePlaced = !URoom::Overlap(*Room, Graph->Rooms);
+	bool bCanBePlaced = !URoom::Overlap(*Room, Graph->GetAllRooms());
 
 	// Check that it does not collide with the world too
 	if (bCanBePlaced && bUseWorldCollisionChecks)
@@ -323,7 +324,7 @@ bool ADungeonGeneratorBase::AddRoomToDungeon(URoom* const& Room, const TArray<in
 		return false;
 	}
 
-	Graph->Rooms.Add(Room);
+	Graph->AddRoom(Room);
 	OnRoomAdded(Room->GetRoomData(), Room);
 	return true;
 }
@@ -438,7 +439,7 @@ void ADungeonGeneratorBase::Reset()
 void ADungeonGeneratorBase::UpdateOctree()
 {
 	Octree->Destroy();
-	for (URoom* r : Graph->Rooms)
+	for (URoom* r : Graph->GetAllRooms())
 	{
 		check(IsValid(r));
 		FBoxCenterAndExtent bounds = r->GetBounds();
@@ -471,6 +472,19 @@ void ADungeonGeneratorBase::UpdateSeed()
 	}
 
 	DungeonLog_Info("Seed: %d", Seed);
+}
+
+// @TODO: Place the debug draw in an editor module of the plugin?
+void ADungeonGeneratorBase::DrawDebug() const
+{
+#if ENABLE_DRAW_DEBUG
+	if (!Dungeon::DrawDebug() || !bDrawDebugDungeonBounds)
+		return;
+
+	const FTransform& Transform = GetDungeonTransform();
+	FBoxCenterAndExtent DungeonBounds = Graph->GetDungeonBounds(Transform);
+	DrawDebugBox(GetWorld(), DungeonBounds.Center, DungeonBounds.Extent, Transform.GetRotation(), FColor::Yellow);
+#endif
 }
 
 /*
@@ -541,6 +555,7 @@ void ADungeonGeneratorBase::OnStateTick(EGenerationState State)
 	{
 	case EGenerationState::Idle:
 		UpdateRoomVisibility();
+		DrawDebug();
 		if (Graph->IsDirty() || IsGenerating() || IsLoadingSavedDungeon())
 			SetState(EGenerationState::Unload);
 		break;

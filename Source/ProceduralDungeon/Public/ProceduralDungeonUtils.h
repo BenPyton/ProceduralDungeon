@@ -41,6 +41,9 @@ namespace IntVector
 	void PROCEDURALDUNGEON_API MinMax(const FIntVector& A, const FIntVector& B, FIntVector& OutMin, FIntVector& OutMax);
 }
 
+class FBoxCenterAndExtent;
+struct FBoxMinAndMax;
+
 namespace Dungeon
 {
 	// Returns the real world location of a point in room units
@@ -48,6 +51,12 @@ namespace Dungeon
 
 	// Returns the real world vector (no offset) of a vector in room units
 	FVector PROCEDURALDUNGEON_API ToWorldVector(FIntVector RoomVector);
+
+	// Convertthe Box from dungeon coordinate to world coordinate, applying an optional transform on it.
+	FBoxCenterAndExtent PROCEDURALDUNGEON_API ToWorld(const FBoxMinAndMax& Box, const FTransform& Transform = FTransform::Identity);
+
+	// Convertthe Box from dungeon coordinate to world coordinate, applying an optional transform on it.
+	FBoxCenterAndExtent PROCEDURALDUNGEON_API ToWorld(const FBoxCenterAndExtent& Box, const FTransform& Transform = FTransform::Identity);
 
 	// Returns the location in room units from a point in real world
 	FIntVector PROCEDURALDUNGEON_API ToRoomLocation(FVector WorldPoint);
