@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@
 #include "ProceduralDungeonSettings.h"
 #include "Room.h"
 #include "ProceduralDungeonLog.h"
+#include "Math/GenericOctree.h" // FBoxCenterAndExtent
+#include "ProceduralDungeonTypes.h" // FBoxMinAndMax
 
 FIntVector IntVector::Min(const FIntVector& A, const FIntVector& B)
 {
@@ -46,6 +48,24 @@ void IntVector::MinMax(const FIntVector& A, const FIntVector& B, FIntVector& Out
 FVector Dungeon::ToWorldLocation(FIntVector RoomPoint)
 {
 	return Dungeon::RoomUnit() * (FVector(RoomPoint) - FVector(0.5f, 0.5f, 0.0f));
+}
+
+FVector Dungeon::ToWorldVector(FIntVector RoomPoint)
+{
+	return Dungeon::RoomUnit() * FVector(RoomPoint);
+}
+
+FBoxCenterAndExtent Dungeon::ToWorld(const FBoxMinAndMax& Box, const FTransform& Transform)
+{
+	return ToWorld(Box.ToCenterAndExtent(), Transform);
+}
+
+FBoxCenterAndExtent Dungeon::ToWorld(const FBoxCenterAndExtent& Box, const FTransform& Transform)
+{
+	const FVector Unit = Dungeon::RoomUnit();
+	const FVector Center = Transform.TransformPosition(Unit * Box.Center);
+	const FVector Extent = Transform.TransformVector(Unit * Box.Extent).GetAbs();
+	return FBoxCenterAndExtent(Center, Extent);
 }
 
 FIntVector Dungeon::ToRoomLocation(FVector WorldPoint)

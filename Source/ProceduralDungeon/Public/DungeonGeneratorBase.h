@@ -289,6 +289,8 @@ private:
 	bool IsGenerating() const { return EnumHasAllFlags(Flags, EGeneratorFlags::Generating); }
 	bool IsLoadingSavedDungeon() const { return EnumHasAllFlags(Flags, EGeneratorFlags::LoadSavedDungeon); }
 
+	void DrawDebug() const;
+
 	// ===== FSM =====
 
 	void SetState(EGenerationState NewState);
@@ -356,6 +358,10 @@ private:
 	// *WARNING*: This is only available in editor and dev builds and will not change anything in packaged builds. It should be used for debugging purposes only.
 	UPROPERTY(EditAnywhere, AdvancedDisplay, Category = "Procedural Generation", meta = (AllowPrivateAccess = true))
 	bool bUseJsonSave {false};
+
+	// Draws the computed dungeon bounding box.
+	UPROPERTY(EditAnywhere, AdvancedDisplay, Category = "Procedural Generation", meta = (AllowPrivateAccess = true))
+	bool bDrawDebugDungeonBounds {false};
 #endif
 
 	// If true, the generator will manage the default UE navmesh system to rebuild it at the end of a generation.

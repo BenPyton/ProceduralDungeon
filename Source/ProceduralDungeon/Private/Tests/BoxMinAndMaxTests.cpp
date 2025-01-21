@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -129,6 +129,28 @@ bool FBoxMinAndMaxTest::RunTest(const FString& Parameters)
 		TestEqual(TEXT("Rotate(Box((-1,0,-1), (3,1,1)), S).Max == (2,1,1)"), RotBox1S.Max, FIntVector(2, 1, 1));
 		TestEqual(TEXT("Rotate(Box((-1,0,-1), (3,1,1)), W).Min == (0,-2,-1)"), RotBox1W.Min, FIntVector(0, -2, -1));
 		TestEqual(TEXT("Rotate(Box((-1,0,-1), (3,1,1)), W).Max == (1,2,1)"), RotBox1W.Max, FIntVector(1, 2, 1));
+	}
+
+	// Extend Test
+	{
+		FBoxMinAndMax BoxToExtend;
+		FBoxMinAndMax Box0({0,0,0}, {1,1,1});
+		FBoxMinAndMax Box1 = Box0 + FIntVector(1, 2, 3); // offseted box
+		FBoxMinAndMax Box2({-1, -2, -3}, {4, 5, 6});
+
+		BoxToExtend.Extend(Box0);
+		TestEqual(TEXT("Extend Box Step 1"), BoxToExtend, Box0);
+
+		// Extend the box to contain the provided box
+		BoxToExtend.Extend(Box1);
+		TestEqual(TEXT("Extend Box Step 2"), BoxToExtend, FBoxMinAndMax({0, 0, 0}, {2, 3, 4}));
+
+		BoxToExtend.Extend(Box2);
+		TestEqual(TEXT("Extend Box Step 3"), BoxToExtend, Box2);
+
+		// The extended box should not change when using a box entirely contained in it.
+		BoxToExtend.Extend(Box0);
+		TestEqual(TEXT("Extend Box Step 4"), BoxToExtend, Box2);
 	}
 
 	// IsInside(FBoxMinAndMax) Test
