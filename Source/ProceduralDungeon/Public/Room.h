@@ -32,6 +32,7 @@
 #include "Interfaces/DungeonSaveInterface.h"
 #include "UObject/SoftObjectPtr.h"
 #include "RoomData.h" // for TSoftObjectPtr to compile. @TODO: Would be great to find a way to not include it
+#include "ReadOnlyRoom.h"
 #include "Room.generated.h"
 
 class ADungeonGeneratorBase;
@@ -51,53 +52,6 @@ public:
 	UClass* DataClass {nullptr};
 	UPROPERTY()
 	URoomCustomData* Data {nullptr};
-};
-
-// This class does not need to be modified.
-UINTERFACE(MinimalAPI, BlueprintType, NotBlueprintable, meta = (CannotImplementInterfaceInBlueprint, Tooltip = "Allow access to only some members of Room instances during the generation process."))
-class UReadOnlyRoom : public UInterface
-{
-	GENERATED_BODY()
-};
-
-// Interface to access some room instance's data during the generation process.
-class PROCEDURALDUNGEON_API IReadOnlyRoom
-{
-	GENERATED_BODY()
-
-public:
-	// Returns the room data asset of this room instance.
-	UFUNCTION(BlueprintCallable, Category = "Room")
-	virtual const URoomData* GetRoomData() const { return nullptr; }
-
-	// Returns the unique ID (per-dungeon) of the room.
-	// The first room has ID 0 and then it increases in the order of placed room.
-	UFUNCTION(BlueprintCallable, Category = "Room")
-	virtual int64 GetRoomID() const { return -1ll; }
-
-	// Returns the world extents (half size) of the room.
-	UFUNCTION(BlueprintCallable, Category = "Room")
-	virtual FIntVector GetPosition() const { return FIntVector::ZeroValue; }
-
-	// Returns the world extents (half size) of the room.
-	UFUNCTION(BlueprintCallable, Category = "Room")
-	virtual EDoorDirection GetDirection() const { return EDoorDirection::North; }
-
-	// Returns true if all the doors of this room are connected to other rooms.
-	UFUNCTION(BlueprintCallable, Category = "Room")
-	virtual bool AreAllDoorsConnected() const { return false; }
-
-	// Returns true if all the doors of this room are connected to other rooms.
-	UFUNCTION(BlueprintCallable, Category = "Room")
-	virtual int CountConnectedDoors() const { return -1; }
-
-	// Returns the world center position of the room.
-	UFUNCTION(BlueprintCallable, Category = "Room")
-	virtual FVector GetBoundsCenter() const { return FVector::ZeroVector; }
-	
-	// Returns the world extents (half size) of the room.
-	UFUNCTION(BlueprintCallable, Category = "Room")
-	virtual FVector GetBoundsExtent() const { return FVector::ZeroVector; }
 };
 
 // The room instances of the dungeon.
