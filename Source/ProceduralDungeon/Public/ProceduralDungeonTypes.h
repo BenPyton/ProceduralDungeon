@@ -109,6 +109,9 @@ struct PROCEDURALDUNGEON_API FDoorDef
 	GENERATED_BODY()
 
 public:
+	static const FDoorDef Invalid;
+
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef")
 	FIntVector Position {FIntVector::ZeroValue};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef")
@@ -117,6 +120,11 @@ public:
 	class UDoorType* Type {nullptr};
 
 public:
+	FDoorDef() = default;
+	FDoorDef(const FIntVector& InPosition, EDoorDirection InDirection, class UDoorType* InType = nullptr);
+
+	bool IsValid() const;
+	operator bool() const { return IsValid(); }
 	bool operator==(const FDoorDef& Other) const;
 
 	static bool AreCompatible(const FDoorDef& A, const FDoorDef& B);
@@ -159,6 +167,7 @@ public:
 	void Rotate(const EDoorDirection& Rot);
 	void Extend(const FBoxMinAndMax& Other);
 	FString ToString() const;
+	FIntVector GetClosestPoint(const FIntVector& Point) const;
 
 	static bool Overlap(const FBoxMinAndMax& A, const FBoxMinAndMax& B);
 

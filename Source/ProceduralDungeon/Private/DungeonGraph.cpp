@@ -369,14 +369,62 @@ FVector UDungeonGraph::GetDungeonBoundsExtent() const
 	return GetDungeonBounds(Transform).Extent;
 }
 
+struct FRoomCandidatePredicate
+{
+	bool operator() (const FRoomCandidate& A, const FRoomCandidate& B) const
+	{
+		return A.Score > B.Score;
+	}
+};
+
+bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms) const
+{
+	SortedRooms.Empty();
+
+	FDoorDef TargetDoor = FromDoor.GetOpposite();
+
+	for (URoomData* RoomData : RoomList)
+	{
+		if (!IsValid(RoomData))
+			continue;
+
+		FVoxelBounds DataBounds = RoomData->GetVoxelBounds();
+
+		// Try each possible door
+		for (int i = 0; i < RoomData->GetNbDoor(); ++i)
+		{
+			FDoorDef Door = RoomData->Doors[i];
+			if (!FDoorDef::AreCompatible(TargetDoor, Door))
+				continue;
+
+			// Create a new bounds placed at the target door
+			EDoorDirection Direction = TargetDoor.Direction - Door.Direction;
+			FVoxelBounds NewBounds = Rotate(DataBounds, Direction);;
+			NewBounds += TargetDoor.Position - Rotate(Door.Position, Direction);
+
+			FRoomCandidate Candidate;
+			Candidate.Data = RoomData;
+			Candidate.DoorIndex = i;
+
+			// Check if the room can fit
+			if (!NewBounds.GetCompatibilityScore(Bounds, Candidate.Score))
+				continue;
+
+			SortedRooms.HeapPush(Candidate, FRoomCandidatePredicate());
+		}
+	}
+
+	return SortedRooms.Num() > 0;
+}
+
 FBoxCenterAndExtent UDungeonGraph::GetDungeonBounds(const FTransform& Transform) const
 {
-	return Dungeon::ToWorld(Bounds, Transform);
+	return Dungeon::ToWorld(Bounds.GetBounds(), Transform);
 }
 
 FBoxMinAndMax UDungeonGraph::GetIntBounds() const
 {
-	return Bounds;
+	return Bounds.GetBounds();
 }
 
 URoom* UDungeonGraph::GetRoomByIndex(int64 Index) const
@@ -705,12 +753,12 @@ void UDungeonGraph::UnloadAllRooms()
 void UDungeonGraph::UpdateBounds(const URoom* Room)
 {
 	check(IsValid(Room));
-	Bounds.Extend(Room->GetIntBounds());
+	Bounds += Room->GetVoxelBounds();
 }
 
 void UDungeonGraph::RebuildBounds()
 {
-	Bounds = FBoxMinAndMax();
+	Bounds = FVoxelBounds();
 	for (const URoom* Room : Rooms)
 	{
 		UpdateBounds(Room);

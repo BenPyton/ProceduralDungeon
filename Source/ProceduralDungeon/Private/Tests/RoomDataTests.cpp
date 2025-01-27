@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2024 Benoit Pelletier
+* Copyright (c) 2024-2025 Benoit Pelletier
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@
 #include "UObject/StrongObjectPtr.h"
 #include "UObject/Package.h"
 #include "TestUtils.h"
+#include "VoxelBounds/VoxelBounds.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
@@ -329,6 +330,98 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 			TestEqual("RoomDataB->GetVolume() == 2", RoomDataB->GetVolume(), 2);
 			TestEqual("RoomDataC->GetVolume() == 4", RoomDataC->GetVolume(), 4);
 			TestEqual("RoomDataD->GetVolume() == 8", RoomDataD->GetVolume(), 8);
+		}
+	}
+
+	// Test GetVoxelBounds
+	{
+		CREATE_ROOM_DATA(RoomDataA);
+		RoomDataA->FirstPoint = FIntVector(0, 0, 0);
+		RoomDataA->SecondPoint = FIntVector(1, 1, 1);
+		RoomDataA->Doors.Add({{0, 0, 0}, EDoorDirection::North});
+
+		// Should have one cell at (0,0,0) with a door at (0,0,0)[North]
+		{
+			FVoxelBounds ExpectedBounds;
+			ExpectedBounds.AddCell({0,0,0});
+
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+			FVoxelBounds ConvertedBounds = RoomDataA->GetVoxelBounds();
+			TestEqual("RoomDataA->GetVoxelBounds() == ExpectedBounds", ConvertedBounds, ExpectedBounds);
+		}
+
+		CREATE_ROOM_DATA(RoomDataB);
+		RoomDataB->FirstPoint = FIntVector(-1, 0, 0);
+		RoomDataB->SecondPoint = FIntVector(2, 1, 1);
+		RoomDataB->Doors.Add({{0, 0, 0}, EDoorDirection::South});
+		RoomDataB->Doors.Add({{1, 0, 0}, EDoorDirection::East});
+
+		// Should have 3 cells at (-1,0,0), (0,0,0), (1,0,0) with doors at (0,0,0)[South] and (1,0,0)[East]
+		{
+			FVoxelBounds ExpectedBounds;
+			ExpectedBounds.AddCell({-1,0,0});
+			ExpectedBounds.AddCell({0,0,0});
+			ExpectedBounds.AddCell({1,0,0});
+
+			ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+			ExpectedBounds.SetCellConnection({1, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({1, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({1, 0, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+			ExpectedBounds.SetCellConnection({1, 0, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({1, 0, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+			FVoxelBounds ConvertedBounds = RoomDataB->GetVoxelBounds();
+			TestEqual("RoomDataB->GetVoxelBounds() == ExpectedBounds", ConvertedBounds, ExpectedBounds);
+		}
+
+		CREATE_ROOM_DATA(RoomDataC);
+		RoomDataC->FirstPoint = FIntVector(0, 0, -1);
+		RoomDataC->SecondPoint = FIntVector(1, 1, 2);
+		RoomDataC->Doors.Add({{0, 0, 0}, EDoorDirection::North});
+		RoomDataC->Doors.Add({{0, 0, 1}, EDoorDirection::South});
+
+		// Should have 3 cells at (0,0,-1), (0,0,0), (0,0,1) with doors at (0,0,0)[North] and (0,0,1)[South]
+		{
+			FVoxelBounds ExpectedBounds;
+			ExpectedBounds.AddCell({0,0,-1});
+			ExpectedBounds.AddCell({0,0,0});
+			ExpectedBounds.AddCell({0,0,1});
+
+			ExpectedBounds.SetCellConnection({0, 0, -1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, -1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, -1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, -1}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, -1}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+			ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+			ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+			ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+			FVoxelBounds ConvertedBounds = RoomDataC->GetVoxelBounds();
+			TestEqual("RoomDataC->GetVoxelBounds() == ExpectedBounds", ConvertedBounds, ExpectedBounds);
 		}
 	}
 

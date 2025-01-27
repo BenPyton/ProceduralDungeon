@@ -33,6 +33,7 @@
 #include "UObject/SoftObjectPtr.h"
 #include "RoomData.h" // for TSoftObjectPtr to compile. @TODO: Would be great to find a way to not include it
 #include "ReadOnlyRoom.h"
+#include "VoxelBounds/VoxelBounds.h"
 #include "Room.generated.h"
 
 class ADungeonGeneratorBase;
@@ -253,6 +254,7 @@ public:
 	int32 GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot) const;
 	int32 GetOtherDoorIndex(int32 DoorIndex) const;
 	const FDoorDef& GetDoorDef(int32 DoorIndex) const;
+	const FDoorDef& GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const;
 
 	FIntVector WorldToRoom(const FIntVector& WorldPos) const;
 	FIntVector RoomToWorld(const FIntVector& RoomPos) const;
@@ -262,6 +264,8 @@ public:
 	FBoxMinAndMax RoomToWorld(const FBoxMinAndMax& RoomBox) const;
 	FDoorDef WorldToRoom(const FDoorDef& WorldDoor) const;
 	FDoorDef RoomToWorld(const FDoorDef& RoomDoor) const;
+	FVoxelBounds WorldToRoom(const FVoxelBounds& WorldBounds) const;
+	FVoxelBounds RoomToWorld(const FVoxelBounds& RoomBounds) const;
 	void SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot);
 	void SetPositionFromDoor(int DoorIndex, FIntVector WorldPos);
 	void SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot);
@@ -271,6 +275,7 @@ public:
 	FBoxCenterAndExtent GetBounds() const;
 	FBoxCenterAndExtent GetLocalBounds() const;
 	FBoxMinAndMax GetIntBounds() const;
+	FVoxelBounds GetVoxelBounds() const;
 
 	// AABB Overlapping
 	static bool Overlap(const URoom& A, const URoom& B);

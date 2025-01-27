@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2023-2024 Benoit Pelletier
+* Copyright (c) 2023-2025 Benoit Pelletier
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -64,6 +64,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 		CREATE_ROOM_DATA(DA_A);
 		CREATE_ROOM_DATA(DA_B);
 		CREATE_ROOM_DATA(DA_C);
+		CREATE_ROOM_DATA(DA_D);
 
 		DA_A->Doors.Add({{0,0,0}, EDoorDirection::South});
 
@@ -74,6 +75,10 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 		DA_C->Doors.Add({{0,0,0}, EDoorDirection::South});
 		DA_C->Doors.Add({{0,0,0}, EDoorDirection::East});
 		DA_C->Doors.Add({{0,0,0}, EDoorDirection::West});
+
+		DA_D->SecondPoint = {1,1,2};
+		DA_D->Doors.Add({{0,0,0}, EDoorDirection::North});
+		DA_D->Doors.Add({{0,0,1}, EDoorDirection::North});
 
 		// Test pathfind
 		{
@@ -176,6 +181,183 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			TestFalse(TEXT("No path should be found between Room0 and Room6"), UDungeonGraph::FindPath(Room0, Room6, &Path));
 			TestEqual(TEXT("Path should be empty"), Path.Num(), 0);
 			TestTrue(TEXT("Path should be found between Room0 and Room6 (when locked rooms allowed)"), UDungeonGraph::FindPath(Room0, Room6, nullptr, /*IgnoreLocked = */true));
+
+			CLEAN_TEST();
+		}
+
+		// Test Voxel Bounds Conversions
+		{
+			INIT_TEST(Graph);
+
+			// first floor		second floor
+			// C - B - A		C - C
+			// |				|
+			// D				D
+
+			CREATE_ROOM(Room0, DA_C);
+			CREATE_ROOM(Room1, DA_B);
+			CREATE_ROOM(Room2, DA_A);
+			CREATE_ROOM(Room3, DA_D);
+			CREATE_ROOM(Room4, DA_C);
+			CREATE_ROOM(Room5, DA_C);
+
+			Room1->Position = {0,1,0};
+			Room2->Position = {0,2,0}; Room2->Direction = EDoorDirection::East;
+			Room3->Position = {-1,0,0};
+			Room4->Position = {0,0,1};
+			Room5->Position = {0,1,1};
+
+			// Room positions are modified manually, so we need to explicitely rebuild bounds
+			Graph->RebuildBounds();
+
+			// Check Room0 voxel bounds conversion
+			{
+				FVoxelBounds ExpectedBounds;
+				ExpectedBounds.AddCell({0,0,0});
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+				FVoxelBounds ConvertedBounds = Room0->GetVoxelBounds();
+				TestEqual(TEXT("Room0 bounds should be as expected"), ConvertedBounds, ExpectedBounds);
+			}
+
+			// Check Room1 voxel bounds conversion
+			{
+				FVoxelBounds ExceptedBounds;
+				ExceptedBounds.AddCell({0,1,0});
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+				FVoxelBounds ConvertedBounds = Room1->GetVoxelBounds();
+				TestEqual(TEXT("Room1 bounds should be as expected"), ConvertedBounds, ExceptedBounds);
+			}
+
+			// Check Room2 voxel bounds conversion
+			{
+				FVoxelBounds ExpectedBounds;
+				ExpectedBounds.AddCell({0,2,0});
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+				FVoxelBounds ConvertedBounds = Room2->GetVoxelBounds();
+				TestEqual(TEXT("Room2 bounds should be as expected"), ConvertedBounds, ExpectedBounds);
+			}
+
+			// Check Room3 voxel bounds conversion
+			{
+				FVoxelBounds ExpectedBounds;
+				ExpectedBounds.AddCell({-1,0,0});
+				ExpectedBounds.AddCell({-1,0,1});
+				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+				FVoxelBounds ConvertedBounds = Room3->GetVoxelBounds();
+				TestEqual(TEXT("Room3 bounds should be as expected"), ConvertedBounds, ExpectedBounds);
+			}
+
+			// Check Room4 voxel bounds conversion
+			{
+				FVoxelBounds ExpectedBounds;
+				ExpectedBounds.AddCell({0,0,1});
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+				FVoxelBounds ConvertedBounds = Room4->GetVoxelBounds();
+				TestEqual(TEXT("Room4 bounds should be as expected"), ConvertedBounds, ExpectedBounds);
+			}
+
+			// Check Room5 voxel bounds conversion
+			{
+				FVoxelBounds ExpectedBounds;
+				ExpectedBounds.AddCell({0,1,1});
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+
+				FVoxelBounds ConvertedBounds = Room5->GetVoxelBounds();
+				TestEqual(TEXT("Room5 bounds should be as expected"), ConvertedBounds, ExpectedBounds);
+			}
+		}
+
+		// FilterAndSort Test
+		{
+			INIT_TEST(Graph);
+
+			// first floor		second floor
+			// C - B - A		C - C
+			// |				|
+			// D				D
+
+			CREATE_ROOM_DATA(DA_E);
+			DA_E->SecondPoint = {1,2,1};
+			DA_E->Doors.Add({{0,1,0}, EDoorDirection::North});
+
+			CREATE_ROOM(Room0, DA_C);
+			CREATE_ROOM(Room1, DA_B);
+			CREATE_ROOM(Room2, DA_A);
+			CREATE_ROOM(Room3, DA_D);
+			CREATE_ROOM(Room4, DA_C);
+			CREATE_ROOM(Room5, DA_C);
+
+			Room1->Position = {0,1,0};
+			Room2->Position = {0,2,0}; Room2->Direction = EDoorDirection::East;
+			Room3->Position = {-1,0,0};
+			Room4->Position = {0,0,1};
+			Room5->Position = {0,1,1};
+
+			// Room positions are modified manually, so we need to explicitely rebuild bounds
+			Graph->RebuildBounds();
+
+			const TArray<URoomData*> RoomList = { DA_A.Get(), DA_D.Get(), DA_E.Get()};
+			TArray<FRoomCandidate> SortedRooms;
+
+			{
+				FDoorDef FromDoor = {{0,0,0}, EDoorDirection::North};
+				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms);
+				TestTrue(TEXT("There should be candidates"), bHasCandidates);
+				TestEqual(TEXT("There should be 4 candidates"), SortedRooms.Num(), 4);
+				TestEqual(TEXT("RoomData D should be the best candidate"), SortedRooms[0].Data, DA_D.Get());
+				TestEqual(TEXT("RoomData D Door index 0 should be the best candidate"), SortedRooms[0].DoorIndex, 0);
+				TestEqual(TEXT("RoomData A should be the worst candidate"), SortedRooms[3].Data, DA_A.Get());
+			}
+
+			{
+				FDoorDef FromDoor = {{0,1,1}, EDoorDirection::South};
+				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms);
+				TestTrue(TEXT("There should be candidates"), bHasCandidates);
+				TestEqual(TEXT("There should be 3 candidates"), SortedRooms.Num(), 3);
+				TestEqual(TEXT("RoomData D should be the best candidate"), SortedRooms[0].Data, DA_D.Get());
+				TestEqual(TEXT("RoomData D DoorIndex 0 should be the best candidate"), SortedRooms[0].DoorIndex, 0);
+				TestEqual(TEXT("RoomData D should be the worst candidate"), SortedRooms[2].Data, DA_D.Get());
+				TestEqual(TEXT("RoomData D DoorIndex 1 should be the worst candidate"), SortedRooms[2].DoorIndex, 1);
+			}
 
 			CLEAN_TEST();
 		}

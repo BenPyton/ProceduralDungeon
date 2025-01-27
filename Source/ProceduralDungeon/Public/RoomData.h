@@ -28,6 +28,7 @@
 #include "Engine/DataAsset.h"
 #include "ProceduralDungeonTypes.h"
 #include "Misc/EngineVersionComparison.h"
+#include "VoxelBounds/VoxelBounds.h"
 #include "RoomData.generated.h"
 
 #if UE_VERSION_OLDER_THAN(5, 3, 0)
@@ -119,6 +120,7 @@ public:
 
 	class FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
 	FBoxMinAndMax GetIntBounds() const;
+	FVoxelBounds GetVoxelBounds() const;
 
 	bool IsRoomInBounds(const FBoxMinAndMax& Bounds, int DoorIndex, const FDoorDef& DoorDungeonPos) const;
 
@@ -139,4 +141,10 @@ public:
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 
 #endif // WITH_EDITOR
+
+private:
+	// This is a transient to avoid unnecessary computation
+	// Flagged as mutable because it is computed on the fly when necessary.
+	// This flag will be removed when the VoxelBounds editor will be implemented.
+	mutable FVoxelBounds CachedVoxelBounds;
 };
