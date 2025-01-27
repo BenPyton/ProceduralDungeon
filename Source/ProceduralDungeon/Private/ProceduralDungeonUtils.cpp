@@ -105,6 +105,11 @@ FVector Dungeon::DefaultDoorSize()
 	return Settings->DoorSize;
 }
 
+FColor Dungeon::DefaultDoorColor()
+{
+	return FColor::Blue;
+}
+
 float Dungeon::DoorOffset()
 {
 	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();

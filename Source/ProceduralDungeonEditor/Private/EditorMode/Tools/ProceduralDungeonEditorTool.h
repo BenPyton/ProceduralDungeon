@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,13 +57,15 @@ public:
 	virtual bool UsesTransformWidget() const { return false; }
 	virtual bool UsesTransformWidget(WidgetMode CheckMode) const { return false; }
 	virtual FVector GetWidgetLocation() const { return FVector::ZeroVector; }
+	virtual bool GetCursor(EMouseCursor::Type& OutCursor) const { return false; }
 
-	/** FGCObject interface */
+	//~ Begin FGCObject Interface
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override {}
 	virtual FString GetReferencerName() const override
 	{
 		return TEXT("FProceduralDungeonEditorTool");
 	}
+	//~ End FGCObject Interface
 
 	virtual void OnLevelChanged(const class ARoomLevel* NewLevel) {}
 	virtual void OnDataChanged(const class URoomData* NewData) {}

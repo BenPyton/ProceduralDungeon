@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,4 +37,9 @@ UDoorType::UDoorType()
 FVector UDoorType::GetSize(const UDoorType* DoorType)
 {
 	return IsValid(DoorType) ? DoorType->Size : Dungeon::DefaultDoorSize();
+}
+
+FColor UDoorType::GetColor(const UDoorType* DoorType)
+{
+	return IsValid(DoorType) ? DoorType->Color : Dungeon::DefaultDoorColor();
 }

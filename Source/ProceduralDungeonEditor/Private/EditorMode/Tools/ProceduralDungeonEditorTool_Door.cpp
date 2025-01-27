@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023-2024 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -148,8 +148,7 @@ void FProceduralDungeonEditorTool_Door::Tick(FEditorViewportClient* ViewportClie
 		check(IsValid(Data));
 
 		UWorld* World = ViewportClient->GetWorld();
-		FColor Color = IsDoorValid(Data, DoorPreview) ? FColor::Green : FColor::Orange;
-		FDoorDef::DrawDebug(World, Color, DoorPreview, FTransform::Identity, /*includeOffset = */ true);
+		FDoorDef::DrawDebug(World, DoorPreview, FTransform::Identity, /*includeOffset = */ true, /*isConnected = */IsDoorValid(Data, DoorPreview));
 	}
 }
 
@@ -188,8 +187,8 @@ bool FProceduralDungeonEditorTool_Door::HandleClick(FEditorViewportClient* InVie
 			Data->Modify();
 			Data->Doors.Remove(DoorPreview);
 			GEditor->EndTransaction();
+			return true;
 		}
-		return true;
 	}
 
 	return false;
@@ -234,6 +233,23 @@ bool FProceduralDungeonEditorTool_Door::MouseMove(FEditorViewportClient* Viewpor
 	}
 
 	return false;
+}
+
+bool FProceduralDungeonEditorTool_Door::GetCursor(EMouseCursor::Type& OutCursor) const
+{
+	if (!ShowDoorPreview)
+		return false;
+
+	auto Level = EdMode->GetLevel();
+	if (!Level.IsValid())
+		return false;
+
+	URoomData* Data = Level->Data;
+	if (!IsValid(Data))
+		return false;
+
+	OutCursor = IsDoorValid(Data, DoorPreview) ? EMouseCursor::Hand : EMouseCursor::SlashedCircle;
+	return true;
 }
 
 void FProceduralDungeonEditorTool_Door::OnLevelChanged(const ARoomLevel* NewLevel)

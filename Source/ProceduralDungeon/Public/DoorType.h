@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,12 +40,20 @@ public:
 	// or the default door size in plugin's settings if no door type defined.
 	static FVector GetSize(const UDoorType* DoorType);
 
+	// Returns the door color from the door type asset,
+	// or the default door color in plugin's settings if no door type defined.
+	static FColor GetColor(const UDoorType* DoorType);
+
 protected:
 	// Size of the door bounds, only used by the debug draw as a visual hint for designers and artists.
 	UPROPERTY(EditInstanceOnly, Category = "Door Type", meta = (ClampMin = 0))
 	FVector Size;
 
 #if WITH_EDITORONLY_DATA
+	// The color used to draw the door bounds in the editor.
+	UPROPERTY(EditInstanceOnly, Category = "Door Type")
+	FColor Color {FColor::Blue};
+
 	// Just a description, used nowhere.
 	UPROPERTY(EditInstanceOnly, Category = "Door Type")
 	FText Description;

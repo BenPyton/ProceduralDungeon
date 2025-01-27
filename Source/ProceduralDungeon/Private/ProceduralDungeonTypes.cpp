@@ -213,6 +213,11 @@ FVector FDoorDef::GetDoorSize() const
 	return UDoorType::GetSize(Type);
 }
 
+FColor FDoorDef::GetDoorColor() const
+{
+	return UDoorType::GetColor(Type);
+}
+
 FString FDoorDef::GetTypeName() const
 {
 	return IsValid(Type) ? Type->GetName() : TEXT("Default");
@@ -249,16 +254,16 @@ FVector FDoorDef::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRo
 }
 
 #if !UE_BUILD_SHIPPING
-void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FDoorDef& DoorDef, const FTransform& Transform, bool bIncludeOffset, bool isConnected)
+void FDoorDef::DrawDebug(const UWorld* World, const FDoorDef& DoorDef, const FTransform& Transform, bool bIncludeOffset, bool bIsConnected)
 {
-	DrawDebug(World, Color, DoorDef.GetDoorSize(), DoorDef.Position, DoorDef.Direction, Transform, bIncludeOffset, isConnected);
+	DrawDebug(World, DoorDef.GetDoorColor(), DoorDef.GetDoorSize(), DoorDef.Position, DoorDef.Direction, Transform, bIncludeOffset, bIsConnected);
 
 	// Door debug draw using its bounds
 	//FBoxCenterAndExtent DoorBounds = DoorDef.GetBounds(bIncludeOffset);
 	//DrawDebugBox(World, Transform.TransformPosition(DoorBounds.Center), DoorBounds.Extent, Transform.GetRotation(), FColor::Cyan);
 }
 
-void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector& DoorSize, const FIntVector& DoorCell, const EDoorDirection& DoorRot, const FTransform& Transform, bool bIncludeOffset, bool isConnected)
+void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector& DoorSize, const FIntVector& DoorCell, const EDoorDirection& DoorRot, const FTransform& Transform, bool bIncludeOffset, bool bIsConnected)
 {
 #if ENABLE_DRAW_DEBUG
 	// @TODO: Use FDoorDef::GetBounds here? (should mabye remove this overload and use exclusively the one with FDoorDef?)
@@ -268,7 +273,7 @@ void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector
 	// Door frame
 	DrawDebugBox(World, DoorPosition, DoorSize * 0.5f, DoorRotation, Color);
 
-	if (isConnected)
+	if (bIsConnected)
 	{
 		// Arrow (there is a room on the other side OR in the editor preview)
 		FVector ArrowVector = (Dungeon::FlipDoorArrow() ? -1.0f : 1.0f) * FVector(Dungeon::DoorArrowLength(), 0.0f, 0.0f);

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@ public:
 	/** FGCObject interface */
 	virtual void AddReferencedObjects(FReferenceCollector& Collector) override;
 
-	// FEdMode interface
+	//~ Begin FEdMode Interface
 	virtual void Enter() override;
 	virtual void Exit() override;
 	virtual void Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI) override;
@@ -58,6 +58,8 @@ public:
 	virtual FVector GetWidgetLocation() const override;
 	virtual bool AllowWidgetMove() override { return true; }
 	virtual bool GetPivotForOrbit(FVector& OutPivot) const override;
+	virtual bool GetCursor(EMouseCursor::Type& OutCursor) const override;
+	//~ End FEdMode Interface
 
 	bool GetTool(FName ToolName, FProceduralDungeonEditorTool*& OutTool) const;
 	FProceduralDungeonEditorTool* GetActiveTool() const;

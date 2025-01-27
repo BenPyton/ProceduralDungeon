@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -172,6 +172,11 @@ bool FProceduralDungeonEdMode::GetPivotForOrbit(FVector& OutPivot) const
 	FBoxCenterAndExtent RoomBounds = Data->GetBounds();
 	OutPivot = RoomBounds.Center;
 	return true;
+}
+
+bool FProceduralDungeonEdMode::GetCursor(EMouseCursor::Type& OutCursor) const
+{
+	return ROUTE_TO_TOOL(GetCursor(OutCursor));
 }
 
 bool FProceduralDungeonEdMode::GetTool(FName ToolName, FProceduralDungeonEditorTool*& OutTool) const
