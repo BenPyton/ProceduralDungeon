@@ -198,6 +198,20 @@ FVector Rotate(const FVector& Pos, const EDoorDirection& Rot)
 
 // ############ FDoorDef ##############
 
+const FDoorDef FDoorDef::Invalid(FIntVector::ZeroValue, EDoorDirection::NbDirection);
+
+FDoorDef::FDoorDef(const FIntVector& InPosition, EDoorDirection InDirection, UDoorType* InType)
+{
+	Position = InPosition;
+	Direction = InDirection;
+	Type = InType;
+}
+
+bool FDoorDef::IsValid() const
+{
+	return Direction != EDoorDirection::NbDirection;
+}
+
 bool FDoorDef::operator==(const FDoorDef& Other) const
 {
 	return Position == Other.Position && Direction == Other.Direction;
@@ -225,7 +239,7 @@ FColor FDoorDef::GetDoorColor() const
 
 FString FDoorDef::GetTypeName() const
 {
-	return IsValid(Type) ? Type->GetName() : TEXT("Default");
+	return ::IsValid(Type) ? Type->GetName() : TEXT("Default");
 }
 
 FString FDoorDef::ToString() const
@@ -361,13 +375,26 @@ void FBoxMinAndMax::Rotate(const EDoorDirection& Rot)
 
 void FBoxMinAndMax::Extend(const FBoxMinAndMax& Other)
 {
-	Min = IntVector::Min(Min, Other.Min);
-	Max = IntVector::Max(Max, Other.Max);
+	if (Min != Max)
+	{
+		Min = IntVector::Min(Min, Other.Min);
+		Max = IntVector::Max(Max, Other.Max);
+	}
+	else
+	{
+		Min = Other.Min;
+		Max = Other.Max;
+	}
 }
 
 FString FBoxMinAndMax::ToString() const
 {
 	return FString::Printf(TEXT("[(%d, %d, %d), (%d, %d, %d)]"), Min.X, Min.Y, Min.Z, Max.X, Max.Y, Max.Z);
+}
+
+FIntVector FBoxMinAndMax::GetClosestPoint(const FIntVector& Point) const
+{
+	return IntVector::Min(Max, IntVector::Max(Min, Point));
 }
 
 bool FBoxMinAndMax::Overlap(const FBoxMinAndMax& A, const FBoxMinAndMax& B)

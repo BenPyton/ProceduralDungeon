@@ -32,6 +32,7 @@
 #include "Templates/SubclassOf.h"
 #include "Templates/Function.h"
 #include "ProceduralDungeonTypes.h"
+#include "VoxelBounds/VoxelBounds.h"
 #include "DungeonGraph.generated.h"
 
 class URoom;
@@ -39,6 +40,24 @@ class URoomData;
 class URoomCustomData;
 class URoomConnection;
 class ADungeonGeneratorBase;
+
+// Describe a potential room to be added to the dungeon.
+// Mainly used by FilterAndSortRooms function.
+USTRUCT(BlueprintType)
+struct FRoomCandidate
+{
+	GENERATED_BODY();
+
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
+	URoomData* Data {nullptr};
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
+	int32 DoorIndex {-1};
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
+	int32 Score {-1};
+};
 
 // Holds the generated dungeon.
 // You can access the rooms using many functions.
@@ -189,6 +208,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	FVector GetDungeonBoundsExtent() const;
 
+	UFUNCTION(BlueprintPure = false, Category = "Dungeon Graph", meta = (ExpandBoolAsExecs = "ReturnValue"))
+	bool FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms) const;
+
 	// Returns the computed dungeon bounds.
 	class FBoxCenterAndExtent GetDungeonBounds(const FTransform& Transform = FTransform::Identity) const;
 	struct FBoxMinAndMax GetIntBounds() const;
@@ -263,7 +285,7 @@ private:
 	TWeakObjectPtr<ADungeonGeneratorBase> Generator {nullptr};
 
 	// Transient. The computed bounds of the dungeon. Updated each time the room list changes.
-	FBoxMinAndMax Bounds;
+	FVoxelBounds Bounds;
 
 private:
 	struct FSaveData

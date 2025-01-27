@@ -364,11 +364,15 @@ FIntVector URoom::GetDoorWorldPosition(int DoorIndex) const
 
 bool URoom::IsDoorIndexValid(int32 DoorIndex) const
 {
+	check(RoomData.IsValid());
 	return DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num();
 }
 
 int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot) const
 {
+	if (EDoorDirection::NbDirection == WorldRot)
+		return -2;
+
 	FIntVector localPos = WorldToRoom(WorldPos);
 	EDoorDirection localRot = WorldToRoom(WorldRot);
 
@@ -391,6 +395,13 @@ const FDoorDef& URoom::GetDoorDef(int32 DoorIndex) const
 {
 	check(IsDoorIndexValid(DoorIndex));
 	return RoomData->Doors[DoorIndex];
+}
+
+const FDoorDef& URoom::GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const
+{
+	check(RoomData.IsValid());
+	int32 DoorIndex = GetDoorIndexAt(WorldPos, WorldRot);
+	return (DoorIndex >= 0) ? GetDoorDef(DoorIndex) : FDoorDef::Invalid;
 }
 
 FIntVector URoom::WorldToRoom(const FIntVector& WorldPos) const
@@ -439,6 +450,16 @@ FDoorDef URoom::RoomToWorld(const FDoorDef& RoomDoor) const
 	return WorldDoor;
 }
 
+FVoxelBounds URoom::WorldToRoom(const FVoxelBounds& WorldBounds) const
+{
+	return Rotate(WorldBounds - Position, -Direction);
+}
+
+FVoxelBounds URoom::RoomToWorld(const FVoxelBounds& RoomBounds) const
+{
+	return Rotate(RoomBounds, Direction) + Position;
+}
+
 void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)
 {
 	check(IsDoorIndexValid(DoorIndex));
@@ -483,6 +504,12 @@ FBoxMinAndMax URoom::GetIntBounds() const
 {
 	check(RoomData.IsValid());
 	return RoomToWorld(RoomData->GetIntBounds());
+}
+
+FVoxelBounds URoom::GetVoxelBounds() const
+{
+	check(RoomData.IsValid());
+	return RoomToWorld(RoomData->GetVoxelBounds());
 }
 
 FTransform URoom::GetTransform() const

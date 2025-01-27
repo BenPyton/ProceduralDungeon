@@ -143,6 +143,69 @@ FBoxMinAndMax URoomData::GetIntBounds() const
 	return FBoxMinAndMax(FirstPoint, SecondPoint);
 }
 
+FVoxelBounds URoomData::GetVoxelBounds() const
+{
+	if (CachedVoxelBounds.IsValid())
+		return CachedVoxelBounds;
+
+	// For now, just convert the IntBounds into a VoxelBounds.
+	// When the VoxelBounds editor will be implemented, we will just have to return the serialized VoxelBounds.
+	FBoxMinAndMax Bounds = GetIntBounds();
+	for (int X = Bounds.Min.X; X < Bounds.Max.X; ++X)
+	{
+		for (int Y = Bounds.Min.Y; Y < Bounds.Max.Y; ++Y)
+		{
+			for (int Z = Bounds.Min.Z; Z < Bounds.Max.Z; ++Z)
+			{
+				CachedVoxelBounds.AddCell(FIntVector(X, Y, Z));
+			}
+		}
+	}
+
+	const FVoxelBoundsConnection WallConnection(FVoxelBoundsConnection::EType::Wall);
+
+	// Fill top and bottom with walls.
+	for (int X = Bounds.Min.X; X < Bounds.Max.X; ++X)
+	{
+		for (int Y = Bounds.Min.Y; Y < Bounds.Max.Y; ++Y)
+		{
+			CachedVoxelBounds.SetCellConnection(FIntVector(X, Y, Bounds.Min.Z), FVoxelBounds::EDirection::Down, WallConnection);
+			CachedVoxelBounds.SetCellConnection(FIntVector(X, Y, Bounds.Max.Z - 1), FVoxelBounds::EDirection::Up, WallConnection);
+		}
+	}
+
+	// Fill left and right with walls.
+	for (int Y = Bounds.Min.Y; Y < Bounds.Max.Y; ++Y)
+	{
+		for (int Z = Bounds.Min.Z; Z < Bounds.Max.Z; ++Z)
+		{
+			CachedVoxelBounds.SetCellConnection(FIntVector(Bounds.Min.X, Y, Z), FVoxelBounds::EDirection::West, WallConnection);
+			CachedVoxelBounds.SetCellConnection(FIntVector(Bounds.Max.X - 1, Y, Z), FVoxelBounds::EDirection::East, WallConnection);
+		}
+	}
+
+	// Fill front and back with walls.
+	for (int X = Bounds.Min.X; X < Bounds.Max.X; ++X)
+	{
+		for (int Z = Bounds.Min.Z; Z < Bounds.Max.Z; ++Z)
+		{
+			CachedVoxelBounds.SetCellConnection(FIntVector(X, Bounds.Min.Y, Z), FVoxelBounds::EDirection::South, WallConnection);
+			CachedVoxelBounds.SetCellConnection(FIntVector(X, Bounds.Max.Y - 1, Z), FVoxelBounds::EDirection::North, WallConnection);
+		}
+	}
+
+	// Add the doors
+	for (int i = 0; i < Doors.Num(); ++i)
+	{
+		const FDoorDef& Door = Doors[i];
+		const FIntVector DoorPos = Door.Position;
+		const EDoorDirection DoorDir = Door.Direction;
+		CachedVoxelBounds.SetCellConnection(DoorPos, FVoxelBounds::EDirection(DoorDir), FVoxelBoundsConnection(Door.Type));
+	}
+
+	return CachedVoxelBounds;
+}
+
 bool URoomData::IsRoomInBounds(const FBoxMinAndMax& Bounds, int DoorIndex, const FDoorDef& DoorDungeonPos) const
 {
 	const FIntVector BoundSize = Bounds.GetSize();
@@ -281,6 +344,9 @@ void URoomData::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyCha
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 	OnPropertiesChanged.Broadcast(this);
+
+	// Reset the cached VoxelBounds to trigger a new computation.
+	CachedVoxelBounds = FVoxelBounds();
 }
 
 #endif // WITH_EDITOR
