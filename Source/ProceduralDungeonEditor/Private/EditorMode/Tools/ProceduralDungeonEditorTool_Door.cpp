@@ -285,6 +285,9 @@ void FProceduralDungeonEditorTool_Door::UpdateRoomBox()
 	if (!CachedLevel.IsValid())
 		return;
 
+	if (!IsValid(CachedLevel->Data))
+		return;
+
 	FBoxCenterAndExtent Box = CachedLevel->Data->GetBounds();
 	RoomBox->SetRelativeLocation(Box.Center);
 	RoomBox->SetBoxExtent(Box.Extent);
