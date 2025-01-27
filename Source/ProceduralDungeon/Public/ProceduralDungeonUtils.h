@@ -98,6 +98,7 @@ namespace Dungeon
 
 	FVector PROCEDURALDUNGEON_API RoomUnit();
 	FVector PROCEDURALDUNGEON_API DefaultDoorSize();
+	FColor PROCEDURALDUNGEON_API DefaultDoorColor();
 	float PROCEDURALDUNGEON_API DoorOffset();
 	bool PROCEDURALDUNGEON_API OcclusionCulling();
 	bool PROCEDURALDUNGEON_API UseLegacyOcclusion();

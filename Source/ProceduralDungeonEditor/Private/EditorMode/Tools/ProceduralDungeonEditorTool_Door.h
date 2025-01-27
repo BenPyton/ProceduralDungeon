@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,20 +34,22 @@ public:
 	{
 	}
 
+	//~ Begin FProceduralDungeonEditorTool Interface
 	virtual const TCHAR* GetToolName() override { return TEXT("Tool_Door"); }
 	virtual FText GetDisplayName() override { return NSLOCTEXT("ProceduralDungeonEditor", "Tool_Door", "Door"); }
 	virtual FText GetDisplayMessage() override { return NSLOCTEXT("ProceduralDungeonEditor", "Tool_Door_Tooltip", ""); }
 
-	/** FProceduralDungeonEditorTool interface */
 	virtual void EnterTool() override;
 	virtual void ExitTool() override;
 	virtual void Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI) override;
 	virtual void Tick(FEditorViewportClient* ViewportClient, float DeltaTime) override;
 	virtual bool HandleClick(FEditorViewportClient* InViewportClient, HHitProxy* HitProxy, const FViewportClick& Click) override;
 	virtual bool MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 MouseX, int32 MouseY) override;
+	virtual bool GetCursor(EMouseCursor::Type& OutCursor) const override;
 
 	virtual void OnLevelChanged(const class ARoomLevel* NewLevel) override;
 	virtual void OnDataChanged(const URoomData* NewData = nullptr) override;
+	//~ End FProceduralDungeonEditorTool Interface
 
 protected:
 	void UpdateRoomBox();

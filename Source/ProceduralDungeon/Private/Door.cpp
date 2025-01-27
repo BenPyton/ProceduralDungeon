@@ -139,8 +139,7 @@ void ADoor::Tick(float DeltaTime)
 		FDoorDef DoorDef;
 		DoorDef.Direction = EDoorDirection::NbDirection;
 		DoorDef.Type = Type;
-		FDoorDef::DrawDebug(GetWorld(), FColor::Blue, DoorDef);
-		//FDoorDef::DrawDebug(GetWorld(), FColor::Blue, UDoorType::GetSize(Type));
+		FDoorDef::DrawDebug(GetWorld(), DoorDef);
 	}
 #endif // ENABLE_DRAW_DEBUG
 }
