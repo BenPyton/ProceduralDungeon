@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -367,7 +367,7 @@ bool URoom::IsDoorIndexValid(int32 DoorIndex) const
 	return DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num();
 }
 
-int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot)
+int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot) const
 {
 	FIntVector localPos = WorldToRoom(WorldPos);
 	EDoorDirection localRot = WorldToRoom(WorldRot);
@@ -381,10 +381,16 @@ int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot)
 	return -1;
 }
 
-int URoom::GetOtherDoorIndex(int32 DoorIndex)
+int URoom::GetOtherDoorIndex(int32 DoorIndex) const
 {
 	check(IsDoorIndexValid(DoorIndex));
 	return URoomConnection::GetOtherDoorId(Connections[DoorIndex].Get(), this);
+}
+
+const FDoorDef& URoom::GetDoorDef(int32 DoorIndex) const
+{
+	check(IsDoorIndexValid(DoorIndex));
+	return RoomData->Doors[DoorIndex];
 }
 
 FIntVector URoom::WorldToRoom(const FIntVector& WorldPos) const
@@ -415,6 +421,22 @@ FBoxMinAndMax URoom::WorldToRoom(const FBoxMinAndMax& WorldBox) const
 FBoxMinAndMax URoom::RoomToWorld(const FBoxMinAndMax& RoomBox) const
 {
 	return Rotate(RoomBox, Direction) + Position;
+}
+
+FDoorDef URoom::WorldToRoom(const FDoorDef& WorldDoor) const
+{
+	FDoorDef RoomDoor = WorldDoor;
+	RoomDoor.Position = WorldToRoom(WorldDoor.Position);
+	RoomDoor.Direction = WorldToRoom(WorldDoor.Direction);
+	return RoomDoor;
+}
+
+FDoorDef URoom::RoomToWorld(const FDoorDef& RoomDoor) const
+{
+	FDoorDef WorldDoor = RoomDoor;
+	WorldDoor.Position = RoomToWorld(RoomDoor.Position);
+	WorldDoor.Direction = RoomToWorld(RoomDoor.Direction);
+	return WorldDoor;
 }
 
 void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)

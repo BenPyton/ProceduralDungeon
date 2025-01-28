@@ -213,6 +213,11 @@ FVector FDoorDef::GetDoorSize() const
 	return UDoorType::GetSize(Type);
 }
 
+float FDoorDef::GetDoorOffset() const
+{
+	return UDoorType::GetOffset(Type);
+}
+
 FColor FDoorDef::GetDoorColor() const
 {
 	return UDoorType::GetColor(Type);
@@ -241,34 +246,39 @@ FDoorDef FDoorDef::GetOpposite() const
 FBoxCenterAndExtent FDoorDef::GetBounds(bool bIncludeOffset) const
 {
 	const FVector RotatedDoorSize = Rotate(GetDoorSize(), (!Direction) ? EDoorDirection::North : Direction).GetAbs();
-	const FVector WorldPosition = GetRealDoorPosition(Position, Direction, bIncludeOffset) + FVector(0, 0, RotatedDoorSize.Z * 0.5f);
+	const FVector WorldPosition = GetRealDoorPosition(*this, bIncludeOffset) + FVector(0, 0, RotatedDoorSize.Z * 0.5f);
 	return FBoxCenterAndExtent(WorldPosition, 0.5f * RotatedDoorSize);
 }
 
-FVector FDoorDef::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, bool bIncludeOffset)
+FVector FDoorDef::GetRealDoorPosition(const FDoorDef& DoorDef, bool bIncludeOffset)
+{
+	return GetRealDoorPosition(DoorDef.Position, DoorDef.Direction, bIncludeOffset ? DoorDef.GetDoorOffset() : 0.0f);
+}
+
+FVector FDoorDef::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, float DoorOffset)
 {
 	const FVector CellPosition = FVector(DoorCell);
 	const FVector DirectionOffset = !DoorRot ? FVector::ZeroVector : (0.5f * ToVector(DoorRot));
-	const FVector HeightOffset = bIncludeOffset ? FVector(0, 0, Dungeon::DoorOffset()) : FVector::ZeroVector;
+	const FVector HeightOffset = FVector(0, 0, DoorOffset);
 	return Dungeon::RoomUnit() * (CellPosition + DirectionOffset + HeightOffset);
 }
 
 #if !UE_BUILD_SHIPPING
 void FDoorDef::DrawDebug(const UWorld* World, const FDoorDef& DoorDef, const FTransform& Transform, bool bIncludeOffset, bool bIsConnected)
 {
-	DrawDebug(World, DoorDef.GetDoorColor(), DoorDef.GetDoorSize(), DoorDef.Position, DoorDef.Direction, Transform, bIncludeOffset, bIsConnected);
+	DrawDebug(World, DoorDef.GetDoorColor(), DoorDef.GetDoorSize(), DoorDef.Position, DoorDef.Direction, Transform, bIncludeOffset ? DoorDef.GetDoorOffset() : 0.0f, bIsConnected);
 
 	// Door debug draw using its bounds
 	//FBoxCenterAndExtent DoorBounds = DoorDef.GetBounds(bIncludeOffset);
 	//DrawDebugBox(World, Transform.TransformPosition(DoorBounds.Center), DoorBounds.Extent, Transform.GetRotation(), FColor::Cyan);
 }
 
-void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector& DoorSize, const FIntVector& DoorCell, const EDoorDirection& DoorRot, const FTransform& Transform, bool bIncludeOffset, bool bIsConnected)
+void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector& DoorSize, const FIntVector& DoorCell, const EDoorDirection& DoorRot, const FTransform& Transform, float DoorOffset, bool bIsConnected)
 {
 #if ENABLE_DRAW_DEBUG
 	// @TODO: Use FDoorDef::GetBounds here? (should mabye remove this overload and use exclusively the one with FDoorDef?)
 	FQuat DoorRotation = Transform.GetRotation() * ToQuaternion(!DoorRot ? EDoorDirection::North : DoorRot);
-	FVector DoorPosition = Transform.TransformPosition(GetRealDoorPosition(DoorCell, DoorRot, bIncludeOffset) + FVector(0, 0, DoorSize.Z * 0.5f));
+	FVector DoorPosition = Transform.TransformPosition(GetRealDoorPosition(DoorCell, DoorRot, DoorOffset) + FVector(0, 0, DoorSize.Z * 0.5f));
 
 	// Door frame
 	DrawDebugBox(World, DoorPosition, DoorSize * 0.5f, DoorRotation, Color);
