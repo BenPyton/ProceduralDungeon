@@ -53,14 +53,15 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category = "Door Type", meta = (ClampMin = 0))
 	FVector Size;
 
+	// The offset of the door bounds from the room's base (in percentage of the room unit Z).
 	UPROPERTY(EditInstanceOnly, Category = "Door Type", meta = (ClampMin = 0, ClampMax = 1, UIMin = 0, UIMax = 1))
 	float Offset;
 
-#if WITH_EDITORONLY_DATA
 	// The color used to draw the door bounds in the editor.
 	UPROPERTY(EditInstanceOnly, Category = "Door Type")
 	FColor Color;
 
+#if WITH_EDITORONLY_DATA
 	// Just a description, used nowhere.
 	UPROPERTY(EditInstanceOnly, Category = "Door Type")
 	FText Description;

@@ -23,6 +23,7 @@
  */
 
 #include "Interfaces/RoomActorGuid.h"
+#include "GameFramework/Actor.h"
 #include "ProceduralDungeonLog.h"
 
 UObject* IRoomActorGuid::GetImplementer(AActor* Actor)

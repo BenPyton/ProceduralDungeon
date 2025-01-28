@@ -23,6 +23,7 @@
  */
 
 #include "Components/SimpleGuidComponent.h"
+#include "GameFramework/Actor.h"
 #include "ProceduralDungeonLog.h"
 #include "UObject/ObjectSaveContext.h"
 

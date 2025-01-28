@@ -31,6 +31,7 @@
 #include "Utils/DungeonSaveUtils.h"
 #include "Classes/DungeonSaveClasses.h"
 #include "TestUtils.h"
+#include "UObject/StrongObjectPtr.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 

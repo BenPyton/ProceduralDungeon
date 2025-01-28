@@ -68,7 +68,7 @@ struct FDungeonSaveData
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "GUID")
 	FGuid GeneratorId;
 
 	UPROPERTY()
@@ -111,10 +111,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Dungeon Generator")
 	void Unload();
 
-	UFUNCTION(BlueprintPure = false)
+	UFUNCTION(BlueprintPure = false, Category = "Dungeon Generator")
 	void SaveDungeon(FDungeonSaveData& SaveData);
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	void LoadDungeon(const FDungeonSaveData& SaveData);
 
 	void SerializeDungeon(FArchive& Archive);

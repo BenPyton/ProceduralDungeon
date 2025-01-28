@@ -37,6 +37,8 @@
 #include "Components/PrimitiveComponent.h"
 #include "Utils/ReplicationUtils.h"
 #include "ProceduralDungeonCustomVersion.h"
+#include "Serialization/MemoryReader.h"
+#include "Serialization/MemoryWriter.h"
 #include "Serialization/StructuredArchive.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "DungeonSaveProxyArchive.h"
@@ -137,7 +139,13 @@ void ADungeonGeneratorBase::SerializeDungeon(FArchive& Archive)
 {
 	FDungeonSaveProxyArchive ProxyArchive(Archive);
 
-	TUniquePtr<FArchiveFormatterType> Formatter = CreateArchiveFormatterFromArchive(ProxyArchive, bUseJsonSave);
+	TUniquePtr<FArchiveFormatterType> Formatter = CreateArchiveFormatterFromArchive(ProxyArchive,
+#if WITH_EDITORONLY_DATA
+		bUseJsonSave
+#else
+		false
+#endif
+	);
 	check(nullptr != Formatter);
 	FStructuredArchive StructuredArchive(*Formatter);
 
@@ -478,8 +486,13 @@ void ADungeonGeneratorBase::UpdateSeed()
 void ADungeonGeneratorBase::DrawDebug() const
 {
 #if ENABLE_DRAW_DEBUG
-	if (!Dungeon::DrawDebug() || !bDrawDebugDungeonBounds)
+	if (!Dungeon::DrawDebug())
 		return;
+
+#if WITH_EDITORONLY_DATA
+	if (!bDrawDebugDungeonBounds)
+		return;
+#endif
 
 	const FTransform& Transform = GetDungeonTransform();
 	FBoxCenterAndExtent DungeonBounds = Graph->GetDungeonBounds(Transform);
