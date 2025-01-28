@@ -324,19 +324,27 @@ int UDungeonGraph::CountTotalRoomType(const TArray<TSubclassOf<URoomData>>& Room
 	});
 }
 
-bool UDungeonGraph::HasValidPath(const URoom* From, const URoom* To, bool IgnoreLockedRooms)
+bool UDungeonGraph::HasValidPath(const URoom* From, const URoom* To, bool IgnoreLockedRooms) const
 {
 	return FindPath(From, To, nullptr, IgnoreLockedRooms);
 }
 
-int UDungeonGraph::NumberOfRoomBetween(const URoom* A, const URoom* B, bool IgnoreLockedRooms)
+int32 UDungeonGraph::NumberOfRoomBetween(const URoom* A, const URoom* B, bool IgnoreLockedRooms) const
 {
 	TArray<const URoom*> Path;
 	FindPath(A, B, &Path, IgnoreLockedRooms);
 	return Path.Num();
 }
 
-bool UDungeonGraph::GetPathBetween(const URoom* A, const URoom* B, TArray<URoom*>& ResultPath, bool IgnoreLockedRooms)
+int32 UDungeonGraph::NumberOfRoomBetween_ReadOnly(TScriptInterface<IReadOnlyRoom> A, TScriptInterface<IReadOnlyRoom> B) const
+{
+	// @TODO: That's not really safe, it should be better to make a FindPath using ReadOnlyRooms too.
+	const URoom* RoomA = Cast<URoom>(A.GetObject());
+	const URoom* RoomB = Cast<URoom>(B.GetObject());
+	return NumberOfRoomBetween(RoomA, RoomB);
+}
+
+bool UDungeonGraph::GetPathBetween(const URoom* A, const URoom* B, TArray<URoom*>& ResultPath, bool IgnoreLockedRooms) const
 {
 	// @HACK: is it another alternative?
 	TArray<const URoom*>& Temp = reinterpret_cast<TArray<const URoom*>&>(ResultPath);
