@@ -122,13 +122,15 @@ public:
 	// ===== Methods that should be overriden in blueprint =====
 
 	// Return the door which will be spawned between Current Room and Next Room
-	// @param CurrentRoom The first of both rooms to have been generated. By default the door will face this room.
-	// @param NextRoom The second of both rooms to have been generated. Set Flipped to true to make the door facing this room.
+	// @param CurrentRoom The first of both rooms to have been generated. By default the door will face this room. [DEPRECATED] Use `CurrentRoomInstance->GetRoomData` instead.
+	// @param CurrentRoomInstance The room instance of one side of the door. By default the door will face this room.
+	// @param NextRoom The second of both rooms to have been generated. Set Flipped to true to make the door facing this room. [DEPRECATED] Use `NextRoomInstance->GetRoomData` instead.
+	// @param NextRoomInstance The room instance of the other side of the door. Set Flipped to true to make the door facing this room.
 	// @param DoorType The door type set by both room data. Use IsDoorOfType function to compare a door actor class with this.
 	// @param Flipped Tells which room the door is facing between CurrentRoom (false) and NextRoom (true).
 	// @return The door actor class to spawn between CurrentRoom and NextRoom.
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Door"))
-	TSubclassOf<ADoor> ChooseDoor(const URoomData* CurrentRoom, const URoomData* NextRoom, const UDoorType* DoorType, bool& Flipped);
+	TSubclassOf<ADoor> ChooseDoor(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, bool& Flipped);
 
 	// ===== Optional functions to override =====
 
