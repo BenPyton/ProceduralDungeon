@@ -706,26 +706,26 @@ bool URoom::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading
 	}
 
 	int32 NumCustomData = CustomData.Num();
-	FStructuredArchiveArray CustomDataRecords = Record.EnterArray(TEXT("CustomData"), NumCustomData);
+	FStructuredArchiveArray CustomDataRecords = Record.EnterArray(AR_FIELD_NAME("CustomData"), NumCustomData);
 	CustomData.SetNum(NumCustomData);
 
 	for (int32 i = 0; i < NumCustomData; i++)
 	{
 		FStructuredArchive::FRecord CustomDataRecord = CustomDataRecords.EnterElement().EnterRecord();
-		SerializeUClass(CustomDataRecord.EnterField(TEXT("Class")), CustomData[i].DataClass);
+		SerializeUClass(CustomDataRecord.EnterField(AR_FIELD_NAME("Class")), CustomData[i].DataClass);
 
 		if (bIsLoading)
 		{
 			CustomData[i].Data = NewObject<URoomCustomData>(GetOuter(), CustomData[i].DataClass);
 		}
 
-		FStructuredArchive::FRecord PropertiesRecord = CustomDataRecord.EnterRecord(TEXT("Data"));
+		FStructuredArchive::FRecord PropertiesRecord = CustomDataRecord.EnterRecord(AR_FIELD_NAME("Data"));
 		SerializeUObject(PropertiesRecord, CustomData[i].Data, bIsLoading);
 	}
 
-	Record.EnterField(TEXT("ConnectionIds")) << SaveData->ConnectionIds;
-	Record.EnterField(TEXT("LevelActor")) << SaveData->LevelActor;
-	Record.EnterField(TEXT("Actors")) << SaveData->Actors;
+	Record.EnterField(AR_FIELD_NAME("ConnectionIds")) << SaveData->ConnectionIds;
+	Record.EnterField(AR_FIELD_NAME("LevelActor")) << SaveData->LevelActor;
+	Record.EnterField(AR_FIELD_NAME("Actors")) << SaveData->Actors;
 
 	if (!bIsLoading)
 	{

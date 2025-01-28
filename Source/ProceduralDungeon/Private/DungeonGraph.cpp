@@ -95,8 +95,8 @@ bool UDungeonGraph::SerializeObject(FStructuredArchive::FRecord& Record, bool bI
 		SavedData->Connections = TArray<URoomConnection*>(RoomConnections);
 	}
 
-	SerializeUObjectArray(Record, TEXT("Rooms"), SavedData->Rooms, bIsLoading, this);
-	SerializeUObjectArray(Record, TEXT("Connections"), SavedData->Connections, bIsLoading, this);
+	SerializeUObjectArray(Record, AR_FIELD_NAME("Rooms"), SavedData->Rooms, bIsLoading, this);
+	SerializeUObjectArray(Record, AR_FIELD_NAME("Connections"), SavedData->Connections, bIsLoading, this);
 
 	return true;
 }

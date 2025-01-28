@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 Benoit Pelletier
+ * Copyright (c) 2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,23 +24,21 @@
 
 #pragma once
 
-#include "RoomCustomData.h"
-#include "RoomCustomDataChildClasses.generated.h"
+#include "Misc/EngineVersionComparison.h"
+#include "Templates/UnrealTypeTraits.h"
 
-UCLASS(NotBlueprintable, NotBlueprintType, HideDropdown, meta = (HiddenNode))
-class UCustomDataA : public URoomCustomData
-{
-	GENERATED_BODY()
-};
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
+#define UE_REQUIRES(...)\
+	, typename = typename TEnableIf<__VA_ARGS__>::Type
+#elif UE_VERSION_OLDER_THAN(5, 3, 0)
+#define UE_REQUIRES(...)\
+	UE_CONSTRAINTS_BEGIN\
+	UE_CONSTRAINT(__VA_ARGS__)\
+	UE_CONSTRAINTS_END
+#endif
 
-UCLASS(NotBlueprintable, NotBlueprintType, HideDropdown, meta = (HiddenNode))
-class UCustomDataB : public URoomCustomData
-{
-	GENERATED_BODY()
-};
-
-UCLASS(NotBlueprintable, NotBlueprintType, HideDropdown, meta = (HiddenNode))
-class UCustomDataC : public URoomCustomData
-{
-	GENERATED_BODY()
-};
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
+#define AR_FIELD_NAME(Name) FArchiveFieldName(TEXT(Name))
+#else
+#define AR_FIELD_NAME(Name) TEXT(Name)
+#endif

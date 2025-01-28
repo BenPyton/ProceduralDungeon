@@ -97,7 +97,7 @@ bool URoomCustomData::SerializeObject(FStructuredArchive::FRecord& Record, bool 
 		}
 	}
 
-	Record.EnterField(TEXT("ComponentData")) << SavedData->ComponentData;
+	Record.EnterField(AR_FIELD_NAME("ComponentData")) << SavedData->ComponentData;
 
 	if (!bIsLoading)
 	{

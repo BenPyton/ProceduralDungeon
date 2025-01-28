@@ -44,6 +44,7 @@
 #include "DungeonSaveProxyArchive.h"
 #include "Utils/DungeonSaveUtils.h"
 #include "DrawDebugHelpers.h"
+#include "Utils/CompatUtils.h"
 
 #if UE_VERSION_OLDER_THAN(5, 5, 0)
 #define SetNetUpdateFrequency(X) NetUpdateFrequency = X
@@ -58,8 +59,8 @@ FArchive& operator<<(FArchive& Ar, FDungeonSaveData& Data)
 void operator<<(FStructuredArchiveSlot Slot, FDungeonSaveData& Data)
 {
 	FStructuredArchive::FRecord DungeonRecord = Slot.EnterRecord();
-	DungeonRecord.EnterField(TEXT("GeneratorId")) << Data.GeneratorId;
-	DungeonRecord.EnterField(TEXT("Data")) << Data.Data;
+	DungeonRecord.EnterField(AR_FIELD_NAME("GeneratorId")) << Data.GeneratorId;
+	DungeonRecord.EnterField(AR_FIELD_NAME("Data")) << Data.Data;
 
 	if (IsSaving(Slot))
 	{
@@ -178,10 +179,10 @@ void ADungeonGeneratorBase::SerializeObject(FStructuredArchive::FRecord& Record,
 		DungeonLog_Info("Start Loading Dungeon.");
 	}
 
-	Record.EnterField(TEXT("Id")) << Id;
-	SerializeScriptProperties(Record.EnterField(TEXT("Properties")));
+	Record.EnterField(AR_FIELD_NAME("Id")) << Id;
+	SerializeScriptProperties(Record.EnterField(AR_FIELD_NAME("Properties")));
 
-	FStructuredArchiveRecord GraphRecord = Record.EnterRecord(TEXT("Graph"));
+	FStructuredArchiveRecord GraphRecord = Record.EnterRecord(AR_FIELD_NAME("Graph"));
 	SerializeUObject(GraphRecord, Graph, bIsLoading);
 
 	if (bIsLoading)

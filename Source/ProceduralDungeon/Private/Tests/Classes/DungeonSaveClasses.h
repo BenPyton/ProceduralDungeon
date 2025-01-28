@@ -22,9 +22,12 @@
  * SOFTWARE.
  */
 
+#pragma once
+
 #include "CoreMinimal.h"
 #include "Interfaces/DungeonCustomSerialization.h"
 #include "Interfaces/DungeonSaveInterface.h"
+#include "Utils/CompatUtils.h"
 #include "DungeonSaveClasses.generated.h"
 
 UCLASS(NotBlueprintable, NotBlueprintType, HideDropdown, meta = (HiddenNode))
@@ -37,7 +40,7 @@ public:
 	virtual bool SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading) override
 	{
 		OrderOfExecution += (bIsLoading) ? TEXT("X") : TEXT("C");
-		Record.EnterField(TEXT("NativeTest")) << TestSerializeObjectFunction;
+		Record.EnterField(AR_FIELD_NAME("NativeTest")) << TestSerializeObjectFunction;
 		return true;
 	}
 	//~ End IDungeonCustomSerialization Interface

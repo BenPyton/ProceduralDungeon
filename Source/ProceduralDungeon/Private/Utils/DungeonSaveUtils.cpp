@@ -26,12 +26,15 @@
 #include "Serialization/MemoryReader.h"
 #include "Serialization/MemoryWriter.h"
 #include "Serialization/StructuredArchive.h"
-#include "Serialization/StructuredArchiveSlotBase.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "Interfaces/DungeonSaveInterface.h"
 #include "Interfaces/DungeonCustomSerialization.h"
 #include "Serialization/Formatters/JsonArchiveInputFormatter.h"
 #include "Serialization/Formatters/JsonArchiveOutputFormatter.h"
+
+#if UE_VERSION_NEWER_THAN(5, 0, 0)
+#include "Serialization/StructuredArchiveSlotBase.h"
+#endif
 
 TUniquePtr<FArchiveFormatterType> CreateArchiveFormatterFromArchive(FArchive& Ar, bool bTextFormat)
 {
@@ -61,7 +64,7 @@ bool SerializeUObject(FStructuredArchive::FRecord& Record, UObject* Obj, bool bI
 		IDungeonSaveInterface::Execute_DungeonPreSerialize(Obj, bIsLoading);
 
 	bool bSuccess = true;
-	Obj->SerializeScriptProperties(Record.EnterField(TEXT("Properties")));
+	Obj->SerializeScriptProperties(Record.EnterField(AR_FIELD_NAME("Properties")));
 	if (auto* SaveableObj = Cast<IDungeonCustomSerialization>(Obj))
 	{
 		bSuccess &= SaveableObj->SerializeObject(Record, bIsLoading);
@@ -128,12 +131,12 @@ void SerializeUClass(FStructuredArchiveSlot Slot, UClass*& Class)
 	}
 }
 
-bool IsLoading(const FStructuredrchiveSlotBase& Slot)
+bool IsLoading(const FStructuredArchiveSlotBase& Slot)
 {
 	return Slot.GetArchiveState().IsLoading();
 }
 
-bool IsSaving(const FStructuredrchiveSlotBase& Slot)
+bool IsSaving(const FStructuredArchiveSlotBase& Slot)
 {
 	return Slot.GetArchiveState().IsSaving();
 }
