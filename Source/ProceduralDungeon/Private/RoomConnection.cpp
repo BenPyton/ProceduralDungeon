@@ -67,11 +67,11 @@ bool URoomConnection::SerializeObject(FStructuredArchive::FRecord& Record, bool 
 		SerializeUObject(SaveData->DoorSavedData, DoorInstance.Get(), false);
 	}
 
-	Record.EnterField(TEXT("RoomA")) << SaveData->RoomAID;
-	Record.EnterField(TEXT("RoomB")) << SaveData->RoomBID;
+	Record.EnterField(AR_FIELD_NAME("RoomA")) << SaveData->RoomAID;
+	Record.EnterField(AR_FIELD_NAME("RoomB")) << SaveData->RoomBID;
 
-	Record.EnterField(TEXT("DoorClass")) << DoorClass;
-	Record.EnterField(TEXT("DoorProperties")) << SaveData->DoorSavedData;
+	Record.EnterField(AR_FIELD_NAME("DoorClass")) << DoorClass;
+	Record.EnterField(AR_FIELD_NAME("DoorProperties")) << SaveData->DoorSavedData;
 
 	if (bIsLoading)
 	{

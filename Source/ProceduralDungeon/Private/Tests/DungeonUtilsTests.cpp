@@ -161,11 +161,10 @@ void FGuid2SeedStatisticalTests::Define()
 				// The test cases we want to check for each Guid.
 				// First value is the number of elements in the generated samples.
 				// Second value is the critical value for the Chi Squared test (with p-value of 5%)
-				TArray<TTuple<int32, double>> TestCases = {
-					{10, 16.91898},
-					{100, 123.22522},
-					{1000, 1073.64265},
-				};
+				TArray<TTuple<int32, double>> TestCases;
+				TestCases.Add(TTuple<int32, double>(10, 16.91898));
+				TestCases.Add(TTuple<int32, double>(100, 123.22522));
+				TestCases.Add(TTuple<int32, double>(1000, 1073.64265));
 
 				for (const auto& TestCase : TestCases)
 				{

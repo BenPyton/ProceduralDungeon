@@ -26,6 +26,7 @@
 
 #include "CoreMinimal.h"
 #include "ProceduralDungeonLog.h"
+#include "Utils/CompatUtils.h"
 
 TUniquePtr<FArchiveFormatterType> CreateArchiveFormatterFromArchive(FArchive& Ar, bool bTextFormat = true);
 
@@ -75,6 +76,7 @@ bool SerializeUObjectArray(FStructuredArchive::FRecord& ParentRecord, FArchiveFi
 // Can't make it an operator<< since it already exists.
 void SerializeUClass(FStructuredArchiveSlot Slot, UClass*& Class);
 
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
 template <typename T>
 void operator<<(FStructuredArchiveSlot Slot, TSubclassOf<T>& Class)
 {
@@ -98,11 +100,16 @@ void operator<<(FStructuredArchiveSlot Slot, TSubclassOf<T>& Class)
 		}
 	}
 }
+#endif
 
 namespace
 {
-	using FStructuredrchiveSlotBase = UE::StructuredArchive::Private::FSlotBase;
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
+	using FStructuredArchiveSlotBase = UE4StructuredArchive_Private::FSlotBase;
+#else
+	using FStructuredArchiveSlotBase = UE::StructuredArchive::Private::FSlotBase;
+#endif
 }
 
-bool IsLoading(const FStructuredrchiveSlotBase& Slot);
-bool IsSaving(const FStructuredrchiveSlotBase& Slot);
+bool IsLoading(const FStructuredArchiveSlotBase& Slot);
+bool IsSaving(const FStructuredArchiveSlotBase& Slot);

@@ -25,7 +25,6 @@
 #include "Components/SimpleGuidComponent.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralDungeonLog.h"
-#include "UObject/ObjectSaveContext.h"
 
 #if GUID_DEBUG_ENABLED
 #define LOG_GUID_INFO(...) DungeonLog_InfoSilent(## __VA_ARGS__)
