@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 Benoit Pelletier
+ * Copyright (c) 2023-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -85,6 +85,10 @@ public:
 	// Transforms North into South and East into West (and vice versa)
 	UFUNCTION(BlueprintPure, Category = "Math|Door Direction", meta = (DisplayName = "Opposite", CompactNodeTitle = "Opposite", AutoCreateRefTerm = "A"))
 	static EDoorDirection DoorDirection_Opposite(const EDoorDirection& A) { return ~A; }
+
+	// Convert a DoorDirection enum value into a unit IntVector pointing in that direction.
+	UFUNCTION(BlueprintPure, Category = "Conversion|Door Direction", meta = (BlueprintAutocast, DisplayName = "To Int Vector", AutoCreateRefTerm = "A"))
+	static FIntVector DoorDirection_ToIntVector(const EDoorDirection& A) { return ToIntVector(A); }
 
 	// ===== Plugin Settings Accessors =====
 

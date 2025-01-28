@@ -174,6 +174,9 @@ public:
 	UFUNCTION(BlueprintPure = false, Category = "Dungeon Graph", meta = (ReturnDisplayName = "Has Path"))
 	bool GetPathBetween(const URoom* A, const URoom* B, TArray<URoom*>& ResultPath, bool IgnoreLockedRooms = false) const;
 
+	// Returns the room instance at the provided room cell (expressed in Room Units, not Unreal Units!!!).
+	// Returns null if no room located at the provided cell.
+	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	URoom* GetRoomAt(FIntVector RoomCell) const;
 
 	// Returns the center of the bounding box of the dungeon.
