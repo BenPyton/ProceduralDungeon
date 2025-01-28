@@ -68,6 +68,9 @@ void FProceduralDungeonEdMode::Enter()
 	}
 
 	UpdateLevelBlueprint();
+
+	// Turn on the flag to force the debug drawings.
+	ARoomLevel::bIsDungeonEditorMode = true;
 }
 
 void FProceduralDungeonEdMode::Exit()
@@ -85,6 +88,8 @@ void FProceduralDungeonEdMode::Exit()
 
 	CachedLevelInstance.Reset();
 	CachedLevelBlueprint.Reset();
+
+	ARoomLevel::bIsDungeonEditorMode = false;
 
 	FEdMode::Exit();
 	DungeonEd_LogInfo("Exit Room Editor Mode.");

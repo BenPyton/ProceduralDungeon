@@ -147,6 +147,12 @@ bool Dungeon::DrawDebug()
 	return Settings->DrawDebug;
 }
 
+bool Dungeon::DrawOnlyWhenEditingRoom()
+{
+	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
+	return Settings->bDrawOnlyWhenEditingRooms;
+}
+
 bool Dungeon::ShowRoomOrigin()
 {
 	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();

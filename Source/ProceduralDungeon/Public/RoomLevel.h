@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,13 +44,18 @@ class PROCEDURALDUNGEON_API ARoomLevel : public ALevelScriptActor
 {
 	GENERATED_BODY()
 
-	// TODO: Make those properties protected is public getter instead
+	// TODO: Make those properties protected with public getter instead
 public:
 	UPROPERTY(EditAnywhere, Category = "Data")
 	class URoomData* Data;
 
 	UPROPERTY() // Macro is here to mark property to be used by GC
 	URoom* Room = nullptr;
+
+#if WITH_EDITOR
+	// Flag to know when the Dungeon Editor mode is active.
+	static bool bIsDungeonEditorMode;
+#endif
 
 public:
 	ARoomLevel(const FObjectInitializer& ObjectInitializer);

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,10 @@
 #include "Components/BoxComponent.h"
 #include "RoomVisibilityComponent.h"
 #include "RoomVisitor.h"
+
+#if WITH_EDITOR
+bool ARoomLevel::bIsDungeonEditorMode = false;
+#endif
 
 ARoomLevel::ARoomLevel(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -135,7 +139,15 @@ void ARoomLevel::Tick(float DeltaTime)
 
 #if ENABLE_DRAW_DEBUG
 	// @TODO: Place the debug draw in an editor module of the plugin?
-	if (Dungeon::DrawDebug() && IsValid(Data))
+
+	const bool bIsEditingRoom = GetLevel() == GetWorld()->PersistentLevel;
+	bool bShouldDrawDebug = Dungeon::DrawDebug() && (!Dungeon::DrawOnlyWhenEditingRoom() || bIsEditingRoom);
+#if WITH_EDITOR
+	// Force debug drawing when the editor is in DungeonEditor mode
+	bShouldDrawDebug |= bIsDungeonEditorMode;
+#endif
+
+	if (IsValid(Data) && bShouldDrawDebug)
 	{
 		const bool bIsRoomValid = (Room != nullptr);
 		const bool bIsRoomDataValid = bIsRoomValid && (Data == Room->GetRoomData());
