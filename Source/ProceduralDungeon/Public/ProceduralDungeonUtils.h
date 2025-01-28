@@ -105,6 +105,7 @@ namespace Dungeon
 	uint32 PROCEDURALDUNGEON_API OcclusionDistance();
 	bool PROCEDURALDUNGEON_API OccludeDynamicActors();
 	bool PROCEDURALDUNGEON_API DrawDebug();
+	bool PROCEDURALDUNGEON_API DrawOnlyWhenEditingRoom();
 	bool PROCEDURALDUNGEON_API ShowRoomOrigin();
 	bool PROCEDURALDUNGEON_API FlipDoorArrow();
 	float PROCEDURALDUNGEON_API DoorArrowLength();

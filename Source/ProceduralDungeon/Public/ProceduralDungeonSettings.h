@@ -98,6 +98,10 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Debug")
 	bool DrawDebug;
 
+	// Show room and door outlines in editor and development builds
+	UPROPERTY(EditAnywhere, config, Category = "Debug", meta = (EditCondition = "DrawDebug"))
+	bool bDrawOnlyWhenEditingRooms;
+
 	// Show the room origin in magenta
 	// DEPRECATED: This setting will be removed in a future release of the plugin.
 	UPROPERTY(EditAnywhere, config, Category = "Debug", meta = (EditCondition = "DrawDebug"))
