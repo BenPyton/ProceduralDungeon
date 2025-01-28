@@ -28,6 +28,8 @@
 #include "Door.h"
 #include "TriggerDoor.generated.h"
 
+// Door that opens when an actor enters the trigger box.
+// You can customize which actors can open the door by overriding the IsValidActor function.
 UCLASS()
 class PROCEDURALDUNGEON_API ATriggerDoor : public ADoor
 {

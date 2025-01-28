@@ -49,6 +49,8 @@ struct FRegisterSubObjectParams
 	EUnregisterSubObjectType UnregisterType = EUnregisterSubObjectType::Unregister;
 };
 
+// Base class for sub-objects that can be replicated.
+// This class is not blueprintable and should not be used directly in blueprints.
 UCLASS(NotBlueprintable, NotBlueprintType)
 class PROCEDURALDUNGEON_API UReplicableObject : public UObject
 {

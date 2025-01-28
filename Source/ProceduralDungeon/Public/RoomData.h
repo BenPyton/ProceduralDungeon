@@ -46,6 +46,8 @@ class URoomData;
 DECLARE_MULTICAST_DELEGATE_OneParam(FRoomDataEditorEvent, URoomData*)
 #endif
 
+// Static data shared by multiple room instances.
+// This data is used to define the room's properties and the room level to spawn.
 UCLASS()
 class PROCEDURALDUNGEON_API URoomData : public UPrimaryDataAsset
 {

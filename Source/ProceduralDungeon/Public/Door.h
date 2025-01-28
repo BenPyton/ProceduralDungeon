@@ -32,6 +32,8 @@
 class URoom;
 class UDoorType;
 
+// Base class for all door actors in the dungeon.
+// Use this class even if you want to create a wall to place instead of a door (when the door is not connected to another room for example).
 UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADoor : public AActor
 {

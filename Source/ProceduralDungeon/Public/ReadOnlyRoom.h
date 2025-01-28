@@ -51,11 +51,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	virtual int64 GetRoomID() const { return -1ll; }
 
-	// Returns the world extents (half size) of the room.
+	// Returns the position of the room (in Room Units).
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	virtual FIntVector GetPosition() const { return FIntVector::ZeroValue; }
 
-	// Returns the world extents (half size) of the room.
+	// Returns the direction of the room.
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	virtual EDoorDirection GetDirection() const { return EDoorDirection::North; }
 

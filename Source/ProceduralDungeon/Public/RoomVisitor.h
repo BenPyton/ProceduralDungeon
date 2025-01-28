@@ -31,13 +31,13 @@
 class ARoomLevel;
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI, BlueprintType)
+UINTERFACE(MinimalAPI, BlueprintType, meta = (Tooltip = "Interface which adds events to an actor (or a component) when the actor enters/exits a dungeon room."))
 class URoomVisitor : public UInterface
 {
 	GENERATED_BODY()
 };
 
-// Allows notify when entering/exiting a dungeon room.
+// Interface which adds events to an actor (or a component) when the actor enters/exits a dungeon room.
 class PROCEDURALDUNGEON_API IRoomVisitor
 {
 	GENERATED_BODY()

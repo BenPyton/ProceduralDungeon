@@ -31,7 +31,7 @@
 class URoom;
 class URoomConnection;
 
-UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
+UINTERFACE(MinimalAPI, NotBlueprintable, NotBlueprintType, meta = (CannotImplementInterfaceInBlueprint))
 class URoomContainer : public UInterface
 {
 	GENERATED_BODY()

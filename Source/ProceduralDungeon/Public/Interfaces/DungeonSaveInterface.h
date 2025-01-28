@@ -28,7 +28,7 @@
 #include "UObject/Interface.h"
 #include "DungeonSaveInterface.generated.h"
 
-UINTERFACE(BlueprintType, Blueprintable)
+UINTERFACE(BlueprintType, Blueprintable, meta = (Tooltip = "Give access to some serialization events to actors saved within a dungeon."))
 class UDungeonSaveInterface : public UInterface
 {
 	GENERATED_BODY()

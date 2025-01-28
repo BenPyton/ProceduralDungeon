@@ -41,6 +41,7 @@ enum class EGenerationState : uint8
 	NbState					UMETA(Hidden)
 };
 
+// The different directions a door can face.
 UENUM(BlueprintType, meta = (DisplayName = "Door Direction"))
 enum class EDoorDirection : uint8
 {
@@ -70,6 +71,7 @@ FQuat PROCEDURALDUNGEON_API ToQuaternion(const EDoorDirection& Direction);
 FIntVector PROCEDURALDUNGEON_API Rotate(const FIntVector& Pos, const EDoorDirection& Rot);
 FVector PROCEDURALDUNGEON_API Rotate(const FVector& Pos, const EDoorDirection& Rot);
 
+//The different types of generation algorithms.
 UENUM(BlueprintType, meta = (DisplayName = "Generation Type"))
 enum class EGenerationType : uint8
 {
@@ -78,6 +80,7 @@ enum class EGenerationType : uint8
 	NbType = 2 				UMETA(Hidden)
 };
 
+// The different types of seed update at each generation.
 UENUM(BlueprintType, meta = (DisplayName = "Seed Type"))
 enum class ESeedType : uint8
 {
@@ -98,6 +101,8 @@ enum class EVisibilityMode : uint8
 	NbMode			UMETA(Hidden)
 };
 
+// Structure that defines a door.
+// A door is defined by its position, its direction, and its type.
 USTRUCT(BlueprintType)
 struct PROCEDURALDUNGEON_API FDoorDef
 {

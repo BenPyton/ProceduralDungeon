@@ -28,18 +28,16 @@
 #include "UObject/Interface.h"
 #include "RoomActorGuid.generated.h"
 
-UINTERFACE(BlueprintType, Blueprintable)
+UINTERFACE(BlueprintType, Blueprintable, meta = (Tooltip = "Interface to access a custom Guid for actors saved within a dungeon."))
 class URoomActorGuid : public UInterface
 {
 	GENERATED_BODY()
 };
 
-/**
- * Interface for all saveable actors placed in room levels
- * The guid must be constant across game sessions to be able to save/load the actors.
- * It can be placed on ActorComponents too, but the interface on the Actor itself will be prioritized.
- * Only the first component found that implements the interface will be used. Make sure to have only one to prevent any confusions.
- */
+// Interface for all saveable actors placed in room levels
+// The guid must be constant across game sessions to be able to save/load the actors.
+// It can be placed on ActorComponents too, but the interface on the Actor itself will be prioritized.
+// Only the first component found that implements the interface will be used. Make sure to have only one to prevent any confusions.
 class PROCEDURALDUNGEON_API IRoomActorGuid
 {
 	GENERATED_BODY()
