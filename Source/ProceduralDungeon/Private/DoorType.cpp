@@ -29,7 +29,9 @@ UDoorType::UDoorType()
 	: UDataAsset()
 {
 	Size = Dungeon::DefaultDoorSize();
-#if WITH_EDITOR
+	Offset = Dungeon::DoorOffset();
+#if WITH_EDITORONLY_DATA
+	Color = FColor::Blue;
 	Description = FText::FromString(TEXT("No Description"));
 #endif
 }
@@ -37,6 +39,11 @@ UDoorType::UDoorType()
 FVector UDoorType::GetSize(const UDoorType* DoorType)
 {
 	return IsValid(DoorType) ? DoorType->Size : Dungeon::DefaultDoorSize();
+}
+
+float UDoorType::GetOffset(const UDoorType* DoorType)
+{
+	return IsValid(DoorType) ? DoorType->Offset : Dungeon::DoorOffset();
 }
 
 FColor UDoorType::GetColor(const UDoorType* DoorType)

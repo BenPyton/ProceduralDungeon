@@ -205,11 +205,9 @@ ADoor* URoomConnection::InstantiateDoor(UWorld* World, AActor* Owner, bool bUseO
 		bFinalFlipped = !bFinalFlipped; // Flipped is inverted when using RoomB instead of RoomA
 	}
 
-	FIntVector DoorCell = Room->GetDoorWorldPosition(DoorId);
-	EDoorDirection DoorRot = Room->GetDoorWorldOrientation(DoorId);
-
-	FVector InstanceDoorPos = FDoorDef::GetRealDoorPosition(DoorCell, DoorRot);
-	FQuat InstanceDoorRot = FRotator(0, 90 * (int8)DoorRot + bFinalFlipped * 180, 0).Quaternion();
+	FDoorDef DoorDef = Room->RoomToWorld(Room->GetDoorDef(DoorId));
+	FVector InstanceDoorPos = FDoorDef::GetRealDoorPosition(DoorDef);
+	FQuat InstanceDoorRot = FRotator(0, 90 * static_cast<uint8>(DoorDef.Direction) + bFinalFlipped * 180, 0).Quaternion();
 
 	if (bUseOwnerTransform && IsValid(Owner))
 	{

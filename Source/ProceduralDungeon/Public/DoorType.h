@@ -40,6 +40,10 @@ public:
 	// or the default door size in plugin's settings if no door type defined.
 	static FVector GetSize(const UDoorType* DoorType);
 
+	// Returns the door offset from the door type asset,
+	// or the default door offset in plugin's settings if no door type defined.
+	static float GetOffset(const UDoorType* DoorType);
+
 	// Returns the door color from the door type asset,
 	// or the default door color in plugin's settings if no door type defined.
 	static FColor GetColor(const UDoorType* DoorType);
@@ -49,10 +53,13 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category = "Door Type", meta = (ClampMin = 0))
 	FVector Size;
 
+	UPROPERTY(EditInstanceOnly, Category = "Door Type", meta = (ClampMin = 0, ClampMax = 1, UIMin = 0, UIMax = 1))
+	float Offset;
+
 #if WITH_EDITORONLY_DATA
 	// The color used to draw the door bounds in the editor.
 	UPROPERTY(EditInstanceOnly, Category = "Door Type")
-	FColor Color {FColor::Blue};
+	FColor Color;
 
 	// Just a description, used nowhere.
 	UPROPERTY(EditInstanceOnly, Category = "Door Type")

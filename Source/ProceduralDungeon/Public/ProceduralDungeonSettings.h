@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019-2024 Benoit Pelletier
+ * Copyright (c) 2019-2025 Benoit Pelletier
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ public:
 	FVector DoorSize;
 
 	// The height of the door's base from the room's base (in percentage of the room unit Z)
-	UPROPERTY(EditAnywhere, config, Category = "General")
+	UPROPERTY(EditAnywhere, config, Category = "General", meta = (DisplayName = "Default Door Offset", ClampMin = 0, ClampMax = 1, UIMin = 0, UIMax = 1))
 	float DoorOffset;
 
 	// When true, doors will be connected as long they are at the same place.

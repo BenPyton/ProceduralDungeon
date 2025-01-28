@@ -106,7 +106,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Door", meta = (DisplayName = "Always Unlocked"))
 	bool bAlwaysUnlocked {false};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door", meta = (DisplayName = "Door Type"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Door", meta = (DisplayName = "Door Type"))
 	UDoorType* Type {nullptr};
 
 	UPROPERTY(EditAnywhere, Category = "Door")

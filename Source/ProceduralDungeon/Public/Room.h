@@ -250,8 +250,9 @@ public:
 	void GetAllEmptyConnections(TArray<int32>& EmptyConnections) const;
 
 	bool IsDoorIndexValid(int32 DoorIndex) const;
-	int32 GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot);
-	int32 GetOtherDoorIndex(int32 DoorIndex);
+	int32 GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot) const;
+	int32 GetOtherDoorIndex(int32 DoorIndex) const;
+	const FDoorDef& GetDoorDef(int32 DoorIndex) const;
 
 	FIntVector WorldToRoom(const FIntVector& WorldPos) const;
 	FIntVector RoomToWorld(const FIntVector& RoomPos) const;
@@ -259,6 +260,8 @@ public:
 	EDoorDirection RoomToWorld(const EDoorDirection& RoomRot) const;
 	FBoxMinAndMax WorldToRoom(const FBoxMinAndMax& WorldBox) const;
 	FBoxMinAndMax RoomToWorld(const FBoxMinAndMax& RoomBox) const;
+	FDoorDef WorldToRoom(const FDoorDef& WorldDoor) const;
+	FDoorDef RoomToWorld(const FDoorDef& RoomDoor) const;
 	void SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot);
 	void SetPositionFromDoor(int DoorIndex, FIntVector WorldPos);
 	void SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot);
