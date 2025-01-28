@@ -342,7 +342,7 @@ public:
 	FORCEINLINE EGenerationState GetCurrentState() const { return CurrentState; }
 
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Dungeon Generator", meta = (DisplayName = "Rooms"))
+	UPROPERTY(BlueprintReadOnly, Category = "Dungeon Generator", meta = (DisplayName = "Rooms", ExposeFunctionCategories = "Dungeon Graph"))
 	UDungeonGraph* Graph;
 
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, NonPIEDuplicateTransient, TextExportTransient, Category = "GUID")
