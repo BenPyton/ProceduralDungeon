@@ -26,6 +26,7 @@
 
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"
 #include "Templates/SubclassOf.h"
+#include "UObject/SoftObjectPath.h"
 #include "Serialization/StructuredArchive.h"
 
 // Archive proxy specialized for the dungeon.

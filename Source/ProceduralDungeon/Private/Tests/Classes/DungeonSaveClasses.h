@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-#include "CoreUObject.h"
+#include "CoreMinimal.h"
 #include "Interfaces/DungeonCustomSerialization.h"
 #include "Interfaces/DungeonSaveInterface.h"
 #include "DungeonSaveClasses.generated.h"

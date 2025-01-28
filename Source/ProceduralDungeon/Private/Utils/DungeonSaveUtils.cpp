@@ -23,6 +23,8 @@
  */
 
 #include "Utils/DungeonSaveUtils.h"
+#include "Serialization/MemoryReader.h"
+#include "Serialization/MemoryWriter.h"
 #include "Serialization/StructuredArchive.h"
 #include "Serialization/StructuredArchiveSlotBase.h"
 #include "Serialization/ObjectAndNameAsStringProxyArchive.h"

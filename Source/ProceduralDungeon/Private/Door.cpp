@@ -32,6 +32,7 @@
 #include "DoorType.h"
 #include "ProceduralDungeonUtils.h"
 #include "Utils/ReplicationUtils.h"
+#include "ProceduralDungeonLog.h"
 
 ADoor::ADoor()
 {
