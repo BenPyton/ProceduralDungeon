@@ -28,6 +28,9 @@
 #include "Engine/DataAsset.h"
 #include "DoorType.generated.h"
 
+// Data asset to define a door type.
+// A door type is used to define the size, offset, and color of a door bounds.
+// Doors with different types are not compatible with each others.
 UCLASS(BlueprintType)
 class PROCEDURALDUNGEON_API UDoorType : public UDataAsset
 {

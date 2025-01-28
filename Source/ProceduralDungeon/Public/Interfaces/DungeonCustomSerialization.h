@@ -29,7 +29,7 @@
 #include "DungeonCustomSerialization.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
+UINTERFACE(MinimalAPI, NotBlueprintable, NotBlueprintType, meta = (CannotImplementInterfaceInBlueprint))
 class UDungeonCustomSerialization : public UInterface
 {
 	GENERATED_BODY()

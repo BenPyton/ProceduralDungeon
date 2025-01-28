@@ -28,7 +28,7 @@
 #include "UObject/Interface.h"
 #include "GeneratorProvider.generated.h"
 
-UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
+UINTERFACE(MinimalAPI, NotBlueprintable, NotBlueprintType, meta = (CannotImplementInterfaceInBlueprint))
 class UGeneratorProvider : public UInterface
 {
 	GENERATED_BODY()

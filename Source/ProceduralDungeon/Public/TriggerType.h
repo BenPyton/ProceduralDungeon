@@ -32,6 +32,9 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorTriggerEvent, AActor*, Actor);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FActorTriggerArrayEvent, TArray<AActor*>, Actor);
 
+// Trigger box that manages detection of actors entering and exiting the trigger.
+// Can execute gameplay logic at regular intervals, with an optional delay before activation.
+// You can customize the actor type that can activate the trigger by setting the ActorType property.
 UCLASS(BlueprintType, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent, ScriptName = "ActorTrigger"))
 class PROCEDURALDUNGEON_API UTriggerType : public UBoxComponent
 {

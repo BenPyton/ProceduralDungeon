@@ -39,6 +39,8 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FRoomLevelEditorEvent, ARoomLevel*);
 
 class URoom;
 
+// Level script actor for a room instance.
+// This class is used to manage the room instance and its bounds.
 UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ARoomLevel : public ALevelScriptActor
 {

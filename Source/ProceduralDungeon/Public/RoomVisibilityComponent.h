@@ -29,6 +29,9 @@
 #include "RoomVisitor.h"
 #include "RoomVisibilityComponent.generated.h"
 
+// Actor component to manage the visibility of an actor in the dungeon.
+// Use this one if the actor is able to move room.
+// If the actor remains in the same room, use UStaticRoomVisibilityComponent instead.
 UCLASS(ClassGroup = "ProceduralDungeon", meta = (BlueprintSpawnableComponent, DisplayName = "Room Visibility"))
 class PROCEDURALDUNGEON_API URoomVisibilityComponent : public UStaticRoomVisibilityComponent, public IRoomVisitor
 {

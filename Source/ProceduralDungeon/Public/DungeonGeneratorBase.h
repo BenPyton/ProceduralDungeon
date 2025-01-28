@@ -111,9 +111,11 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Dungeon Generator")
 	void Unload();
 
+	// Create a saved data from the current dungeon state
 	UFUNCTION(BlueprintPure = false, Category = "Dungeon Generator")
 	void SaveDungeon(FDungeonSaveData& SaveData);
 
+	// Load a dungeon from a previously saved data
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	void LoadDungeon(const FDungeonSaveData& SaveData);
 
