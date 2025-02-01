@@ -3,7 +3,7 @@
 :::note
 
 Randomness is an important part of any procedural generation algorithm.\
-You **must not** take easily on it and should think about it seriously from the beggining of your project.\
+You **must not** take easily on it and should think about it seriously from the beginning of your project.\
 This page will show you some features provided by the plugin to help you with tat task and gives you some best practices as well.
 
 :::
