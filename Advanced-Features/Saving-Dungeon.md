@@ -1,9 +1,13 @@
 # Saving/Loading a Dungeon
 
-:::warning[Caution]
+import DungeonSaveExample from "../Blueprints/DungeonSaveExample.bp";
+import DungeonLoadExample from "../Blueprints/DungeonLoadExample.bp";
 
-This feature is still experimental and may get broken changes (or being revamped) in future versions of the plugin!\
-But you can always use it as a first solution, before trying to implement your own save solution for the dungeon.
+:::warning[Experimental]
+
+This feature is still **experimental** and may receive breaking changes (or being revamped) in future versions of the plugin!\
+But do not fear to use it as a first solution, and if you do encounter any issues with it, feel free to report them to me.\
+You can always implement your own save solution for the dungeon if this feature does not meet your needs.
 
 :::
 
@@ -22,7 +26,27 @@ You can then hold this structure into your `Save Game` class to save your dungeo
 
 If you are using a C++ archive-based save system, you also have direct access to the functions to save the dungeon in your archive or structured archive directly.
 
-When loading a dungeon, the data is immediately deserialized from the structure, but the
+## How to save/load your dungeon
+
+When you save/load your game, you can call the [`Save Dungeon`](/api/DungeonGeneratorBase/SaveDungeon) and [`Load Dungeon`](/api/DungeonGeneratorBase/LoadDungeon) nodes on a `Dungeon Generator` reference.
+
+If you are using multiple generator actors at the same time, you can use the `Generator ID` to know which save belongs to which generator.
+The plugin provides also convenient nodes, [`Save All Dungeons`](/api/DungeonGeneratorBase/SaveAllDungeons) and [`Load All Dungeons`](/api/DungeonGeneratorBase/LoadAllDungeons), to automatically gather generators and saving/loading them.
+
+Here some basic examples on how to call the `Save Dungeon` and `Load Dungeon` on a unique generator actor, which is referenced in a variable of the calling blueprint class.
+
+:::tip
+
+This new blueprint representation in this wiki is an **experiment**.\
+You can navigate and interact with the nodes like in the UE Editor.\
+You can also copy the nodes and paste them in your editor!
+Feel free to share your thoughts and suggestions about it on the [Discord server](https://discord.gg/YE2dPda2CC).
+
+:::
+
+<Blueprint src={DungeonSaveExample}/>
+
+<Blueprint src={DungeonLoadExample}/>
 
 ## Saving actors placed in room levels
 
@@ -47,7 +71,7 @@ If you are already using your own guid components in your project, then you just
 
 Once your actor is available for serialization within the dungeon, you can use the `Save Game` flag of the actor's variables to include these variables in your game save.
 
-You can also implement the [`Dungeon Save`](/api/Classes/DungeonSaveInterface) to get access at some save/load events:
+You can also implement the [`Dungeon Save`](/api/Classes/DungeonSaveInterface) interface to get access to some save/load events in your actor:
 
 - `Pre Save Dungeon`: event called only when saving a dungeon. It is called on all actors before starting the serialization of the whole dungeon.
 - `Post Load Dungeon`: event called only when loading a dungeon. It is called after the dungeon has finished to load.
@@ -59,3 +83,13 @@ You can also implement the [`Dungeon Save`](/api/Classes/DungeonSaveInterface) t
 The door actors **spawned by the dungeon** are also handled by the dungeon serialization.\
 You can use the `Save Game` flag and the `Dungeon Save` interface like you would do for the actors placed in room levels (see above).\
 However, there is not need to implement the `Room Actor Guid` interface on them (unless you want to place some doors in your room levels too).
+
+## Saving other actors
+
+As said previously, any actor you will spawn at runtime, as well as the player character and any actor not related to the dungeon (e.g. placed in the master level) are not managed by this dungeon serialization feature.
+
+Saving the dungeon is immediate. So you can do it when you save your other actors.
+
+Loading the dungeon is **not** immediate in the other hand.
+In fact, the dungeon data is deserialized immediately, but before applying them the dungeon first needs to unload the previous dungeon if any, and then load the room levels before applying these loaded data to the room actors.\
+You should spawn and deserialize your runtime actors after all that happened (e.g. in the `Post Generation` event).
