@@ -3,12 +3,6 @@ pagination_prev: guides/Getting-Started/Plugin-Settings
 pagination_next: guides/Getting-Started/Generating-Dungeon/Dungeon-Generator
 ---
 
-:::warning
-
-This page is for plugin version 3.X.X and higher. If you use a version 2.X.X, please read the page [Room Architecture](Room-Architecture) instead.
-
-:::
-
 # Creating Rooms
 
 <!-- BEGIN IMPORTS -->
