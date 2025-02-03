@@ -1,7 +1,3 @@
----
-slug: /guides/Room-Observer
----
-
 # Room Observer
 
 The room observer components allows actors to be notified whenever any actor enters or exits a room.\

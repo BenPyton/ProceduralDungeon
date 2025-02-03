@@ -1,7 +1,3 @@
----
-slug: /guides/Multiplayer
----
-
 # Multiplayer
 
 :::info[Prerequisites]

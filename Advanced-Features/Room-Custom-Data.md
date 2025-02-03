@@ -1,7 +1,3 @@
----
-slug: /guides/Room-Custom-Data
----
-
 # Room Custom Data
 
 You can add variables as much as you want in your `RoomData` assets. However they are only static variables shared by all room instances spawned with the same `RoomData`.

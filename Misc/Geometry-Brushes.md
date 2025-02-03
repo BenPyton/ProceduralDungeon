@@ -1,7 +1,3 @@
----
-slug: /guides/Geometry-Brushes
----
-
 # Geometry Brushes
 
 :::warning[Limitations]

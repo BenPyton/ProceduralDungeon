@@ -1,7 +1,3 @@
----
-slug: /guides/Room-Types
----
-
 # Room Types
 
 There is no built-in room type system provided by the plugin, because it mainly depends on the game you are creating.

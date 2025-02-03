@@ -1,7 +1,3 @@
----
-slug: /guides/Console-Commands
----
-
 # Console Commands
 
 The plugin adds several console commands to control some plugin's settings and add some debug functions.

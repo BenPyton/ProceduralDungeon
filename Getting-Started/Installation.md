@@ -1,5 +1,4 @@
 ---
-slug: /guides/Installation
 toc_min_heading_level: 2
 toc_max_heading_level: 2
 pagination_prev: guides/Introduction

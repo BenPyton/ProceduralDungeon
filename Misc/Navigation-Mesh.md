@@ -1,7 +1,3 @@
----
-slug: /guides/Navigation-Mesh
----
-
 # Navmesh Generation
 
 If you are using the default unreal navigation system ([UNavigationSystemV1](https://docs.unrealengine.com/5.0/en-US/basic-navigation-in-unreal-engine/)), then the navigation mesh is automatically rebuild after each dungeon generation if you setup your project as described below.

@@ -1,7 +1,4 @@
 ---
-slug: /guides/Creating-Rooms
-id: Creating-Rooms
-title: Creating Rooms
 pagination_prev: guides/Getting-Started/Plugin-Settings
 pagination_next: guides/Getting-Started/Generating-Dungeon/Dungeon-Generator
 ---
@@ -12,7 +9,7 @@ This page is for plugin version 3.X.X and higher. If you use a version 2.X.X, pl
 
 :::
 
-# Room Architecture
+# Creating Rooms
 
 <!-- BEGIN IMPORTS -->
 

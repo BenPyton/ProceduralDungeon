@@ -1,7 +1,3 @@
----
-slug: /guides/Door-Types
----
-
 # Door Types
 
 By default, the room data's doors are set with no door type.\

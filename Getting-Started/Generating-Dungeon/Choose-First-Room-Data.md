@@ -1,5 +1,4 @@
 ---
-slug: /guides/Choose-First-Room-Data
 pagination_prev: guides/Getting-Started/Generating-Dungeon/Dungeon-Generator
 pagination_next: guides/Getting-Started/Generating-Dungeon/Choose-Next-Room-Data
 ---

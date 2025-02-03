@@ -1,7 +1,3 @@
----
-slug: /guides/Door
----
-
 # Door
 
 The `Door` class is the base class for all doors spawned by the dungeon.

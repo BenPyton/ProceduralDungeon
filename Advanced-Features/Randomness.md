@@ -36,7 +36,7 @@ To prevent that and make a robust random system that will not break your reprodu
 When you generate a dungeon, there are many pieces that may need randomness: the generator algorithm, the room custom data, the actors and their components, etc.\
 What you want to achieve is to generate the exact same dungeon from only one seed.
 
-The [`Dungeon Generator`](../Dungeon-Generator) will generate a new seed for each generation depending on its settings.\
+The [`Dungeon Generator`](../Getting-Started/Generating-Dungeon/Dungeon-Generator.md) will generate a new seed for each generation depending on its settings.\
 But how to use it in your actors placed in the room levels?
 
 ### The Deterministic Random Component

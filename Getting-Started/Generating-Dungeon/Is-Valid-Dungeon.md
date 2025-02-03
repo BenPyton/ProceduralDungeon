@@ -1,5 +1,4 @@
 ---
-slug: /guides/Is-Valid-Dungeon
 pagination_prev: guides/Getting-Started/Generating-Dungeon/Continue-To-Add-Room
 pagination_next: guides/Getting-Started/Generating-Dungeon/Choose-Door
 ---

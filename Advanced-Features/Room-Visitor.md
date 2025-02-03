@@ -1,7 +1,3 @@
----
-slug: /guides/Room-Visitor
----
-
 # Room Visitor
 
 The `Room Visitor` is an [interface](https://dev.epicgames.com/community/learning/tutorials/bLXe/interfaces-bp-c) used to add behaviors to your actors or components when they enter or exit a room.

@@ -1,5 +1,4 @@
 ---
-slug: /guides/Plugin-Settings
 pagination_prev: guides/Getting-Started/Installation
 pagination_next: guides/Getting-Started/Creating-Rooms
 ---

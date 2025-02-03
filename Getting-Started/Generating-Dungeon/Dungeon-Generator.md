@@ -1,5 +1,4 @@
 ---
-slug: /guides/Dungeon-Generator
 pagination_prev: guides/Getting-Started/Creating-Rooms
 pagination_next: guides/Getting-Started/Generating-Dungeon/Choose-First-Room-Data
 ---
@@ -11,7 +10,7 @@ pagination_next: guides/Getting-Started/Generating-Dungeon/Choose-First-Room-Dat
 The dungeon generator is an actor placed in your main level. It is responsible to generate the dungeon and spawn the room levels.\
 To create one, create a new blueprint, expand "All Classes" and type `DungeonGenerator`.
 
-The dungeon generator don't work directly by itself, you have to [create data and levels for your rooms](Creating-Rooms) first.
+The dungeon generator don't work directly by itself, you have to [create data and levels for your rooms](../Creating-Rooms.md) first.
 
 To be able to generate a dungeon, you also have to override some minimal functions:
 

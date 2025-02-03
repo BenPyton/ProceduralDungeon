@@ -1,5 +1,4 @@
 ---
-slug: /guides/Choose-Door
 pagination_prev: guides/Getting-Started/Generating-Dungeon/Is-Valid-Dungeon
 pagination_next: guides/Getting-Started/Packaging
 ---
