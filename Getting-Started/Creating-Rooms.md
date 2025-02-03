@@ -17,10 +17,22 @@ import TabItem from '@theme/TabItem';
 ![](../Images/DataAndLevel_UE5.jpg)
 
 The level is a classic Unreal Engine level in which you design your room as you like.\
-The data is an asset of type `RoomData` that defines the room properties (size, doors, etc.).\
-You can inherit from `RoomData` class in C++ or in Blueprint to add properties specific for your game.
+The data is an asset of type `Room Data` that defines the room properties (size, doors, etc.).\
+You can inherit from `Room Data` class in C++ or in Blueprint to add properties specific for your game.
 
-But remember, you **must** create one level per room data (you can't use the same room level for multiple room data).
+:::warning[Important]
+
+Remember, you **must** create **one level per room data** (you can't use the same room level for multiple room data) and **vice-versa**.
+
+:::
+
+:::info
+
+The `Room Data` holds only **static** data.
+That means you can't modify those data at runtime.\
+If you want to add variables you can update at runtime, you should create some [`Room Custom Data`](../Advanced-Features/Room-Custom-Data.md) to embed dynamic variables in your room instances.
+
+:::
 
 Before anything else, you should set the [plugin's settings](Plugin-Settings.md) to your desire:
 
@@ -32,15 +44,15 @@ However, the door size doesn't affect anything during the dungeon generation.
 
 # How to create a room
 
-### Step 0 - Creating a `RoomData` child class (optional but recommended)
+### Step 0 - Creating a `Room Data` child class (optional but recommended)
 
-If you want specific data in your rooms, you can create a new child blueprint of from `RoomData`.\
-*(You can do this step only once for all your room data, or you can skip it if you don't need specific data for your rooms)*\
+If you want specific data in your rooms, you can create a new child blueprint of from `Room Data`.\
+*(You can do this step only once for all your room data, or you can skip it if you don't need specific data for your rooms)*
 
 <!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
-To create a new `RoomData` **class**, right-click in content browser and select `Blueprint Class`.\
+To create a new `Room Data` **class**, right-click in content browser and select `Blueprint Class`.\
 Then expand the `All Classes` and type "RoomData" in the search bar. You can then select it.
 
 After doing so, you can add your own data inside this blueprint class (for example an integer representing the difficulty of the room).
@@ -66,7 +78,7 @@ public:
 <!-- [END TAB ITEM] C++ --> </TabItem>
 <!-- [END TABS] Blueprint | C++ --> </Tabs>
 
- You can also make multiple `RoomData` child classes, but I won't tell you how Unreal works here! 😉
+ You can also make multiple `Room Data` child classes, but I won't tell you how Unreal works here! 😉
 
 :::tip
 
@@ -74,11 +86,11 @@ Although not mandatory to use the plugin, creating at least one child class of `
 
 :::
 
-### Step 1 - Creating a `RoomData` asset (one per room)
+### Step 1 - Creating a `Room Data` asset (one per room)
 
-The first required thing to do is to create a `RoomData` asset.\
+The first required thing to do is to create a `Room Data` asset.\
 It is done simply by right-clicking in your content browser, then choosing `Procedural Dungeon` -> `Room Data`.\
-If you have created at least one child class of `RoomData`, you can pick the one you want here.
+If you have created at least one child class of `Room Data`, you can pick the one you want here.
 
 ![](../Images/CreateRoomData_v3.gif)
 
@@ -97,15 +109,15 @@ Open your newly created level, then select the `Dungeon Room` editor mode.
 
 ![](../Images/SelectDungeonRoomMode.gif)
 
-If your level is not already reparented to the `RoomLevel` script blueprint (most likely the case), the editor mode will propose you to reparent it with a button.\
-Click on it, and now you should have a `Data` field where you have to choose your newly created `RoomData` asset above.
+If your level is not already reparented to the `Room Level` script blueprint (most likely the case), the editor mode will propose you to reparent it with a button.\
+Click on it, and now you should have a `Data` field where you have to choose your newly created `Room Data` asset above.
 
 The details of the asset will show up below the level's `Data` field.\
 To complete the mandatory settings, you have to set the data's `Level` field to your current level (if not the case an error message is displayed).
 
 ![](../Images/RoomBasicSetup.gif)
 
-Now you can design your room as you want, and update the `RoomData` accordingly with the help of the tools described below.
+Now you can design your room as you want, and update the `Room Data` accordingly with the help of the tools described below.
 
 # Editor Tools
 

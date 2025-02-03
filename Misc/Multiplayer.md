@@ -1,5 +1,7 @@
 # Multiplayer
 
+import Flowchart from "../Images/Flowchart_Dark_v4.svg";
+
 :::info[Prerequisites]
 
 This guide assumes you have minimum knowledge about multiplayer in Unreal Engine.\
@@ -14,7 +16,7 @@ If you are new to multiplayer in Unreal Engine, I would suggest you to read this
 The first important thing to know is that only the server will generate the dungeon.\
 The clients will replicate the room instance list from the server and then load/unload accordingly the levels.
 
-![](../Images/Flowchart_Dark_v4.svg)
+<Flowchart/>
 
 If you look at the state machine above, both server and client start in a state `idle`.
 

@@ -1,3 +1,7 @@
+---
+title: Packaging Game
+---
+
 # Packaging your game with the plugin
 
 The [releases](https://github.com/BenPyton/ProceduralDungeon/releases) I provide contains only pre-compiled binaries for the Windows 64bits platform.

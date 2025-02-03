@@ -60,13 +60,13 @@ You can also join the [Discord server](https://discord.gg/YE2dPda2CC) dedicated 
 
 ## Tips
 
-The generation take a certain time (the generation itself is done on one frame, but the instantiation and loading of each room take some times proportionally to the number and complexity of the rooms).<br/>
-So, if you have the player character spawned at start, it will fall into the void of the universe before the dungeon has the time to generate.
+The generation takes a certain duration to complete (the generation itself is done in one frame, but the loading of each room level takes some times proportional to their number and complexity).<br/>
+So, if you have the player character spawned at start, it will fall into the void of the universe before the end of the dungeon generation.
 
 To manage this situation, you have multiple solutions:
 
 - The easy and ugly way is to place a little plane somewhere with the player start on it, and disable the inputs from the player to prevent him to fall from this plane, then when the generation is complete you teleport the player into the first room and unlock the inputs;
-- The better and cleaner way is to spawn the player as spectator until the generation is finished, and then you spawn the character actor in the first room (or anywhere else if you want to) and make it possessed by the player controller. (I've added a `Spectate` blueprint node to ease this solution)
+- The better and cleaner way is to spawn the player as spectator until the end of the generation, and then you spawn the player character at a player start. (I've added a [`Spectate`](/api/DungeonBlueprintLibrary/Spectate) blueprint node to ease this solution)
 
-Both solutions use the `Post Generation Event` to know when the generation is done.
+Both solutions are using the `Post Generation Event` to know when the generation is done.
 You will also want to show or keep a loading screen when you start your game map, and you hide it on this event too.

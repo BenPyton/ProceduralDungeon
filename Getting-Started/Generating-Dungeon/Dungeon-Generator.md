@@ -5,6 +5,8 @@ pagination_next: guides/Getting-Started/Generating-Dungeon/Choose-First-Room-Dat
 
 # Dungeon Generator
 
+import Flowchart from "../../Images/Flowchart_Dark_v4.svg";
+
 ## Create a dungeon generator
 
 The dungeon generator is an actor placed in your main level. It is responsible to generate the dungeon and spawn the room levels.\
@@ -33,7 +35,7 @@ Function | Description
 
 ## Understanding the internals of the Dungeon Generator
 
-![](../../Images/Flowchart_Dark_v4.svg)
+<Flowchart/>
 
 This flowchart shows how all functions are pieced together.\
 A generation is made of 4 phases :

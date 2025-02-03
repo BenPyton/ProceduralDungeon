@@ -1,5 +1,7 @@
 # Custom `Create Dungeon` Function
 
+import Flowchart from "../Images/Flowchart_Dark_v4.svg";
+
 :::warning
 
 As of now, overriding the `Create Dungeon` function is only available in C++ because I didn't found out in blueprint how to prevent overriding functions in child classes while allowing them in parent class.
@@ -15,7 +17,7 @@ Its behavior is to create a first room and then add new rooms to existing doors.
 
 See the `Create Dungeon` function in the diagram below:
 
-![](../Images/Flowchart_Dark_v4.svg)
+<Flowchart/>
 
 If you are not satisfied with this default behavior, you can write your own `Create Dungeon` function while keeping the core features of the generator.
 
