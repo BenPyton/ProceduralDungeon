@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkprocedural_dungeon_wiki=self.webpackChunkprocedural_dungeon_wiki||[]).push([[9647],{7121:(e,r,u)=>{u.r(r),u.d(r,{default:()=>l});u(96540);var s=u(34164),n=u(1003),a=u(17559),c=u(22831),d=u(10781),i=u(74848);function l(e){return(0,i.jsx)(n.e3,{className:(0,s.A)(a.G.wrapper.docsPages),children:(0,i.jsx)(d.A,{children:(0,c.v)(e.route.routes)})})}}}]);

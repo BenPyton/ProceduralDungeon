@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkprocedural_dungeon_wiki=self.webpackChunkprocedural_dungeon_wiki||[]).push([[18401],{54517:(e,s,n)=>{n.d(s,{A:()=>a});n(96540);var u=n(79712),c=n(76262),r=n(74848);const a={...u.A,Blueprint:function(e){let{src:s,className:n}=e;return(0,r.jsx)(c.Blueprint,{code:s,className:"blueprint"+(n?" ${className}":"")})}}}}]);
