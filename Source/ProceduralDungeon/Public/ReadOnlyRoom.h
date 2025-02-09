@@ -30,7 +30,7 @@
 class URoomData;
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI, BlueprintType, NotBlueprintable, meta = (CannotImplementInterfaceInBlueprint, Tooltip = "Allow access to only some members of Room instances during the generation process."))
+UINTERFACE(MinimalAPI, BlueprintType, NotBlueprintable, meta = (CannotImplementInterfaceInBlueprint, Documentable, Tooltip = "Allow access to only some members of Room instances during the generation process."))
 class UReadOnlyRoom : public UInterface
 {
 	GENERATED_BODY()
