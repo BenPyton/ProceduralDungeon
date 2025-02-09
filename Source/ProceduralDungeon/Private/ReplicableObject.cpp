@@ -62,11 +62,9 @@ void UReplicableObject::RegisterAsReplicable(bool bRegister, FRegisterSubObjectP
 	if (!Owner->IsUsingRegisteredSubObjectList())
 		return;
 
+	// Ignore if the object is already registered/unregistered
 	if (Owner->IsReplicatedSubObjectRegistered(this) == bRegister)
-	{
-		ensureMsgf(false, TEXT("Trying to %sregister %s as replicable subobject in actor %s but it is already %sregistered."), ::GetWithPredicate(TEXT("un"), !bRegister), *GetNameSafe(this), *GetNameSafe(Owner), ::GetWithPredicate(TEXT("un"), !bRegister));
 		return;
-	}
 
 	DungeonLog_InfoSilent("%s Replicable Subobject: %s", (bRegister) ? TEXT("Register") : TEXT("Unregister"), *GetNameSafe(this));
 
