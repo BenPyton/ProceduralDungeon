@@ -281,6 +281,10 @@ bool ADungeonGeneratorBase::TryPlaceRoom(URoom* const& Room, int DoorIndex, cons
 
 	// Test if it fits in the place
 	bool bCanBePlaced = !URoom::Overlap(*Room, Graph->GetAllRooms());
+	// @TODO: Should be more performant to use voxel bounds instead of room bounds
+	// Also will be mandatory when RoomData will get voxel bounds editor
+	// But for now if the RoomUnit is really small (like (1,1,1)) it is really a bottle neck of performence...
+	//bool bCanBePlaced = !FVoxelBounds::Overlap(Room->GetVoxelBounds(), Graph->GetVoxelBounds());
 
 	// Check that it does not collide with the world too
 	if (bCanBePlaced && bUseWorldCollisionChecks)

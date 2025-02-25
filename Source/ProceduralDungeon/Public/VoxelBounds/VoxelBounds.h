@@ -110,6 +110,7 @@ public:
 	bool operator==(const FVoxelBounds& Other) const;
 	bool operator!=(const FVoxelBounds& Other) const { return !(*this == Other); }
 
+	static bool Overlap(const FVoxelBounds& A, const FVoxelBounds& B);
 	friend FVoxelBounds Rotate(const FVoxelBounds& Bounds, const EDoorDirection& Rot);
 
 private:
