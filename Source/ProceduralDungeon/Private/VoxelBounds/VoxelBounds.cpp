@@ -257,6 +257,21 @@ bool FVoxelBounds::operator==(const FVoxelBounds& Other) const
 	return true;
 }
 
+bool FVoxelBounds::Overlap(const FVoxelBounds& A, const FVoxelBounds& B)
+{
+	if (!FBoxMinAndMax::Overlap(A.Bounds, B.Bounds))
+		return false;
+
+	// @TODO: Maybe it will be more performant to use a hierarchical partitioning
+	// especially when using really small RoomUnits (like (1,1,1))
+	for (const auto& Cell : A.Cells)
+	{
+		if (B.Cells.Contains(Cell.Key))
+			return true;
+	}
+	return false;
+}
+
 FVoxelBounds Rotate(const FVoxelBounds& Bounds, const EDoorDirection& Rot)
 {
 	FVoxelBounds NewBounds;

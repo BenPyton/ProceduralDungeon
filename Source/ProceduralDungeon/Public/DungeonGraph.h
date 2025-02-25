@@ -214,6 +214,7 @@ public:
 	// Returns the computed dungeon bounds.
 	class FBoxCenterAndExtent GetDungeonBounds(const FTransform& Transform = FTransform::Identity) const;
 	struct FBoxMinAndMax GetIntBounds() const;
+	FVoxelBounds GetVoxelBounds() const { return Bounds; }
 
 	// Returns in OutRooms all the rooms in the Distance from each InRooms and optionally apply Func on each rooms.
 	// Distance is the number of room connection between 2 rooms, not the distance in any unit.
