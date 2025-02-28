@@ -5,30 +5,32 @@
 [![License](https://img.shields.io/github/license/BenPyton/ProceduralDungeon?label=License&color=blue)](LICENSE)
 ![Download count](https://img.shields.io/github/downloads/BenPyton/ProceduralDungeon/total?label=Downloads)
 [![Actively Maintained](https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-green.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
-[![Discord](https://img.shields.io/discord/1182461404092055574?logo=discord&logoColor=white&label=Discord&color=%235865F2)][1]
+[![Discord](https://img.shields.io/discord/1182461404092055574?logo=discord&logoColor=white&label=Discord&color=%235865F2)][Discord]
 
 ## Overview
 
-This is an Unreal Engine plugin to create procedural dungeons by arranging procedurally a set of room like "The Binding of Isaac" or "Rogue Legacy" but in 3D.
+This Unreal Engine plugin allows you to create rich, diverse dungeon experiences that combine the best of both worlds: the creativity and precision of handmade room designs, paired with the unpredictability and excitement of procedural generation.
 
-This procedural dungeon plugin uses hand-created rooms that are Unreal levels.\
-You define your own rules in blueprints or C++ to generate the dungeon via an actor placed in a master world.
+Rooms are handmade Unreal levels instanced in the world.
+You define their size and their doors as well as several other parameters.
+You code your own rules in blueprints or C++, with great flexibility and customization, to generate the dungeons ***you*** want.
 
 If you have any bug or crash, please open an issue in the Github repo.\
-If you have suggestions, questions or need help to use the plugin you can join the [Discord server][1] dedicated to this plugin.\
+If you have suggestions, questions or need help to use the plugin you can join the [Discord server][Discord] dedicated to this plugin.\
 If you want to contribute, feel free to create a pull request (*contributions to the wiki are also welcomed!*).
 
 ## Features
 
-- Hand created rooms, allowing full control by the level designers.
-- Generation rules defined in blueprint, allowing flexible and powerful procedural generation.
-- Doors can be put on any Z height, allowing dungeons to be in 3D (but can do flat dungeons as well).
-- Defining different door types, allowing more complex dungeons.
-- Rooms and doors can be locked/unlocked. 
-- Optional occlusion culling, allowing only relevant rooms rendered (and thus better performances).
+- Handcrafted rooms, giving full control of their design by the level designers.
+- Generation rules defined in blueprint or C++, allowing flexible and powerful procedural generation.
 - A new editor mode to ease the creation and edition of the rooms.
-- Custom data in rooms, allowing gameplay specific code in room instances.
-- Working well with navmeshes and multiplayers.
+- Several interfaces and components for your actors (RoomVisitor, RoomObserver, DeterministicRandom, etc.)
+- Different door types, allowing more complex dungeons.
+- Optional room culling system, allowing to render only the relevant rooms to the player.
+- Ready for multiplayer games (push model and subobject lists are implemented).
+- :construction:[^experimental] Save/Load nodes for the dungeon, easy to use with any game save system (blueprint or C++)
+
+[^experimental]: :construction: : Experimental features
 
 ## Example
 
@@ -40,7 +42,8 @@ Some hand-made rooms defined with bounds and doors:\
 <img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonDemo_RoomD.gif" alt="Animated GIF" width="125"/>
 <img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonDemo_RoomExit.gif" alt="Animated GIF" width="125"/>
 
-Some very simple generation rules:
+Some extremely simple generation rules:
+
 - A special room (red) used to spawn the player.
 - Then 10 rooms chosen randomly in a list (blue, green, yellow, cyan).
 - Then a special room (purple) used as an end goal for the player.
@@ -56,21 +59,21 @@ You can find an example project [here](https://github.com/BenPyton/DungeonExampl
 
 ## How to use it
 
-Go to the [Getting Started](https://benpyton.github.io/ProceduralDungeon/guides/Installation) page to begin to work with the plugin.
+Follow the [Getting Started guide on the wiki](https://benpyton.github.io/ProceduralDungeon/guides/Introduction) to start working with the plugin.
 
-If you want more details about how it works internally, you can read the [wiki](https://BenPyton.github.io/ProceduralDungeon/guides/Home).
+If you want more details about how it works internally, you can read the [wiki](https://benpyton.github.io/ProceduralDungeon/guides/Home).
 
-You can also join the [Discord server][1] dedicated to this plugin if you want to ask question or get help from the community.
+You have also access in the wiki to all the exposed [classes and nodes](https://benpyton.github.io/ProceduralDungeon/api) in Blueprint.
+
+You can also join the [Discord server][Discord] dedicated to this plugin if you want to ask question or get help from the community.
 
 ## Installation
 
 Install it like any other Unreal Engine plugin.
 
-If you have any trouble with installation, read the [Installation](https://benpyton.github.io/ProceduralDungeon/guides/Installation) page of the wiki.
+If you have any trouble with installation, read the [Installation](https://benpyton.github.io/ProceduralDungeon/guides/Getting-Started/Installation) page of the wiki.
 
 ## FAQ
-
-[comment]: # (Move the FAQ in a wiki page instead?)
 
 <details>
 <summary><b>Can I generate levels during runtime? What I mean is if I can generate a new dungeon while the player is in it.</b></summary>
@@ -96,10 +99,10 @@ If you have any trouble with installation, read the [Installation](https://benpy
 <details>
 <summary><b>Can I save and load dungeons?</b></summary>
 
-> There is no save/load system implemented in the plugin. You will need to do it yourself.\
-> I made this plugin for a rogue-like game, so I didn't made a save/load system of the dungeon.\
-> A starting point will be to save the dungeon seed, and any other dynamic actors of your game.\
-> You would set an ID for each actors in the room's levels that need to be saved (using the dungeon's seed). Then when you load a game you can retrieve the actors from their IDs in the generated dungeon, and apply the saved data to them.
+> Since version 3.5 of the plugin, There are [some nodes](https://benpyton.github.io/ProceduralDungeon/guides/Advanced-Features/Saving-Dungeon) to help you easily setup a save/load of the dungeon.
+> It'll need some works on your side but it is definitely possible to do it.\
+> The dungeon save should be compatible with any save system you are using.
+> In C++ you can also use some functions for archive-based save systems ( `StructuredArchive` compatible too).
 
 </details>
 
@@ -114,18 +117,16 @@ If you have any trouble with installation, read the [Installation](https://benpy
 <summary><b>It is pretty much up to my creativity to design whatever I want, right? If I want rooms to have enemies or anything like that, I can just create it in the level, right?</b></summary>
 
 > Yes, you can design everything you want in the room. It is the purpose of the plugin: providing a generic way to generate a dungeon, without any compromise on the DA nor the game design.\
-> If you want to add dynamic actors (like enemies, chests, etc.) I would suggest you to create spawners that you place in your room's levels, and spawn those actors after the dungeon generation.\
-> For game save, you should provide a unique id (seed) for each spawner based on the dungeon's seed, so the random spawning of enemies or chest loot will be deterministic from the dungeon's seed.\
-> For multiplayer, you should do the spawning only on the server side. The spawn command will be sent to the clients and the actors spawned will then be replicated correctly.
+> If you don't want to create the rooms manually, you may use other procedural plugins (like PCG) to create the content of the rooms (I've never tested that myself though).
 
 </details>
 
 <details>
-<summary><b>How does the occlusion culling work for multiplayer?</b></summary>
+<summary><b>How does the room culling work for multiplayer?</b></summary>
 
-> The occlusion culling is client side. It will show only the room where the local player is and any adjacent rooms.\
-> You can read further details about the occlusion culling system of this plugin from the [wiki page](https://benpyton.github.io/ProceduralDungeon/guides/Occlusion-Culling).\
-> You can also disable the occlusion culling from the [plugin's settings](https://benpyton.github.io/ProceduralDungeon/guides/Plugin-Settings) and do it yourself in another way.
+> The room culling system built in the plugin is client side. It will show only the room where the local player is and any adjacent rooms.\
+> You can read further details about the room culling system of this plugin from the [wiki page](https://benpyton.github.io/ProceduralDungeon/guides/Advanced-Features/Occlusion-Culling).\
+> You can also disable the room culling system from the [plugin's settings](https://benpyton.github.io/ProceduralDungeon/guides/Getting-Started/Plugin-Settings) and do it yourself in another way.
 
 </details>
 
@@ -133,8 +134,9 @@ If you have any trouble with installation, read the [Installation](https://benpy
 <summary><b>Is there a seed?</b></summary>
 
 > Yes, there is a seed for the dungeon generation.\
-> I made a parameter in the `DungeonGenerator` actor to have different types of seed:
-> - You can have a fixed seed you can set in the actor which will be always used (useful for testing and debugging purpose, or to set manually the seed from the game).
+> I made a parameter in the [`DungeonGenerator`](https://benpyton.github.io/ProceduralDungeon/guides/Getting-Started/Generating-Dungeon/Dungeon-Generator#seed-type) actor to have different types of seed:
+>
+> - You can have a fixed seed you can set in the actor which will be always used (useful for testing and debugging purpose, or to set manually the seed in Blueprint or C++).
 > - You can have an incrementing seed, using the fixed seed for the first generation, then adding a value to it at each generation (useful for demonstration purpose).
 > - You can have a random seed generated for each generation (for released game mostly, or to test quickly a lot of dungeon generations).
 
@@ -144,16 +146,18 @@ If you have any trouble with installation, read the [Installation](https://benpy
 <summary><b>Can I have some sort of flow to the dungeon? Like have a secret room spawn only once and have boss rooms only spawn 4 rooms?</b></summary>
 
 > Yes, you can define the flow you want for your dungeon. It is the purpose of the plugin.\
-> There is the function [`ChooseNextRoomData`](https://benpyton.github.io/ProceduralDungeon/guides/Choose-Next-Room-Data) where you define what I call your "rules" of the dungeon.\
-> You can, for example, check a minimum number of room before spawning a secret room, and then don't spawn it if you already have one in the dungeon.
+> There is the function [`ChooseNextRoomData`][ChooseNextRoom] where you define what I call your "rules" of the dungeon.\
+> You can, for example, check a minimum number of room before spawning a secret room, and then don't spawn it if you already have one in the dungeon.\
+> If you need help on how to define your dungeon rules, you can check this [example](https://benpyton.github.io/ProceduralDungeon/guides/Best-Practices/Workflows/Dungeon-Generation-Algorithm) and get help on the [Discord server][Discord] dedicated to this plugin.
 
 </details>
 
 <details>
 <summary><b>Can I increase the difficulty of the dungeon? Lets say room level 1 is easy and room level 5 is hard, can I tell the dungeon to not go from level 1 to level 5?</b></summary>
 
-> Of course, you can. To do that sort of thing, you should create a child blueprint of `RoomData` class to add new parameters like a `DifficultyLevel`, which you can set value for each rooms in your `RoomData` assets.\
-> Then for example, in your [`ChooseNextRoomData`](https://benpyton.github.io/ProceduralDungeon/guides/Choose-Next-Room-Data) function you can choose a room depending on its difficulty level compared to the difficulty level of the previous room.
+> Of course, you can do that sort of thing!
+> For this difficulty example, you should create a child blueprint of `RoomData` class to add new parameters like a `DifficultyLevel`, which you can set a different value for each room in your `RoomData` assets.\
+> Then for example, in your [`ChooseNextRoomData`][ChooseNextRoom] function you can choose a room depending on its difficulty level compared to the difficulty level of the previous room.
 
 </details>
 
@@ -165,10 +169,12 @@ The only condition is to add the copyright notice and a copy of the license with
 
 ## *Support Me*
 
- If you like my plugin, please consider tipping:
+ If you like my plugin, please consider leaving a tip, it would mean so much to me! 😊
 
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-ff5f5f?style=for-the-badge)](https://ko-fi.com/M4M3NW2JV)
-[![liberapay](https://img.shields.io/badge/liberapay-f6c915?style=for-the-badge)](https://liberapay.com/BenPyton/donate)
-[![PayPal](https://img.shields.io/badge/PayPal-142c8e?style=for-the-badge)](https://www.paypal.com/donate/?hosted_button_id=9VWP66JU5DZXN)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-FF5E5B?logo=kofi&logoColor=fff&style=for-the-badge)](https://ko-fi.com/M4M3NW2JV)
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-FFDD00?logo=buymeacoffee&logoColor=000&style=for-the-badge)](https://buymeacoffee.com/benpyton)
+[![Liberapay](https://img.shields.io/badge/Liberapay-F6C915?logo=liberapay&logoColor=000&style=for-the-badge)](https://liberapay.com/BenPyton/donate)
+[![PayPal](https://img.shields.io/badge/PayPal-003087?logo=paypal&logoColor=fff&style=for-the-badge)](https://www.paypal.com/donate/?hosted_button_id=9VWP66JU5DZXN)
 
-[1]: https://discord.gg/YE2dPda2CC
+[Discord]: https://discord.gg/YE2dPda2CC
+[ChooseNextRoom]: https://benpyton.github.io/ProceduralDungeon/guides/Getting-Started/Generating-Dungeon/Choose-Next-Room-Data
