@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 30500,
-	"VersionName": "3.5.0",
+	"Version": 30501,
+	"VersionName": "3.5.1",
 	"FriendlyName": "Procedural Dungeon",
 	"Description": "This Unreal Engine plugin allows you to create rich, diverse dungeon experiences that combine the best of both worlds: the creativity and precision of handmade room designs, paired with the unpredictability and excitement of procedural generation.",
 	"Category": "Procedural",
