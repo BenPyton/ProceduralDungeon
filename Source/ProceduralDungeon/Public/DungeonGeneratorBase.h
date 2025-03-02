@@ -80,7 +80,7 @@ public:
 
 // This is the main actor of the plugin. The dungeon generator is responsible to generate dungeons and replicate them over the network.
 // This base class is abstract. You need to override the `CreateDungeon` function to write your own generation algorithm.
-UCLASS(Abstract, NotBlueprintable, BlueprintType, ClassGroup = "Procedural Dungeon")
+UCLASS(Abstract, Blueprintable, BlueprintType, ClassGroup = "Procedural Dungeon")
 class PROCEDURALDUNGEON_API ADungeonGeneratorBase : public AActor
 {
 	GENERATED_BODY()
@@ -244,32 +244,29 @@ public:
 
 protected:
 	// Create virtually the dungeon (no load nor initialization of room levels)
-	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (BlueprintInternalUseOnly = true))
+	UFUNCTION(BlueprintNativeEvent, Category = "GenerationAlgorithm")
 	bool CreateDungeon();
 
 	// ===== Functions for dungeon creation =====
-	// @TODO: For now, I didn't found a way to hide them on child blueprints (HideFunctions and KismetHideOverrides do not work)
-	// So in the meantime I marked them as BlueprintInternalUseOnly.
-	// Can still be used in C++.
 
 	// Clear current graph and call GenerationInit event.
-	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator", meta = (BlueprintInternalUseOnly = true))
+	UFUNCTION(BlueprintCallable, Category = "GenerationAlgorithm", meta = (BlueprintProtected))
 	void StartNewDungeon();
 
 	// Initialize room instances after all rooms have been placed and connected (call InitializeDungeon).
-	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator", meta = (BlueprintInternalUseOnly = true))
+	UFUNCTION(BlueprintCallable, Category = "GenerationAlgorithm", meta = (BlueprintProtected))
 	void FinalizeDungeon();
 
 	// Create and initialize a new room instance using the room data provided.
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "Dungeon Generator", meta = (BlueprintInternalUseOnly = true))
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "GenerationAlgorithm", meta = (BlueprintProtected))
 	URoom* CreateRoomInstance(URoomData* RoomData);
 
 	// Set the position and rotation of a room instance and return true if there is nothing colliding with it.
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "Dungeon Generator", meta = (ReturnDisplayName = "Success", HidePin = "World", BlueprintInternalUseOnly = true))
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "GenerationAlgorithm", meta = (BlueprintProtected, ReturnDisplayName = "Success", HidePin = "World"))
 	bool TryPlaceRoom(URoom* const& Room, int DoorIndex, const FDoorDef& TargetDoor, const UWorld* World = nullptr) const;
 
 	// Finalize the room creation by adding it to the dungeon graph. OnRoomAdded is called here.
-	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator", meta = (ReturnDisplayName = "Success", AutoCreateRefTerm = "DoorsToConnect", AdvancedDisplay = "DoorsToConnect,bFailIfNotConnected", BlueprintInternalUseOnly = true))
+	UFUNCTION(BlueprintCallable, Category = "GenerationAlgorithm", meta = (BlueprintProtected, ReturnDisplayName = "Success", AutoCreateRefTerm = "DoorsToConnect", AdvancedDisplay = "DoorsToConnect,bFailIfNotConnected"))
 	bool AddRoomToDungeon(URoom* const& Room, const TArray<int>& DoorsToConnect, bool bFailIfNotConnected = true);
 	bool AddRoomToDungeon(URoom* const& Room);
 

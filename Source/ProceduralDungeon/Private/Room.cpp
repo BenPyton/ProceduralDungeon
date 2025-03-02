@@ -391,13 +391,13 @@ int URoom::GetOtherDoorIndex(int32 DoorIndex) const
 	return URoomConnection::GetOtherDoorId(Connections[DoorIndex].Get(), this);
 }
 
-const FDoorDef& URoom::GetDoorDef(int32 DoorIndex) const
+FDoorDef URoom::GetDoorDef(int32 DoorIndex) const
 {
-	check(IsDoorIndexValid(DoorIndex));
-	return RoomData->Doors[DoorIndex];
+	check(RoomData.IsValid());
+	return RoomToWorld(RoomData->GetDoorDef(DoorIndex));
 }
 
-const FDoorDef& URoom::GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const
+FDoorDef URoom::GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const
 {
 	check(RoomData.IsValid());
 	int32 DoorIndex = GetDoorIndexAt(WorldPos, WorldRot);

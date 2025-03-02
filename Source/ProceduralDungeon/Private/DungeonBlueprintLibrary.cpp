@@ -77,6 +77,11 @@ bool UDungeonBlueprintLibrary::GetOwningRoomCustomData(const AActor* Target, TSu
 	return IsValid(CustomData);
 }
 
+FDoorDef UDungeonBlueprintLibrary::DoorDef_GetOpposite(const FDoorDef& DoorDef)
+{
+	return (DoorDef) ? DoorDef.GetOpposite() : DoorDef;
+}
+
 // ===== Plugin Settings Accessors =====
 
 FVector UDungeonBlueprintLibrary::Settings_RoomUnit()

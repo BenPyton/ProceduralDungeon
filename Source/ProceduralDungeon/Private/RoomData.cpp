@@ -39,6 +39,13 @@ URoomData::URoomData()
 {
 }
 
+const FDoorDef& URoomData::GetDoorDef(int32 DoorIndex) const
+{
+	if (DoorIndex >= 0 && DoorIndex < Doors.Num())
+		return Doors[DoorIndex];
+	return FDoorDef::Invalid;
+}
+
 bool URoomData::HasCompatibleDoor(const FDoorDef& DoorData) const
 {
 	for (int i = 0; i < Doors.Num(); ++i)
