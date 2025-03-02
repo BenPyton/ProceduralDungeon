@@ -83,6 +83,9 @@ public:
 	int GetNbDoor() const { return Doors.Num(); }
 
 	UFUNCTION(BlueprintPure, Category = "Room Data")
+	const FDoorDef& GetDoorDef(int32 DoorIndex) const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Data")
 	bool HasCompatibleDoor(const FDoorDef& DoorData) const;
 
 	UFUNCTION(BlueprintPure, Category = "Room Data")

@@ -32,7 +32,7 @@
 class IReadOnlyRoom;
 
 // This is the main actor of the plugin. The dungeon generator is responsible to generate dungeons and replicate them over the network. 
-UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon", HideFunctions = "StartNewDungeon,FinalizeDungeon,CreateRoomInstance,TryPlaceRoom,AddRoomToDungeon", meta = (KismetHideOverrides = "CreateDungeon", HideFunctions = "CreateRoomInstance,TryPlaceRoom,AddRoomToDungeon"))
+UCLASS(Blueprintable, ClassGroup = "Procedural Dungeon", HideCategories = "GenerationAlgorithm")
 class PROCEDURALDUNGEON_API ADungeonGenerator : public ADungeonGeneratorBase
 {
 	GENERATED_BODY()

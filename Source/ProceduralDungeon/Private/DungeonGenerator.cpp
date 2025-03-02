@@ -137,9 +137,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 			continue;
 
 		// Get the door definition in its world position and direction
-		FDoorDef doorDef = ParentRoom.GetRoomData()->Doors[i];
-		doorDef.Position = ParentRoom.RoomToWorld(doorDef.Position);
-		doorDef.Direction = ParentRoom.RoomToWorld(doorDef.Direction);
+		FDoorDef doorDef = ParentRoom.GetDoorDef(i);
 
 		// Get the door definition for the next room
 		const FDoorDef newRoomDoor = doorDef.GetOpposite();
@@ -178,12 +176,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 
 			// Get all compatible door indices from the chosen room data
 			TArray<int> compatibleDoors;
-			for (int k = 0; k < roomDef->GetNbDoor(); ++k)
-			{
-				if (FDoorDef::AreCompatible(roomDef->Doors[k], doorDef))
-					compatibleDoors.Add(k);
-			}
-
+			roomDef->GetCompatibleDoors(doorDef, compatibleDoors);
 			if (compatibleDoors.Num() <= 0)
 			{
 				DungeonLog_Error("ChooseNextRoomData returned room data '%s' with no compatible door (door type: '%s').", *roomDef->GetName(), *doorDef.GetTypeName());

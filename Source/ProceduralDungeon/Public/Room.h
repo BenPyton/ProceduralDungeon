@@ -253,8 +253,11 @@ public:
 	bool IsDoorIndexValid(int32 DoorIndex) const;
 	int32 GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot) const;
 	int32 GetOtherDoorIndex(int32 DoorIndex) const;
-	const FDoorDef& GetDoorDef(int32 DoorIndex) const;
-	const FDoorDef& GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const;
+
+	UFUNCTION(BlueprintPure, Category = "Room")
+	FDoorDef GetDoorDef(int32 DoorIndex) const;
+
+	FDoorDef GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const;
 
 	FIntVector WorldToRoom(const FIntVector& WorldPos) const;
 	FIntVector RoomToWorld(const FIntVector& RoomPos) const;
