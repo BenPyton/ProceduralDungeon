@@ -254,6 +254,7 @@ FDoorDef FDoorDef::GetOpposite() const
 	FDoorDef OppositeDoor;
 	OppositeDoor.Position = Position + ToIntVector(Direction);
 	OppositeDoor.Direction = ~Direction;
+	OppositeDoor.Type = Type;
 	return OppositeDoor;
 }
 
