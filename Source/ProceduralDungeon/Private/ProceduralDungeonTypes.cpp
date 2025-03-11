@@ -251,10 +251,9 @@ FString FDoorDef::ToString() const
 
 FDoorDef FDoorDef::GetOpposite() const
 {
-	FDoorDef OppositeDoor;
+	FDoorDef OppositeDoor(*this);
 	OppositeDoor.Position = Position + ToIntVector(Direction);
 	OppositeDoor.Direction = ~Direction;
-	OppositeDoor.Type = Type;
 	return OppositeDoor;
 }
 
