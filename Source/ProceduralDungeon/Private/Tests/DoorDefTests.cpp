@@ -1,0 +1,92 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2025 Benoit Pelletier
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+#include "CoreTypes.h"
+#include "Containers/UnrealString.h"
+#include "Misc/AutomationTest.h"
+#include "ProceduralDungeonTypes.h"
+#include "DoorType.h"
+#include "TestUtils.h"
+
+#if WITH_DEV_AUTOMATION_TESTS
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDoorDefTest, "ProceduralDungeon.Types.DoorDef", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::SmokeFilter)
+
+bool FDoorDefTest::RunTest(const FString& Parameters)
+{
+	CREATE_DATA_ASSET(UDoorType, DoorTypeA);
+	CREATE_DATA_ASSET(UDoorType, DoorTypeB);
+
+	// Constructor Test
+	{
+		FDoorDef Door0;
+		FDoorDef Door1(FDoorDef::Invalid);
+		FDoorDef Door2({1, 2, 3}, EDoorDirection::South, DoorTypeA.Get());
+		FDoorDef Door3(Door2);
+
+		TestTrue(TEXT("Default Constructor makes valid door"), Door0.IsValid());
+		TestFalse(TEXT("Copy constructor of invalid door mus makes an invalid door"), Door1.IsValid());
+
+		TestTrue(TEXT("Constructor (1,2,3) South DoorTypeA is valid"), Door2.IsValid());
+		TestEqual(TEXT("Constructor (1,2,3) South DoorTypeA :: Position == (1,2,3)"), Door2.Position, {1, 2, 3});
+		TestEqual(TEXT("Constructor (1,2,3) South DoorTypeA :: Direction == South"), Door2.Direction, EDoorDirection::South);
+		TestEqual(TEXT("Constructor (1,2,3) South DoorTypeA :: Type == DoorTypeA"), Door2.Type, DoorTypeA.Get());
+
+		TestTrue(TEXT("Copy Constructor of valid door must be valid too"), Door3.IsValid());
+		TestEqual(TEXT("Copy Constructor must carry over position"), Door3.Position, Door2.Position);
+		TestEqual(TEXT("Copy Constructor must carry over direction"), Door3.Direction, Door2.Direction);
+		TestEqual(TEXT("Copy Constructor must carry over type"), Door3.Type, Door2.Type);
+	}
+
+	// Compatibility Test
+	{
+		FDoorDef Door0({0, 0, 0}, EDoorDirection::North, DoorTypeA.Get());
+		FDoorDef Door1({1, 2, 3}, EDoorDirection::South, DoorTypeA.Get());
+		FDoorDef Door2({1, 2, 3}, EDoorDirection::South, DoorTypeB.Get());
+		FDoorDef Door3;
+
+		TestTrue(TEXT("Door0 is compatible with Door1"), FDoorDef::AreCompatible(Door0, Door1));
+		TestFalse(TEXT("Door0 is not compatible with Door2"), FDoorDef::AreCompatible(Door0, Door2));
+		TestFalse(TEXT("Door0 is not compatible with Door3"), FDoorDef::AreCompatible(Door0, Door3));
+		TestFalse(TEXT("Door1 is not compatible with Door2"), FDoorDef::AreCompatible(Door1, Door2));
+		TestFalse(TEXT("Door1 is not compatible with Door3"), FDoorDef::AreCompatible(Door1, Door3));
+		TestFalse(TEXT("Door2 is not compatible with Door3"), FDoorDef::AreCompatible(Door2, Door3));
+	}
+
+	// Opposite Test
+	{
+		FDoorDef Door0({1, 2, 3}, EDoorDirection::North, DoorTypeA.Get());
+		FDoorDef Door1 = Door0.GetOpposite();
+
+		TestTrue(TEXT("Opposite door is valid"), Door1.IsValid());
+		TestEqual(TEXT("Opposite of North is South"), Door1.Direction, EDoorDirection::South);
+		TestEqual(TEXT("Opposite cell of (1,2,3)[North] is (2,2,3)"), Door1.Position, {2, 2, 3});
+		TestEqual(TEXT("Opposite type is the same"), Door1.Type, DoorTypeA.Get());
+		TestTrue(TEXT("Opposite door is compatible with original"), FDoorDef::AreCompatible(Door0, Door1));
+	}
+
+	return true;
+}
+
+#endif //WITH_DEV_AUTOMATION_TESTS
