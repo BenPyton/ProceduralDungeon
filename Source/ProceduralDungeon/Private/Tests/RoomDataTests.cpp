@@ -28,7 +28,6 @@
 #include "RoomData.h"
 #include "DoorType.h"
 #include "./Classes/RoomCustomDataChildClasses.h"
-#include "UObject/StrongObjectPtr.h"
 #include "UObject/Package.h"
 #include "TestUtils.h"
 #include "VoxelBounds/VoxelBounds.h"
@@ -36,10 +35,6 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRoomDataTests, "ProceduralDungeon.Types.RoomData", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::EngineFilter)
-
-// Utility to create door type
-#define CREATE_DATA_ASSET(VAR_TYPE, VAR_NAME) \
-	TStrongObjectPtr<VAR_TYPE> VAR_NAME(NewObject<VAR_TYPE>(GetTransientPackage(), #VAR_NAME))
 
 // Utility to create room data
 #define CREATE_ROOM_DATA(Data) \

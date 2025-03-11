@@ -28,7 +28,6 @@
 #include "DungeonGraph.h"
 #include "Room.h"
 #include "RoomData.h"
-#include "UObject/StrongObjectPtr.h"
 #include "TestUtils.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
@@ -49,7 +48,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonGraphTest, "ProceduralDungeon.Types.Dun
 
 // Utility to create room data
 #define CREATE_ROOM_DATA(Data) \
-	TStrongObjectPtr<URoomData> Data(NewObject<URoomData>(GetTransientPackage(), #Data)); \
+	CREATE_DATA_ASSET(URoomData, Data); \
 	Data->Doors.Empty();
 
 // Utility to create a non-empty path

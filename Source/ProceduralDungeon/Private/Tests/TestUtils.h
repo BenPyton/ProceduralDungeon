@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2024 Benoit Pelletier
+* Copyright (c) 2024-2025 Benoit Pelletier
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -25,9 +25,14 @@
 #pragma once
 
 #include "Misc/EngineVersionComparison.h"
+#include "UObject/StrongObjectPtr.h"
 
 #if UE_VERSION_OLDER_THAN(5, 5, 0)
 #define FLAG_APPLICATION_CONTEXT EAutomationTestFlags::ApplicationContextMask
 #else
 #define FLAG_APPLICATION_CONTEXT EAutomationTestFlags_ApplicationContextMask
 #endif
+
+// Utility to create a data asset
+#define CREATE_DATA_ASSET(VAR_TYPE, VAR_NAME) \
+	TStrongObjectPtr<VAR_TYPE> VAR_NAME(NewObject<VAR_TYPE>(GetTransientPackage(), #VAR_NAME))
