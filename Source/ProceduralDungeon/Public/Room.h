@@ -49,9 +49,9 @@ struct FCustomDataPair
 
 public:
 	UPROPERTY()
-	UClass* DataClass {nullptr};
+	TObjectPtr<UClass> DataClass;
 	UPROPERTY()
-	URoomCustomData* Data {nullptr};
+	TObjectPtr<URoomCustomData> Data;
 };
 
 // The room instances of the dungeon.
@@ -64,7 +64,7 @@ class PROCEDURALDUNGEON_API URoom : public UReplicableObject, public IReadOnlyRo
 public:
 	// TODO: Make them private
 	UPROPERTY()
-	ULevelStreamingDynamic* Instance {nullptr};
+	TObjectPtr<ULevelStreamingDynamic> Instance;
 	UPROPERTY(Replicated, SaveGame)
 	FIntVector Position {0};
 	UPROPERTY(Replicated, SaveGame)

@@ -81,7 +81,7 @@ protected:
 	bool bIsActivated;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Trigger Type")
-	TArray<AActor*> ActorList;
+	TArray<TObjectPtr<AActor>> ActorList;
 
 private:
 	UPROPERTY()

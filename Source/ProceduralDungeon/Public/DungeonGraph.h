@@ -240,15 +240,15 @@ protected:
 
 private:
 	UPROPERTY(Transient)
-	TArray<URoom*> Rooms;
+	TArray<TObjectPtr<URoom>> Rooms;
 
 	UPROPERTY(Replicated, Transient)
-	TArray<URoomConnection*> RoomConnections;
+	TArray<TObjectPtr<URoomConnection>> RoomConnections;
 
 	// This array is synchronized with the server
 	// We keep it separated to be able to unload previous rooms on clients
 	UPROPERTY(ReplicatedUsing = OnRep_Rooms, Transient)
-	TArray<URoom*> ReplicatedRooms;
+	TArray<TObjectPtr<URoom>> ReplicatedRooms;
 
 	UFUNCTION()
 	void OnRep_Rooms();

@@ -98,9 +98,9 @@ protected:
 
 	// The two connected rooms to this door
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Door")
-	URoom* RoomA {nullptr};
+	TObjectPtr<URoom> RoomA ;
 	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Door")
-	URoom* RoomB {nullptr};
+	TObjectPtr<URoom> RoomB ;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Door", meta = (DisplayName = "Always Visible"))
 	bool bAlwaysVisible {false};
@@ -109,8 +109,8 @@ protected:
 	bool bAlwaysUnlocked {false};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Door", meta = (DisplayName = "Door Type"))
-	UDoorType* Type {nullptr};
+	TObjectPtr<UDoorType> Type;
 
 	UPROPERTY(EditAnywhere, Category = "Door")
-	USceneComponent* DefaultSceneComponent {nullptr};
+	TObjectPtr<USceneComponent> DefaultSceneComponent;
 };

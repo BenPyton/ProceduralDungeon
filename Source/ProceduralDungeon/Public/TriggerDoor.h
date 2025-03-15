@@ -28,6 +28,8 @@
 #include "Door.h"
 #include "TriggerDoor.generated.h"
 
+class UBoxComponent;
+class AActor;
 // Door that opens when an actor enters the trigger box.
 // You can customize which actors can open the door by overriding the IsValidActor function.
 UCLASS()
@@ -37,10 +39,10 @@ class PROCEDURALDUNGEON_API ATriggerDoor : public ADoor
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Door Trigger")
-	class UBoxComponent* BoxComponent;
+	TObjectPtr<UBoxComponent> BoxComponent;
 
 	UPROPERTY(Transient)
-	TSet<class AActor*> ActorList;
+	TSet<TObjectPtr<AActor>> ActorList;
 
 public:
 	ATriggerDoor();

@@ -30,6 +30,8 @@
 #include "RoomLevel.generated.h"
 
 class ARoomLevel;
+class URoomData;
+class UBoxComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoomLevelVisibilityEvent, ARoomLevel*, RoomLevel, bool, IsVisible);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoomLevelActorEvent, ARoomLevel*, RoomLevel, AActor*, Actor);
 
@@ -49,10 +51,10 @@ class PROCEDURALDUNGEON_API ARoomLevel : public ALevelScriptActor
 	// TODO: Make those properties protected with public getter instead
 public:
 	UPROPERTY(EditAnywhere, Category = "Data")
-	class URoomData* Data;
+	TObjectPtr<URoomData> Data;
 
 	UPROPERTY() // Macro is here to mark property to be used by GC
-	URoom* Room = nullptr;
+	TObjectPtr<URoom> Room;
 
 #if WITH_EDITOR
 	// Flag to know when the Dungeon Editor mode is active.
@@ -117,7 +119,7 @@ private:
 	FTransform DungeonTransform;
 	FBoxCenterAndExtent Bounds;
 	UPROPERTY(Transient)
-	class UBoxComponent* RoomTrigger = nullptr;
+	TObjectPtr<UBoxComponent> RoomTrigger;
 	TSet<TWeakObjectPtr<UObject>> Visitors;
 
 private:

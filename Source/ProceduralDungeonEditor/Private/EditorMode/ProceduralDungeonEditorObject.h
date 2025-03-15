@@ -29,6 +29,8 @@
 #include "UObject/Object.h"
 #include "ProceduralDungeonEditorObject.generated.h"
 
+class UDoorType;
+
 UCLASS(MinimalApi)
 class UProceduralDungeonEditorObject : public UObject
 {
@@ -37,5 +39,5 @@ class UProceduralDungeonEditorObject : public UObject
 public:
 
 	UPROPERTY(EditAnywhere, Category = "Procedural Dungeon Editor")
-	class UDoorType* DoorType {nullptr};
+	TObjectPtr<UDoorType> DoorType;
 };

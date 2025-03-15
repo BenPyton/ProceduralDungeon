@@ -345,7 +345,7 @@ public:
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Dungeon Generator", meta = (DisplayName = "Rooms", ExposeFunctionCategories = "Dungeon Graph"))
-	UDungeonGraph* Graph;
+	TObjectPtr<UDungeonGraph> Graph;
 
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, NonPIEDuplicateTransient, TextExportTransient, Category = "GUID")
 	FGuid Id;

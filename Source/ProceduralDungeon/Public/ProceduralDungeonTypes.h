@@ -29,6 +29,8 @@
 #include "Math/GenericOctree.h" // FBoxCenterAndExtent
 #include "ProceduralDungeonTypes.generated.h"
 
+class UDoorType;
+
 UENUM()
 enum class EGenerationState : uint8
 {
@@ -114,7 +116,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef")
 	EDoorDirection Direction {EDoorDirection::North};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef", meta = (DisplayThumbnail = false))
-	class UDoorType* Type {nullptr};
+	TObjectPtr<UDoorType> Type;;
 
 public:
 	bool operator==(const FDoorDef& Other) const;

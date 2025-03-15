@@ -576,7 +576,7 @@ bool UDungeonGraph::FindPath(const URoom* From, const URoom* To, TArray<const UR
 	return Common != nullptr;
 }
 
-void CopyRooms(TArray<URoom*>& To, TArray<URoom*>& From)
+void CopyRooms(TArray<TObjectPtr<URoom>>& To, TArray<TObjectPtr<URoom>>& From)
 {
 	for (URoom* Room : From)
 	{
@@ -662,7 +662,7 @@ void UDungeonGraph::SpawnAllDoors()
 
 	checkf(Generator.IsValid(), TEXT("Spawning dungeon's doors is only available with a ADungeonGenerator outer."));
 
-	for (auto* RoomConnection : RoomConnections)
+	for (auto RoomConnection : RoomConnections)
 	{
 		if (RoomConnection->IsDoorInstanced())
 			continue;
@@ -685,7 +685,7 @@ void UDungeonGraph::UnloadAllRooms()
 {
 	if (HasAuthority())
 	{
-		for (auto* RoomConnection : RoomConnections)
+		for (auto RoomConnection : RoomConnections)
 		{
 			ADoor* Door = RoomConnection->GetDoorInstance();
 			if (IsValid(Door))

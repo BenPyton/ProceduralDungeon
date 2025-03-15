@@ -712,7 +712,8 @@ bool URoom::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading
 	for (int32 i = 0; i < NumCustomData; i++)
 	{
 		FStructuredArchive::FRecord CustomDataRecord = CustomDataRecords.EnterElement().EnterRecord();
-		SerializeUClass(CustomDataRecord.EnterField(AR_FIELD_NAME("Class")), CustomData[i].DataClass);
+		UClass* RawClassPtr = CustomData[i].DataClass.Get();
+		SerializeUClass(CustomDataRecord.EnterField(AR_FIELD_NAME("Class")), RawClassPtr);
 
 		if (bIsLoading)
 		{
