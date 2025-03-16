@@ -266,7 +266,7 @@ void URoom::UpdateVisibility() const
 	else if (IsValid(Instance))
 	{
 		// TODO: make the level be visible again, I don't know why it is not visible although
-		// the Visible and Loaded of StreamingLevel are correctly set to true 
+		// the Visible and Loaded of StreamingLevel are correctly set to true
 		// and the Loaded of Level instance inside it is also set to true...
 		// In the meantime, only the legacy version will remains.
 		//Instance->SetShouldBeVisible(bNewVisibility);
@@ -714,6 +714,7 @@ bool URoom::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading
 		FStructuredArchive::FRecord CustomDataRecord = CustomDataRecords.EnterElement().EnterRecord();
 		UClass* RawClassPtr = CustomData[i].DataClass.Get();
 		SerializeUClass(CustomDataRecord.EnterField(AR_FIELD_NAME("Class")), RawClassPtr);
+		CustomData[i].DataClass = RawClassPtr;
 
 		if (bIsLoading)
 		{
@@ -783,7 +784,7 @@ bool URoom::FixupReferences(UObject* Context)
 		Connections[i] = Connection;
 		DungeonLog_Debug("Fixed up connection: %s (id: %d)", *GetNameSafe(Connection), ConnectionIndex);
 	}
-	
+
 	return true;
 }
 

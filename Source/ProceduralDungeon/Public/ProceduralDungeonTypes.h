@@ -116,7 +116,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef")
 	EDoorDirection Direction {EDoorDirection::North};
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef", meta = (DisplayThumbnail = false))
-	TObjectPtr<UDoorType> Type;;
+	TObjectPtr<UDoorType> Type;
 
 public:
 	bool operator==(const FDoorDef& Other) const;

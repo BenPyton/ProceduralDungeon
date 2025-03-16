@@ -30,6 +30,7 @@
 
 class UBoxComponent;
 class AActor;
+
 // Door that opens when an actor enters the trigger box.
 // You can customize which actors can open the door by overriding the IsValidActor function.
 UCLASS()

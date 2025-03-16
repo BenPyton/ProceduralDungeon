@@ -32,6 +32,7 @@
 class ARoomLevel;
 class URoomData;
 class UBoxComponent;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoomLevelVisibilityEvent, ARoomLevel*, RoomLevel, bool, IsVisible);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoomLevelActorEvent, ARoomLevel*, RoomLevel, AActor*, Actor);
 
