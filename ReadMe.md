@@ -2,7 +2,7 @@
 
 [![Plugin version number](https://img.shields.io/github/v/release/BenPyton/ProceduralDungeon?label=Version)](https://github.com/BenPyton/ProceduralDungeon/releases/latest)
 [![Unreal Engine Supported Versions](https://img.shields.io/badge/Unreal_Engine-4.27_%7C_5.2_%7C_5.3_%7C_5.4_%7C_5.5-9455CE?logo=unrealengine)](https://github.com/BenPyton/ProceduralDungeon/releases)
-[![License](https://img.shields.io/github/license/BenPyton/ProceduralDungeon?label=License&color=blue)](LICENSE)
+[![License](https://img.shields.io/badge/License-CeCILL--C_or_Fab_EULA-blue)](LICENSE)
 ![Download count](https://img.shields.io/github/downloads/BenPyton/ProceduralDungeon/total?label=Downloads)
 [![Actively Maintained](https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-green.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
 [![Discord](https://img.shields.io/discord/1182461404092055574?logo=discord&logoColor=white&label=Discord&color=%235865F2)][Discord]
@@ -163,9 +163,12 @@ If you have any trouble with installation, read the [Installation](https://benpy
 
 ## License
 
-This plugin is under [MIT license](LICENSE).\
-This means you are free to use this plugin for personal/free/commercial projects, you are also allowed to modify the source code and/or redistribute it.\
-The only condition is to add the copyright notice and a copy of the license with your project and/or any redistribution of the source code, modified or not.
+This plugin is available under different licenses depending on the source from which it was obtained:
+
+- The [Fab EULA](https://fab.com/eula) applies when obtained from the Fab marketplace.
+- The [CeCILL-C license](https://cecill.info/licences/Licence_CeCILL-C_V1-en.html) applies when obtained from any other source.
+
+Please refer to the accompanying [LICENSE file](LICENSE) for further details.
 
 ## *Support Me*
 
