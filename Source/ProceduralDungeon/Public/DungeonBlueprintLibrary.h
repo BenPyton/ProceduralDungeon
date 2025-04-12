@@ -80,6 +80,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Conversion|Door Direction", meta = (BlueprintAutocast, DisplayName = "To Int Vector", AutoCreateRefTerm = "A"))
 	static FIntVector DoorDirection_ToIntVector(const EDoorDirection& A) { return ToIntVector(A); }
 
+	// ===== Dungeon Math Transform =====
+
+	// Transform a cell position in local corrdinates into the the dungeon coordinates
+	UFUNCTION(BlueprintPure, Category = "Math|Dungeon", meta = (DisplayName = "Transform Position (Dungeon)", AutoCreateRefTerm = "Rotation"))
+	static FIntVector Dungeon_TransformPosition(const FIntVector& LocalPos, const FIntVector& Offset, const EDoorDirection& Rotation);
+
+	// Inverse transform a cell position in the dungeon coordinates into a local coordinates
+	UFUNCTION(BlueprintPure, Category = "Math|Dungeon", meta = (DisplayName = "Inverse Transform Position (Dungeon)", AutoCreateRefTerm = "Rotation"))
+	static FIntVector Dungeon_InverseTransformPosition(const FIntVector& DungeonPos, const FIntVector& Offset, const EDoorDirection& Rotation);
+
 	// ===== Plugin Settings Accessors =====
 
 	// Returns the room unit size in unreal units

@@ -70,6 +70,16 @@ FDoorDef UDungeonBlueprintLibrary::DoorDef_GetOpposite(const FDoorDef& DoorDef)
 
 // ===== Plugin Settings Accessors =====
 
+FIntVector UDungeonBlueprintLibrary::Dungeon_TransformPosition(const FIntVector& LocalPos, const FIntVector& Offset, const EDoorDirection& Rotation)
+{
+	return Rotate(LocalPos, Rotation) + Offset;
+}
+
+FIntVector UDungeonBlueprintLibrary::Dungeon_InverseTransformPosition(const FIntVector& DungeonPos, const FIntVector& Offset, const EDoorDirection& Rotation)
+{
+	return Rotate(DungeonPos - Offset, -Rotation);
+}
+
 FVector UDungeonBlueprintLibrary::Settings_RoomUnit()
 {
 	return Dungeon::RoomUnit();
