@@ -22,19 +22,19 @@
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRoomDataTests, "ProceduralDungeon.Types.RoomData", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::EngineFilter)
 
-// Utility to create room data
-#define CREATE_ROOM_DATA(Data) \
-	CREATE_DATA_ASSET(URoomData, Data); \
-	Data->Doors.Empty();
+	// Utility to create room data
+	#define CREATE_ROOM_DATA(Data)          \
+		CREATE_DATA_ASSET(URoomData, Data); \
+		Data->Doors.Empty();
 
-#define ADD_DOOR(ROOM, DOOR_POS, DOOR_DIR, DOOR_TYPE) \
-	{ \
-		FDoorDef Door; \
-		Door.Position = DOOR_POS; \
-		Door.Direction = DOOR_DIR; \
-		Door.Type = DOOR_TYPE; \
-		ROOM->Doors.Add(Door); \
-	}
+	#define ADD_DOOR(ROOM, DOOR_POS, DOOR_DIR, DOOR_TYPE) \
+		{                                                 \
+			FDoorDef Door;                                \
+			Door.Position = DOOR_POS;                     \
+			Door.Direction = DOOR_DIR;                    \
+			Door.Type = DOOR_TYPE;                        \
+			ROOM->Doors.Add(Door);                        \
+		}
 
 bool FRoomDataTests::RunTest(const FString& Parameters)
 {
@@ -299,10 +299,10 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 
 		// GetSize
 		{
-			TestEqual("RoomDataA->GetSize() == {1,1,1}", RoomDataA->GetSize(), FIntVector{1,1,1});
-			TestEqual("RoomDataB->GetSize() == {2,1,1}", RoomDataB->GetSize(), FIntVector{2,1,1});
-			TestEqual("RoomDataC->GetSize() == {2,2,1}", RoomDataC->GetSize(), FIntVector{2,2,1});
-			TestEqual("RoomDataD->GetSize() == {2,2,2}", RoomDataD->GetSize(), FIntVector{2,2,2});
+			TestEqual("RoomDataA->GetSize() == {1,1,1}", RoomDataA->GetSize(), FIntVector {1, 1, 1});
+			TestEqual("RoomDataB->GetSize() == {2,1,1}", RoomDataB->GetSize(), FIntVector {2, 1, 1});
+			TestEqual("RoomDataC->GetSize() == {2,2,1}", RoomDataC->GetSize(), FIntVector {2, 2, 1});
+			TestEqual("RoomDataD->GetSize() == {2,2,2}", RoomDataD->GetSize(), FIntVector {2, 2, 2});
 		}
 
 		// GetVolume
@@ -324,7 +324,7 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 		// Should have one cell at (0,0,0) with a door at (0,0,0)[North]
 		{
 			FVoxelBounds ExpectedBounds;
-			ExpectedBounds.AddCell({0,0,0});
+			ExpectedBounds.AddCell({0, 0, 0});
 
 			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
 			ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
@@ -346,9 +346,9 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 		// Should have 3 cells at (-1,0,0), (0,0,0), (1,0,0) with doors at (0,0,0)[South] and (1,0,0)[East]
 		{
 			FVoxelBounds ExpectedBounds;
-			ExpectedBounds.AddCell({-1,0,0});
-			ExpectedBounds.AddCell({0,0,0});
-			ExpectedBounds.AddCell({1,0,0});
+			ExpectedBounds.AddCell({-1, 0, 0});
+			ExpectedBounds.AddCell({0, 0, 0});
+			ExpectedBounds.AddCell({1, 0, 0});
 
 			ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
 			ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
@@ -380,9 +380,9 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 		// Should have 3 cells at (0,0,-1), (0,0,0), (0,0,1) with doors at (0,0,0)[North] and (0,0,1)[South]
 		{
 			FVoxelBounds ExpectedBounds;
-			ExpectedBounds.AddCell({0,0,-1});
-			ExpectedBounds.AddCell({0,0,0});
-			ExpectedBounds.AddCell({0,0,1});
+			ExpectedBounds.AddCell({0, 0, -1});
+			ExpectedBounds.AddCell({0, 0, 0});
+			ExpectedBounds.AddCell({0, 0, 1});
 
 			ExpectedBounds.SetCellConnection({0, 0, -1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
 			ExpectedBounds.SetCellConnection({0, 0, -1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
@@ -409,8 +409,8 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 	return true;
 }
 
-#undef CREATE_DATA_ASSET
-#undef CREATE_ROOM_DATA
-#undef ADD_DOOR
+	#undef CREATE_DATA_ASSET
+	#undef CREATE_ROOM_DATA
+	#undef ADD_DOOR
 
 #endif //WITH_DEV_AUTOMATION_TESTS

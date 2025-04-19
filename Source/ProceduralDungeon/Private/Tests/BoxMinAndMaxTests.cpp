@@ -120,7 +120,7 @@ bool FBoxMinAndMaxTest::RunTest(const FString& Parameters)
 	// Extend Test
 	{
 		FBoxMinAndMax BoxToExtend;
-		FBoxMinAndMax Box0({0,0,0}, {1,1,1});
+		FBoxMinAndMax Box0({0, 0, 0}, {1, 1, 1});
 		FBoxMinAndMax Box1 = Box0 + FIntVector(1, 2, 3); // offseted box
 		FBoxMinAndMax Box2({-1, -2, -3}, {4, 5, 6});
 

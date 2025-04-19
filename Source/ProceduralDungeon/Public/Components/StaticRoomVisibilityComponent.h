@@ -20,12 +20,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FRoomVisibilityEvent, AActor*, Acto
 // Component to manage the visibility of an actor in the dungeon.
 // Use this one if the actor remains in the same room.
 // If the actor is able to move room, use URoomVisibilityComponent instead.
-UCLASS(ClassGroup = "ProceduralDungeon", meta = (BlueprintSpawnableComponent, DisplayName = "Room Visibility (Static)") )
+UCLASS(ClassGroup = "ProceduralDungeon", meta = (BlueprintSpawnableComponent, DisplayName = "Room Visibility (Static)"))
 class PROCEDURALDUNGEON_API UStaticRoomVisibilityComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	UStaticRoomVisibilityComponent();
 
 	virtual void BeginPlay() override;
@@ -55,7 +55,7 @@ public:
 protected:
 	ARoomLevel* GetOwnerRoomLevel() const;
 	void UpdateVisibility();
-	void RegisterVisibilityDelegate(ARoomLevel* RoomLevel,  bool Register);
+	void RegisterVisibilityDelegate(ARoomLevel* RoomLevel, bool Register);
 
 	UFUNCTION()
 	void RoomVisibilityChanged(class ARoomLevel* RoomLevel, bool IsVisible);

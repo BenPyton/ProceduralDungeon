@@ -33,7 +33,7 @@
 #include "Utils/CompatUtils.h"
 
 #if UE_VERSION_OLDER_THAN(5, 5, 0)
-#define SetNetUpdateFrequency(X) NetUpdateFrequency = X
+	#define SetNetUpdateFrequency(X) NetUpdateFrequency = X
 #endif
 
 FArchive& operator<<(FArchive& Ar, FDungeonSaveData& Data)
@@ -65,7 +65,7 @@ ADungeonGeneratorBase::ADungeonGeneratorBase()
 	PrimaryActorTick.bCanEverTick = true;
 
 	SeedType = ESeedType::Random;
-	Seed = 123456789; // default Seed
+	Seed = 123456789;		// default Seed
 	SeedIncrement = 123456; // default Seed increment
 	bUseGeneratorTransform = false;
 
@@ -206,7 +206,7 @@ void ADungeonGeneratorBase::PostInitializeComponents()
 void ADungeonGeneratorBase::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	if(EndPlayReason == EEndPlayReason::Destroyed)
+	if (EndPlayReason == EEndPlayReason::Destroyed)
 		Graph->UnloadAllRooms();
 }
 
@@ -392,8 +392,7 @@ void ADungeonGeneratorBase::UpdateRoomVisibility()
 
 	TSet<URoom*> RoomsToHide(CurrentPlayerRooms);
 	CurrentPlayerRooms.Empty();
-	FindElementsWithBoundsTest(*Octree, WorldPlayerBox, [this, &RoomsToHide](const FDungeonOctreeElement& Element)
-	{
+	FindElementsWithBoundsTest(*Octree, WorldPlayerBox, [this, &RoomsToHide](const FDungeonOctreeElement& Element) {
 		RoomsToHide.Remove(Element.Room);
 		CurrentPlayerRooms.Add(Element.Room);
 		Element.Room->SetPlayerInside(true);
@@ -457,7 +456,7 @@ void ADungeonGeneratorBase::UpdateSeed()
 		Seed = Random.GetCurrentSeed();
 		break;
 	case ESeedType::AutoIncrement:
-		if(bShouldIncrement)
+		if (bShouldIncrement)
 			Seed += SeedIncrement;
 		else
 			bShouldIncrement = true;
@@ -480,10 +479,10 @@ void ADungeonGeneratorBase::DrawDebug() const
 	if (!Dungeon::DrawDebug())
 		return;
 
-#if WITH_EDITORONLY_DATA
+	#if WITH_EDITORONLY_DATA
 	if (!bDrawDebugDungeonBounds)
 		return;
-#endif
+	#endif
 
 	const FTransform& Transform = GetDungeonTransform();
 	FBoxCenterAndExtent DungeonBounds = Graph->GetDungeonBounds(Transform);

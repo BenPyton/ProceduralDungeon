@@ -14,11 +14,11 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogProceduralDungeonEditor, Verbose, All);
 
-#define DungeonEd_LogInfo(Format, ...)\
+#define DungeonEd_LogInfo(Format, ...) \
 	UE_LOG(LogProceduralDungeonEditor, Log, TEXT(Format), ##__VA_ARGS__)
 
-#define DungeonEd_LogWarning(Format, ...)\
+#define DungeonEd_LogWarning(Format, ...) \
 	UE_LOG(LogProceduralDungeonEditor, Warning, TEXT(Format), ##__VA_ARGS__)
 
-#define DungeonEd_LogError(Format, ...)\
+#define DungeonEd_LogError(Format, ...) \
 	UE_LOG(LogProceduralDungeonEditor, Error, TEXT(Format), ##__VA_ARGS__)

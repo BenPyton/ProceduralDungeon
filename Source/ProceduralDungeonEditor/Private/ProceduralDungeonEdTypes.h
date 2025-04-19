@@ -16,14 +16,13 @@
 #include "ProceduralDungeonEdTypes.generated.h"
 
 #if UE_VERSION_OLDER_THAN(5, 0, 0)
-#define COMPATIBILITY 1
+	#define COMPATIBILITY 1
 #else
-#define COMPATIBILITY 0
+	#define COMPATIBILITY 0
 #endif
 
-
 #if !COMPATIBILITY
-#include "UnrealWidgetFwd.h"
+	#include "UnrealWidgetFwd.h"
 #endif
 
 #if COMPATIBILITY
@@ -33,9 +32,9 @@ using WidgetMode = UE::Widget::EWidgetMode;
 #endif
 
 #if UE_VERSION_NEWER_THAN(5, 3, 0)
-#define GC_PTR(VAR_TYPE) TObjectPtr<VAR_TYPE>
+	#define GC_PTR(VAR_TYPE) TObjectPtr<VAR_TYPE>
 #else
-#define GC_PTR(VAR_TYPE) VAR_TYPE*
+	#define GC_PTR(VAR_TYPE) VAR_TYPE*
 #endif
 
 // Some utility functions for EAxisList
@@ -50,13 +49,13 @@ struct FMargin3D
 
 public:
 	UPROPERTY(EditAnywhere, Category = "Margin", meta = (DisplayName = "X"))
-	FVector2D XAxis{0.0f, 0.0f};
+	FVector2D XAxis {0.0f, 0.0f};
 
 	UPROPERTY(EditAnywhere, Category = "Margin", meta = (DisplayName = "Y"))
-	FVector2D YAxis{0.0f, 0.0f};
+	FVector2D YAxis {0.0f, 0.0f};
 
 	UPROPERTY(EditAnywhere, Category = "Margin", meta = (DisplayName = "Z"))
-	FVector2D ZAxis{0.0f, 0.0f};
+	FVector2D ZAxis {0.0f, 0.0f};
 
 	// Create a new bounds from an existing bounds with the margin applied on it.
 	FBoxCenterAndExtent Apply(const FBoxCenterAndExtent& Bounds) const;

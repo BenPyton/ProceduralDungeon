@@ -63,7 +63,7 @@ bool SerializeUObjectArray(FStructuredArchive::FRecord& ParentRecord, FArchiveFi
 void SerializeUClass(FStructuredArchiveSlot Slot, UClass*& Class);
 
 #if UE_VERSION_OLDER_THAN(5, 4, 0)
-template <typename T>
+template<typename T>
 void operator<<(FStructuredArchiveSlot Slot, TSubclassOf<T>& Class)
 {
 	auto ClassPath = FSoftObjectPath(Class);
@@ -95,7 +95,7 @@ namespace
 #else
 	using FStructuredArchiveSlotBase = UE::StructuredArchive::Private::FSlotBase;
 #endif
-}
+} //namespace
 
 bool IsLoading(const FStructuredArchiveSlotBase& Slot);
 bool IsSaving(const FStructuredArchiveSlotBase& Slot);

@@ -20,7 +20,7 @@ UCLASS(Config = Editor, DefaultConfig)
 class UProceduralDungeonEditorSettings : public UObject
 {
 	GENERATED_BODY()
-	
+
 public:
 	UProceduralDungeonEditorSettings(const FObjectInitializer& ObjectInitializer);
 

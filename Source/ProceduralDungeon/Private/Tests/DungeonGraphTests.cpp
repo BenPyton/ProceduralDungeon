@@ -20,27 +20,27 @@
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonGraphTest, "ProceduralDungeon.Types.DungeonGraph", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::EngineFilter)
 
-#define INIT_TEST(Graph) \
-	TStrongObjectPtr<UDungeonGraph> Graph(NewObject<UDungeonGraph>(GetTransientPackage(), #Graph)); \
+	#define INIT_TEST(Graph) \
+		TStrongObjectPtr<UDungeonGraph> Graph(NewObject<UDungeonGraph>(GetTransientPackage(), #Graph));
 
-#define CLEAN_TEST() \
-	Graph->Clear();
+	#define CLEAN_TEST() \
+		Graph->Clear();
 
-// Utility to create and initialize a room
-#define CREATE_ROOM(Name, RoomDataPtr) \
-	URoom* Name = NewObject<URoom>(); \
-	Name->Init(RoomDataPtr.Get(), nullptr, Graph->Count()); \
-	Graph->AddRoom(Name);
+	// Utility to create and initialize a room
+	#define CREATE_ROOM(Name, RoomDataPtr)                      \
+		URoom* Name = NewObject<URoom>();                       \
+		Name->Init(RoomDataPtr.Get(), nullptr, Graph->Count()); \
+		Graph->AddRoom(Name);
 
-// Utility to create room data
-#define CREATE_ROOM_DATA(Data) \
-	CREATE_DATA_ASSET(URoomData, Data); \
-	Data->Doors.Empty();
+	// Utility to create room data
+	#define CREATE_ROOM_DATA(Data)          \
+		CREATE_DATA_ASSET(URoomData, Data); \
+		Data->Doors.Empty();
 
-// Utility to create a non-empty path
-#define DUMMY_PATH(Path) \
-	Path.Empty(); \
-	Path.Add(nullptr);
+	// Utility to create a non-empty path
+	#define DUMMY_PATH(Path) \
+		Path.Empty();        \
+		Path.Add(nullptr);
 
 bool FDungeonGraphTest::RunTest(const FString& Parameters)
 {
@@ -51,19 +51,19 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 		CREATE_ROOM_DATA(DA_C);
 		CREATE_ROOM_DATA(DA_D);
 
-		DA_A->Doors.Add({{0,0,0}, EDoorDirection::South});
+		DA_A->Doors.Add({{0, 0, 0}, EDoorDirection::South});
 
-		DA_B->Doors.Add({{0,0,0}, EDoorDirection::East});
-		DA_B->Doors.Add({{0,0,0}, EDoorDirection::West});
+		DA_B->Doors.Add({{0, 0, 0}, EDoorDirection::East});
+		DA_B->Doors.Add({{0, 0, 0}, EDoorDirection::West});
 
-		DA_C->Doors.Add({{0,0,0}, EDoorDirection::North});
-		DA_C->Doors.Add({{0,0,0}, EDoorDirection::South});
-		DA_C->Doors.Add({{0,0,0}, EDoorDirection::East});
-		DA_C->Doors.Add({{0,0,0}, EDoorDirection::West});
+		DA_C->Doors.Add({{0, 0, 0}, EDoorDirection::North});
+		DA_C->Doors.Add({{0, 0, 0}, EDoorDirection::South});
+		DA_C->Doors.Add({{0, 0, 0}, EDoorDirection::East});
+		DA_C->Doors.Add({{0, 0, 0}, EDoorDirection::West});
 
-		DA_D->SecondPoint = {1,1,2};
-		DA_D->Doors.Add({{0,0,0}, EDoorDirection::North});
-		DA_D->Doors.Add({{0,0,1}, EDoorDirection::North});
+		DA_D->SecondPoint = {1, 1, 2};
+		DA_D->Doors.Add({{0, 0, 0}, EDoorDirection::North});
+		DA_D->Doors.Add({{0, 0, 1}, EDoorDirection::North});
 
 		// Test pathfind
 		{
@@ -165,7 +165,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			DUMMY_PATH(Path);
 			TestFalse(TEXT("No path should be found between Room0 and Room6"), UDungeonGraph::FindPath(Room0, Room6, &Path));
 			TestEqual(TEXT("Path should be empty"), Path.Num(), 0);
-			TestTrue(TEXT("Path should be found between Room0 and Room6 (when locked rooms allowed)"), UDungeonGraph::FindPath(Room0, Room6, nullptr, /*IgnoreLocked = */true));
+			TestTrue(TEXT("Path should be found between Room0 and Room6 (when locked rooms allowed)"), UDungeonGraph::FindPath(Room0, Room6, nullptr, /*IgnoreLocked = */ true));
 
 			CLEAN_TEST();
 		}
@@ -186,11 +186,12 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			CREATE_ROOM(Room4, DA_C);
 			CREATE_ROOM(Room5, DA_C);
 
-			Room1->Position = {0,1,0};
-			Room2->Position = {0,2,0}; Room2->Direction = EDoorDirection::East;
-			Room3->Position = {-1,0,0};
-			Room4->Position = {0,0,1};
-			Room5->Position = {0,1,1};
+			Room1->Position = {0, 1, 0};
+			Room2->Position = {0, 2, 0};
+			Room2->Direction = EDoorDirection::East;
+			Room3->Position = {-1, 0, 0};
+			Room4->Position = {0, 0, 1};
+			Room5->Position = {0, 1, 1};
 
 			// Room positions are modified manually, so we need to explicitely rebuild bounds
 			Graph->RebuildBounds();
@@ -198,7 +199,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			// Check Room0 voxel bounds conversion
 			{
 				FVoxelBounds ExpectedBounds;
-				ExpectedBounds.AddCell({0,0,0});
+				ExpectedBounds.AddCell({0, 0, 0});
 				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
 				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
 				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
@@ -213,7 +214,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			// Check Room1 voxel bounds conversion
 			{
 				FVoxelBounds ExceptedBounds;
-				ExceptedBounds.AddCell({0,1,0});
+				ExceptedBounds.AddCell({0, 1, 0});
 				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
 				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
 				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
@@ -228,7 +229,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			// Check Room2 voxel bounds conversion
 			{
 				FVoxelBounds ExpectedBounds;
-				ExpectedBounds.AddCell({0,2,0});
+				ExpectedBounds.AddCell({0, 2, 0});
 				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
 				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
 				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
@@ -243,8 +244,8 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			// Check Room3 voxel bounds conversion
 			{
 				FVoxelBounds ExpectedBounds;
-				ExpectedBounds.AddCell({-1,0,0});
-				ExpectedBounds.AddCell({-1,0,1});
+				ExpectedBounds.AddCell({-1, 0, 0});
+				ExpectedBounds.AddCell({-1, 0, 1});
 				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
 				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
 				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
@@ -263,7 +264,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			// Check Room4 voxel bounds conversion
 			{
 				FVoxelBounds ExpectedBounds;
-				ExpectedBounds.AddCell({0,0,1});
+				ExpectedBounds.AddCell({0, 0, 1});
 				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
 				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
 				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
@@ -278,7 +279,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			// Check Room5 voxel bounds conversion
 			{
 				FVoxelBounds ExpectedBounds;
-				ExpectedBounds.AddCell({0,1,1});
+				ExpectedBounds.AddCell({0, 1, 1});
 				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
 				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
 				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
@@ -301,8 +302,8 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			// D				D
 
 			CREATE_ROOM_DATA(DA_E);
-			DA_E->SecondPoint = {1,2,1};
-			DA_E->Doors.Add({{0,1,0}, EDoorDirection::North});
+			DA_E->SecondPoint = {1, 2, 1};
+			DA_E->Doors.Add({{0, 1, 0}, EDoorDirection::North});
 
 			CREATE_ROOM(Room0, DA_C);
 			CREATE_ROOM(Room1, DA_B);
@@ -311,11 +312,12 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			CREATE_ROOM(Room4, DA_C);
 			CREATE_ROOM(Room5, DA_C);
 
-			Room1->Position = {0,1,0};
-			Room2->Position = {0,2,0}; Room2->Direction = EDoorDirection::East;
-			Room3->Position = {-1,0,0};
-			Room4->Position = {0,0,1};
-			Room5->Position = {0,1,1};
+			Room1->Position = {0, 1, 0};
+			Room2->Position = {0, 2, 0};
+			Room2->Direction = EDoorDirection::East;
+			Room3->Position = {-1, 0, 0};
+			Room4->Position = {0, 0, 1};
+			Room5->Position = {0, 1, 1};
 
 			// Room positions are modified manually, so we need to explicitely rebuild bounds
 			Graph->RebuildBounds();
@@ -324,7 +326,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			TArray<FRoomCandidate> SortedRooms;
 
 			{
-				FDoorDef FromDoor = {{0,0,0}, EDoorDirection::North};
+				FDoorDef FromDoor = {{0, 0, 0}, EDoorDirection::North};
 				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms);
 				TestTrue(TEXT("There should be candidates"), bHasCandidates);
 				TestEqual(TEXT("There should be 4 candidates"), SortedRooms.Num(), 4);
@@ -334,7 +336,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			}
 
 			{
-				FDoorDef FromDoor = {{0,1,1}, EDoorDirection::South};
+				FDoorDef FromDoor = {{0, 1, 1}, EDoorDirection::South};
 				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms);
 				TestTrue(TEXT("There should be candidates"), bHasCandidates);
 				TestEqual(TEXT("There should be 3 candidates"), SortedRooms.Num(), 3);
@@ -351,10 +353,10 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 	return true;
 }
 
-#undef INIT_TEST
-#undef CLEAN_TEST
-#undef CREATE_ROOM
-#undef CREATE_ROOM_DATA
-#undef DUMMY_PATH
+	#undef INIT_TEST
+	#undef CLEAN_TEST
+	#undef CREATE_ROOM
+	#undef CREATE_ROOM_DATA
+	#undef DUMMY_PATH
 
 #endif //WITH_DEV_AUTOMATION_TESTS

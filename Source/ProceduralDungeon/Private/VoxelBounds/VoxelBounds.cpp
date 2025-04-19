@@ -11,12 +11,12 @@
 #include "VoxelBounds/VoxelBounds.h"
 
 const FIntVector FVoxelBounds::Directions[] = {
-	{1, 0, 0}, // North
-	{0, 1, 0}, // East
+	{1, 0, 0},	// North
+	{0, 1, 0},	// East
 	{-1, 0, 0}, // South
 	{0, -1, 0}, // West
-	{0, 0, 1}, // Up
-	{0, 0, -1} // Down
+	{0, 0, 1},	// Up
+	{0, 0, -1}	// Down
 };
 
 bool FVoxelBoundsConnection::operator==(const FVoxelBoundsConnection& Other) const

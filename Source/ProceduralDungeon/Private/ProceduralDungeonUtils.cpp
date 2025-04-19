@@ -12,7 +12,7 @@
 #include "ProceduralDungeonSettings.h"
 #include "Room.h"
 #include "ProceduralDungeonLog.h"
-#include "Math/GenericOctree.h" // FBoxCenterAndExtent
+#include "Math/GenericOctree.h"		// FBoxCenterAndExtent
 #include "ProceduralDungeonTypes.h" // FBoxMinAndMax
 
 FIntVector IntVector::Min(const FIntVector& A, const FIntVector& B)
@@ -223,10 +223,10 @@ uint32 Random::Guid2Seed(FGuid Guid, int64 Salt)
 	uint64 State = Part1 ^ Part2 ^ Salt;
 
 	// Applying PCG-RXS-M-XS to create much more variations from the salt.
-	const uint8 Count = State >> 59;	// Extracting the highest 5 bits for the random xorshift below (64-5=59)
-	State ^= State >> (5 + Count);		// [RXS] Random xorshift (at least 5 to leave the highest 5 bits untouched)
-	State *= 12605985483714917081u;		// [M] Multiplication with a really big odd number
-	State ^= State >> 43;				// [XS] Xorshifting 1/3 of the top bits to the 1/3 of the lower bits
+	const uint8 Count = State >> 59;				   // Extracting the highest 5 bits for the random xorshift below (64-5=59)
+	State ^= State >> (5 + Count);					   // [RXS] Random xorshift (at least 5 to leave the highest 5 bits untouched)
+	State *= 12605985483714917081u;					   // [M] Multiplication with a really big odd number
+	State ^= State >> 43;							   // [XS] Xorshifting 1/3 of the top bits to the 1/3 of the lower bits
 	return static_cast<uint32>(State ^ (State >> 32)); // Folding the top half for the result on the bottom half to convert into a 32bit output.
 }
 
@@ -238,7 +238,7 @@ void ObjectUtils::DispatchToObjectAndSubobjects(UObject* Obj, TFunction<void(UOb
 
 	// Get all direct subobjects of this object.
 	TArray<UObject*> Subobjects;
-	GetObjectsWithOuter(Obj, Subobjects, /*bIncludeNestedObjects = */false);
+	GetObjectsWithOuter(Obj, Subobjects, /*bIncludeNestedObjects = */ false);
 
 	++Depth;
 	// Recursively dispatch to all subobjects found.

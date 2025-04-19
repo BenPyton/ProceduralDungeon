@@ -17,7 +17,7 @@
 #include "Math/GenericOctree.h" // FBoxCenterAndExtent
 
 #if !USE_LEGACY_DATA_VALIDATION
-#include "Misc/DataValidation.h"
+	#include "Misc/DataValidation.h"
 #endif
 
 URoomData::URoomData()
@@ -265,19 +265,19 @@ bool URoomData::IsDoorDuplicate(int DoorIndex) const
 
 #if WITH_EDITOR
 
-#if USE_LEGACY_DATA_VALIDATION
-#define VALIDATION_LOG_ERROR(Msg) ValidationErrors.Add(Msg)
+	#if USE_LEGACY_DATA_VALIDATION
+		#define VALIDATION_LOG_ERROR(Msg) ValidationErrors.Add(Msg)
 EDataValidationResult URoomData::IsDataValid(TArray<FText>& ValidationErrors)
-#else
-#define VALIDATION_LOG_ERROR(Msg) Context.AddError(Msg)
+	#else
+		#define VALIDATION_LOG_ERROR(Msg) Context.AddError(Msg)
 EDataValidationResult URoomData::IsDataValid(FDataValidationContext& Context) const
-#endif // USE_LEGACY_DATA_VALIDATION
+	#endif // USE_LEGACY_DATA_VALIDATION
 {
-#if USE_LEGACY_DATA_VALIDATION
+	#if USE_LEGACY_DATA_VALIDATION
 	EDataValidationResult Result = Super::IsDataValid(ValidationErrors);
-#else
+	#else
 	EDataValidationResult Result = Super::IsDataValid(Context);
-#endif // USE_LEGACY_DATA_VALIDATION
+	#endif // USE_LEGACY_DATA_VALIDATION
 	if (!IsAsset() || Result == EDataValidationResult::Invalid)
 		return Result;
 
@@ -331,7 +331,7 @@ EDataValidationResult URoomData::IsDataValid(FDataValidationContext& Context) co
 
 	return Result;
 }
-#undef VALIDATION_LOG_ERROR
+	#undef VALIDATION_LOG_ERROR
 
 void URoomData::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {

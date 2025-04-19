@@ -26,7 +26,7 @@ namespace IntVector
 
 	// Returns the component-wise minimum and maximum of A and B
 	void PROCEDURALDUNGEON_API MinMax(const FIntVector& A, const FIntVector& B, FIntVector& OutMin, FIntVector& OutMax);
-}
+} //namespace IntVector
 
 class FBoxCenterAndExtent;
 struct FBoxMinAndMax;
@@ -105,7 +105,7 @@ namespace Dungeon
 
 	void PROCEDURALDUNGEON_API EnableOcclusionCulling(bool Enable);
 	void PROCEDURALDUNGEON_API SetOcclusionDistance(int32 Distance);
-}
+} //namespace Dungeon
 
 namespace Random
 {
@@ -149,7 +149,7 @@ namespace WorldUtils
 			OutActorMap.Add(MapFunction(Actor), Actor);
 		}
 	}
-}
+} //namespace WorldUtils
 
 namespace ObjectUtils
 {

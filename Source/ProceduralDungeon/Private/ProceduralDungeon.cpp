@@ -18,15 +18,15 @@
 #define LOCTEXT_NAMESPACE "FProceduralDungeonModule"
 
 #if WITH_EDITOR && UE_VERSION_NEWER_THAN(5, 4, 0)
-#define ACTOR_REPLACEMENT_FIX_HACK 1
+	#define ACTOR_REPLACEMENT_FIX_HACK 1
 #else
-#define ACTOR_REPLACEMENT_FIX_HACK 0
+	#define ACTOR_REPLACEMENT_FIX_HACK 0
 #endif
 
 // ----- Hack to fix Room references issues of RoomLevel actors in PIE for UE 5.4
 #if ACTOR_REPLACEMENT_FIX_HACK
-#include "RoomLevel.h"
-#include "Room.h"
+	#include "RoomLevel.h"
+	#include "Room.h"
 
 FDelegateHandle ObjectReplacedHandle;
 void ObjectReplaced(const FCoreUObjectDelegates::FReplacementObjectMap& ReplacementMap)

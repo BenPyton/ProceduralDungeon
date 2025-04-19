@@ -19,7 +19,7 @@ TSharedRef<IPropertyTypeCustomization> FDoorDefCustomization::MakeInstance()
 	return MakeShareable(new FDoorDefCustomization());
 }
 
-void FDoorDefCustomization::GetSortedChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, TArray< TSharedRef<IPropertyHandle> >& OutChildren)
+void FDoorDefCustomization::GetSortedChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, TArray<TSharedRef<IPropertyHandle>>& OutChildren)
 {
 	TSharedPtr<IPropertyHandle> PositionProp = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDoorDef, Position));
 	TSharedPtr<IPropertyHandle> DirectionProp = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDoorDef, Direction));

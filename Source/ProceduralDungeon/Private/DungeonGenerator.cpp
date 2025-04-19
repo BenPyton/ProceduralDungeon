@@ -37,7 +37,8 @@ bool ADungeonGenerator::CreateDungeon_Implementation()
 	bool ValidDungeon = false;
 
 	// generate level until IsValidDungeon return true
-	do {
+	do
+	{
 		TriesLeft--;
 
 		// Reset generation data
@@ -67,7 +68,7 @@ bool ADungeonGenerator::CreateDungeon_Implementation()
 
 		// Create the first room
 		URoom* root = CreateRoomInstance(def);
-		AddRoomToDungeon(root, /*DoorsToConnect = */{}, /*bFailIfNotConnected = */false);
+		AddRoomToDungeon(root, /*DoorsToConnect = */ {}, /*bFailIfNotConnected = */ false);
 
 		// Build the list of rooms
 		TQueueOrStack<URoom*> roomStack(listMode);
@@ -207,7 +208,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 
 		// Plugin-wide setting is deprecated, will be removed in v4.0
 		const bool bConnectAllDoors = bCanLoop && Dungeon::CanLoop();
-		if (AddRoomToDungeon(newRoom, bConnectAllDoors ? TArray<int>{} : TArray<int> {doorIndex}))
+		if (AddRoomToDungeon(newRoom, bConnectAllDoors ? TArray<int> {} : TArray<int> {doorIndex}))
 		{
 			AddedRooms.Add(newRoom);
 		}

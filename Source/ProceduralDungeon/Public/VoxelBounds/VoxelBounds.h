@@ -53,12 +53,12 @@ struct FVoxelBounds
 public:
 	enum class EDirection : uint8
 	{
-		North = 0,	// { 1,  0,  0}
-		East,		// { 0,  1,  0}
-		South,		// {-1,  0,  0}
-		West,		// { 0, -1,  0}
-		Up,			// { 0,  0,  1}
-		Down,		// { 0,  0, -1}
+		North = 0, // { 1,  0,  0}
+		East,	   // { 0,  1,  0}
+		South,	   // {-1,  0,  0}
+		West,	   // { 0, -1,  0}
+		Up,		   // { 0,  0,  1}
+		Down,	   // { 0,  0, -1}
 		NbDirection
 	};
 

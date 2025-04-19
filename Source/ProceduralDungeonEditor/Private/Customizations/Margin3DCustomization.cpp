@@ -79,5 +79,4 @@ void FMargin3DCustomization::CustomizeChildren(TSharedRef<IPropertyHandle> Struc
 	// TODO?
 }
 
-
 #undef LOCTEXT_NAMESPACE

@@ -41,7 +41,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Utilities|Procedural Dungeon", meta = (DefaultToSelf = "Target", ExpandBoolAsExecs = "ReturnValue", DeterminesOutputType = "CustomDataClass", DynamicOutputParam = "CustomData"))
 	static bool GetOwningRoomCustomData(const AActor* Target, TSubclassOf<URoomCustomData> CustomDataClass, URoomCustomData*& CustomData);
 
-
 	UFUNCTION(BlueprintPure, Category = "DoorDef", meta = (DisplayName = "Opposite", CompactNodeTitle = "Opposite"))
 	static FDoorDef DoorDef_GetOpposite(const FDoorDef& DoorDef);
 
@@ -129,5 +128,4 @@ public:
 	// Set player to spectate
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Player", meta = (DefaultToSelf = "Controller"))
 	static void Spectate(APlayerController* Controller, bool DestroyPawn = true);
-
 };
