@@ -24,7 +24,7 @@ class PROCEDURALDUNGEON_API UStaticRoomObserverComponent : public UActorComponen
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	UStaticRoomObserverComponent();
 
 	FStaticRoomObserverEvent& OnActorEnterRoomEvent() { return ActorEnterRoomEvent; }

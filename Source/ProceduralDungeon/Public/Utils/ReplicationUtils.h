@@ -15,13 +15,13 @@
 #include "Net/Core/PushModel/PushModel.h"
 
 #if UE_WITH_IRIS
-#include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
+	#include "Iris/ReplicationSystem/ReplicationFragmentUtil.h"
 #endif // UE_WITH_IRIS
 
 // Should be called to modify the value of a replicated variable in a specific object.
 // Use in place of Object->Property = Value;
 #define SET_OBJECT_REPLICATED_PROPERTY_VALUE(Object, Property, Value) \
-	Property = Value; \
+	Property = Value;                                                 \
 	MARK_PROPERTY_DIRTY_FROM_NAME(std::remove_pointer_t<decltype(Object)>, Property, Object);
 
 // Should be called in the owner class of a replicated variable.
@@ -32,11 +32,11 @@
 // Should be called in the actor class of a replicated variable.
 // in place of Name = Value;
 #define SET_ACTOR_REPLICATED_PROPERTY_VALUE(Property, Value) \
-	FlushNetDormancy(); \
+	FlushNetDormancy();                                      \
 	SET_OBJECT_REPLICATED_PROPERTY_VALUE(this, Property, Value);
 
 // Should be called in a UReplicableObject derived class
 // in place of Name = Value;
 #define SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Property, Value) \
-	WakeUpOwnerActor(); \
+	WakeUpOwnerActor();                                          \
 	SET_OBJECT_REPLICATED_PROPERTY_VALUE(this, Property, Value);

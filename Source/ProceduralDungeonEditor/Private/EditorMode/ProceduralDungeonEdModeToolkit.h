@@ -16,7 +16,7 @@ class FProceduralDungeonEdModeToolkit : public FModeToolkit
 {
 public:
 	/** FModeToolkit interface */
-	virtual void Init(const TSharedPtr< class IToolkitHost >& InitToolkitHost) override;
+	virtual void Init(const TSharedPtr<class IToolkitHost>& InitToolkitHost) override;
 	virtual void GetToolPaletteNames(TArray<FName>& InPaletteName) const override;
 	virtual FText GetToolPaletteDisplayName(FName PaletteName) const override;
 	virtual void BuildToolPalette(FName Palette, class FToolBarBuilder& ToolbarBuilder) override;

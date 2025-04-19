@@ -18,7 +18,8 @@ struct HRoomPointProxy : public HHitProxy
 	DECLARE_HIT_PROXY();
 
 	HRoomPointProxy(int32 InIndex)
-		: HHitProxy(HPP_UI), Index(InIndex)
+		: HHitProxy(HPP_UI)
+		, Index(InIndex)
 	{
 	}
 
@@ -47,7 +48,7 @@ private:
 private:
 	EAxisList::Type bDirty {EAxisList::None};
 	FVector Location {0};
-	TArray<FLink> LinkedPoints{};
+	TArray<FLink> LinkedPoints {};
 };
 
 class FProceduralDungeonEditorTool_Size : public FProceduralDungeonEditorTool

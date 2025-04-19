@@ -227,28 +227,26 @@ void UDungeonGraph::GetAllRoomsWithCustomData(const TSubclassOf<URoomCustomData>
 
 void UDungeonGraph::GetAllRoomsWithAllCustomData(const TArray<TSubclassOf<URoomCustomData>>& CustomData, TArray<URoom*>& OutRooms)
 {
-	GetRoomsByPredicate(OutRooms, [&CustomData](const URoom* Room)
+	GetRoomsByPredicate(OutRooms, [&CustomData](const URoom* Room) {
+		for (auto Datum : CustomData)
 		{
-			for (auto Datum : CustomData)
-			{
-				if (!Room->HasCustomData(Datum))
-					return false;
-			}
-			return true;
-		});
+			if (!Room->HasCustomData(Datum))
+				return false;
+		}
+		return true;
+	});
 }
 
 void UDungeonGraph::GetAllRoomsWithAnyCustomData(const TArray<TSubclassOf<URoomCustomData>>& CustomData, TArray<URoom*>& OutRooms)
 {
-	GetRoomsByPredicate(OutRooms, [&CustomData](const URoom* Room)
+	GetRoomsByPredicate(OutRooms, [&CustomData](const URoom* Room) {
+		for (auto Datum : CustomData)
 		{
-			for (auto Datum : CustomData)
-			{
-				if (Room->HasCustomData(Datum))
-					return true;
-			}
-			return false;
-		});
+			if (Room->HasCustomData(Datum))
+				return true;
+		}
+		return false;
+	});
 }
 
 URoom* UDungeonGraph::GetRandomRoom(const TArray<URoom*>& RoomList) const
@@ -357,7 +355,7 @@ FVector UDungeonGraph::GetDungeonBoundsExtent() const
 
 struct FRoomCandidatePredicate
 {
-	bool operator() (const FRoomCandidate& A, const FRoomCandidate& B) const
+	bool operator()(const FRoomCandidate& A, const FRoomCandidate& B) const
 	{
 		return A.Score > B.Score;
 	}
@@ -385,7 +383,7 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 
 			// Create a new bounds placed at the target door
 			EDoorDirection Direction = TargetDoor.Direction - Door.Direction;
-			FVoxelBounds NewBounds = Rotate(DataBounds, Direction);;
+			FVoxelBounds NewBounds = Rotate(DataBounds, Direction);
 			NewBounds += TargetDoor.Position - Rotate(Door.Position, Direction);
 
 			FRoomCandidate Candidate;
@@ -447,7 +445,7 @@ int UDungeonGraph::CountRoomByPredicate(TFunction<bool(const URoom*)> Predicate)
 		if (Predicate(Room))
 			count++;
 	}
-	return  count;
+	return count;
 }
 
 void UDungeonGraph::GetRoomsByPredicate(TArray<URoom*>& OutRooms, TFunction<bool(const URoom*)> Predicate) const
@@ -614,7 +612,7 @@ void CopyRooms(TArray<URoom*>& To, TArray<URoom*>& From)
 {
 	for (URoom* Room : From)
 	{
-		if(Room->Instance)
+		if (Room->Instance)
 			DungeonLog_Debug("[%s] Loaded Level: %s", *GetNameSafe(Room), *GetNameSafe(Room->Instance->GetLoadedLevel()));
 	}
 

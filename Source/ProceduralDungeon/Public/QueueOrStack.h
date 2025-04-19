@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "Containers/Queue.h" 	
+#include "Containers/Queue.h"
 #include "Containers/Array.h"
 
 template<typename T>

@@ -14,9 +14,9 @@
 #include "UObject/StrongObjectPtr.h"
 
 #if UE_VERSION_OLDER_THAN(5, 5, 0)
-#define FLAG_APPLICATION_CONTEXT EAutomationTestFlags::ApplicationContextMask
+	#define FLAG_APPLICATION_CONTEXT EAutomationTestFlags::ApplicationContextMask
 #else
-#define FLAG_APPLICATION_CONTEXT EAutomationTestFlags_ApplicationContextMask
+	#define FLAG_APPLICATION_CONTEXT EAutomationTestFlags_ApplicationContextMask
 #endif
 
 // Utility to create a data asset

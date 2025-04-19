@@ -23,11 +23,11 @@ bool FDungeonUtilsTest_WeightedMap::RunTest(const FString& Parameters)
 	// Built-in types test
 	{
 		TMap<int, int> WeightedMap = {
-			{ 1, 0 },	// Weight with 0 should never be returned
-			{ 2, 1 },	// The first non-zero weight should be return for index 0
-			{ 3, 2 },	// Weights greater than 1 should be returned for as much indices
-			{ 4, 1 }	// The last one should be return when index == total weights minus one
-		};				// Out of bounds index should return default value
+			{1, 0}, // Weight with 0 should never be returned
+			{2, 1}, // The first non-zero weight should be return for index 0
+			{3, 2}, // Weights greater than 1 should be returned for as much indices
+			{4, 1}	// The last one should be return when index == total weights minus one
+		}; // Out of bounds index should return default value
 
 		TestEqual(TEXT("Total Weights"), Dungeon::GetTotalWeight(WeightedMap), 4);
 		TestEqual(TEXT("Weighted value at -1"), Dungeon::GetWeightedAt(WeightedMap, -1), 0); // negative index should return default value
@@ -46,10 +46,10 @@ bool FDungeonUtilsTest_WeightedMap::RunTest(const FString& Parameters)
 		int d = 4;
 
 		TMap<int*, int> WeightedMap = {
-			{ &a, 2 },
-			{ &b, 0 },	// Weight with 0 in middle should be skipped
-			{ &c, 1 },
-			{ &d, 0 }	// The last one should not be returned if weight is 0
+			{&a, 2},
+			{&b, 0}, // Weight with 0 in middle should be skipped
+			{&c, 1},
+			{&d, 0} // The last one should not be returned if weight is 0
 		};
 
 		TestEqual(TEXT("Total Weights"), Dungeon::GetTotalWeight(WeightedMap), 3);
@@ -142,8 +142,8 @@ void FGuid2SeedStatisticalTests::Define()
 		for (const auto& Guid : GuidsToTest)
 		{
 			Params.Guid = Guid;
-			Describe(FString::Printf(TEXT("with Guid %s"), *Guid.ToString()), [this, Params]() mutable {
-
+			Describe(FString::Printf(TEXT("with Guid %s"), *Guid.ToString()), [this, Params]() mutable
+			{
 				// The test cases we want to check for each Guid.
 				// First value is the number of elements in the generated samples.
 				// Second value is the critical value for the Chi Squared test (with p-value of 5%)

@@ -19,7 +19,7 @@
 #include "Serialization/Formatters/JsonArchiveOutputFormatter.h"
 
 #if UE_VERSION_NEWER_THAN(5, 0, 0)
-#include "Serialization/StructuredArchiveSlotBase.h"
+	#include "Serialization/StructuredArchiveSlotBase.h"
 #endif
 
 TUniquePtr<FArchiveFormatterType> CreateArchiveFormatterFromArchive(FArchive& Ar, bool bTextFormat)

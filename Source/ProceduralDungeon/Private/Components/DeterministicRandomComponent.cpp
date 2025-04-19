@@ -28,7 +28,7 @@ namespace
 	{
 		A = A ^ B;
 	}
-}
+} //namespace
 
 UDeterministicRandomComponent::UDeterministicRandomComponent()
 {

@@ -13,9 +13,9 @@
 #include "ProceduralDungeonLog.h"
 
 #if GUID_DEBUG_ENABLED
-#define LOG_GUID_INFO(...) DungeonLog_InfoSilent(## __VA_ARGS__)
+	#define LOG_GUID_INFO(...) DungeonLog_InfoSilent(##__VA_ARGS__)
 #else
-#define LOG_GUID_INFO(...)
+	#define LOG_GUID_INFO(...)
 #endif
 
 USimpleGuidComponent::USimpleGuidComponent()
@@ -93,7 +93,6 @@ void USimpleGuidComponent::OnComponentCreated()
 	LOG_GUID_INFO("[%s.SimpleGuidComponent] Created Component", *GetNameSafe(GetOwner()));
 	Super::OnComponentCreated();
 	LOG_GUID_INFO("-- Guid: %s", *Guid.ToString());
-
 }
 
 void USimpleGuidComponent::InitializeComponent()

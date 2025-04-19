@@ -21,7 +21,6 @@ class UProceduralDungeonEditorObject : public UObject
 	GENERATED_BODY()
 
 public:
-
 	UPROPERTY(EditAnywhere, Category = "Procedural Dungeon Editor")
 	class UDoorType* DoorType {nullptr};
 };

@@ -23,8 +23,8 @@ struct FReplicationFlags;
 enum class EUnregisterSubObjectType : uint8
 {
 	Unregister = 0, // Simply remove from the subobject list. Subobject on remotes will be destroyed when it's garbage collected on authority.
-	Destroy, // Immediately destroy the subobject on remotes. It's the responsibility of the authority to destroy it later. Imply Unregister.
-	TearOff, // Break replication of this subobject, so it's considered as local subobject on remotes. Imply Unregister.
+	Destroy,		// Immediately destroy the subobject on remotes. It's the responsibility of the authority to destroy it later. Imply Unregister.
+	TearOff,		// Break replication of this subobject, so it's considered as local subobject on remotes. Imply Unregister.
 };
 
 struct FRegisterSubObjectParams

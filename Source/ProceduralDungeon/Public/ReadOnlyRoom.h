@@ -56,7 +56,7 @@ public:
 	// Returns the world center position of the room.
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	virtual FVector GetBoundsCenter() const { return FVector::ZeroVector; }
-	
+
 	// Returns the world extents (half size) of the room.
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	virtual FVector GetBoundsExtent() const { return FVector::ZeroVector; }

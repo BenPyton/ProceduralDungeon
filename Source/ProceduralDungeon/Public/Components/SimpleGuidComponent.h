@@ -30,7 +30,7 @@ class PROCEDURALDUNGEON_API USimpleGuidComponent : public UActorComponent, publi
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	USimpleGuidComponent();
 
 protected:

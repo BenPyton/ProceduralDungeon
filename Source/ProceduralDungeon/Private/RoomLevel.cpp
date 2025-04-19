@@ -128,10 +128,10 @@ void ARoomLevel::Tick(float DeltaTime)
 
 	const bool bIsEditingRoom = GetLevel() == GetWorld()->PersistentLevel;
 	bool bShouldDrawDebug = Dungeon::DrawDebug() && (!Dungeon::DrawOnlyWhenEditingRoom() || bIsEditingRoom);
-#if WITH_EDITOR
+	#if WITH_EDITOR
 	// Force debug drawing when the editor is in DungeonEditor mode
 	bShouldDrawDebug |= bIsDungeonEditorMode;
-#endif
+	#endif
 
 	if (IsValid(Data) && bShouldDrawDebug)
 	{
@@ -147,7 +147,7 @@ void ARoomLevel::Tick(float DeltaTime)
 
 		// @TODO: is it still needed now?
 		// Pivot
-		if(Dungeon::ShowRoomOrigin())
+		if (Dungeon::ShowRoomOrigin())
 			DrawDebugSphere(World, DungeonTransform.TransformPositionNoScale(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
 
 		// Room bounds
@@ -158,15 +158,15 @@ void ARoomLevel::Tick(float DeltaTime)
 			FBox Box = Bounds.GetBox();
 			const FVector& Min = Box.Min;
 			const FVector& Max = Box.Max;
-#ifdef T
+	#ifdef T
 			static_assert(false, "T macro is already defined! Please change its name to avoid potential conflicts");
-#endif
-#define T(POINT) DungeonTransform.TransformPositionNoScale(POINT)
+	#endif
+	#define T(POINT) DungeonTransform.TransformPositionNoScale(POINT)
 			DrawDebugLine(World, T(Min), T(Max), FColor::Red);
 			DrawDebugLine(World, T(FVector(Min.X, Min.Y, Max.Z)), T(FVector(Max.X, Max.Y, Min.Z)), FColor::Red);
 			DrawDebugLine(World, T(FVector(Min.X, Max.Y, Max.Z)), T(FVector(Max.X, Min.Y, Min.Z)), FColor::Red);
 			DrawDebugLine(World, T(FVector(Min.X, Max.Y, Min.Z)), T(FVector(Max.X, Min.Y, Max.Z)), FColor::Red);
-#undef T
+	#undef T
 		}
 
 		// Doors
@@ -174,7 +174,7 @@ void ARoomLevel::Tick(float DeltaTime)
 		{
 			const bool bIsConnected = !bIsRoomValid || (bIsRoomDataValid && Room->IsConnected(i));
 			const bool bIsDoorValid = Data->IsDoorValid(i) && !Data->IsDoorDuplicate(i);
-			FDoorDef::DrawDebug(World, Data->Doors[i], RoomTransform * DungeonTransform, /*bIncludeOffset = */true, bIsDoorValid && bIsConnected);
+			FDoorDef::DrawDebug(World, Data->Doors[i], RoomTransform * DungeonTransform, /*bIncludeOffset = */ true, bIsDoorValid && bIsConnected);
 		}
 	}
 #endif // ENABLE_DRAW_DEBUG
@@ -197,7 +197,7 @@ bool ARoomLevel::IsLocked()
 
 void ARoomLevel::Lock(bool lock)
 {
-	if(IsValid(Room))
+	if (IsValid(Room))
 		Room->Lock(lock);
 }
 

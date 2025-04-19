@@ -14,9 +14,9 @@
 #include "Misc/EngineVersionComparison.h"
 
 #if UE_VERSION_OLDER_THAN(4, 26, 0)
-#define USE_LEGACY_OCTREE 1
+	#define USE_LEGACY_OCTREE 1
 #else
-#define USE_LEGACY_OCTREE 0
+	#define USE_LEGACY_OCTREE 0
 #endif
 
 struct FDungeonOctreeElement

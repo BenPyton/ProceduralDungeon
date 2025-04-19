@@ -29,7 +29,6 @@ FProceduralDungeonEditorCommands::FProceduralDungeonEditorCommands()
 
 void FProceduralDungeonEditorCommands::RegisterCommands()
 {
-
 	UI_COMMAND(SizeTool, "Size", "Change room size by dragging points in the viewport.", EUserInterfaceActionType::RadioButton, FInputChord());
 	NameToCommandMap.Add("Tool_Size", SizeTool);
 

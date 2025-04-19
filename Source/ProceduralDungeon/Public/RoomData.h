@@ -18,9 +18,9 @@
 #include "RoomData.generated.h"
 
 #if UE_VERSION_OLDER_THAN(5, 3, 0)
-#define USE_LEGACY_DATA_VALIDATION 1
+	#define USE_LEGACY_DATA_VALIDATION 1
 #else
-#define USE_LEGACY_DATA_VALIDATION 0
+	#define USE_LEGACY_DATA_VALIDATION 0
 #endif
 
 class URoom;
@@ -93,7 +93,7 @@ public:
 	bool HasAnyCustomData(const TArray<TSubclassOf<URoomCustomData>>& CustomDataList) const;
 
 	UFUNCTION(BlueprintPure, Category = "Room Data")
-	bool HasAllCustomData(const TArray < TSubclassOf<URoomCustomData>>& CustomDataList) const;
+	bool HasAllCustomData(const TArray<TSubclassOf<URoomCustomData>>& CustomDataList) const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Room Data")
 	void InitializeRoom(URoom* Room, UDungeonGraph* Dungeon) const;
@@ -120,11 +120,11 @@ public:
 
 #if WITH_EDITOR
 
-#if USE_LEGACY_DATA_VALIDATION
+	#if USE_LEGACY_DATA_VALIDATION
 	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;
-#else
+	#else
 	virtual EDataValidationResult IsDataValid(class FDataValidationContext& Context) const override;
-#endif // USE_LEGACY_DATA_VALIDATION
+	#endif // USE_LEGACY_DATA_VALIDATION
 
 	FRoomDataEditorEvent OnPropertiesChanged;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;

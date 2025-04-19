@@ -134,7 +134,7 @@ void FProceduralDungeonEditorTool_Door::Tick(FEditorViewportClient* ViewportClie
 		check(IsValid(Data));
 
 		UWorld* World = ViewportClient->GetWorld();
-		FDoorDef::DrawDebug(World, DoorPreview, FTransform::Identity, /*includeOffset = */ true, /*isConnected = */IsDoorValid(Data, DoorPreview));
+		FDoorDef::DrawDebug(World, DoorPreview, FTransform::Identity, /*includeOffset = */ true, /*isConnected = */ IsDoorValid(Data, DoorPreview));
 	}
 }
 

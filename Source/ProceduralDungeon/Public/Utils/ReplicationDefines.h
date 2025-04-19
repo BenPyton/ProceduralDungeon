@@ -15,7 +15,7 @@
 #if UE_VERSION_OLDER_THAN(5, 0, 0)
 	// Fixup undefined UE_WITH_IRIS for UE4
 	#ifndef UE_WITH_IRIS
-	#define UE_WITH_IRIS 0
+		#define UE_WITH_IRIS 0
 	#endif
 
 	#define UE_WITH_SUBOBJECT_LIST 0

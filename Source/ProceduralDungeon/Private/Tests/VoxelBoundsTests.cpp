@@ -19,8 +19,8 @@
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FVoxelBoundsTest, "ProceduralDungeon.Types.VoxelBounds", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::SmokeFilter)
 
-#define SET_CONNECTION(BOUNDS, CELL, DIR, TYPE) \
-	BOUNDS.SetCellConnection(FIntVector CELL, FVoxelBounds::EDirection::DIR, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::TYPE));
+	#define SET_CONNECTION(BOUNDS, CELL, DIR, TYPE) \
+		BOUNDS.SetCellConnection(FIntVector CELL, FVoxelBounds::EDirection::DIR, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::TYPE));
 
 bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 {
@@ -79,7 +79,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 
 		// Offset by 0
 		{
-			TestEqual(TEXT("Bounds + (0,0,0) == OffsetBounds"), Bounds + FIntVector {0,0,0}, Bounds);
+			TestEqual(TEXT("Bounds + (0,0,0) == OffsetBounds"), Bounds + FIntVector {0, 0, 0}, Bounds);
 		}
 
 		// Simple addition
@@ -90,7 +90,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			SET_CONNECTION(OffsetBounds, (1, -1, 1), North, Wall);
 			SET_CONNECTION(OffsetBounds, (2, 0, 2), South, Door);
 
-			TestEqual(TEXT("Bounds + (1,-1,1) == OffsetBounds"), Bounds + FIntVector {1,-1,1}, OffsetBounds);
+			TestEqual(TEXT("Bounds + (1,-1,1) == OffsetBounds"), Bounds + FIntVector {1, -1, 1}, OffsetBounds);
 		}
 
 		// Simple subtraction
@@ -100,7 +100,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			OffsetBounds.AddCell(FIntVector(0, 2, 0));
 			SET_CONNECTION(OffsetBounds, (-1, 1, -1), North, Wall);
 			SET_CONNECTION(OffsetBounds, (0, 2, 0), South, Door);
-			TestEqual(TEXT("Bounds - (1,-1,1) == OffsetBounds"), Bounds - FIntVector {1,-1,1}, OffsetBounds);
+			TestEqual(TEXT("Bounds - (1,-1,1) == OffsetBounds"), Bounds - FIntVector {1, -1, 1}, OffsetBounds);
 		}
 
 		// North rotation
@@ -258,7 +258,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 		// +---+-o-+	+   +---+
 		// |100 110|	    |111|
 		// +-o-+   +	+   +-o-+
-		//     |010|	
+		//     |010|
 		// +   +---+	+   +   +
 		FVoxelBounds DungeonBounds;
 		DungeonBounds.AddCell(FIntVector(1, 0, 0));
@@ -292,7 +292,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 		{
 			// Bounds that fits perfectly in the available space
 			// +   +   +
-			//			
+			//
 			// +-o-+   +
 			// |000|
 			// +---+   +
@@ -307,7 +307,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 
 			// Like BoundsA but with a door facing a wall
 			// +   +   +
-			//			
+			//
 			// +-o-+   +
 			// |000o
 			// +---+   +
@@ -404,7 +404,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 
 			// Bounds bigger with a connected door
 			// +   +   +
-			// 
+			//
 			// +-o-+-o-+
 			// |001 011|
 			// +---+---+
@@ -491,6 +491,6 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 	return true;
 }
 
-#undef SET_CONNECTION
+	#undef SET_CONNECTION
 
 #endif //WITH_DEV_AUTOMATION_TESTS

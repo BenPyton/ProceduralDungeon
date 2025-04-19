@@ -86,7 +86,6 @@ protected:
 	void SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading);
 
 public:
-
 	// Update the seed and call the generation on all clients
 	// Do nothing when called on clients
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Dungeon Generator")

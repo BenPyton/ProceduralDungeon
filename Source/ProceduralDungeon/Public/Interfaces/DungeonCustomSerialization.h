@@ -22,7 +22,7 @@ class UDungeonCustomSerialization : public UInterface
 };
 
 /**
- * 
+ *
  */
 class PROCEDURALDUNGEON_API IDungeonCustomSerialization
 {

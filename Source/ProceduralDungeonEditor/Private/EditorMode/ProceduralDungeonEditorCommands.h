@@ -16,7 +16,6 @@
 
 class FProceduralDungeonEditorCommands : public TCommands<FProceduralDungeonEditorCommands>
 {
-
 public:
 	FProceduralDungeonEditorCommands();
 

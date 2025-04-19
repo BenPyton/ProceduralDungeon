@@ -24,7 +24,6 @@ UTriggerType::UTriggerType()
 	ActivationDelay = 0.0;
 }
 
-
 // Called when the game starts
 void UTriggerType::BeginPlay()
 {

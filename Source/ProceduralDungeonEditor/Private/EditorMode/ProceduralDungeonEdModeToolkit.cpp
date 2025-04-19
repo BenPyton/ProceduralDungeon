@@ -20,7 +20,7 @@
 
 #define LOCTEXT_NAMESPACE "ProceduralDungeonEditor"
 
-void FProceduralDungeonEdModeToolkit::Init(const TSharedPtr< class IToolkitHost >& InitToolkitHost)
+void FProceduralDungeonEdModeToolkit::Init(const TSharedPtr<class IToolkitHost>& InitToolkitHost)
 {
 	auto NameToCommandMap = FProceduralDungeonEditorCommands::Get().NameToCommandMap;
 

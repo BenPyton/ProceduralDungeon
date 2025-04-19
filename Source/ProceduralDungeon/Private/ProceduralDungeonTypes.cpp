@@ -275,7 +275,7 @@ void FDoorDef::DrawDebug(const UWorld* World, const FDoorDef& DoorDef, const FTr
 
 void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector& DoorSize, const FIntVector& DoorCell, const EDoorDirection& DoorRot, const FTransform& Transform, float DoorOffset, bool bIsConnected)
 {
-#if ENABLE_DRAW_DEBUG
+	#if ENABLE_DRAW_DEBUG
 	// @TODO: Use FDoorDef::GetBounds here? (should mabye remove this overload and use exclusively the one with FDoorDef?)
 	FQuat DoorRotation = Transform.GetRotation() * ToQuaternion(!DoorRot ? EDoorDirection::North : DoorRot);
 	FVector DoorPosition = Transform.TransformPosition(GetRealDoorPosition(DoorCell, DoorRot, DoorOffset) + FVector(0, 0, DoorSize.Z * 0.5f));
@@ -297,7 +297,7 @@ void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector
 		DrawDebugLine(World, DoorPosition - HalfSize, DoorPosition + HalfSize, Color);
 		DrawDebugLine(World, DoorPosition - HalfSizeConjugate, DoorPosition + HalfSizeConjugate, Color);
 	}
-#endif // ENABLE_DRAW_DEBUG
+	#endif // ENABLE_DRAW_DEBUG
 }
 #endif // !UE_BUILD_SHIPPING
 

@@ -59,7 +59,7 @@ public:
 
 	//~ Begin IReadOnlyRoom Interface
 	virtual const URoomData* GetRoomData() const override { return RoomData.Get(); }
-	virtual int64 GetRoomID() const override{ return Id; }
+	virtual int64 GetRoomID() const override { return Id; }
 	virtual FIntVector GetPosition() const { return Position; }
 	virtual EDoorDirection GetDirection() const { return Direction; }
 	virtual bool AreAllDoorsConnected() const override;

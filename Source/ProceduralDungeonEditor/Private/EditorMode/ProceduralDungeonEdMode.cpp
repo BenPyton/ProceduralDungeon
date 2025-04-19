@@ -237,7 +237,7 @@ ULevelScriptBlueprint* FProceduralDungeonEdMode::GetLevelBlueprint(bool bCreate)
 {
 	UWorld* World = GetWorld();
 	check(World);
-	ULevelScriptBlueprint* LevelBlueprint = World->PersistentLevel->GetLevelScriptBlueprint(/*bDontCreate = */!bCreate);
+	ULevelScriptBlueprint* LevelBlueprint = World->PersistentLevel->GetLevelScriptBlueprint(/*bDontCreate = */ !bCreate);
 	return LevelBlueprint;
 }
 

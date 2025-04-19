@@ -35,7 +35,6 @@ void URoomConnection::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	DOREPLIFETIME_WITH_PARAMS(URoomConnection, DoorInstance, Params);
 }
 
-
 bool URoomConnection::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading)
 {
 	check(!SaveData.IsValid());

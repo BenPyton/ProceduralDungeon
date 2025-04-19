@@ -22,7 +22,7 @@ namespace
 		_duration = Settings->PrintDebugDuration;
 		return Settings->OnScreenPrintDebug;
 	}
-}
+} //namespace
 
 void LogOnScreen(const FString& Message, FColor Color, bool bForceOnScreen)
 {

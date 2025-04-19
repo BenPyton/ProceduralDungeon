@@ -25,7 +25,7 @@ class PROCEDURALDUNGEON_API URoomObserverComponent : public UActorComponent, pub
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	URoomObserverComponent();
 
 	FRoomObserverEvent& OnActorEnterRoomEvent() { return ActorEnterRoomEvent; }

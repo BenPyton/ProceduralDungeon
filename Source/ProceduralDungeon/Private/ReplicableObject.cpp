@@ -20,7 +20,7 @@ namespace
 	{
 		return (bPredicate) ? Str : TEXT("");
 	}
-}
+} //namespace
 
 bool UReplicableObject::ReplicateSubobject(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
 {
@@ -63,14 +63,14 @@ void UReplicableObject::RegisterAsReplicable(bool bRegister, FRegisterSubObjectP
 		case EUnregisterSubObjectType::Unregister:
 			Owner->RemoveReplicatedSubObject(this);
 			break;
-#if UE_VERSION_NEWER_THAN(5, 2, 0)
+	#if UE_VERSION_NEWER_THAN(5, 2, 0)
 		case EUnregisterSubObjectType::Destroy:
 			Owner->DestroyReplicatedSubObjectOnRemotePeers(this);
 			break;
 		case EUnregisterSubObjectType::TearOff:
 			Owner->TearOffReplicatedSubObjectOnRemotePeers(this);
 			break;
-#endif
+	#endif
 		default:
 			checkf(false, TEXT("Unimplemented case."));
 			break;
@@ -114,7 +114,6 @@ FString UReplicableObject::GetAuthorityName() const
 {
 	return HasAuthority() ? TEXT("Server") : TEXT("Client");
 }
-
 
 void UReplicableObject::WakeUpOwnerActor()
 {

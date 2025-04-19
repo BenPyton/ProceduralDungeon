@@ -28,7 +28,7 @@
 
 #define LOCTEXT_NAMESPACE "FProceduralDungeonEditorModule"
 
-#define IMAGE_BRUSH( RelativePath, ... ) FSlateImageBrush( StyleSet->RootToContentDir( RelativePath, TEXT(".png") ), __VA_ARGS__ )
+#define IMAGE_BRUSH(RelativePath, ...) FSlateImageBrush(StyleSet->RootToContentDir(RelativePath, TEXT(".png")), __VA_ARGS__)
 
 void FProceduralDungeonEditorModule::StartupModule()
 {
