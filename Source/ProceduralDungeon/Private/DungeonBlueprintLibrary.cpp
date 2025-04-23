@@ -70,6 +70,16 @@ FDoorDef UDungeonBlueprintLibrary::DoorDef_GetOpposite(const FDoorDef& DoorDef)
 
 // ===== Plugin Settings Accessors =====
 
+FIntVector UDungeonBlueprintLibrary::IntVector_Next(const FIntVector& Vector, const EDoorDirection& Direction)
+{
+	return Vector + ToIntVector(Direction);
+}
+
+FIntVector UDungeonBlueprintLibrary::IntVector_Rotate(const FIntVector& Vector, const EDoorDirection& Direction)
+{
+	return Rotate(Vector, Direction);
+}
+
 FIntVector UDungeonBlueprintLibrary::Dungeon_TransformPosition(const FIntVector& LocalPos, const FIntVector& Offset, const EDoorDirection& Rotation)
 {
 	return Rotate(LocalPos, Rotation) + Offset;
@@ -78,6 +88,26 @@ FIntVector UDungeonBlueprintLibrary::Dungeon_TransformPosition(const FIntVector&
 FIntVector UDungeonBlueprintLibrary::Dungeon_InverseTransformPosition(const FIntVector& DungeonPos, const FIntVector& Offset, const EDoorDirection& Rotation)
 {
 	return Rotate(DungeonPos - Offset, -Rotation);
+}
+
+FIntVector UDungeonBlueprintLibrary::IntVector_Add(const FIntVector& A, const FIntVector& B)
+{
+	return A + B;
+}
+
+FIntVector UDungeonBlueprintLibrary::IntVector_Subtract(const FIntVector& A, const FIntVector& B)
+{
+	return A - B;
+}
+
+bool UDungeonBlueprintLibrary::IntVector_Equal(const FIntVector& A, const FIntVector& B)
+{
+	return A == B;
+}
+
+bool UDungeonBlueprintLibrary::IntVector_NotEqual(const FIntVector& A, const FIntVector& B)
+{
+	return A != B;
 }
 
 FVector UDungeonBlueprintLibrary::Settings_RoomUnit()

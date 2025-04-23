@@ -127,7 +127,13 @@ FVector ToVector(const EDoorDirection& Direction)
 FQuat ToQuaternion(const EDoorDirection& Direction)
 {
 	check(!!Direction);
-	return FRotator(0.0f, 90.0f * static_cast<uint8>(Direction), 0.0f).Quaternion();
+	return FRotator(0.0f, ToAngle(Direction), 0.0f).Quaternion();
+}
+
+float ToAngle(const EDoorDirection& Direction)
+{
+	check(!!Direction);
+	return 90.0f * static_cast<uint8>(Direction);
 }
 
 FIntVector Rotate(const FIntVector& Pos, const EDoorDirection& Rot)
