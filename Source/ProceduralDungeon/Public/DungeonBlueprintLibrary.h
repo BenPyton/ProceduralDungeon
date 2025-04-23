@@ -79,7 +79,19 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Conversion|Door Direction", meta = (BlueprintAutocast, DisplayName = "To Int Vector", AutoCreateRefTerm = "A"))
 	static FIntVector DoorDirection_ToIntVector(const EDoorDirection& A) { return ToIntVector(A); }
 
+	// Convert a DoorDirection enum value into a unit IntVector pointing in that direction.
+	UFUNCTION(BlueprintPure, Category = "Conversion|Door Direction", meta = (BlueprintAutocast, DisplayName = "To Angle", AutoCreateRefTerm = "A"))
+	static float DoorDirection_ToAngle(const EDoorDirection& A) { return ToAngle(A); }
+
 	// ===== Dungeon Math Transform =====
+
+	// Returns the neighbor at the provided direction.
+	// Same as Vector + ToIntVector(Direction)
+	UFUNCTION(BlueprintPure, Category = "Math|Transform", meta = (DisplayName = "Next (Int Vector)"))
+	static FIntVector IntVector_Next(const FIntVector& Vector, const EDoorDirection& Direction);
+
+	UFUNCTION(BlueprintPure, Category = "Math|Transform", meta = (DisplayName = "Rotate (Int Vector)"))
+	static FIntVector IntVector_Rotate(const FIntVector& Vector, const EDoorDirection& Direction);
 
 	// Transform a cell position in local corrdinates into the the dungeon coordinates
 	UFUNCTION(BlueprintPure, Category = "Math|Dungeon", meta = (DisplayName = "Transform Position (Dungeon)", AutoCreateRefTerm = "Rotation"))
@@ -88,6 +100,20 @@ public:
 	// Inverse transform a cell position in the dungeon coordinates into a local coordinates
 	UFUNCTION(BlueprintPure, Category = "Math|Dungeon", meta = (DisplayName = "Inverse Transform Position (Dungeon)", AutoCreateRefTerm = "Rotation"))
 	static FIntVector Dungeon_InverseTransformPosition(const FIntVector& DungeonPos, const FIntVector& Offset, const EDoorDirection& Rotation);
+
+	// ===== Int Vector Operators =====
+
+	UFUNCTION(BlueprintPure, Category = "Utilities|Operators", meta = (DisplayName = "Add (Int Vector)", CompactNodeTitle = "+", CallableWithoutWorldContext, CommutativeAssociativeBinaryOperator))
+	static FIntVector IntVector_Add(const FIntVector& A, const FIntVector& B);
+
+	UFUNCTION(BlueprintPure, Category = "Utilities|Operators", meta = (DisplayName = "Subtract (Int Vector)", CompactNodeTitle = "-", CallableWithoutWorldContext, CommutativeAssociativeBinaryOperator))
+	static FIntVector IntVector_Subtract(const FIntVector& A, const FIntVector& B);
+
+	UFUNCTION(BlueprintPure, Category = "Utilities|Operators", meta = (DisplayName = "Equal (Int Vector)", Keywords = "==", CompactNodeTitle = "==", CallableWithoutWorldContext))
+	static bool IntVector_Equal(const FIntVector& A, const FIntVector& B);
+
+	UFUNCTION(BlueprintPure, Category = "Utilities|Operators", meta = (DisplayName = "Not Equal (Int Vector)", Keywords = "!=", CompactNodeTitle = "!=", CallableWithoutWorldContext))
+	static bool IntVector_NotEqual(const FIntVector& A, const FIntVector& B);
 
 	// ===== Plugin Settings Accessors =====
 

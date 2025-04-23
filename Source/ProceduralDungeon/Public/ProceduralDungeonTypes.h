@@ -54,6 +54,7 @@ inline EDoorDirection PROCEDURALDUNGEON_API Opposite(const EDoorDirection& Direc
 FIntVector PROCEDURALDUNGEON_API ToIntVector(const EDoorDirection& Direction);
 FVector PROCEDURALDUNGEON_API ToVector(const EDoorDirection& Direction);
 FQuat PROCEDURALDUNGEON_API ToQuaternion(const EDoorDirection& Direction);
+float PROCEDURALDUNGEON_API ToAngle(const EDoorDirection& Direction);
 FIntVector PROCEDURALDUNGEON_API Rotate(const FIntVector& Pos, const EDoorDirection& Rot);
 FVector PROCEDURALDUNGEON_API Rotate(const FVector& Pos, const EDoorDirection& Rot);
 
