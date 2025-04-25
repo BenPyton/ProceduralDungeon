@@ -188,6 +188,26 @@ FVector Rotate(const FVector& Pos, const EDoorDirection& Rot)
 	return NewPos;
 }
 
+FIntVector Transform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation)
+{
+	return Rotate(Pos, Rotation) + Translation;
+}
+
+FIntVector InverseTransform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation)
+{
+	return Rotate(Pos - Translation, -Rotation);
+}
+
+EDoorDirection Transform(const EDoorDirection& Direction, const EDoorDirection& Rotation)
+{
+	return Direction + Rotation;
+}
+
+EDoorDirection InverseTransform(const EDoorDirection& Direction, const EDoorDirection& Rotation)
+{
+	return Direction - Rotation;
+}
+
 // ############ FDoorDef ##############
 
 const FDoorDef FDoorDef::Invalid(FIntVector::ZeroValue, EDoorDirection::NbDirection);
@@ -267,6 +287,22 @@ FVector FDoorDef::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRo
 	const FVector DirectionOffset = !DoorRot ? FVector::ZeroVector : (0.5f * ToVector(DoorRot));
 	const FVector HeightOffset = FVector(0, 0, DoorOffset);
 	return Dungeon::RoomUnit() * (CellPosition + DirectionOffset + HeightOffset);
+}
+
+FDoorDef FDoorDef::Transform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation)
+{
+	FDoorDef NewDoor = DoorDef;
+	NewDoor.Position = ::Transform(DoorDef.Position, Translation, Rotation);
+	NewDoor.Direction = ::Transform(DoorDef.Direction, Rotation);
+	return NewDoor;
+}
+
+FDoorDef FDoorDef::InverseTransform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation)
+{
+	FDoorDef NewDoor = DoorDef;
+	NewDoor.Position = ::InverseTransform(DoorDef.Position, Translation, Rotation);
+	NewDoor.Direction = ::InverseTransform(DoorDef.Direction, Rotation);
+	return NewDoor;
 }
 
 #if !UE_BUILD_SHIPPING

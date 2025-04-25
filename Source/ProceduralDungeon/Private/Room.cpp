@@ -392,22 +392,22 @@ FDoorDef URoom::GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const
 
 FIntVector URoom::WorldToRoom(const FIntVector& WorldPos) const
 {
-	return Rotate(WorldPos - Position, -Direction);
+	return InverseTransform(WorldPos, Position, Direction);
 }
 
 FIntVector URoom::RoomToWorld(const FIntVector& RoomPos) const
 {
-	return Rotate(RoomPos, Direction) + Position;
+	return Transform(RoomPos, Position, Direction);
 }
 
 EDoorDirection URoom::WorldToRoom(const EDoorDirection& WorldRot) const
 {
-	return WorldRot - Direction;
+	return InverseTransform(WorldRot, Direction);
 }
 
 EDoorDirection URoom::RoomToWorld(const EDoorDirection& RoomRot) const
 {
-	return RoomRot + Direction;
+	return Transform(RoomRot, Direction);
 }
 
 FBoxMinAndMax URoom::WorldToRoom(const FBoxMinAndMax& WorldBox) const
@@ -422,18 +422,12 @@ FBoxMinAndMax URoom::RoomToWorld(const FBoxMinAndMax& RoomBox) const
 
 FDoorDef URoom::WorldToRoom(const FDoorDef& WorldDoor) const
 {
-	FDoorDef RoomDoor = WorldDoor;
-	RoomDoor.Position = WorldToRoom(WorldDoor.Position);
-	RoomDoor.Direction = WorldToRoom(WorldDoor.Direction);
-	return RoomDoor;
+	return FDoorDef::InverseTransform(WorldDoor, Position, Direction);
 }
 
 FDoorDef URoom::RoomToWorld(const FDoorDef& RoomDoor) const
 {
-	FDoorDef WorldDoor = RoomDoor;
-	WorldDoor.Position = RoomToWorld(RoomDoor.Position);
-	WorldDoor.Direction = RoomToWorld(RoomDoor.Direction);
-	return WorldDoor;
+	return FDoorDef::Transform(RoomDoor, Position, Direction);
 }
 
 FVoxelBounds URoom::WorldToRoom(const FVoxelBounds& WorldBounds) const
