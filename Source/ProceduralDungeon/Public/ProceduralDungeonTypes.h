@@ -58,6 +58,13 @@ float PROCEDURALDUNGEON_API ToAngle(const EDoorDirection& Direction);
 FIntVector PROCEDURALDUNGEON_API Rotate(const FIntVector& Pos, const EDoorDirection& Rot);
 FVector PROCEDURALDUNGEON_API Rotate(const FVector& Pos, const EDoorDirection& Rot);
 
+FIntVector PROCEDURALDUNGEON_API Transform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation);
+FIntVector PROCEDURALDUNGEON_API InverseTransform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation);
+
+// Those ones are just for consistent naming and centralized code
+EDoorDirection PROCEDURALDUNGEON_API Transform(const EDoorDirection& Direction, const EDoorDirection& Rotation);
+EDoorDirection PROCEDURALDUNGEON_API InverseTransform(const EDoorDirection& Direction, const EDoorDirection& Rotation);
+
 //The different types of generation algorithms.
 UENUM(BlueprintType, meta = (DisplayName = "Generation Type"))
 enum class EGenerationType : uint8
@@ -99,11 +106,11 @@ public:
 	static const FDoorDef Invalid;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef")
 	FIntVector Position {FIntVector::ZeroValue};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef")
 	EDoorDirection Direction {EDoorDirection::North};
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DoorDef", meta = (DisplayThumbnail = false))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef", meta = (DisplayThumbnail = false))
 	class UDoorType* Type {nullptr};
 
 public:
@@ -126,6 +133,9 @@ public:
 
 	static FVector GetRealDoorPosition(const FDoorDef& DoorDef, bool bIncludeOffset = true);
 	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, float DoorOffset = 0.0f);
+
+	static FDoorDef Transform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation);
+	static FDoorDef InverseTransform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation);
 
 #if !UE_BUILD_SHIPPING
 	static void DrawDebug(const class UWorld* World, const FDoorDef& DoorDef, const FTransform& Transform = FTransform::Identity, bool bIncludeOffset = false, bool bIsConnected = true);

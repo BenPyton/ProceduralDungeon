@@ -80,14 +80,24 @@ FIntVector UDungeonBlueprintLibrary::IntVector_Rotate(const FIntVector& Vector, 
 	return Rotate(Vector, Direction);
 }
 
-FIntVector UDungeonBlueprintLibrary::Dungeon_TransformPosition(const FIntVector& LocalPos, const FIntVector& Offset, const EDoorDirection& Rotation)
+FIntVector UDungeonBlueprintLibrary::Dungeon_TransformPosition(const FIntVector& LocalPos, const FIntVector& Translation, const EDoorDirection& Rotation)
 {
-	return Rotate(LocalPos, Rotation) + Offset;
+	return Transform(LocalPos, Translation, Rotation);
 }
 
-FIntVector UDungeonBlueprintLibrary::Dungeon_InverseTransformPosition(const FIntVector& DungeonPos, const FIntVector& Offset, const EDoorDirection& Rotation)
+FIntVector UDungeonBlueprintLibrary::Dungeon_InverseTransformPosition(const FIntVector& DungeonPos, const FIntVector& Translation, const EDoorDirection& Rotation)
 {
-	return Rotate(DungeonPos - Offset, -Rotation);
+	return InverseTransform(DungeonPos, Translation, Rotation);
+}
+
+FDoorDef UDungeonBlueprintLibrary::Dungeon_TransformDoorDef(const FDoorDef& DoorDef, const FIntVector& Translation, const EDoorDirection& Rotation)
+{
+	return FDoorDef::Transform(DoorDef, Translation, Rotation);
+}
+
+FDoorDef UDungeonBlueprintLibrary::Dungeon_InverseTransformDoorDef(const FDoorDef& DoorDef, const FIntVector& Translation, const EDoorDirection& Rotation)
+{
+	return FDoorDef::InverseTransform(DoorDef, Translation, Rotation);
 }
 
 FIntVector UDungeonBlueprintLibrary::IntVector_Add(const FIntVector& A, const FIntVector& B)

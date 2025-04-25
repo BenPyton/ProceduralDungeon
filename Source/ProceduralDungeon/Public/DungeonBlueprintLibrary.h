@@ -93,13 +93,21 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Math|Transform", meta = (DisplayName = "Rotate (Int Vector)"))
 	static FIntVector IntVector_Rotate(const FIntVector& Vector, const EDoorDirection& Direction);
 
-	// Transform a cell position in local corrdinates into the the dungeon coordinates
+	// Transform a cell position from local coordinates into the dungeon coordinates
 	UFUNCTION(BlueprintPure, Category = "Math|Dungeon", meta = (DisplayName = "Transform Position (Dungeon)", AutoCreateRefTerm = "Rotation"))
-	static FIntVector Dungeon_TransformPosition(const FIntVector& LocalPos, const FIntVector& Offset, const EDoorDirection& Rotation);
+	static FIntVector Dungeon_TransformPosition(const FIntVector& LocalPos, const FIntVector& Translation, const EDoorDirection& Rotation);
 
-	// Inverse transform a cell position in the dungeon coordinates into a local coordinates
+	// Inverse transform a cell position from the dungeon coordinates into a local coordinates
 	UFUNCTION(BlueprintPure, Category = "Math|Dungeon", meta = (DisplayName = "Inverse Transform Position (Dungeon)", AutoCreateRefTerm = "Rotation"))
-	static FIntVector Dungeon_InverseTransformPosition(const FIntVector& DungeonPos, const FIntVector& Offset, const EDoorDirection& Rotation);
+	static FIntVector Dungeon_InverseTransformPosition(const FIntVector& DungeonPos, const FIntVector& Translation, const EDoorDirection& Rotation);
+
+	// Transform a DoorDef structure from local coordinates into the dungeon coordinates
+	UFUNCTION(BlueprintPure, Category = "Math|Dungeon", meta = (DisplayName = "Transform DoorDef (Dungeon)", AutoCreateRefTerm = "Rotation"))
+	static FDoorDef Dungeon_TransformDoorDef(const FDoorDef& DoorDef, const FIntVector& Translation, const EDoorDirection& Rotation);
+
+	// Inverse transform a DoorDef structure from the dungeon coordinates into a local coordinates
+	UFUNCTION(BlueprintPure, Category = "Math|Dungeon", meta = (DisplayName = "Inverse Transform DoorDef (Dungeon)", AutoCreateRefTerm = "Rotation"))
+	static FDoorDef Dungeon_InverseTransformDoorDef(const FDoorDef& DoorDef, const FIntVector& Translation, const EDoorDirection& Rotation);
 
 	// ===== Int Vector Operators =====
 
