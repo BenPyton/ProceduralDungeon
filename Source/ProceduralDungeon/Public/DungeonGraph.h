@@ -94,6 +94,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	const TArray<URoom*>& GetAllRooms() const { return Rooms; }
 
+	// Returns all room connections
+	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
+	const TArray<URoomConnection*>& GetAllConnections() const { return RoomConnections; }
+
 	// Returns all room instances of the provided room data
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph")
 	void GetAllRoomsFromData(const URoomData* Data, TArray<URoom*>& Rooms);
@@ -207,8 +211,6 @@ public:
 	static void TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* OutRooms, uint32 Distance, TFunction<void(URoom*)> Func);
 
 	static bool FindPath(const URoom* From, const URoom* To, TArray<const URoom*>* OutPath = nullptr, bool IgnoreLocked = false);
-
-	const TArray<URoomConnection*>& GetAllConnections() const { return RoomConnections; }
 
 protected:
 	int CountRoomByPredicate(TFunction<bool(const URoom*)> Predicate) const;

@@ -133,6 +133,7 @@ public:
 
 	static FVector GetRealDoorPosition(const FDoorDef& DoorDef, bool bIncludeOffset = true);
 	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, float DoorOffset = 0.0f);
+	static FQuat GetRealDoorRotation(const FDoorDef& DoorDef, bool bFlipped = false);
 
 	static FDoorDef Transform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation);
 	static FDoorDef InverseTransform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation);

@@ -20,7 +20,7 @@ class URoom;
 class ADoor;
 
 // A DungeonGraph subobject that represents a connection between two rooms.
-UCLASS()
+UCLASS(BlueprintType)
 class PROCEDURALDUNGEON_API URoomConnection : public UReplicableObject, public IDungeonCustomSerialization, public IDungeonSaveInterface
 {
 	GENERATED_BODY()
@@ -37,15 +37,33 @@ public:
 	//~ End IDungeonSaveInterface Interface
 
 public:
+	UFUNCTION(BlueprintPure, Category = "Room Connection")
 	int32 GetID() const;
+
 	const TWeakObjectPtr<URoom> GetRoomA() const;
 	const TWeakObjectPtr<URoom> GetRoomB() const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Connection", meta = (DisplayName = "Get Door A Index"))
 	int32 GetRoomADoorId() const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Connection", meta = (DisplayName = "Get Door B Index"))
 	int32 GetRoomBDoorId() const;
+
 	TWeakObjectPtr<URoom> GetOtherRoom(const URoom* FromRoom) const;
 	int32 GetOtherDoorId(const URoom* FromRoom) const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Connection")
 	bool IsDoorInstanced() const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Connection")
 	ADoor* GetDoorInstance() const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Connection")
+	FVector GetDoorLocation(bool bIgnoreGeneratorTransform) const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Connection")
+	FRotator GetDoorRotation(bool bIgnoreGeneratorTransform) const;
+
 	void SetDoorClass(TSubclassOf<ADoor> DoorClass, bool bFlipped);
 	ADoor* InstantiateDoor(UWorld* World, AActor* Owner = nullptr, bool bUseOwnerTransform = false);
 
@@ -56,6 +74,13 @@ public:
 	static class UDoorType* GetDoorType(const URoomConnection* Conn);
 
 	static URoomConnection* CreateConnection(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB, UObject* Outer, int32 IdInOuter);
+
+protected:
+	UFUNCTION(BlueprintPure, Category = "Room Connection", meta = (DisplayName = "Get Room A", CompactNodeTitle = "Room A"))
+	const URoom* GetRoomA_BP() const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Connection", meta = (DisplayName = "Get Room B", CompactNodeTitle = "Room B"))
+	const URoom* GetRoomB_BP() const;
 
 private:
 	UFUNCTION()

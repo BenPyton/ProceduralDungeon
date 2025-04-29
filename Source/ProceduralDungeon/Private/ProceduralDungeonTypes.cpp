@@ -289,6 +289,11 @@ FVector FDoorDef::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRo
 	return Dungeon::RoomUnit() * (CellPosition + DirectionOffset + HeightOffset);
 }
 
+FQuat FDoorDef::GetRealDoorRotation(const FDoorDef& DoorDef, bool bFlipped)
+{
+	return FRotator(0, 90 * static_cast<uint8>(DoorDef.Direction) + bFlipped * 180, 0).Quaternion();
+}
+
 FDoorDef FDoorDef::Transform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation)
 {
 	FDoorDef NewDoor = DoorDef;

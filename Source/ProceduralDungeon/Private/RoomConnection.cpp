@@ -18,6 +18,7 @@
 #include "Engine/Engine.h"
 #include "Interfaces/RoomContainer.h"
 #include "Utils/DungeonSaveUtils.h"
+#include "DungeonGeneratorBase.h"
 
 void URoomConnection::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -124,6 +125,16 @@ const TWeakObjectPtr<URoom> URoomConnection::GetRoomB() const
 	return RoomB;
 }
 
+const URoom* URoomConnection::GetRoomA_BP() const
+{
+	return RoomA.Get();
+}
+
+const URoom* URoomConnection::GetRoomB_BP() const
+{
+	return RoomB.Get();
+}
+
 int32 URoomConnection::GetRoomADoorId() const
 {
 	return RoomADoorId;
@@ -154,6 +165,60 @@ bool URoomConnection::IsDoorInstanced() const
 ADoor* URoomConnection::GetDoorInstance() const
 {
 	return DoorInstance.Get();
+}
+
+FVector URoomConnection::GetDoorLocation(bool bIgnoreGeneratorTransform) const
+{
+	FDoorDef DoorDef;
+	const AActor* Generator = nullptr;
+	if (RoomA.IsValid())
+	{
+		DoorDef = RoomA->GetDoorDef(RoomADoorId);
+		Generator = RoomA->Generator();
+	}
+	else if (RoomB.IsValid())
+	{
+		DoorDef = RoomB->GetDoorDef(RoomBDoorId);
+		Generator = RoomB->Generator();
+	}
+	else
+	{
+		return FVector();
+	}
+
+	FVector Location = FDoorDef::GetRealDoorPosition(DoorDef);
+	if (!bIgnoreGeneratorTransform && IsValid(Generator))
+		Location = Generator->GetTransform().TransformPositionNoScale(Location);
+
+	return Location;
+}
+
+FRotator URoomConnection::GetDoorRotation(bool bIgnoreGeneratorTransform) const
+{
+	FDoorDef DoorDef;
+	const AActor* Generator = nullptr;
+	bool bFinalFlipped = bFlipped;
+	if (RoomA.IsValid())
+	{
+		DoorDef = RoomA->GetDoorDef(RoomADoorId);
+		Generator = RoomA->Generator();
+	}
+	else if (RoomB.IsValid())
+	{
+		DoorDef = RoomB->GetDoorDef(RoomBDoorId);
+		Generator = RoomB->Generator();
+		bFinalFlipped = !bFlipped;
+	}
+	else
+	{
+		return FRotator::ZeroRotator;
+	}
+
+	FQuat Rotation = FDoorDef::GetRealDoorRotation(DoorDef, bFinalFlipped);
+	if (!bIgnoreGeneratorTransform && IsValid(Generator))
+		Rotation = Generator->GetTransform().InverseTransformRotation(Rotation);
+
+	return Rotation.Rotator();
 }
 
 void URoomConnection::SetDoorClass(TSubclassOf<ADoor> InDoorClass, bool bInFlipped)
@@ -192,7 +257,7 @@ ADoor* URoomConnection::InstantiateDoor(UWorld* World, AActor* Owner, bool bUseO
 
 	FDoorDef DoorDef = Room->GetDoorDef(DoorId);
 	FVector InstanceDoorPos = FDoorDef::GetRealDoorPosition(DoorDef);
-	FQuat InstanceDoorRot = FRotator(0, 90 * static_cast<uint8>(DoorDef.Direction) + bFinalFlipped * 180, 0).Quaternion();
+	FQuat InstanceDoorRot = FDoorDef::GetRealDoorRotation(DoorDef, bFinalFlipped);
 
 	if (bUseOwnerTransform && IsValid(Owner))
 	{
