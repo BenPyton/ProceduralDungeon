@@ -327,7 +327,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 
 			{
 				FDoorDef FromDoor = {{0, 0, 0}, EDoorDirection::North};
-				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms, FScoreCallback());
+				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms);
 				TestTrue(TEXT("There should be candidates"), bHasCandidates);
 				TestEqual(TEXT("There should be 4 candidates"), SortedRooms.Num(), 4);
 				TestEqual(TEXT("RoomData D should be the best candidate"), SortedRooms[0].Data, DA_D.Get());
@@ -337,7 +337,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 
 			{
 				FDoorDef FromDoor = {{0, 1, 1}, EDoorDirection::South};
-				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms, FScoreCallback());
+				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms);
 				TestTrue(TEXT("There should be candidates"), bHasCandidates);
 				TestEqual(TEXT("There should be 3 candidates"), SortedRooms.Num(), 3);
 				TestEqual(TEXT("RoomData D should be the best candidate"), SortedRooms[0].Data, DA_D.Get());
