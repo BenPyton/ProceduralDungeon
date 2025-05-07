@@ -16,34 +16,43 @@
 
 class UDoorType;
 
+UENUM(BlueprintType, meta = (DisplayName = "Room Bounds Connection Type"))
+enum class EVoxelBoundsConnectionType : uint8
+{
+	None,
+	Wall,
+	Door
+};
+
 // Base class for the different connection types.
+USTRUCT(BlueprintType, meta = (DisplayName = "Room Bounds Connection"))
 struct FVoxelBoundsConnection
 {
+	GENERATED_BODY()
+
 public:
-	enum class EType
-	{
-		None,
-		Wall,
-		Door
-	};
-
 	FVoxelBoundsConnection() = default;
-	FVoxelBoundsConnection(EType InType) : Type(InType) {}
-	FVoxelBoundsConnection(UDoorType* InDoorType) : Type(EType::Door), DoorType(InDoorType) {}
+	FVoxelBoundsConnection(EVoxelBoundsConnectionType InType) : Type(InType) {}
+	FVoxelBoundsConnection(UDoorType* InDoorType) : Type(EVoxelBoundsConnectionType::Door) , DoorType(InDoorType) {}
 
-	EType Type {EType::None};
+	UPROPERTY(BlueprintReadOnly, Category = "Bounds Connection")
+	EVoxelBoundsConnectionType Type {EVoxelBoundsConnectionType::None};
 
 	// Used when `Type` is `Door`
 	// Same door types give a high score whereas different door types give a low score.
+	UPROPERTY(BlueprintReadOnly, Category = "Bounds Connection")
 	UDoorType* DoorType {nullptr};
 
-	bool IsValid() const { return EType::None != Type; }
+	bool IsValid() const { return EVoxelBoundsConnectionType::None != Type; }
 
 	bool operator==(const FVoxelBoundsConnection& Other) const;
 	bool operator!=(const FVoxelBoundsConnection& Other) const { return !(*this == Other); }
 
+	// Default score function
 	static int32 GetCompatibilityScore(const FVoxelBoundsConnection& A, const FVoxelBoundsConnection& B);
 };
+
+DECLARE_DYNAMIC_DELEGATE_RetVal_ThreeParams(bool, FScoreCallback, const FVoxelBoundsConnection&, A, const FVoxelBoundsConnection&, B, UPARAM(Ref) int32&, Score);
 
 USTRUCT()
 struct FVoxelBounds
@@ -76,7 +85,7 @@ public:
 
 	// Checks how well the bounds fit together.
 	// Returns true if the bounds fit together and sets the score.
-	bool GetCompatibilityScore(const FVoxelBounds& Other, int32& Score) const;
+	bool GetCompatibilityScore(const FVoxelBounds& Other, int32& Score, const FScoreCallback& CustomScore = FScoreCallback()) const;
 
 	// Operators to offset the bounds
 	void operator+=(const FIntVector& Offset);

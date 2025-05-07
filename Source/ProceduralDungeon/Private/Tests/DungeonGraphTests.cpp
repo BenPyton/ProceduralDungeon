@@ -200,12 +200,12 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			{
 				FVoxelBounds ExpectedBounds;
 				ExpectedBounds.AddCell({0, 0, 0});
-				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({0, 0, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
 
 				FVoxelBounds ConvertedBounds = Room0->GetVoxelBounds();
 				TestEqual(TEXT("Room0 bounds should be as expected"), ConvertedBounds, ExpectedBounds);
@@ -215,12 +215,12 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			{
 				FVoxelBounds ExceptedBounds;
 				ExceptedBounds.AddCell({0, 1, 0});
-				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExceptedBounds.SetCellConnection({0, 1, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
 
 				FVoxelBounds ConvertedBounds = Room1->GetVoxelBounds();
 				TestEqual(TEXT("Room1 bounds should be as expected"), ConvertedBounds, ExceptedBounds);
@@ -230,12 +230,12 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			{
 				FVoxelBounds ExpectedBounds;
 				ExpectedBounds.AddCell({0, 2, 0});
-				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({0, 2, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
 
 				FVoxelBounds ConvertedBounds = Room2->GetVoxelBounds();
 				TestEqual(TEXT("Room2 bounds should be as expected"), ConvertedBounds, ExpectedBounds);
@@ -246,16 +246,16 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 				FVoxelBounds ExpectedBounds;
 				ExpectedBounds.AddCell({-1, 0, 0});
 				ExpectedBounds.AddCell({-1, 0, 1});
-				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 0}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({-1, 0, 1}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
 
 				FVoxelBounds ConvertedBounds = Room3->GetVoxelBounds();
 				TestEqual(TEXT("Room3 bounds should be as expected"), ConvertedBounds, ExpectedBounds);
@@ -265,12 +265,12 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			{
 				FVoxelBounds ExpectedBounds;
 				ExpectedBounds.AddCell({0, 0, 1});
-				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({0, 0, 1}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
 
 				FVoxelBounds ConvertedBounds = Room4->GetVoxelBounds();
 				TestEqual(TEXT("Room4 bounds should be as expected"), ConvertedBounds, ExpectedBounds);
@@ -280,12 +280,12 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			{
 				FVoxelBounds ExpectedBounds;
 				ExpectedBounds.AddCell({0, 1, 1});
-				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door));
-				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
-				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall));
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::North, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::West, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::South, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::East, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door));
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::Up, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
+				ExpectedBounds.SetCellConnection({0, 1, 1}, FVoxelBounds::EDirection::Down, FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall));
 
 				FVoxelBounds ConvertedBounds = Room5->GetVoxelBounds();
 				TestEqual(TEXT("Room5 bounds should be as expected"), ConvertedBounds, ExpectedBounds);
@@ -327,7 +327,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 
 			{
 				FDoorDef FromDoor = {{0, 0, 0}, EDoorDirection::North};
-				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms);
+				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms, FScoreCallback());
 				TestTrue(TEXT("There should be candidates"), bHasCandidates);
 				TestEqual(TEXT("There should be 4 candidates"), SortedRooms.Num(), 4);
 				TestEqual(TEXT("RoomData D should be the best candidate"), SortedRooms[0].Data, DA_D.Get());
@@ -337,7 +337,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 
 			{
 				FDoorDef FromDoor = {{0, 1, 1}, EDoorDirection::South};
-				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms);
+				bool bHasCandidates = Graph->FilterAndSortRooms(RoomList, FromDoor, SortedRooms, FScoreCallback());
 				TestTrue(TEXT("There should be candidates"), bHasCandidates);
 				TestEqual(TEXT("There should be 3 candidates"), SortedRooms.Num(), 3);
 				TestEqual(TEXT("RoomData D should be the best candidate"), SortedRooms[0].Data, DA_D.Get());

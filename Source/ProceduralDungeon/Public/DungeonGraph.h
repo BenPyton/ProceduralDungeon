@@ -198,8 +198,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Dungeon Graph")
 	FVector GetDungeonBoundsExtent() const;
 
-	UFUNCTION(BlueprintPure = false, Category = "Dungeon Graph", meta = (ExpandBoolAsExecs = "ReturnValue"))
-	bool FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms) const;
+	UFUNCTION(BlueprintPure = false, Category = "Dungeon Graph", meta = (ExpandBoolAsExecs = "ReturnValue", AdvancedDisplay = "CustomFilter", AutoCreateRefTerm = "CustomScore"))
+	bool FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms, const FScoreCallback& CustomScore) const;
 
 	// Returns the computed dungeon bounds.
 	class FBoxCenterAndExtent GetDungeonBounds(const FTransform& Transform = FTransform::Identity) const;

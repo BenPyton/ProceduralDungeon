@@ -361,7 +361,7 @@ struct FRoomCandidatePredicate
 	}
 };
 
-bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms) const
+bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms, const FScoreCallback& CustomScore) const
 {
 	SortedRooms.Empty();
 
@@ -378,6 +378,9 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 		for (int i = 0; i < RoomData->GetNbDoor(); ++i)
 		{
 			FDoorDef Door = RoomData->Doors[i];
+
+			// Filter out the door candidate if not compatible with the door
+			// we want to connect from.
 			if (!FDoorDef::AreCompatible(TargetDoor, Door))
 				continue;
 
@@ -391,7 +394,7 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 			Candidate.DoorIndex = i;
 
 			// Check if the room can fit
-			if (!NewBounds.GetCompatibilityScore(Bounds, Candidate.Score))
+			if (!NewBounds.GetCompatibilityScore(Bounds, Candidate.Score, CustomScore))
 				continue;
 
 			SortedRooms.HeapPush(Candidate, FRoomCandidatePredicate());

@@ -155,7 +155,7 @@ FVoxelBounds URoomData::GetVoxelBounds() const
 		}
 	}
 
-	const FVoxelBoundsConnection WallConnection(FVoxelBoundsConnection::EType::Wall);
+	const FVoxelBoundsConnection WallConnection(EVoxelBoundsConnectionType::Wall);
 
 	// Fill top and bottom with walls.
 	for (int X = Bounds.Min.X; X < Bounds.Max.X; ++X)
