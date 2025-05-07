@@ -145,6 +145,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Generation Init"))
 	void OnGenerationInit();
 
+	// Called when a dungeon has been successfully generated (IsValidDungeon returned true).
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Generation Success"))
+	void OnGenerationSuccess();
+
 	// Called when all dungeon generation tries are exhausted (IsValidDungeon always return false).
 	// No dungeon had been generated.
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Generation Failed"))
@@ -212,6 +216,10 @@ public:
 	// Called before trying to generate a new dungeon and each time IsValidDungeon return false.
 	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
 	FGenerationEvent OnGenerationInitEvent;
+
+	// Called when a dungeon has been successfully generated (IsValidDungeon returned true).
+	UPROPERTY(BlueprintAssignable, Category = "Dungeon Generator")
+	FGenerationEvent OnGenerationSuccessEvent;
 
 	// Called when all dungeon generation tries are exhausted (IsValidDungeon always return false).
 	// No dungeon had been generated.

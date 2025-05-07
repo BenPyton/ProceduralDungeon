@@ -518,7 +518,11 @@ void ADungeonGeneratorBase::OnStateBegin(EGenerationState State)
 		check(HasAuthority()); // should never generate on clients!
 		FlushNetDormancy();
 		UpdateSeed();
-		if (!CreateDungeon())
+		if (CreateDungeon())
+		{
+			OnGenerationSuccess();
+		}
+		else
 		{
 			Graph->Clear();
 			OnGenerationFailed();
@@ -679,6 +683,11 @@ void ADungeonGeneratorBase::OnPostGeneration_Implementation()
 void ADungeonGeneratorBase::OnGenerationInit_Implementation()
 {
 	OnGenerationInitEvent.Broadcast();
+}
+
+void ADungeonGeneratorBase::OnGenerationSuccess_Implementation()
+{
+	OnGenerationSuccessEvent.Broadcast();
 }
 
 void ADungeonGeneratorBase::OnGenerationFailed_Implementation()
