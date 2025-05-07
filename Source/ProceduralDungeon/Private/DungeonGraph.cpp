@@ -404,6 +404,11 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 	return SortedRooms.Num() > 0;
 }
 
+bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms) const
+{
+	return FilterAndSortRooms(RoomList, FromDoor, SortedRooms, FScoreCallback());
+}
+
 FBoxCenterAndExtent UDungeonGraph::GetDungeonBounds(const FTransform& Transform) const
 {
 	return Dungeon::ToWorld(Bounds.GetBounds(), Transform);
