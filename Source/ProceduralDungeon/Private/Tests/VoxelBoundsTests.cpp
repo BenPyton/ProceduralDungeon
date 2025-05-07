@@ -13,6 +13,7 @@
 #include "Misc/AutomationTest.h"
 #include "ProceduralDungeonTypes.h"
 #include "VoxelBounds/VoxelBounds.h"
+#include "Tests/Classes/CustomScoreCallbacks.h"
 #include "TestUtils.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
@@ -20,7 +21,7 @@
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FVoxelBoundsTest, "ProceduralDungeon.Types.VoxelBounds", FLAG_APPLICATION_CONTEXT | EAutomationTestFlags::SmokeFilter)
 
 	#define SET_CONNECTION(BOUNDS, CELL, DIR, TYPE) \
-		BOUNDS.SetCellConnection(FIntVector CELL, FVoxelBounds::EDirection::DIR, FVoxelBoundsConnection(FVoxelBoundsConnection::EType::TYPE));
+		BOUNDS.SetCellConnection(FIntVector CELL, FVoxelBounds::EDirection::DIR, FVoxelBoundsConnection(EVoxelBoundsConnectionType::TYPE));
 
 bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 {
@@ -56,8 +57,8 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 		// Setting the cell connections in a different way is intentional here
 		auto& CellA = BoundsB.AddCell(FIntVector(0, 0, 0));
 		auto& CellB = BoundsB.AddCell(FIntVector(1, 1, 1));
-		CellA[static_cast<uint8>(FVoxelBounds::EDirection::North)] = FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Wall);
-		CellB[static_cast<uint8>(FVoxelBounds::EDirection::South)] = FVoxelBoundsConnection(FVoxelBoundsConnection::EType::Door);
+		CellA[static_cast<uint8>(FVoxelBounds::EDirection::North)] = FVoxelBoundsConnection(EVoxelBoundsConnectionType::Wall);
+		CellB[static_cast<uint8>(FVoxelBounds::EDirection::South)] = FVoxelBoundsConnection(EVoxelBoundsConnectionType::Door);
 
 		BoundsC.AddCell(FIntVector(0, 0, 0));
 		BoundsC.AddCell(FIntVector(1, 1, 1));
@@ -425,21 +426,21 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			SET_CONNECTION(BoundsG, (0, 1, 1), Down, Wall);
 
 			int32 _ScoreA, _ScoreB, _ScoreC, _ScoreD, _ScoreE, _ScoreF, _ScoreG;
-			TestTrue(TEXT("BoundsA fits in DungeonBounds"), BoundsA.GetCompatibilityScore(DungeonBounds, _ScoreA));
-			TestTrue(TEXT("BoundsB fits in DungeonBounds"), BoundsB.GetCompatibilityScore(DungeonBounds, _ScoreB));
-			TestTrue(TEXT("BoundsC fits in DungeonBounds"), BoundsC.GetCompatibilityScore(DungeonBounds, _ScoreC));
-			TestTrue(TEXT("BoundsD fits in DungeonBounds"), BoundsD.GetCompatibilityScore(DungeonBounds, _ScoreD));
-			TestTrue(TEXT("BoundsE fits in DungeonBounds"), BoundsE.GetCompatibilityScore(DungeonBounds, _ScoreE));
-			TestTrue(TEXT("BoundsF fits in DungeonBounds"), BoundsF.GetCompatibilityScore(DungeonBounds, _ScoreF));
-			TestTrue(TEXT("BoundsG fits in DungeonBounds"), BoundsG.GetCompatibilityScore(DungeonBounds, _ScoreG));
+			TestTrue(TEXT("BoundsA fit in DungeonBounds"), BoundsA.GetCompatibilityScore(DungeonBounds, _ScoreA));
+			TestTrue(TEXT("BoundsB fit in DungeonBounds"), BoundsB.GetCompatibilityScore(DungeonBounds, _ScoreB));
+			TestTrue(TEXT("BoundsC fit in DungeonBounds"), BoundsC.GetCompatibilityScore(DungeonBounds, _ScoreC));
+			TestTrue(TEXT("BoundsD fit in DungeonBounds"), BoundsD.GetCompatibilityScore(DungeonBounds, _ScoreD));
+			TestTrue(TEXT("BoundsE fit in DungeonBounds"), BoundsE.GetCompatibilityScore(DungeonBounds, _ScoreE));
+			TestTrue(TEXT("BoundsF fit in DungeonBounds"), BoundsF.GetCompatibilityScore(DungeonBounds, _ScoreF));
+			TestTrue(TEXT("BoundsG fit in DungeonBounds"), BoundsG.GetCompatibilityScore(DungeonBounds, _ScoreG));
 
 			// Order of fitting: E(G) > A > C(F) > B > D
-			TestTrue(TEXT("BoundsE fits better than BoundsA"), _ScoreE > _ScoreA);
-			TestTrue(TEXT("BoundsA fits better than BoundsC"), _ScoreA > _ScoreC);
-			TestTrue(TEXT("BoundsC fits better than BoundsB"), _ScoreC > _ScoreB);
-			TestTrue(TEXT("BoundsB fits better than BoundsD"), _ScoreB > _ScoreD);
-			TestTrue(TEXT("BoundsG fits equally as BoundsE"), _ScoreG == _ScoreE);
-			TestTrue(TEXT("BoundsC fits equally as BoundsF"), _ScoreC == _ScoreF);
+			TestTrue(TEXT("BoundsE fit better than BoundsA"), _ScoreE > _ScoreA);
+			TestTrue(TEXT("BoundsA fit better than BoundsC"), _ScoreA > _ScoreC);
+			TestTrue(TEXT("BoundsC fit better than BoundsB"), _ScoreC > _ScoreB);
+			TestTrue(TEXT("BoundsB fit better than BoundsD"), _ScoreB > _ScoreD);
+			TestTrue(TEXT("BoundsG fit equally as BoundsE"), _ScoreG == _ScoreE);
+			TestTrue(TEXT("BoundsC fit equally as BoundsF"), _ScoreC == _ScoreF);
 		}
 
 		// Bounds that do not fit in the available space
@@ -459,7 +460,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			SET_CONNECTION(BoundsA, (1, 0, 0), Down, Wall);
 
 			int32 ScoreA;
-			TestFalse(TEXT("BoundsA does not fits in DungeonBounds"), BoundsA.GetCompatibilityScore(DungeonBounds, ScoreA));
+			TestFalse(TEXT("BoundsA does not fit in DungeonBounds"), BoundsA.GetCompatibilityScore(DungeonBounds, ScoreA));
 
 			// Bigger bounds that does not fit in the available space
 			// +---+   +
@@ -484,7 +485,35 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			SET_CONNECTION(BoundsB, (1, 0, 0), Down, Wall);
 
 			int32 ScoreB;
-			TestFalse(TEXT("BoundsB does not fits in DungeonBounds"), BoundsB.GetCompatibilityScore(DungeonBounds, ScoreB));
+			TestFalse(TEXT("BoundsB does not fit in DungeonBounds"), BoundsB.GetCompatibilityScore(DungeonBounds, ScoreB));
+		}
+
+		// Custom Score Test
+		{
+			UCustomScoreCallback* CustomCallbacks = NewObject<UCustomScoreCallback>();
+
+			FScoreCallback ZeroScore;
+			ZeroScore.BindDynamic(CustomCallbacks, &UCustomScoreCallback::ZeroScore);
+
+			FScoreCallback NeverPassScore;
+			NeverPassScore.BindDynamic(CustomCallbacks, &UCustomScoreCallback::NeverPass);
+
+			FVoxelBounds BoundsA;
+			BoundsA.AddCell(FIntVector(0, 0, 0));
+			SET_CONNECTION(BoundsA, (0, 0, 0), North, Door);
+			SET_CONNECTION(BoundsA, (0, 0, 0), East, Wall);
+			SET_CONNECTION(BoundsA, (0, 0, 0), South, Wall);
+			SET_CONNECTION(BoundsA, (0, 0, 0), West, Wall);
+			SET_CONNECTION(BoundsA, (0, 0, 0), Up, Wall);
+			SET_CONNECTION(BoundsA, (0, 0, 0), Down, Wall);
+
+			int32 ScoreA;
+			TestTrue(TEXT("BoundsA does fit in DungeonBounds with ZeroScore"), BoundsA.GetCompatibilityScore(DungeonBounds, ScoreA, ZeroScore));
+			TestEqual(TEXT("BoundsA ZeroScore should have score of 0"), ScoreA, 0);
+
+			int32 ScoreB;
+			TestFalse(TEXT("BoundsA does not fit in DungeonBounds ith NeverPass"), BoundsA.GetCompatibilityScore(DungeonBounds, ScoreB, NeverPassScore));
+			TestNotEqual(TEXT("BoundsA NeverPass should have score different from ZeroScore"), ScoreA, ScoreB);
 		}
 	}
 

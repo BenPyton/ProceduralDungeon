@@ -23,7 +23,7 @@ bool FVoxelBoundsConnection::operator==(const FVoxelBoundsConnection& Other) con
 {
 	if (Type != Other.Type)
 		return false;
-	if (EType::Door == Type)
+	if (EVoxelBoundsConnectionType::Door == Type)
 		return DoorType == Other.DoorType;
 	return true;
 }
@@ -31,19 +31,19 @@ bool FVoxelBoundsConnection::operator==(const FVoxelBoundsConnection& Other) con
 int32 FVoxelBoundsConnection::GetCompatibilityScore(const FVoxelBoundsConnection& A, const FVoxelBoundsConnection& B)
 {
 	// No connection is always compatible with any other (that measn it's inside the bounds)
-	if (A.Type == EType::None || B.Type == EType::None)
+	if (A.Type == EVoxelBoundsConnectionType::None || B.Type == EVoxelBoundsConnectionType::None)
 		return 0;
 
 	// When types are mismatching, it's not compatible
 	if (A.Type != B.Type)
 	{
 		// Penalty when a door is not aligned with another door
-		if (EType::Door == A.Type || EType::Door == B.Type)
+		if (EVoxelBoundsConnectionType::Door == A.Type || EVoxelBoundsConnectionType::Door == B.Type)
 			return -10;
 		return 0;
 	}
 
-	if (EType::Door == A.Type)
+	if (EVoxelBoundsConnectionType::Door == A.Type)
 	{
 		// High score when doors are aligned and matching together
 		if (A.DoorType == B.DoorType)
@@ -102,7 +102,7 @@ bool FVoxelBounds::SetCellConnection(FIntVector Cell, EDirection Direction, cons
 	return true;
 }
 
-bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score) const
+bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score, const FScoreCallback& CustomScore) const
 {
 	// Each cell add 1 to the score, so the bigger volume the higher score.
 	Score = Cells.Num();
@@ -147,7 +147,16 @@ bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score
 
 			const auto& Connection = Cell.Value[i];
 			const auto& OtherConnection = (*NeighConns)[static_cast<uint8>(Opposite(static_cast<EDirection>(i)))];
-			Score += FVoxelBoundsConnection::GetCompatibilityScore(Connection, OtherConnection);
+
+			if (CustomScore.IsBound())
+			{
+				if (!CustomScore.Execute(Connection, OtherConnection, Score))
+					return false;
+			}
+			else
+			{
+				Score += FVoxelBoundsConnection::GetCompatibilityScore(Connection, OtherConnection);
+			}
 		}
 	}
 
