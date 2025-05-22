@@ -54,7 +54,7 @@ void operator<<(FStructuredArchiveSlot Slot, FDungeonSaveData& Data)
 	}
 	else
 	{
-		DungeonLog_Debug("Deserialized dungeon from saved data: %d", *Data.GeneratorId.ToString());
+		DungeonLog_Debug("Deserialized dungeon from saved data: %s", *Data.GeneratorId.ToString());
 	}
 }
 
