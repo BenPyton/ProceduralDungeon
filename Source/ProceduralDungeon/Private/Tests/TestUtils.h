@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include "UObject/UObjectGlobals.h"
+#include "UObject/Package.h"
 #include "Misc/EngineVersionComparison.h"
 #include "UObject/StrongObjectPtr.h"
 
