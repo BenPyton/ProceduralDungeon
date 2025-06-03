@@ -82,6 +82,8 @@ void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId
 	{
 		DungeonLog_Error("No RoomData provided.");
 	}
+
+	CreateAllCustomData();
 }
 
 bool URoom::IsConnected(int32 DoorIndex) const

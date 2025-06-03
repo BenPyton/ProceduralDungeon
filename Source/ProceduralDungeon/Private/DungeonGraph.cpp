@@ -115,13 +115,6 @@ void UDungeonGraph::InitRooms()
 		}
 	}
 
-	// Create custom data for all rooms
-	for (URoom* Room : Rooms)
-	{
-		// @TODO: Maybe could be done during the `Room->Init()` instead?
-		Room->CreateAllCustomData();
-	}
-
 	// Finally we can initialize them all
 	for (URoom* Room : Rooms)
 	{
