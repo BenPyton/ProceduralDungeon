@@ -8,7 +8,7 @@
 	"CreatedBy": "Ben Pyton",
 	"CreatedByURL": "https://github.com/BenPyton",
 	"DocsURL": "https://BenPyton.github.io/ProceduralDungeon",
-	"MarketplaceURL": "",
+	"FabURL": "com.epicgames.launcher://ue/Fab/product/62cbdceb-ae3c-4fe4-adac-39d751a15df9",
 	"SupportURL": "https://github.com/BenPyton/ProceduralDungeon/issues",
 	"CanContainContent": false,
 	"IsBetaVersion": false,
@@ -23,7 +23,6 @@
 				"Win64"
 			]
 		},
-
 		{
 			"Name": "ProceduralDungeonEditor",
 			"Type": "Editor",
