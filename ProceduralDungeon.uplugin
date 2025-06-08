@@ -19,16 +19,16 @@
 			"Name": "ProceduralDungeon",
 			"Type": "Runtime",
 			"LoadingPhase": "PreDefault",
-			"WhitelistPlatforms": [
-				"Win64"
+			"PlatformAllowList": [
+				"Win64", "Mac", "Linux", "IOS", "Android"
 			]
 		},
 		{
 			"Name": "ProceduralDungeonEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default",
-			"WhitelistPlatforms": [
-				"Win64"
+			"PlatformAllowList": [
+				"Win64", "Mac", "Linux"
 			]
 		}
 	]
