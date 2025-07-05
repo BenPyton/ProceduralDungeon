@@ -52,7 +52,7 @@ public:
 
 bool AMyDungeonGenerator::ContinueToAddRoom_Implementation()
 {
-    return GetRooms()->HasAlreadyRoomData(EndingRoom);
+    return !GetRooms()->HasAlreadyRoomData(EndingRoom);
 }
 
 ```
