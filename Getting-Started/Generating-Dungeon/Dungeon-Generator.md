@@ -68,11 +68,6 @@ The `Dungeon Generator` actor has some parameters grouped inside the `Procedural
 
 ![](../../Images/GeneratorSettings.jpg)
 
-#### `Use Generator Transform`
-
-If checked, the dungeon will be offset and rotated using the dungeon generator actor's transform.\
-If unchecked, the first room will be placed at world's (0,0,0) and no rotation will be applied.
-
 #### `Generation Type`
 
 - The `depth first` will prioritize the last added room to continue the generation.
@@ -89,6 +84,15 @@ If checked, when a new room is placed in the dungeon, any door aligned with anot
 If unchecked, only the door from the previous room (the one used to generate this room) will be connected.\
 *This parameter is only used when `Can Loop` from the project-wide [settings](../Plugin-Settings.md) is also checked.*
 
+#### `Dungeon Limits`
+
+This is the bounding limits of the dungeon. If a limit is defined, a room will be considered as not placeable if its bounding box  is outside of this limit.
+
+#### `Use Generator Transform`
+
+If checked, the dungeon will be offset and rotated using the dungeon generator actor's transform.\
+If unchecked, the first room will be placed at world's (0,0,0) and no rotation will be applied.
+
 #### `Seed Type`
 
 - `Random`: at each generation, the seed is randomly chosen.
@@ -103,15 +107,25 @@ The initial seed you want to use if the `Seed Type` is not `Random`
 
 The number used to increment the seed if the `Seed Type` is `Auto Increment`
 
-#### `Dungeon Limits`
+#### `Auto Discard Room If Null`
 
-This is the bounding limits of the dungeon. If a limit is defined, a room will be considered as not placeable if its bounding box  is outside of this limit.
+When checked, if the `Choose Next Room` returns null, the generator will not consider anymore placing a room at the current door, and switch directly to the next door, without throwing errors.
 
 #### `Use World Collision Checks`
 
 When checked, the dungeon generator will test a box overlapping with world static actors in order to allow or not a room to be generated.\
 This can be CPU-intensive and should be used only when necessary. Though, it is only used during the generation process, not during gameplay.
 
-#### `Auto Discard Room If Null`
+#### `Use Json Save`
 
-When checked, if the `Choose Next Room` returns null, the generator will not consider anymore placing a room at the current door, and switch directly to the next door, without throwing errors.
+> :warning: *This is only available for editor and dev builds!*
+
+When checked, the dungeon save system will serialize as json format instead of binary.  
+
+#### `Draw Debug Dungeon Bounds`
+
+Toggle the draw of the whole dungeon bounding box in yellow.
+
+#### `Rebuild Navmesh`
+
+Toggle the force rebuild of the navmesh at the end of the dungeon generation.
