@@ -1,6 +1,6 @@
 # Multiplayer
 
-import Flowchart from "../Images/Flowchart_Dark_v4.svg";
+import Flowchart from "../Images/Flowchart_Dark.svg";
 
 :::info[Prerequisites]
 

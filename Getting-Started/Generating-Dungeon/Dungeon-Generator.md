@@ -5,7 +5,7 @@ pagination_next: guides/Getting-Started/Generating-Dungeon/Choose-First-Room-Dat
 
 # Dungeon Generator
 
-import Flowchart from "../../Images/Flowchart_Dark_v4.svg";
+import Flowchart from "../../Images/Flowchart_Dark.svg";
 
 ## Create a dungeon generator
 

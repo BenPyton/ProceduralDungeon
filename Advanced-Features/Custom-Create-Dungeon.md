@@ -5,7 +5,7 @@
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-import Flowchart from "../Images/Flowchart_Dark_v4.svg";
+import Flowchart from "../Images/Flowchart_Dark.svg";
 
 <!-- END IMPORTS -->
 
