@@ -1,6 +1,13 @@
 # Custom `Create Dungeon` Function
 
+<!-- BEGIN IMPORTS -->
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 import Flowchart from "../Images/Flowchart_Dark_v4.svg";
+
+<!-- END IMPORTS -->
 
 :::warning
 
@@ -25,6 +32,32 @@ If you are not satisfied with this default behavior, you can write your own `Cre
 
 To write your own custom `Create Dungeon`, you'll need to create a new class deriving from **`Dungeon Generator Base`**.\
 This class has the core features of a dungeon generator: the state machine to load/unload the level instances (shown in the diagram above), the network replication, the room culling system, etc.
+
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
+
+You have to create a new blueprint class deriving from `Dungeon Generator Base`.
+
+![](../Images/CustomAlgo_CreateGeneratorBase.jpg)
+
+Then, the `Create Dungeon` function become overridable.
+
+![](../Images/CustomAlgo_OverrideCreateDungeon.jpg)
+
+There are several functions to use inside the `Create Dungeon`.  
+See the screenshot below for a list of them, and how to use them.  
+
+:::warning[caution]
+
+This is a **non-working** example!  
+Just to show you the most important functions and their use.
+
+:::
+
+![](../Images/CustomAlgo_Blueprint.jpg)
+
+<!-- [END TAB ITEM] Blueprint --> </TabItem>
+<!-- [BEGIN TAB ITEM] C++ --> <TabItem value="cpp" label="C++">
 
 :::note
 
@@ -95,3 +128,6 @@ URoomData* AMyCustomDungeonGenerator::CreateDungeon_Implementation()
     return true;
 }
 ```
+
+<!-- [END TAB ITEM] C++ --> </TabItem>
+<!-- [END TABS] Blueprint | C++ --> </Tabs>
