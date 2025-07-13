@@ -28,14 +28,14 @@ bool UDungeonBlueprintLibrary::CompareDataTableRows(const FDataTableRowHandle& A
 	return A == B;
 }
 
-URoom* UDungeonBlueprintLibrary::GetOwningRoom(const AActor* Target)
+const ARoomLevel* UDungeonBlueprintLibrary::GetLevelScript(const AActor* Target)
 {
 	if (!IsValid(Target))
 		return nullptr;
 
 	if (const ARoomLevel* SelfLevel = Cast<ARoomLevel>(Target))
 	{
-		return SelfLevel->Room;
+		return SelfLevel;
 	}
 
 	ULevel* Level = Target->GetLevel();
@@ -46,7 +46,16 @@ URoom* UDungeonBlueprintLibrary::GetOwningRoom(const AActor* Target)
 	if (!IsValid(RoomLevel))
 		return nullptr;
 
-	return RoomLevel->GetRoom();
+	return RoomLevel;
+}
+
+URoom* UDungeonBlueprintLibrary::GetOwningRoom(const AActor* Target)
+{
+	if (const ARoomLevel* SelfLevel = GetLevelScript(Target))
+	{
+		return SelfLevel->GetRoom();
+	}
+	return nullptr;
 }
 
 bool UDungeonBlueprintLibrary::GetOwningRoomCustomData(const AActor* Target, TSubclassOf<URoomCustomData> CustomDataClass, URoomCustomData*& CustomData)
@@ -58,6 +67,15 @@ bool UDungeonBlueprintLibrary::GetOwningRoomCustomData(const AActor* Target, TSu
 
 	OwningRoom->GetCustomData(CustomDataClass, CustomData);
 	return IsValid(CustomData);
+}
+
+const URoomData* UDungeonBlueprintLibrary::GetLevelRoomData(const AActor* Target)
+{
+	if (const ARoomLevel* SelfLevel = GetLevelScript(Target))
+	{
+		return SelfLevel->GetRoomData();
+	}
+	return nullptr;
 }
 
 FDoorDef UDungeonBlueprintLibrary::DoorDef_GetOpposite(const FDoorDef& DoorDef)
