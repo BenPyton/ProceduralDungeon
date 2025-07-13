@@ -68,7 +68,10 @@ public:
 	void Lock(bool lock);
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Room"))
-	URoom* GetRoom() { return Room; }
+	URoom* GetRoom() const { return Room; }
+
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Room Data"))
+	const URoomData* GetRoomData() const { return Data; }
 
 	UFUNCTION()
 	void OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
