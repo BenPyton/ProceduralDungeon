@@ -22,7 +22,7 @@ In output, you have to return true to continue the generation, or false to stop 
 
 Here an example where we stop the generation as soon as the end room has been placed:
 
-<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs groupId="lang" queryString>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
 ![](../../Images/ContinueAddingRoom.jpg)

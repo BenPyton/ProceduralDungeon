@@ -20,7 +20,7 @@ In output, you have to return true to validate the dungeon, or false to regenera
 
 Here an example where we check if the dungeon has an exit:
 
-<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs groupId="lang" queryString>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
 ![](../../Images/IsValidDungeon.jpg)

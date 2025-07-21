@@ -51,7 +51,7 @@ See the multiplayer section of the [door wiki page](../Getting-Started/Door.md) 
 However, you should not forget to [replicate](https://cedric-neukirchen.net/docs/multiplayer-compendium/replication) properly your actors.
 Also, the `Net Load on Client` must be unchecked to avoid any issue.
 
-<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs groupId="lang" queryString>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
 ![](../Images/MinimalReplicationActorSettings.jpg)
@@ -83,7 +83,7 @@ Here is how to setup the editor.\
 
 1. First, you have to click on the arrow next to the play button and go to `Advance Settings`
 
-<!-- [BEGIN TABS] UE4 | UE5 --> <Tabs groupId="ue-version">
+<!-- [BEGIN TABS] UE4 | UE5 --> <Tabs groupId="ue-version" queryString>
 <!-- [BEGIN TAB ITEM] UE4 --> <TabItem value="ue4" label="UE4">
 
 ![](../Images/Multiplayer_AdvanceSettings_UE4.jpg)

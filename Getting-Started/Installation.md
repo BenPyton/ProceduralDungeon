@@ -14,9 +14,9 @@ import TabItem from '@theme/TabItem';
 
 # Installation
 
-<!-- [BEGIN TABS] Windows | MacOS --> <Tabs>
+<!-- [BEGIN TABS] Windows | MacOS --> <Tabs groupId="os" queryString>
 <!-- [BEGIN TAB ITEM] Windows --> <TabItem value="windows" label="Windows" default>
-<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs groupId="lang" queryString>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="BP-only Project" default>
 
 :::danger[Caution]
@@ -83,7 +83,7 @@ Finally, open the `.sln` in Visual Studio and build the editor by using the gree
 <!-- [END TAB ITEM] Windows --> </TabItem>
 
 <!-- [BEGIN TAB ITEM] MacOS++ --> <TabItem value="macos" label="MacOS" default>
-<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs groupId="lang" queryString>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="BP-only Project" default>
 
 :::info[BAD APPLE!!!]

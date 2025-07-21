@@ -40,7 +40,7 @@ If you struggle to write the code in this function, I would suggest you to read 
 
 Here an example of a simple dungeon made by `NbRoom` randomly chosen standard rooms before setting an exit room:
 
-<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs groupId="lang" queryString>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
 ![](../../Images/ChooseNextRoomData.jpg)

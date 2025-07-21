@@ -25,7 +25,7 @@ If you are not satisfied with this default behavior, you can write your own `Cre
 To write your own custom `Create Dungeon`, you'll need to create a new class deriving from **`Dungeon Generator Base`**.\
 This class has the core features of a dungeon generator: the state machine to load/unload the level instances (shown in the diagram above), the network replication, the room culling system, etc.
 
-<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs groupId="lang" queryString>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
 You have to create a new blueprint class deriving from `Dungeon Generator Base`.

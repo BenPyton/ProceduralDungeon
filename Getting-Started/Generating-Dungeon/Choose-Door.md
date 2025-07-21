@@ -27,7 +27,7 @@ You certainly want to set an always closed door, or a door actor that act as a "
 
 An example to spawn a simple door if both rooms are valid, or a wall if one of them is not valid (assuming there is only one door type):
 
-<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs groupId="lang" queryString>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
 ![](../../Images/ChooseDoor.jpg)

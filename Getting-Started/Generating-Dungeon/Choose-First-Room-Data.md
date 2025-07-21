@@ -25,7 +25,7 @@ However, if for example you want multiple spawn rooms for different player teams
 
 Here an example where we always set the same room as the first room dungeon:
 
-<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs groupId="lang" queryString>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
 ![](../../Images/ChooseFirstRoomData.jpg)
