@@ -14,8 +14,21 @@ import TabItem from '@theme/TabItem';
 
 # Installation
 
+If you need details on where to get the plugin (Fab or GitHub), you can refer to the [license clarification page](../Copyrights-and-Licenses.md).
+
+<!-- [BEGIN TABS] Fab | GitHub --> <Tabs groupId="source" queryString>
+<!-- [BEGIN TAB ITEM] Fab --> <TabItem value="fab" label="Fab" default>
+
+Download the plugin from [Fab.com](https://fab.com/listings/62cbdceb-ae3c-4fe4-adac-39d751a15df9) and let it install the plugin in the engine.
+
+It should be fine for both Windows and Mac OS development.
+
+<!-- [END TAB ITEM] Fab --> </TabItem>
+<!-- [BEGIN TAB ITEM] GitHub --> <TabItem value="github" label="GitHub">
+
 <!-- [BEGIN TABS] Windows | MacOS --> <Tabs groupId="os" queryString>
 <!-- [BEGIN TAB ITEM] Windows --> <TabItem value="windows" label="Windows" default>
+
 <!-- [BEGIN TABS] Blueprint | C++ --> <Tabs groupId="lang" queryString>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="BP-only Project" default>
 
@@ -80,9 +93,10 @@ Finally, open the `.sln` in Visual Studio and build the editor by using the gree
 
 <!-- [END TAB ITEM] C++ --> </TabItem>
 <!-- [END TABS] Blueprint | C++ --> </Tabs>
-<!-- [END TAB ITEM] Windows --> </TabItem>
 
-<!-- [BEGIN TAB ITEM] MacOS++ --> <TabItem value="macos" label="MacOS" default>
+<!-- [END TAB ITEM] Windows --> </TabItem>
+<!-- [BEGIN TAB ITEM] MacOS --> <TabItem value="macos" label="MacOS">
+
 <!-- [BEGIN TABS] Blueprint | C++ --> <Tabs groupId="lang" queryString>
 <!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="BP-only Project" default>
 
@@ -100,11 +114,24 @@ You can convert your Blueprint-only project into a C++ project, and follow the i
 
 - Clone or download the plugin sources somewhere (extract the zip file after download). I will refer later to this plugin's root path as `<plugin path>`.
 
-- Open the `.uplugin` file (located directly inside `<plugin path>`) in a text editor and add `Mac` to the whitelisted platforms for both listed modules:
+- Open the `.uplugin` file (located directly inside `<plugin path>`) in a text editor and add `Mac` to the whitelisted platforms for both listed modules if it is not already there:
+
+<!-- [BEGIN TABS] UE4 | UE5 --> <Tabs groupId="ue-version" queryString>
+<!-- [BEGIN TAB ITEM] UE4 --> <TabItem value="ue4" label="UE4">
 
 ```txt
 "WhitelistPlatforms": ["Win64", "Mac"]
 ```
+
+<!-- [END TAB ITEM] UE4 --> </TabItem>
+<!-- [BEGIN TAB ITEM] UE5 --> <TabItem value="ue5" label="UE5" default>
+
+```txt
+"PlatformAllowList": ["Win64", "Mac"]
+```
+
+<!-- [END TAB ITEM] UE5 --> </TabItem>
+<!-- [END TABS] UE4 | UE5 --> </Tabs>
 
 - Open the terminal and change the working directory to wherever `RunUAT.sh` is located (using the `cd` command).\
 An example where this file is located would be `/Users/Shared/Epic Games/UE_5.3/Engine/Build/BatchFiles`.
@@ -114,7 +141,7 @@ An example where this file is located would be `/Users/Shared/Epic Games/UE_5.3/
 - Then, run the following command (replace `<plugin path>` with your plugin location and `<output path>` with the location where you want the pre-compiled binaries to be generated):
 
 ```txt
-`./RunUAT.sh BuildPlugin -Plugin="/PluginPath/ProceduralDungeon.uplugin" -Package="/OutputPath" -Rocket -TargetPlatforms=Mac
+./RunUAT.sh BuildPlugin -Plugin="/PluginPath/ProceduralDungeon.uplugin" -Package="/OutputPath" -Rocket -TargetPlatforms=Mac
 ```
 
 - Finally copy your `<output path>` folder into your engine's `Plugins/Marketplace` folder.
@@ -140,5 +167,9 @@ Recompile your project in Visual Studio Code.
 
 <!-- [END TAB ITEM] C++ --> </TabItem>
 <!-- [END TABS] Blueprint | C++ --> </Tabs>
+
 <!-- [END TAB ITEM] MacOS --> </TabItem>
 <!-- [END TABS] Windows | MacOS --> </Tabs>
+
+<!-- [END TAB ITEM] GitHub --> </TabItem>
+<!-- [END TABS] Fab | GitHub --> </Tabs>
