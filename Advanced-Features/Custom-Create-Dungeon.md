@@ -9,14 +9,6 @@ import Flowchart from "../Images/Flowchart_Dark.svg";
 
 <!-- END IMPORTS -->
 
-:::warning
-
-As of now, overriding the `Create Dungeon` function is only available in C++ because I didn't found out in blueprint how to prevent overriding functions in child classes while allowing them in parent class.
-
-If you know how to do that, please let me know on [**Github**](https://github.com/BenPyton/ProceduralDungeon/issues) or [**Discord**](https://discord.gg/YE2dPda2CC)!
-
-:::
-
 ## Introduction
 
 The provided `Dungeon Generator` class in the plugin has a basic default generation algorithm.\
