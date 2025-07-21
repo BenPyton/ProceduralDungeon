@@ -1,6 +1,13 @@
 # Multiplayer
 
+<!-- BEGIN IMPORTS -->
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 import Flowchart from "../Images/Flowchart_Dark.svg";
+
+<!-- END IMPORTS -->
 
 :::info[Prerequisites]
 
@@ -38,36 +45,86 @@ However, a lot more data will be sent over the network, especially if you have a
 However, you still need to do some logic correctly on your project in order to make it work properly.\
 See the multiplayer section of the [door wiki page](../Getting-Started/Door.md) for details on it.
 
-### *Since Plugin v3.0*
+- **Actors spawned by yourself** will be replicated as you would do normally.
 
-- **Actors** directly placed in room levels can be replicated like you would do with a normal unreal level.\
+- **Actors directly placed in room levels** can be replicated like you would do with a normal unreal level.\
 However, you should not forget to [replicate](https://cedric-neukirchen.net/docs/multiplayer-compendium/replication) properly your actors.
+Also, the `Net Load on Client` must be unchecked to avoid any issue.
 
-### *Before Plugin v3.0*
+<!-- [BEGIN TABS] Blueprint | C++ --> <Tabs>
+<!-- [BEGIN TAB ITEM] Blueprint --> <TabItem value="bp" label="Blueprint" default>
 
-- **Actors** directly placed in room levels are not replicated. If you want to have some actors (like enemies, chests, NPCs, etc.) and want them replicated, you need to make some workarounds.\
-My suggestion:
+![](../Images/MinimalReplicationActorSettings.jpg)
 
-- In your actor you want replicated, check the `Replicates` field.
-- Create and place a spawner actor in your room level. This spawner is not replicated.
-- In the `BeginPlay` of the spawner, check if it's server-side (with the `HasAuthority` function) before spawning the real actor you want.
-- Spawn the actor if previous point is true. The spawned actor will spawns on all clients too and will be replicated properly.
+<!-- [END TAB ITEM] Blueprint --> </TabItem>
+<!-- [BEGIN TAB ITEM] C++ --> <TabItem value="cpp" label="C++">
 
-![](../Images/MultiSpawner.jpg)
+```cpp
+AMyActor::AMyActor()
+{
+    // ...
+    bReplicates = true;
+    bNetLoadOnClient = false;
+    // ...
+}
+```
+
+<!-- [END TAB ITEM] C++ --> </TabItem>
+<!-- [END TABS] Blueprint | C++ --> </Tabs>
 
 ## Multiplayer in Editor
 
-You cannot play in multiplayer directly from the editor viewport.\
+While it could be played in viewport, there may be some issues occurring. So it is advised to test your multiplayer features in standalone game instead.
+
 You have to change some settings in the editor in order to test your game in multiplayer.
 
 Here is how to setup the editor.\
-*(Some options could be in another place on newer version, but they are all here)*
+*(Some options may be located elsewhere on newer versions, but they should be all present)*
 
-- First, you have to click on the arrow next to the play button and go to `Advance Settings`.\
-![](../Images/AdvanceSettings.jpg)
+1. First, you have to click on the arrow next to the play button and go to `Advance Settings`
 
-- Then in `Multiplayer Options`, set `Number of Players` to 2, uncheck the `Use Single Process` box and set the `Editor Multiplyer Mode` to `Listen Server` or `Client`.\
-![](../Images/MultiOptions.jpg)
+<!-- [BEGIN TABS] UE4 | UE5 --> <Tabs groupId="ue-version">
+<!-- [BEGIN TAB ITEM] UE4 --> <TabItem value="ue4" label="UE4">
 
-- Finally, close the settings window and click again on the arrow next to the Play button and choose `Standalone Game`.\
-![](../Images/Standalone.jpg)
+![](../Images/Multiplayer_AdvanceSettings_UE4.jpg)
+
+<!-- [END TAB ITEM] UE4 --> </TabItem>
+<!-- [BEGIN TAB ITEM] UE5 --> <TabItem value="ue5" label="UE5" default>
+
+![](../Images/Multiplayer_AdvanceSettings_UE5.jpg)
+
+<!-- [END TAB ITEM] UE5 --> </TabItem>
+<!-- [END TABS] UE4 | UE5 --> </Tabs>
+
+2. Then in `Multiplayer Options`, set those options:
+    - `Play Number of Clients` to `2` or more
+    - Make sure to uncheck the `Run Under One Process` box. This is the most important setting as this will clear almost every issues regarding actors not being replicated.
+    - Set the `Play Net Mode` to `Listen Server` *only if you launch your map directly without connection process* (if you want to connect through your own in-game menus, set it as `Play Standalone` instead)
+
+<!-- [BEGIN TABS] UE4 | UE5 --> <Tabs groupId="ue-version">
+<!-- [BEGIN TAB ITEM] UE4 --> <TabItem value="ue4" label="UE4">
+
+![](../Images/Multiplayer_MultiOptions_UE4.jpg)
+
+<!-- [END TAB ITEM] UE4 --> </TabItem>
+<!-- [BEGIN TAB ITEM] UE5 --> <TabItem value="ue5" label="UE5">
+
+![](../Images/Multiplayer_MultiOptions_UE5.jpg)
+
+<!-- [END TAB ITEM] UE5 --> </TabItem>
+<!-- [END TABS] UE4 | UE5 --> </Tabs>
+
+3. Finally, close the settings window and click again on the arrow next to the Play button and choose `Standalone Game`
+
+<!-- [BEGIN TABS] UE4 | UE5 --> <Tabs groupId="ue-version">
+<!-- [BEGIN TAB ITEM] UE4 --> <TabItem value="ue4" label="UE4">
+
+![](../Images/Multiplayer_Standalone_UE4.jpg)
+
+<!-- [END TAB ITEM] UE4 --> </TabItem>
+<!-- [BEGIN TAB ITEM] UE5 --> <TabItem value="ue5" label="UE5">
+
+![](../Images/Multiplayer_Standalone_UE5.jpg)
+
+<!-- [END TAB ITEM] UE5 --> </TabItem>
+<!-- [END TABS] UE4 | UE5 --> </Tabs>
