@@ -28,6 +28,7 @@
 #include "Utils/DungeonSaveUtils.h"
 #include "DrawDebugHelpers.h"
 #include "Utils/CompatUtils.h"
+#include "DungeonSettings.h"
 
 #if UE_VERSION_OLDER_THAN(5, 5, 0)
 	#define SetNetUpdateFrequency(X) NetUpdateFrequency = X
@@ -296,6 +297,13 @@ bool ADungeonGeneratorBase::AddRoomToDungeon(URoom* const& Room, const TArray<in
 	{
 		// @TODO: do something to be able to call OnFailedToAddRoom here (either pass arguments or change them for current room)
 		//OnFailedToAddRoom(ParentRoom.GetRoomData(), doorDef);
+		return false;
+	}
+
+	if (Room->GetRoomData()->GetSettings() != SettingsOverrides)
+	{
+		// Mismatching dungeon settings
+		DungeonLog_Error("Mismatching dungeon settings between dungeon %s and room %s (settings should be %s)", *GetName(), *GetNameSafe(Room->GetRoomData()), *GetNameSafe(SettingsOverrides))
 		return false;
 	}
 

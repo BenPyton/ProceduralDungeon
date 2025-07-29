@@ -157,7 +157,7 @@ void URoom::Instantiate(UWorld* World)
 		}
 		InstanceName.Appendf(TEXT("_%d"), Id);
 
-		FVector FinalLocation = rotation.RotateVector(Dungeon::RoomUnit() * FVector(Position)) + offset;
+		FVector FinalLocation = rotation.RotateVector(RoomData->GetRoomUnit() * FVector(Position)) + offset;
 		FQuat FinalRotation = rotation * ToQuaternion(Direction);
 		Instance = LoadInstance(World, Level, InstanceName.ToString(), FinalLocation, FinalRotation.Rotator());
 
@@ -496,8 +496,9 @@ FVoxelBounds URoom::GetVoxelBounds() const
 
 FTransform URoom::GetTransform() const
 {
+	checkf(RoomData.IsValid(), TEXT("Invalid RoomData in URoom class!"));
 	FTransform Transform;
-	Transform.SetLocation(FVector(Position) * Dungeon::RoomUnit());
+	Transform.SetLocation(FVector(Position) * RoomData->GetRoomUnit());
 	Transform.SetRotation(ToQuaternion(Direction));
 	return Transform;
 }

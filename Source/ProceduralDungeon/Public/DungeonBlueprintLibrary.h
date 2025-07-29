@@ -129,7 +129,7 @@ public:
 	// ===== Plugin Settings Accessors =====
 
 	// Returns the room unit size in unreal units
-	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Get Room Unit"))
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Get Default Room Unit", DeprecatedFunction, DeprecationMessage = "Use the GetRoomUnit from the DungeonSettings class instead."))
 	static FVector Settings_RoomUnit();
 
 	// Returns the default door type's size

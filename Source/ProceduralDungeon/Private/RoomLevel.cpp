@@ -171,7 +171,7 @@ void ARoomLevel::Tick(float DeltaTime)
 		{
 			const bool bIsConnected = !bIsRoomValid || (bIsRoomDataValid && Room->IsConnected(i));
 			const bool bIsDoorValid = Data->IsDoorValid(i) && !Data->IsDoorDuplicate(i);
-			FDoorDef::DrawDebug(World, Data->Doors[i], RoomTransform * DungeonTransform, /*bIncludeOffset = */ true, bIsDoorValid && bIsConnected);
+			FDoorDef::DrawDebug(World, Data->Doors[i], Data->GetRoomUnit(), RoomTransform * DungeonTransform, /*bIncludeOffset = */ true, bIsDoorValid && bIsConnected);
 		}
 	}
 #endif // ENABLE_DRAW_DEBUG
