@@ -19,6 +19,7 @@
 #include "Engine/LevelStreamingDynamic.h"
 #include "Utils/DungeonSaveUtils.h"
 #include "ProceduralDungeonUtils.h"
+#include "DungeonSettings.h"
 
 void UDungeonGraph::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -401,7 +402,8 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 
 FBoxCenterAndExtent UDungeonGraph::GetDungeonBounds(const FTransform& Transform) const
 {
-	return Dungeon::ToWorld(Bounds.GetBounds(), Transform);
+	const FVector RoomUnit = UDungeonSettings::GetRoomUnit(Generator.IsValid() ? Generator->SettingsOverrides : nullptr);
+	return Dungeon::ToWorld(Bounds.GetBounds(), RoomUnit, Transform);
 }
 
 FBoxMinAndMax UDungeonGraph::GetIntBounds() const

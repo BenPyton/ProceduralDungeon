@@ -16,7 +16,7 @@
 #include "RoomData.h"
 #include "Door.h"
 
-bool AreDoorsOverlapping(const FDoorDef& DoorA, const FDoorDef& DoorB)
+bool AreDoorsOverlapping(const FDoorDef& DoorA, const FDoorDef& DoorB, const FVector RoomUnit)
 {
 	// If not in same direction, they will never overlap.
 	if (DoorA.Direction != DoorB.Direction)
@@ -26,19 +26,18 @@ bool AreDoorsOverlapping(const FDoorDef& DoorA, const FDoorDef& DoorB)
 	if (DoorA.Position == DoorB.Position)
 		return true;
 
-	const FBoxCenterAndExtent DoorBoundsA = DoorA.GetBounds();
-	const FBoxCenterAndExtent DoorBoundsB = DoorB.GetBounds();
+	const FBoxCenterAndExtent DoorBoundsA = DoorA.GetBounds(RoomUnit);
+	const FBoxCenterAndExtent DoorBoundsB = DoorB.GetBounds(RoomUnit);
 	return Intersect(DoorBoundsA, DoorBoundsB);
 }
 
-bool IsPositionInside(const FDoorDef& Door, const FIntVector& Position)
+bool IsPositionInside(const FDoorDef& Door, const FIntVector& Position, const FVector RoomUnit)
 {
 	// If same position, then always inside.
 	if (Door.Position == Position)
 		return true;
 
-	const FVector RoomUnit = Dungeon::RoomUnit();
-	const FBoxCenterAndExtent DoorBounds = Door.GetBounds();
+	const FBoxCenterAndExtent DoorBounds = Door.GetBounds(RoomUnit);
 	const FVector LocalDoorExtent = DoorBounds.Extent / RoomUnit;
 	const FVector RelativePosition = (FVector(Position) - (DoorBounds.Center / RoomUnit)).GetAbs();
 	return RelativePosition.X <= LocalDoorExtent.X && RelativePosition.Y <= LocalDoorExtent.Y && RelativePosition.Z <= LocalDoorExtent.Z;
@@ -49,7 +48,7 @@ bool IsDoorValid(const URoomData* Data, const FDoorDef& Door)
 	check(IsValid(Data));
 	for (const FDoorDef& DoorDef : Data->Doors)
 	{
-		if (AreDoorsOverlapping(Door, DoorDef))
+		if (AreDoorsOverlapping(Door, DoorDef, Data->GetRoomUnit()))
 			return false;
 	}
 	return true;
@@ -72,14 +71,15 @@ void FProceduralDungeonEditorTool_Door::Render(const FSceneView* View, FViewport
 {
 	FProceduralDungeonEditorTool::Render(View, Viewport, PDI);
 
-	auto Level = EdMode->GetLevel();
-	if (!Level.IsValid() || !IsValid(Level->Data))
+	const URoomData* Data = GetRoomData();
+	if (!IsValid(Data))
 		return;
 
 	FIntVector Min, Max;
-	IntVector::MinMax(Level->Data->FirstPoint, Level->Data->SecondPoint, Min, Max);
+	IntVector::MinMax(Data->FirstPoint, Data->SecondPoint, Min, Max);
 
 	const FColor LineColor(100, 20, 0);
+	const FVector RoomUnit = Data->GetRoomUnit();
 
 	// Vertical Lines on X
 	for (int32 i = Min.X + 1; i < Max.X; ++i)
@@ -88,8 +88,8 @@ void FProceduralDungeonEditorTool_Door::Render(const FSceneView* View, FViewport
 		FIntVector BottomB(i, Max.Y, Min.Z);
 		FIntVector TopA(i, Min.Y, Max.Z);
 		FIntVector TopB(i, Max.Y, Max.Z);
-		PDI->DrawLine(Dungeon::ToWorldLocation(BottomA), Dungeon::ToWorldLocation(TopA), LineColor, SDPG_World);
-		PDI->DrawLine(Dungeon::ToWorldLocation(BottomB), Dungeon::ToWorldLocation(TopB), LineColor, SDPG_World);
+		PDI->DrawLine(Dungeon::ToWorldLocation(BottomA, RoomUnit), Dungeon::ToWorldLocation(TopA, RoomUnit), LineColor, SDPG_World);
+		PDI->DrawLine(Dungeon::ToWorldLocation(BottomB, RoomUnit), Dungeon::ToWorldLocation(TopB, RoomUnit), LineColor, SDPG_World);
 	}
 
 	// Vertical Lines on Y
@@ -99,8 +99,8 @@ void FProceduralDungeonEditorTool_Door::Render(const FSceneView* View, FViewport
 		FIntVector BottomB(Max.X, i, Min.Z);
 		FIntVector TopA(Min.X, i, Max.Z);
 		FIntVector TopB(Max.X, i, Max.Z);
-		PDI->DrawLine(Dungeon::ToWorldLocation(BottomA), Dungeon::ToWorldLocation(TopA), LineColor, SDPG_World);
-		PDI->DrawLine(Dungeon::ToWorldLocation(BottomB), Dungeon::ToWorldLocation(TopB), LineColor, SDPG_World);
+		PDI->DrawLine(Dungeon::ToWorldLocation(BottomA, RoomUnit), Dungeon::ToWorldLocation(TopA, RoomUnit), LineColor, SDPG_World);
+		PDI->DrawLine(Dungeon::ToWorldLocation(BottomB, RoomUnit), Dungeon::ToWorldLocation(TopB, RoomUnit), LineColor, SDPG_World);
 	}
 
 	// Horizontal Lines on X and Y
@@ -110,10 +110,10 @@ void FProceduralDungeonEditorTool_Door::Render(const FSceneView* View, FViewport
 		FIntVector B(Min.X, Max.Y, i);
 		FIntVector C(Max.X, Max.Y, i);
 		FIntVector D(Max.X, Min.Y, i);
-		PDI->DrawLine(Dungeon::ToWorldLocation(A), Dungeon::ToWorldLocation(B), LineColor, SDPG_World);
-		PDI->DrawLine(Dungeon::ToWorldLocation(B), Dungeon::ToWorldLocation(C), LineColor, SDPG_World);
-		PDI->DrawLine(Dungeon::ToWorldLocation(C), Dungeon::ToWorldLocation(D), LineColor, SDPG_World);
-		PDI->DrawLine(Dungeon::ToWorldLocation(D), Dungeon::ToWorldLocation(A), LineColor, SDPG_World);
+		PDI->DrawLine(Dungeon::ToWorldLocation(A, RoomUnit), Dungeon::ToWorldLocation(B, RoomUnit), LineColor, SDPG_World);
+		PDI->DrawLine(Dungeon::ToWorldLocation(B, RoomUnit), Dungeon::ToWorldLocation(C, RoomUnit), LineColor, SDPG_World);
+		PDI->DrawLine(Dungeon::ToWorldLocation(C, RoomUnit), Dungeon::ToWorldLocation(D, RoomUnit), LineColor, SDPG_World);
+		PDI->DrawLine(Dungeon::ToWorldLocation(D, RoomUnit), Dungeon::ToWorldLocation(A, RoomUnit), LineColor, SDPG_World);
 	}
 }
 
@@ -123,15 +123,11 @@ void FProceduralDungeonEditorTool_Door::Tick(FEditorViewportClient* ViewportClie
 
 	if (ShowDoorPreview)
 	{
-		auto Level = EdMode->GetLevel();
-		if (!Level.IsValid())
-			return;
-
-		URoomData* Data = Level->Data;
+		const URoomData* Data = GetRoomData();
 		check(IsValid(Data));
 
 		UWorld* World = ViewportClient->GetWorld();
-		FDoorDef::DrawDebug(World, DoorPreview, FTransform::Identity, /*includeOffset = */ true, /*isConnected = */ IsDoorValid(Data, DoorPreview));
+		FDoorDef::DrawDebug(World, DoorPreview, Data->GetRoomUnit(), FTransform::Identity, /*includeOffset = */ true, /*isConnected = */ IsDoorValid(Data, DoorPreview));
 	}
 }
 
@@ -143,11 +139,7 @@ bool FProceduralDungeonEditorTool_Door::HandleClick(FEditorViewportClient* InVie
 	if (!ShowDoorPreview)
 		return false;
 
-	auto Level = EdMode->GetLevel();
-	if (!Level.IsValid())
-		return false;
-
-	URoomData* Data = Level->Data;
+	URoomData* Data = GetRoomData();
 	check(IsValid(Data));
 
 	if (Click.GetKey() == EKeys::LeftMouseButton)
@@ -181,13 +173,17 @@ bool FProceduralDungeonEditorTool_Door::MouseMove(FEditorViewportClient* Viewpor
 {
 	ShowDoorPreview = false;
 
+	const URoomData* Data = GetRoomData();
+	if (!IsValid(Data))
+		return false;
+
 	FHitResult Hit;
 	if (!RoomTraceFromMouse(Hit, ViewportClient))
 		return false;
 
 	FIntVector RoomCell;
 	EDoorDirection DoorDirection;
-	if (!GetRoomCellFromHit(Hit, RoomCell, DoorDirection))
+	if (!GetRoomCellFromHit(Hit, Data->GetRoomUnit(), RoomCell, DoorDirection))
 		return false;
 
 	ShowDoorPreview = true;
@@ -195,20 +191,13 @@ bool FProceduralDungeonEditorTool_Door::MouseMove(FEditorViewportClient* Viewpor
 	DoorPreview.Direction = DoorDirection;
 	DoorPreview.Type = EdMode->Settings->DoorType;
 
-	auto Level = EdMode->GetLevel();
-	if (!Level.IsValid())
-		return false;
-
-	URoomData* Data = Level->Data;
-	check(IsValid(Data));
-
 	// Snap preview to existing door if RoomCell is inside
 	for (const FDoorDef& RoomDoor : Data->Doors)
 	{
 		if (RoomDoor.Direction != DoorPreview.Direction)
 			continue;
 
-		if (IsPositionInside(RoomDoor, DoorPreview.Position))
+		if (IsPositionInside(RoomDoor, DoorPreview.Position, Data->GetRoomUnit()))
 		{
 			DoorPreview = RoomDoor;
 			break;
@@ -223,11 +212,7 @@ bool FProceduralDungeonEditorTool_Door::GetCursor(EMouseCursor::Type& OutCursor)
 	if (!ShowDoorPreview)
 		return false;
 
-	auto Level = EdMode->GetLevel();
-	if (!Level.IsValid())
-		return false;
-
-	URoomData* Data = Level->Data;
+	const URoomData* Data = GetRoomData();
 	if (!IsValid(Data))
 		return false;
 
@@ -319,7 +304,7 @@ bool FProceduralDungeonEditorTool_Door::RoomTrace(FHitResult& OutHit, const FVec
 	return RoomBox->LineTraceComponent(OutHit, RayOrigin, RayEnd, FCollisionQueryParams(SCENE_QUERY_STAT(RoomTrace)));
 }
 
-bool FProceduralDungeonEditorTool_Door::GetRoomCellFromHit(const FHitResult& Hit, FIntVector& OutCell, EDoorDirection& OutDirection) const
+bool FProceduralDungeonEditorTool_Door::GetRoomCellFromHit(const FHitResult& Hit, const FVector RoomUnit, FIntVector& OutCell, EDoorDirection& OutDirection) const
 {
 	// Direction is up or down: invalid
 	if (FMath::Abs(FVector::DotProduct(Hit.ImpactNormal, FVector::UpVector)) >= 0.5f)
@@ -334,7 +319,7 @@ bool FProceduralDungeonEditorTool_Door::GetRoomCellFromHit(const FHitResult& Hit
 		OutDirection = (DirY > 0) ? EDoorDirection::East : EDoorDirection::West;
 
 	// Determine the room cell
-	FVector RoomSpacePoint = Hit.ImpactPoint / Dungeon::RoomUnit();
+	FVector RoomSpacePoint = Hit.ImpactPoint / RoomUnit;
 	RoomSpacePoint -= 0.5f * (ToVector(OutDirection) + FVector::UpVector);
 	OutCell = FIntVector(FMath::RoundToInt(RoomSpacePoint.X), FMath::RoundToInt(RoomSpacePoint.Y), FMath::RoundToInt(RoomSpacePoint.Z));
 	return true;

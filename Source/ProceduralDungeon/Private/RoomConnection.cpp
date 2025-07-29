@@ -169,22 +169,26 @@ FVector URoomConnection::GetDoorLocation(bool bIgnoreGeneratorTransform) const
 {
 	FDoorDef DoorDef;
 	const AActor* Generator = nullptr;
+	const URoomData* Data = nullptr;
 	if (RoomA.IsValid())
 	{
 		DoorDef = RoomA->GetDoorDef(RoomADoorId);
 		Generator = RoomA->Generator();
+		Data = RoomA->GetRoomData();
 	}
 	else if (RoomB.IsValid())
 	{
 		DoorDef = RoomB->GetDoorDef(RoomBDoorId);
 		Generator = RoomB->Generator();
+		Data = RoomB->GetRoomData();
 	}
 	else
 	{
 		return FVector();
 	}
 
-	FVector Location = FDoorDef::GetRealDoorPosition(DoorDef);
+	check(IsValid(Data));
+	FVector Location = FDoorDef::GetRealDoorPosition(DoorDef, Data->GetRoomUnit());
 	if (!bIgnoreGeneratorTransform && IsValid(Generator))
 		Location = Generator->GetTransform().TransformPositionNoScale(Location);
 
@@ -254,7 +258,7 @@ ADoor* URoomConnection::InstantiateDoor(UWorld* World, AActor* Owner, bool bUseO
 	}
 
 	FDoorDef DoorDef = Room->GetDoorDef(DoorId);
-	FVector InstanceDoorPos = FDoorDef::GetRealDoorPosition(DoorDef);
+	FVector InstanceDoorPos = FDoorDef::GetRealDoorPosition(DoorDef, Room->GetRoomData()->GetRoomUnit());
 	FQuat InstanceDoorRot = FDoorDef::GetRealDoorRotation(DoorDef, bFinalFlipped);
 
 	if (bUseOwnerTransform && IsValid(Owner))

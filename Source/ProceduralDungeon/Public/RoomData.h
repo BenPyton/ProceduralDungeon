@@ -24,6 +24,7 @@ class URoom;
 class UDungeonGraph;
 class URoomCustomData;
 class UDoorType;
+class UDungeonSettings;
 
 #if WITH_EDITOR
 class URoomData;
@@ -58,6 +59,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Room")
 	TSet<TSubclassOf<URoomCustomData>> CustomData;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Room", AdvancedDisplay)
+	UDungeonSettings* SettingsOverrides {nullptr};
 
 public:
 	URoomData();
@@ -103,6 +107,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Room Data")
 	int GetVolume() const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Data")
+	const UDungeonSettings* GetSettings() const { return SettingsOverrides; }
+
+	UFUNCTION(BlueprintPure, Category = "Room Data")
+	FVector GetRoomUnit() const;
 
 	class FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
 	FBoxMinAndMax GetIntBounds() const;

@@ -314,6 +314,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Procedural Generation", AdvancedDisplay)
 	bool bUseWorldCollisionChecks {false};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation", AdvancedDisplay)
+	class UDungeonSettings* SettingsOverrides {nullptr};
+
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	void SetSeed(int32 NewSeed);
 

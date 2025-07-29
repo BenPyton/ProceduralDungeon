@@ -53,6 +53,8 @@ public:
 	virtual void OnLevelChanged(const class ARoomLevel* NewLevel) {}
 	virtual void OnDataChanged(const class URoomData* NewData) {}
 
+	class URoomData* GetRoomData() const;
+
 protected:
 	FProceduralDungeonEdMode* EdMode = nullptr;
 };

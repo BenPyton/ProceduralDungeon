@@ -12,6 +12,7 @@
 #include "ProceduralDungeonUtils.h"
 #include "DoorType.h"
 #include "Math/GenericOctree.h" // FBoxCenterAndExtent
+#include "DungeonSettings.h"
 
 #if !USE_LEGACY_DATA_VALIDATION
 	#include "Misc/DataValidation.h"
@@ -112,9 +113,14 @@ void URoomData::CleanupRoom_Implementation(URoom* Room, UDungeonGraph* Dungeon) 
 {
 }
 
+FVector URoomData::GetRoomUnit() const
+{
+	return UDungeonSettings::GetRoomUnit(GetSettings());
+}
+
 FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
 {
-	return Dungeon::ToWorld(GetIntBounds(), Transform);
+	return Dungeon::ToWorld(GetIntBounds(), GetRoomUnit(), Transform);
 }
 
 FIntVector URoomData::GetSize() const

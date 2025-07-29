@@ -126,18 +126,18 @@ public:
 	FString GetTypeName() const;
 	FString ToString() const;
 	FDoorDef GetOpposite() const;
-	FBoxCenterAndExtent GetBounds(bool bIncludeOffset = true) const;
+	FBoxCenterAndExtent GetBounds(const FVector RoomUnit, bool bIncludeOffset = true) const;
 
-	static FVector GetRealDoorPosition(const FDoorDef& DoorDef, bool bIncludeOffset = true);
-	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, float DoorOffset = 0.0f);
+	static FVector GetRealDoorPosition(const FDoorDef& DoorDef, const FVector RoomUnit, bool bIncludeOffset = true);
+	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, const FVector RoomUnit, float DoorOffset = 0.0f);
 	static FQuat GetRealDoorRotation(const FDoorDef& DoorDef, bool bFlipped = false);
 
 	static FDoorDef Transform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation);
 	static FDoorDef InverseTransform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation);
 
 #if !UE_BUILD_SHIPPING
-	static void DrawDebug(const class UWorld* World, const FDoorDef& DoorDef, const FTransform& Transform = FTransform::Identity, bool bIncludeOffset = false, bool bIsConnected = true);
-	static void DrawDebug(const class UWorld* World, const FColor& Color, const FVector& DoorSize, const FIntVector& DoorCell = FIntVector::ZeroValue, const EDoorDirection& DoorRot = EDoorDirection::NbDirection, const FTransform& Transform = FTransform::Identity, float DoorOffset = 0.0f, bool bIsConnected = true);
+	static void DrawDebug(const class UWorld* World, const FDoorDef& DoorDef, const FVector RoomUnit, const FTransform& Transform = FTransform::Identity, bool bIncludeOffset = false, bool bIsConnected = true);
+	static void DrawDebug(const class UWorld* World, const FColor& Color, const FVector& DoorSize, const FVector RoomUnit, const FIntVector& DoorCell = FIntVector::ZeroValue, const EDoorDirection& DoorRot = EDoorDirection::NbDirection, const FTransform& Transform = FTransform::Identity, float DoorOffset = 0.0f, bool bIsConnected = true);
 #endif // !UE_BUILD_SHIPPING
 };
 

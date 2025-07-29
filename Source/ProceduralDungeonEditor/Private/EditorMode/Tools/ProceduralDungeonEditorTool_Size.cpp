@@ -130,22 +130,18 @@ void FProceduralDungeonEditorTool_Size::Render(const FSceneView* View, FViewport
 	const FColor NormalColor(200, 200, 200);
 	const FColor SelectedColor(255, 128, 0);
 
-	auto Level = EdMode->GetLevel();
-	if (Level.IsValid())
-	{
-		const URoomData* Data = Level->Data;
-		if (IsValid(Data))
-		{
-			for (int i = 0; i < Points.Num(); ++i)
-			{
-				const bool bSelected = (SelectedPoint == i);
-				const FColor& Color = bSelected ? SelectedColor : NormalColor;
+	const URoomData* Data = GetRoomData();
+	if (!IsValid(Data))
+		return;
 
-				PDI->SetHitProxy(new HRoomPointProxy(i));
-				PDI->DrawPoint(Points[i].GetLocation(), Color, 15.0f, SDPG_Foreground);
-				PDI->SetHitProxy(nullptr);
-			}
-		}
+	for (int i = 0; i < Points.Num(); ++i)
+	{
+		const bool bSelected = (SelectedPoint == i);
+		const FColor& Color = bSelected ? SelectedColor : NormalColor;
+
+		PDI->SetHitProxy(new HRoomPointProxy(i));
+		PDI->DrawPoint(Points[i].GetLocation(), Color, 15.0f, SDPG_Foreground);
+		PDI->SetHitProxy(nullptr);
 	}
 }
 
@@ -188,11 +184,15 @@ bool FProceduralDungeonEditorTool_Size::InputDelta(FEditorViewportClient* InView
 	if (!HasValidSelection())
 		return false;
 
+	const URoomData* Data = GetRoomData();
+	if (!IsValid(Data))
+		return false;
+
 	if (!InDrag.IsNearlyZero())
 	{
 		DragPoint += InDrag;
 		FVector OldPoint = Points[SelectedPoint].GetLocation();
-		Points[SelectedPoint].SetLocation(Dungeon::SnapPoint(DragPoint));
+		Points[SelectedPoint].SetLocation(Dungeon::SnapPoint(DragPoint, Data->GetRoomUnit()));
 		if (OldPoint != Points[SelectedPoint].GetLocation())
 			UpdateDataAsset();
 	}
@@ -226,12 +226,12 @@ void FProceduralDungeonEditorTool_Size::PostRedo(bool bSuccess)
 
 void FProceduralDungeonEditorTool_Size::OnDataChanged(const URoomData* NewData)
 {
-	TWeakObjectPtr<ARoomLevel> Level = EdMode->GetLevel();
-	if (!Level.IsValid() || !IsValid(Level->Data))
+	const URoomData* Data = GetRoomData();
+	if (!IsValid(Data))
 		return;
 
-	Points[0].SetLocation(Dungeon::ToWorldLocation(Level->Data->FirstPoint));
-	Points[1].SetLocation(Dungeon::ToWorldLocation(Level->Data->SecondPoint));
+	Points[0].SetLocation(Dungeon::ToWorldLocation(Data->FirstPoint, Data->GetRoomUnit()));
+	Points[1].SetLocation(Dungeon::ToWorldLocation(Data->SecondPoint, Data->GetRoomUnit()));
 
 	ResetDragPoint();
 }
@@ -249,17 +249,13 @@ void FProceduralDungeonEditorTool_Size::ResetDragPoint()
 
 void FProceduralDungeonEditorTool_Size::UpdateDataAsset() const
 {
-	auto Level = EdMode->GetLevel();
-	if (!Level.IsValid())
-		return;
-
-	URoomData* Data = Level.Get()->Data;
+	URoomData* Data = GetRoomData();
 	if (!IsValid(Data))
 		return;
 
 	Data->Modify();
-	Data->FirstPoint = Dungeon::ToRoomLocation(Points[0].GetLocation());
-	Data->SecondPoint = Dungeon::ToRoomLocation(Points[1].GetLocation());
+	Data->FirstPoint = Dungeon::ToRoomLocation(Points[0].GetLocation(), Data->GetRoomUnit());
+	Data->SecondPoint = Dungeon::ToRoomLocation(Points[1].GetLocation(), Data->GetRoomUnit());
 }
 
 void FProceduralDungeonEditorTool_Size::SetSelectedPoint(int32 Index)

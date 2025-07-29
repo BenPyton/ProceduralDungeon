@@ -28,50 +28,47 @@ void IntVector::MinMax(const FIntVector& A, const FIntVector& B, FIntVector& Out
 	OutMax = Max(A, B);
 }
 
-FVector Dungeon::ToWorldLocation(FIntVector RoomPoint)
+FVector Dungeon::ToWorldLocation(FIntVector RoomPoint, const FVector RoomUnit)
 {
-	return Dungeon::RoomUnit() * (FVector(RoomPoint) - FVector(0.5f, 0.5f, 0.0f));
+	return RoomUnit * (FVector(RoomPoint) - FVector(0.5f, 0.5f, 0.0f));
 }
 
-FVector Dungeon::ToWorldVector(FIntVector RoomPoint)
+FVector Dungeon::ToWorldVector(FIntVector RoomPoint, const FVector RoomUnit)
 {
-	return Dungeon::RoomUnit() * FVector(RoomPoint);
+	return RoomUnit * FVector(RoomPoint);
 }
 
-FBoxCenterAndExtent Dungeon::ToWorld(const FBoxMinAndMax& Box, const FTransform& Transform)
+FBoxCenterAndExtent Dungeon::ToWorld(const FBoxMinAndMax& Box, const FVector RoomUnit, const FTransform& Transform)
 {
-	return ToWorld(Box.ToCenterAndExtent(), Transform);
+	return ToWorld(Box.ToCenterAndExtent(), RoomUnit, Transform);
 }
 
-FBoxCenterAndExtent Dungeon::ToWorld(const FBoxCenterAndExtent& Box, const FTransform& Transform)
+FBoxCenterAndExtent Dungeon::ToWorld(const FBoxCenterAndExtent& Box, const FVector RoomUnit, const FTransform& Transform)
 {
-	const FVector Unit = Dungeon::RoomUnit();
-	const FVector Center = Transform.TransformPosition(Unit * Box.Center);
-	const FVector Extent = Transform.TransformVector(Unit * Box.Extent).GetAbs();
+	const FVector Center = Transform.TransformPositionNoScale(RoomUnit * Box.Center);
+	const FVector Extent = Transform.TransformVector(RoomUnit * Box.Extent).GetAbs();
 	return FBoxCenterAndExtent(Center, Extent);
 }
 
-FIntVector Dungeon::ToRoomLocation(FVector WorldPoint)
+FIntVector Dungeon::ToRoomLocation(FVector WorldPoint, const FVector RoomUnit)
 {
-	const FVector Unit = Dungeon::RoomUnit();
-	const int X = FMath::RoundToInt(0.5f + (WorldPoint.X) / Unit.X);
-	const int Y = FMath::RoundToInt(0.5f + (WorldPoint.Y) / Unit.Y);
-	const int Z = FMath::RoundToInt((WorldPoint.Z) / Unit.Z);
+	const int X = FMath::RoundToInt(0.5f + (WorldPoint.X) / RoomUnit.X);
+	const int Y = FMath::RoundToInt(0.5f + (WorldPoint.Y) / RoomUnit.Y);
+	const int Z = FMath::RoundToInt((WorldPoint.Z) / RoomUnit.Z);
 	return FIntVector(X, Y, Z);
 }
 
-FIntVector Dungeon::ToRoomVector(FVector WorldVector)
+FIntVector Dungeon::ToRoomVector(FVector WorldVector, const FVector RoomUnit)
 {
-	const FVector Unit = Dungeon::RoomUnit();
-	const int X = FMath::RoundToInt(WorldVector.X / Unit.X);
-	const int Y = FMath::RoundToInt(WorldVector.Y / Unit.Y);
-	const int Z = FMath::RoundToInt(WorldVector.Z / Unit.Z);
+	const int X = FMath::RoundToInt(WorldVector.X / RoomUnit.X);
+	const int Y = FMath::RoundToInt(WorldVector.Y / RoomUnit.Y);
+	const int Z = FMath::RoundToInt(WorldVector.Z / RoomUnit.Z);
 	return FIntVector(X, Y, Z);
 }
 
-FVector Dungeon::SnapPoint(FVector Point)
+FVector Dungeon::SnapPoint(FVector Point, const FVector RoomUnit)
 {
-	return ToWorldLocation(ToRoomLocation(Point));
+	return ToWorldLocation(ToRoomLocation(Point, RoomUnit), RoomUnit);
 }
 
 // =================== Plugin's Settings ========================
