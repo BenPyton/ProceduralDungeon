@@ -33,6 +33,9 @@ public:
 	// Returns the door color from the door type asset,
 	// or the default door color in plugin's settings if no door type defined.
 	static FColor GetColor(const UDoorType* DoorType);
+	
+	// Returns true if one of the door type is explicitely set to be compatible with the other.
+	static bool AreCompatible(const UDoorType* A, const UDoorType* B);
 
 protected:
 	// Size of the door bounds, only used by the debug draw as a visual hint for designers and artists.
@@ -52,4 +55,12 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category = "Door Type")
 	FText Description;
 #endif
+
+	// Can this door type be connected with itself?
+	UPROPERTY(EditInstanceOnly, Category = "Door Type")
+	bool bCompatibleWithItself;
+
+	// Which door types are compatible with this one
+	UPROPERTY(EditInstanceOnly, Category = "Door Type")
+	TArray<UDoorType*> Compatibility;
 };

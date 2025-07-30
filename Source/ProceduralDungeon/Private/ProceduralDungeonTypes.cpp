@@ -228,7 +228,7 @@ bool FDoorDef::operator==(const FDoorDef& Other) const
 
 bool FDoorDef::AreCompatible(const FDoorDef& A, const FDoorDef& B)
 {
-	return A.Type == B.Type;
+	return UDoorType::AreCompatible(A.Type, B.Type);
 }
 
 FVector FDoorDef::GetDoorSize() const
