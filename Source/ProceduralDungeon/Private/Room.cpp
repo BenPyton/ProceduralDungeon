@@ -627,7 +627,7 @@ int URoom::CountConnectedDoors() const
 	int ConnectedDoors = 0;
 	for (const auto& Connection : Connections)
 	{
-		if (URoomConnection::GetOtherRoom(Connection.Get(), this) == nullptr)
+		if (URoomConnection::GetOtherRoom(Connection.Get(), this) != nullptr)
 			++ConnectedDoors;
 	}
 	return ConnectedDoors;
