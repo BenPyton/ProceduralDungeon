@@ -46,7 +46,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	virtual bool AreAllDoorsConnected() const { return false; }
 
-	// Returns true if all the doors of this room are connected to other rooms.
+	// Returns the number of doors in this room connected to another room.
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	virtual int CountConnectedDoors() const { return -1; }
 
