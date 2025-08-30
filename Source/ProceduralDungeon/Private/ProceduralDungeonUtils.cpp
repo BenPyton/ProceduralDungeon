@@ -47,7 +47,7 @@ FBoxCenterAndExtent Dungeon::ToWorld(const FBoxCenterAndExtent& Box, const FTran
 {
 	const FVector Unit = Dungeon::RoomUnit();
 	const FVector Center = Transform.TransformPosition(Unit * Box.Center);
-	const FVector Extent = (Unit * Box.Extent).GetAbs();
+	const FVector Extent = Transform.TransformVector(Unit * Box.Extent).GetAbs();
 	return FBoxCenterAndExtent(Center, Extent);
 }
 

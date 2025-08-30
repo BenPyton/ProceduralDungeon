@@ -482,7 +482,8 @@ void ADungeonGeneratorBase::DrawDebug() const
 	#endif
 
 	const FTransform& Transform = GetDungeonTransform();
-	FBoxCenterAndExtent DungeonBounds = Graph->GetDungeonBounds(Transform);
+	FBoxCenterAndExtent DungeonBounds = Graph->GetDungeonBounds(); // We don't pass the transform here because we don't wan't the bounds to be rotated.
+	DungeonBounds.Center = Transform.TransformPositionNoScale(DungeonBounds.Center);
 	DrawDebugBox(GetWorld(), DungeonBounds.Center, DungeonBounds.Extent, Transform.GetRotation(), FColor::Yellow);
 #endif
 }
