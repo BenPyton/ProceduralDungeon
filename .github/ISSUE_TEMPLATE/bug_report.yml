@@ -1,0 +1,118 @@
+name: 🐞 Bug Report
+description: Report a reproducible bug or issue.
+title: "[BUG] "
+labels: [bug]
+
+body:
+- type: markdown
+  attributes:
+    value: "## Welcome and thank you very much for taking the time to report a bug!"
+      
+- type: checkboxes
+  attributes:
+    label: Is there an existing issue for this?
+    description: Please search to see if an issue already exists for the bug you encountered.
+    options:
+    - label: I have searched the existing issues
+      required: true
+
+- type: input
+  id: plugin_version
+  attributes:
+    label: Plugin Version
+    description: "The plugin version the bug is present on (e.g. v1.2.3)"
+  validations:
+    required: true
+  
+- type: input
+  id: unreal_version
+  attributes:
+    label: Unreal Engine Version
+    description: "The Unreal Engine version the bug is present on (e.g. 5.6)"
+  validations:
+    required: true
+
+- type: input
+  id: os
+  attributes:
+    label: OS
+    description: "Which operating system the bug occurs on? (e.g. Windows 10, macOS 14.5)"
+  validations:
+    required: true
+    
+- type: dropdown
+  id: project_type
+  attributes:
+    label: Project Type
+    description: "Is your Unreal Engine project C++ or Bluprint-only?"
+    options:
+      - C++
+      - BP-only
+  validations:
+    required: true
+
+- type: input
+  id: reproducibility
+  attributes:
+    label: Reproducibility
+    description: "How often do you reproduce the bug following your steps? (e.g. Always, Sometimes, Rarely)"
+  validations:
+    required: true
+    
+- type: textarea
+  id: repro
+  attributes:
+    label: Steps to reproduce
+    description: "How do you trigger this bug? Please walk us through it step by step."
+    value: |
+      1. Go to '...'
+      2. Click on '....'
+      3. Scroll down to '....'
+      4. See error
+    render: markdown
+  validations:
+    required: true
+
+- type: markdown
+  attributes:
+    value: |
+      > [!NOTE]  
+      > If possible, please add a minimal project to help reproduce the bug.  
+      > *If the reproduction steps need some setup, you certainly want to share a minimal project instead.*  
+      > (A minimal project is one where there is only the necessary assets and code to reproduce the bug, please avoid to link projects with dozens of GB of data inside)
+  
+- type: textarea
+  id: expected
+  attributes:
+    label: Expected Behavior
+    description: "A clear and concise description of what you expected to happen."
+  validations:
+    required: true
+
+- type: textarea
+  id: actual
+  attributes:
+    label: Actual Behavior
+    description: "A clear and concise description of what actually happened."
+  validations:
+    required: true
+
+- type: textarea
+  attributes:
+    label: Additional Context
+    description: |
+      Add any other context about the problem here (screenshots, logs, etc.).
+      Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
+  validations:
+    required: false
+
+- type: markdown
+  attributes:
+    value: |
+      > [!NOTE]  
+      > You can add that to your `DefaultEngine.ini` or `Engine.ini` files to enable full logging of the plugin in your logs:
+      > ```plaintext
+      > [Core.Log]
+      > LogProceduralDungeon=VeryVerbose
+      > ```
+  

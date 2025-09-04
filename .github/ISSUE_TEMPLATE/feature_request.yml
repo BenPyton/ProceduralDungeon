@@ -1,0 +1,62 @@
+name: 🚀 Feature Request
+description: Suggest an idea for a new feature or enhancement.
+title: "[Feat] "
+labels: [feature]
+
+body:
+
+- type: markdown
+  attributes:
+    value: "## Welcome and thank you very much for taking the time to fill a feature request!"
+    
+- type: textarea
+  id: description
+  attributes:
+    label: Feature Description
+    description: "A clear and concise description of the new feature you're proposing."
+  validations:
+    required: true
+
+- type: textarea
+  id: motivation
+  attributes:
+    label: Motivation
+    description: "Explain the problem that this feature would solve, or why this functionality is important to add."
+  validations:
+    required: true
+    
+- type: textarea
+  id: solution
+  attributes:
+    label: Proposed Solution
+    description: "A clear and concise description of how you think this feature could be implemented."
+  validations:
+    required: true
+
+- type: textarea
+  id: alternatives
+  attributes:
+    label: Alternatives Considered
+    description: "Have you thought about any alternative solutions or workarounds? If so, please describe them here."
+  validations:
+    required: false
+
+- type: dropdown
+  attributes:
+    label: SemVer Impact
+    description: What is the expected [SemVer](https://semver.org/) impact of this change?
+    options:
+    - minor - New, backward-compatible features
+    - major - Breaking changes
+  validations:
+    required: true
+
+- type: textarea
+  id: additional
+  attributes:
+    label: Additional Context
+    description: |
+      Add any other context or screenshots about the feature request here.
+      Tip: You can attach images and files by clicking this area to highlight it and then dragging files in.
+  validations:
+    required: false
