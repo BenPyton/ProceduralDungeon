@@ -55,7 +55,7 @@ public:
 	EDoorDirection Direction {EDoorDirection::NbDirection};
 
 	//~ Begin IReadOnlyRoom Interface
-	virtual const URoomData* GetRoomData() const override { return RoomData.Get(); }
+	virtual const URoomData* GetRoomData() const override { return RoomData; }
 	virtual int64 GetRoomID() const override { return Id; }
 	virtual FIntVector GetPosition() const { return Position; }
 	virtual EDoorDirection GetDirection() const { return Direction; }
@@ -163,8 +163,17 @@ public:
 	void GetDoorsWith(const URoom* OtherRoom, TArray<ADoor*>& Doors) const;
 
 private:
-	UPROPERTY(ReplicatedUsing = OnRep_RoomData, SaveGame)
-	TSoftObjectPtr<URoomData> RoomData {nullptr};
+	// Deprecate old way of storing RoomData.
+	// Must not be used anywhere else than in serialization code.
+	// It has been renamed SoftRoomData, because despite the DEPRECATED suffix,
+	// the engine treats RoomData_DEPRECATED as RoomData, and thus conflicting with the below one.
+	UPROPERTY(SaveGame, Transient, meta=(DeprecatedProperty))
+	TSoftObjectPtr<URoomData> SoftRoomData_DEPRECATED {nullptr};
+
+	// New way to store RoomData.
+	// It must be a hard reference to avoid it being garbage collected on clients.
+	UPROPERTY(ReplicatedUsing = OnRep_RoomData)
+	URoomData* RoomData {nullptr};
 
 	UPROPERTY(Replicated, Transient)
 	TArray<FCustomDataPair> CustomData;
