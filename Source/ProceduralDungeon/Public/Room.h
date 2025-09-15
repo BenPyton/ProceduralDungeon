@@ -14,6 +14,7 @@
 #include "Interfaces/DungeonCustomSerialization.h"
 #include "Interfaces/DungeonSaveInterface.h"
 #include "UObject/SoftObjectPtr.h"
+#include "UObject/StrongObjectPtr.h"
 #include "RoomData.h" // for TSoftObjectPtr to compile. @TODO: Would be great to find a way to not include it
 #include "ReadOnlyRoom.h"
 #include "VoxelBounds/VoxelBounds.h"
@@ -55,7 +56,7 @@ public:
 	EDoorDirection Direction {EDoorDirection::NbDirection};
 
 	//~ Begin IReadOnlyRoom Interface
-	virtual const URoomData* GetRoomData() const override { return RoomData.Get(); }
+	virtual const URoomData* GetRoomData() const override { return Data; }
 	virtual int64 GetRoomID() const override { return Id; }
 	virtual FIntVector GetPosition() const { return Position; }
 	virtual EDoorDirection GetDirection() const { return Direction; }
@@ -78,7 +79,7 @@ public:
 	const ADungeonGeneratorBase* Generator() const { return GeneratorOwner.Get(); }
 	void SetPlayerInside(bool PlayerInside);
 	void SetVisible(bool Visible);
-	FORCEINLINE bool IsReady() const { return RoomData != nullptr; }
+	FORCEINLINE bool IsReady() const { return Data != nullptr; }
 
 	// Is the player currently inside the room?
 	// A player can be in multiple rooms at once, for example when he stands at the door frame,
@@ -163,8 +164,14 @@ public:
 	void GetDoorsWith(const URoom* OtherRoom, TArray<ADoor*>& Doors) const;
 
 private:
-	UPROPERTY(ReplicatedUsing = OnRep_RoomData, SaveGame)
-	TSoftObjectPtr<URoomData> RoomData {nullptr};
+	// Need to keep the name RoomData to make old saves compatible.
+	//UPROPERTY(SaveGame)
+	//TSoftObjectPtr<URoomData> RoomData {nullptr};
+
+	// This is the actual RoomData used by the room at runtime.
+	// It must be a hard reference to avoid it being garbage collected on clients.
+	UPROPERTY(ReplicatedUsing = OnRep_RoomData)
+	URoomData* Data {nullptr};
 
 	UPROPERTY(Replicated, Transient)
 	TArray<FCustomDataPair> CustomData;

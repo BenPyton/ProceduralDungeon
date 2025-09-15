@@ -35,7 +35,7 @@ void URoom::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePro
 
 	// InitialOnly is not called on newly created subobjects after the InitialCond of actor owner has already been called!!!
 	//Params.Condition = COND_InitialOnly;
-	DOREPLIFETIME_WITH_PARAMS(URoom, RoomData, Params);
+	DOREPLIFETIME_WITH_PARAMS(URoom, Data, Params);
 	DOREPLIFETIME_WITH_PARAMS(URoom, Position, Params);
 	DOREPLIFETIME_WITH_PARAMS(URoom, Direction, Params);
 	DOREPLIFETIME_WITH_PARAMS(URoom, Connections, Params);
@@ -63,17 +63,17 @@ void URoom::RegisterReplicableSubobjects(bool bRegister)
 
 void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId)
 {
-	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(RoomData, Data);
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Data, Data);
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(GeneratorOwner, Generator);
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Id, RoomId);
 	Instance = nullptr;
 	SetPosition(FIntVector::ZeroValue);
 	SetDirection(EDoorDirection::North);
 
-	if (RoomData.IsValid())
+	if (IsValid(Data))
 	{
 		MARK_PROPERTY_DIRTY_FROM_NAME(URoom, Connections, this);
-		Connections.SetNum(RoomData->GetNbDoor());
+		Connections.SetNum(Data->GetNbDoor());
 	}
 	else
 	{
@@ -131,13 +131,13 @@ void URoom::Instantiate(UWorld* World)
 {
 	if (Instance == nullptr)
 	{
-		if (RoomData.IsNull())
+		if (!IsValid(Data))
 		{
 			DungeonLog_Error("Failed to instantiate the room: it has no RoomData.");
 			return;
 		}
 
-		const TSoftObjectPtr<UWorld>& Level = RoomData->Level;
+		const TSoftObjectPtr<UWorld>& Level = Data->Level;
 		if (Level.IsNull())
 		{
 			DungeonLog_Error("Failed to instantiate the room: Level asset is invalid in room data.");
@@ -271,7 +271,7 @@ void URoom::OnRep_Id()
 
 void URoom::OnRep_RoomData()
 {
-	DungeonLog_Debug("[%s] Room '%s' RoomData Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomData.Get()));
+	DungeonLog_Debug("[%s] Room '%s' RoomData Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(Data));
 }
 
 void URoom::OnRep_Connections()
@@ -338,19 +338,19 @@ void URoom::CreateLevelComponents(ARoomLevel* LevelActor)
 EDoorDirection URoom::GetDoorWorldOrientation(int DoorIndex) const
 {
 	check(IsDoorIndexValid(DoorIndex));
-	return RoomData->Doors[DoorIndex].Direction + Direction;
+	return Data->Doors[DoorIndex].Direction + Direction;
 }
 
 FIntVector URoom::GetDoorWorldPosition(int DoorIndex) const
 {
 	check(IsDoorIndexValid(DoorIndex));
-	return RoomToWorld(RoomData->Doors[DoorIndex].Position);
+	return RoomToWorld(Data->Doors[DoorIndex].Position);
 }
 
 bool URoom::IsDoorIndexValid(int32 DoorIndex) const
 {
-	check(RoomData.IsValid());
-	return DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num();
+	check(IsValid(Data));
+	return DoorIndex >= 0 && DoorIndex < Data->Doors.Num();
 }
 
 int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot) const
@@ -361,9 +361,9 @@ int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot) const
 	FIntVector localPos = WorldToRoom(WorldPos);
 	EDoorDirection localRot = WorldToRoom(WorldRot);
 
-	for (int i = 0; i < RoomData->Doors.Num(); ++i)
+	for (int i = 0; i < Data->Doors.Num(); ++i)
 	{
-		const FDoorDef door = RoomData->Doors[i];
+		const FDoorDef door = Data->Doors[i];
 		if (door.Position == localPos && door.Direction == localRot)
 			return i;
 	}
@@ -378,13 +378,13 @@ int URoom::GetOtherDoorIndex(int32 DoorIndex) const
 
 FDoorDef URoom::GetDoorDef(int32 DoorIndex) const
 {
-	check(RoomData.IsValid());
-	return RoomToWorld(RoomData->GetDoorDef(DoorIndex));
+	check(IsValid(Data));
+	return RoomToWorld(Data->GetDoorDef(DoorIndex));
 }
 
 FDoorDef URoom::GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const
 {
-	check(RoomData.IsValid());
+	check(IsValid(Data));
 	int32 DoorIndex = GetDoorIndexAt(WorldPos, WorldRot);
 	return (DoorIndex >= 0) ? GetDoorDef(DoorIndex) : FDoorDef::Invalid;
 }
@@ -442,26 +442,26 @@ FVoxelBounds URoom::RoomToWorld(const FVoxelBounds& RoomBounds) const
 void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)
 {
 	check(IsDoorIndexValid(DoorIndex));
-	SetDirection(WorldRot - RoomData->Doors[DoorIndex].Direction);
+	SetDirection(WorldRot - Data->Doors[DoorIndex].Direction);
 }
 
 void URoom::SetPositionFromDoor(int DoorIndex, FIntVector WorldPos)
 {
 	check(IsDoorIndexValid(DoorIndex));
-	SetPosition(WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction));
+	SetPosition(WorldPos - Rotate(Data->Doors[DoorIndex].Position, Direction));
 }
 
 void URoom::SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot)
 {
 	check(IsDoorIndexValid(DoorIndex));
-	SetDirection(WorldRot - RoomData->Doors[DoorIndex].Direction);
-	SetPosition(WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction));
+	SetDirection(WorldRot - Data->Doors[DoorIndex].Direction);
+	SetPosition(WorldPos - Rotate(Data->Doors[DoorIndex].Position, Direction));
 }
 
 bool URoom::IsOccupied(FIntVector Cell)
 {
 	FIntVector local = WorldToRoom(Cell);
-	FBoxMinAndMax Bounds = RoomData->GetIntBounds();
+	FBoxMinAndMax Bounds = Data->GetIntBounds();
 	return local.X >= Bounds.Min.X && local.X < Bounds.Max.X
 		&& local.Y >= Bounds.Min.Y && local.Y < Bounds.Max.Y
 		&& local.Z >= Bounds.Min.Z && local.Z < Bounds.Max.Z;
@@ -469,26 +469,26 @@ bool URoom::IsOccupied(FIntVector Cell)
 
 FBoxCenterAndExtent URoom::GetBounds() const
 {
-	check(RoomData.IsValid());
-	return RoomData->GetBounds(GetTransform());
+	check(IsValid(Data));
+	return Data->GetBounds(GetTransform());
 }
 
 FBoxCenterAndExtent URoom::GetLocalBounds() const
 {
-	check(RoomData.IsValid());
-	return RoomData->GetBounds();
+	check(IsValid(Data));
+	return Data->GetBounds();
 }
 
 FBoxMinAndMax URoom::GetIntBounds() const
 {
-	check(RoomData.IsValid());
-	return RoomToWorld(RoomData->GetIntBounds());
+	check(IsValid(Data));
+	return RoomToWorld(Data->GetIntBounds());
 }
 
 FVoxelBounds URoom::GetVoxelBounds() const
 {
-	check(RoomData.IsValid());
-	return RoomToWorld(RoomData->GetVoxelBounds());
+	check(IsValid(Data));
+	return RoomToWorld(Data->GetVoxelBounds());
 }
 
 FTransform URoom::GetTransform() const
@@ -531,9 +531,9 @@ bool URoom::CreateCustomData(const TSubclassOf<URoomCustomData>& DataType)
 
 bool URoom::CreateAllCustomData()
 {
-	check(RoomData.IsValid());
+	check(IsValid(Data));
 	bool bSucceeded = true;
-	for (auto Datum : RoomData->CustomData)
+	for (auto Datum : Data->CustomData)
 	{
 		bSucceeded &= CreateCustomData(Datum);
 	}
