@@ -23,6 +23,7 @@
 #include "Engine/Engine.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "Misc/EngineVersionComparison.h"
+#include "ProceduralDungeonCustomVersion.h"
 
 void URoom::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -70,7 +71,7 @@ void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId
 	SetPosition(FIntVector::ZeroValue);
 	SetDirection(EDoorDirection::North);
 
-	if (RoomData.IsValid())
+	if (IsValid(RoomData))
 	{
 		MARK_PROPERTY_DIRTY_FROM_NAME(URoom, Connections, this);
 		Connections.SetNum(RoomData->GetNbDoor());
@@ -131,7 +132,7 @@ void URoom::Instantiate(UWorld* World)
 {
 	if (Instance == nullptr)
 	{
-		if (RoomData.IsNull())
+		if (!IsValid(RoomData))
 		{
 			DungeonLog_Error("Failed to instantiate the room: it has no RoomData.");
 			return;
@@ -271,7 +272,7 @@ void URoom::OnRep_Id()
 
 void URoom::OnRep_RoomData()
 {
-	DungeonLog_Debug("[%s] Room '%s' RoomData Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomData.Get()));
+	DungeonLog_Debug("[%s] Room '%s' RoomData Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomData));
 }
 
 void URoom::OnRep_Connections()
@@ -349,7 +350,7 @@ FIntVector URoom::GetDoorWorldPosition(int DoorIndex) const
 
 bool URoom::IsDoorIndexValid(int32 DoorIndex) const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num();
 }
 
@@ -378,13 +379,13 @@ int URoom::GetOtherDoorIndex(int32 DoorIndex) const
 
 FDoorDef URoom::GetDoorDef(int32 DoorIndex) const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return RoomToWorld(RoomData->GetDoorDef(DoorIndex));
 }
 
 FDoorDef URoom::GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	int32 DoorIndex = GetDoorIndexAt(WorldPos, WorldRot);
 	return (DoorIndex >= 0) ? GetDoorDef(DoorIndex) : FDoorDef::Invalid;
 }
@@ -469,31 +470,31 @@ bool URoom::IsOccupied(FIntVector Cell)
 
 FBoxCenterAndExtent URoom::GetBounds() const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return RoomData->GetBounds(GetTransform());
 }
 
 FBoxCenterAndExtent URoom::GetLocalBounds() const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return RoomData->GetBounds();
 }
 
 FBoxMinAndMax URoom::GetIntBounds() const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return RoomToWorld(RoomData->GetIntBounds());
 }
 
 FVoxelBounds URoom::GetVoxelBounds() const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return RoomToWorld(RoomData->GetVoxelBounds());
 }
 
 FTransform URoom::GetTransform() const
 {
-	checkf(RoomData.IsValid(), TEXT("Invalid RoomData in URoom class!"));
+	checkf(IsValid(RoomData), TEXT("Invalid RoomData in URoom class!"));
 	FTransform Transform;
 	Transform.SetLocation(FVector(Position) * RoomData->GetRoomUnit());
 	Transform.SetRotation(ToQuaternion(Direction));
@@ -532,7 +533,7 @@ bool URoom::CreateCustomData(const TSubclassOf<URoomCustomData>& DataType)
 
 bool URoom::CreateAllCustomData()
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	bool bSucceeded = true;
 	for (auto Datum : RoomData->CustomData)
 	{
@@ -733,6 +734,28 @@ bool URoom::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading
 	Record.EnterField(AR_FIELD_NAME("ConnectionIds")) << SaveData->ConnectionIds;
 	Record.EnterField(AR_FIELD_NAME("LevelActor")) << SaveData->LevelActor;
 	Record.EnterField(AR_FIELD_NAME("Actors")) << SaveData->Actors;
+
+	// Handle old `RoomData` SoftObjectPtr
+	const int32 DungeonVersion = Record.GetUnderlyingArchive().CustomVer(FProceduralDungeonCustomVersion::GUID);
+	DungeonLog_Debug("Serializing RoomData (Version: %d, IsLoading: %d)", DungeonVersion, bIsLoading);
+	if (DungeonVersion < FProceduralDungeonCustomVersion::SoftObjectPtrFix)
+	{
+		if (bIsLoading)
+		{
+			const bool bIsSoftPtrNull = SoftRoomData_DEPRECATED.IsNull();
+			RoomData = !bIsSoftPtrNull ? SoftRoomData_DEPRECATED.Get() : nullptr;
+			SoftRoomData_DEPRECATED.Reset();
+			DungeonLog_Debug("Converted old RoomData SoftObjectPtr (IsNull: %d) to regular pointer: %s", bIsSoftPtrNull, *GetNameSafe(RoomData));
+		}
+		else
+		{
+			checkNoEntry(); // Should never happen when saving.
+		}
+	}
+	else
+	{
+		SerializeUObjectRef(Record.EnterField(AR_FIELD_NAME("RoomData")), RoomData);
+	}
 
 	if (!bIsLoading)
 	{
