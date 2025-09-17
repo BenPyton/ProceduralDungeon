@@ -11,4 +11,4 @@
 const FGuid FProceduralDungeonCustomVersion::GUID(0x07E63959, 0x72E5DEE1, 0x7B00F72A, 0x1B442349);
 
 // Register the custom version with core
-FCustomVersionRegistration GRegisterDungeonCustomVersion(FProceduralDungeonCustomVersion::GUID, FProceduralDungeonCustomVersion::LatestVersion, TEXT("ProcDungeonVer"));
+//FCustomVersionRegistration GRegisterDungeonCustomVersion(FProceduralDungeonCustomVersion::GUID, FProceduralDungeonCustomVersion::LatestVersion, TEXT("ProcDungeonVer"));

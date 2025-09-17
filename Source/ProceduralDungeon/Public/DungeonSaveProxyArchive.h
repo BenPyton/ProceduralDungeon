@@ -20,6 +20,7 @@ public:
 		: FObjectAndNameAsStringProxyArchive(InInnerArchive, true)
 	{
 		ArIsSaveGame = true;
+		SetShouldSkipUpdateCustomVersion(true);
 		//ArNoDelta = true;
 	}
 

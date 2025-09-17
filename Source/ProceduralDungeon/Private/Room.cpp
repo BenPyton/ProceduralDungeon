@@ -23,6 +23,7 @@
 #include "Engine/Engine.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "Misc/EngineVersionComparison.h"
+#include "ProceduralDungeonCustomVersion.h"
 
 void URoom::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -61,9 +62,9 @@ void URoom::RegisterReplicableSubobjects(bool bRegister)
 	}
 }
 
-void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId)
+void URoom::Init(URoomData* InData, ADungeonGeneratorBase* Generator, int32 RoomId)
 {
-	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Data, Data);
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Data, InData);
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(GeneratorOwner, Generator);
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Id, RoomId);
 	Instance = nullptr;
@@ -540,9 +541,9 @@ bool URoom::CreateAllCustomData()
 	return bSucceeded;
 }
 
-bool URoom::GetCustomData_BP(TSubclassOf<URoomCustomData> DataType, URoomCustomData*& Data)
+bool URoom::GetCustomData_BP(TSubclassOf<URoomCustomData> DataType, URoomCustomData*& OutData)
 {
-	return GetCustomData(DataType, Data);
+	return GetCustomData(DataType, OutData);
 }
 
 bool URoom::HasCustomData_BP(const TSubclassOf<URoomCustomData>& DataType)
@@ -550,7 +551,7 @@ bool URoom::HasCustomData_BP(const TSubclassOf<URoomCustomData>& DataType)
 	return HasCustomData(DataType);
 }
 
-bool URoom::GetCustomData(const TSubclassOf<URoomCustomData>& DataType, URoomCustomData*& Data) const
+bool URoom::GetCustomData(const TSubclassOf<URoomCustomData>& DataType, URoomCustomData*& OutData) const
 {
 	const FCustomDataPair* Pair = GetDataPair(DataType);
 	if (!Pair) // Not found
@@ -563,7 +564,7 @@ bool URoom::GetCustomData(const TSubclassOf<URoomCustomData>& DataType, URoomCus
 	if (!Datum->IsA(DataType))
 		return false;
 
-	Data = Datum;
+	OutData = Datum;
 	return true;
 }
 
@@ -733,6 +734,27 @@ bool URoom::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading
 	Record.EnterField(AR_FIELD_NAME("LevelActor")) << SaveData->LevelActor;
 	Record.EnterField(AR_FIELD_NAME("Actors")) << SaveData->Actors;
 
+	// Handle old `RoomData` SoftObjectPtr
+	const int32 DungeonVersion = Record.GetUnderlyingArchive().CustomVer(FProceduralDungeonCustomVersion::GUID);
+	DungeonLog_Debug("Serializing RoomData (Version: %d, IsLoading: %d)", DungeonVersion, bIsLoading);
+	if (DungeonVersion < FProceduralDungeonCustomVersion::SoftObjectPtrFix)
+	{
+		if (bIsLoading)
+		{
+			const bool bIsSoftPtrNull = RoomData.IsNull();
+			Data = !bIsSoftPtrNull ? RoomData.Get() : nullptr;
+			DungeonLog_Debug("Converted old RoomData SoftObjectPtr (IsNull: %d) to regular pointer: %s", bIsSoftPtrNull, *GetNameSafe(Data));
+		}
+		else
+		{
+			checkNoEntry(); // Should never happen when saving.
+		}
+	}
+	else
+	{
+		SerializeUObjectRef(Record.EnterField(AR_FIELD_NAME("RoomData")), Data);
+	}
+
 	if (!bIsLoading)
 	{
 		// When saving, no need to keep the data anymore.
@@ -810,7 +832,7 @@ void URoom::PostLoadDungeon_Implementation()
 	DispatchCallbackToSavedLevelActors(&IDungeonSaveInterface::DispatchPostLoadEvent);
 }
 
-bool URoom::SerializeLevelActors(FSaveData& Data, bool bIsLoading)
+bool URoom::SerializeLevelActors(FSaveData& Save, bool bIsLoading)
 {
 	if (!IsValid(Instance))
 	{
@@ -827,7 +849,7 @@ bool URoom::SerializeLevelActors(FSaveData& Data, bool bIsLoading)
 
 	ARoomLevel* LevelScript = GetLevelScript();
 	checkf(IsValid(LevelScript), TEXT("RoomInstance must be loaded and the LevelScript valid when calling SerializeLevelScript"));
-	SerializeUObject(Data.LevelActor, LevelScript, bIsLoading);
+	SerializeUObject(Save.LevelActor, LevelScript, bIsLoading);
 
 	for (auto& Actor : Level->Actors)
 	{
@@ -858,10 +880,10 @@ bool URoom::SerializeLevelActors(FSaveData& Data, bool bIsLoading)
 
 		if (!bIsLoading)
 		{
-			TArray<uint8>& ActorData = Data.Actors.Add(ActorGuid);
+			TArray<uint8>& ActorData = Save.Actors.Add(ActorGuid);
 			SerializeUObject(ActorData, Actor, false);
 		}
-		else if (TArray<uint8>* ActorData = Data.Actors.Find(ActorGuid))
+		else if (TArray<uint8>* ActorData = Save.Actors.Find(ActorGuid))
 		{
 			SerializeUObject(*ActorData, Actor, true);
 		}

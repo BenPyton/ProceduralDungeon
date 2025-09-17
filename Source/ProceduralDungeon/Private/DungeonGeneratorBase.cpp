@@ -141,8 +141,14 @@ void ADungeonGeneratorBase::SerializeDungeon(FArchive& Archive)
 
 void ADungeonGeneratorBase::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading)
 {
+	const bool bArchiveMarkedAsLoading = Record.GetUnderlyingArchive().IsLoading();
+	const int32 before = Record.GetUnderlyingArchive().CustomVer(FProceduralDungeonCustomVersion::GUID);
 	// Set the archive to use the custom version for future compatibility
 	Record.GetUnderlyingArchive().UsingCustomVersion(FProceduralDungeonCustomVersion::GUID);
+
+	const int32 after = Record.GetUnderlyingArchive().CustomVer(FProceduralDungeonCustomVersion::GUID);
+
+	DungeonLog_Debug("Serializing Dungeon (Version: %d -> %d, IsLoading: %d, ArchiveMarkedAsLoading: %d)", before, after, bIsLoading, bArchiveMarkedAsLoading);
 
 #if false // This is the way to check for an older version that needs to convert some data into new ones.
 	const int32 DungeonVersion = Ar.CustomVer(FProceduralDungeonCustomVersion::GUID);

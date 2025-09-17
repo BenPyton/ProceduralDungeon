@@ -165,8 +165,9 @@ public:
 
 private:
 	// Need to keep the name RoomData to make old saves compatible.
-	//UPROPERTY(SaveGame)
-	//TSoftObjectPtr<URoomData> RoomData {nullptr};
+	// Must not be used anywhere else than in serialization code.
+	UPROPERTY(SaveGame)
+	TSoftObjectPtr<URoomData> RoomData {nullptr};
 
 	// This is the actual RoomData used by the room at runtime.
 	// It must be a hard reference to avoid it being garbage collected on clients.
