@@ -14,6 +14,7 @@
 #include "Interfaces/DungeonCustomSerialization.h"
 #include "Serialization/Formatters/JsonArchiveInputFormatter.h"
 #include "Serialization/Formatters/JsonArchiveOutputFormatter.h"
+#include "UObject/Class.h"
 
 #if UE_VERSION_NEWER_THAN(5, 0, 0)
 	#include "Serialization/StructuredArchiveSlotBase.h"
@@ -93,23 +94,28 @@ bool SerializeUObject(TArray<uint8>& Data, UObject* Obj, bool bIsLoading, bool b
 
 void SerializeUClass(FStructuredArchiveSlot Slot, UClass*& Class)
 {
-	auto ClassPath = FSoftObjectPath(Class);
-	Slot << ClassPath;
+	SerializeUObjectRef(Slot, Class);
+}
+
+void SerializeUObjectRef(FStructuredArchiveSlot Slot, UObject*& Object)
+{
+	auto ObjPath = FSoftObjectPath(Object);
+	Slot << ObjPath;
 
 	if (Slot.GetArchiveState().IsLoading())
 	{
 		// Resolve potential redirectors before trying to resolve the object
-		ClassPath.FixupCoreRedirects();
+		ObjPath.FixupCoreRedirects();
 
-		Class = Cast<UClass>(ClassPath.ResolveObject());
-		if (nullptr == Class && !ClassPath.IsNull())
+		Object = ObjPath.ResolveObject();
+		if (nullptr == Object && !ObjPath.IsNull())
 		{
-			Class = Cast<UClass>(ClassPath.TryLoad());
+			Object = ObjPath.TryLoad();
 		}
 
-		if (nullptr == Class)
+		if (nullptr == Object)
 		{
-			DungeonLog_Error("Failed to load class from path: %s", *ClassPath.ToString());
+			DungeonLog_Error("Failed to load class from path: %s", *ObjPath.ToString());
 		}
 	}
 }
