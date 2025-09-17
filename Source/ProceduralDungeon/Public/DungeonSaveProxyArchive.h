@@ -28,7 +28,7 @@ public:
 		// Calls Value.SerializePath()
 		FObjectAndNameAsStringProxyArchive::operator<<(Value);
 
-		UE_LOG(LogTemp, Warning, TEXT("Custom serialization of a SoftObjectPath!"));
+		//UE_LOG(LogTemp, Warning, TEXT("Custom serialization of a SoftObjectPath!"));
 
 		// If we have a defined core redirect, make sure that it's applied
 		if (IsLoading() && !Value.IsNull())
