@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added a `Get Level Room Data` node accessible from actors, even during their construction script, allowing the actor to setup itself when placed in the room.
 - Added a new Data Asset called `Dungeon Settings` to allow overriding the `Room Unit` in the `Dungeon Generator` class.
+- Added a compatibility list in `Door Type` assets, so different door types may be compatible
 
 ## [3.6.4] - 2025-09-30
 
