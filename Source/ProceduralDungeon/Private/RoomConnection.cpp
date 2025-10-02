@@ -47,7 +47,8 @@ bool URoomConnection::SerializeObject(FStructuredArchive::FRecord& Record, bool 
 
 		// Serializing the door instance's properties only during the save here.
 		// The properties will be loaded back when the door is spawned.
-		SerializeUObject(SaveData->DoorSavedData, DoorInstance.Get(), false);
+		if (DoorInstance.IsValid())
+			SerializeUObject(SaveData->DoorSavedData, DoorInstance.Get(), false);
 	}
 
 	Record.EnterField(AR_FIELD_NAME("RoomA")) << SaveData->RoomAID;

@@ -76,7 +76,7 @@ void operator<<(FStructuredArchiveSlot Slot, TSubclassOf<T>& Class)
 	auto ClassPath = FSoftObjectPath(Class);
 	Slot << ClassPath;
 
-	if (Slot.GetArchiveState().IsLoading())
+	if (Slot.GetArchiveState().IsLoading() && !ClassPath.IsNull())
 	{
 		// Resolve potential redirectors before trying to resolve the object
 		ClassPath.FixupCoreRedirects();

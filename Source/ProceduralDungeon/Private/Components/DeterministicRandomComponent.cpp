@@ -7,7 +7,7 @@
 
 #include "Components/DeterministicRandomComponent.h"
 #include "ProceduralDungeonUtils.h"
-#include "ProceduralDungeonlog.h"
+#include "ProceduralDungeonLog.h"
 #include "DungeonBlueprintLibrary.h"
 #include "Room.h"
 #include "Interfaces/RoomActorGuid.h"
