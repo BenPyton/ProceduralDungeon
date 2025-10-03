@@ -272,9 +272,6 @@ void URoom::OnRep_Id()
 void URoom::OnRep_RoomData()
 {
 	DungeonLog_Debug("[%s] Room '%s' RoomData Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomData.Get()));
-	// This is a hotfix to prevent the RoomData being garbage collected on clients.
-	// Do not use HardRoomData anywhere else.
-	HardRoomData = TStrongObjectPtr<URoomData>(RoomData.Get());
 }
 
 void URoom::OnRep_Connections()
