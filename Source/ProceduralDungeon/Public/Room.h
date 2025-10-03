@@ -14,7 +14,6 @@
 #include "Interfaces/DungeonCustomSerialization.h"
 #include "Interfaces/DungeonSaveInterface.h"
 #include "UObject/SoftObjectPtr.h"
-#include "UObject/StrongObjectPtr.h"
 #include "RoomData.h" // for TSoftObjectPtr to compile. @TODO: Would be great to find a way to not include it
 #include "ReadOnlyRoom.h"
 #include "VoxelBounds/VoxelBounds.h"
@@ -166,10 +165,6 @@ public:
 private:
 	UPROPERTY(ReplicatedUsing = OnRep_RoomData, SaveGame)
 	TSoftObjectPtr<URoomData> RoomData {nullptr};
-
-	// This is a hotfix to prevent the room data to be garbage collected on clients when using steam multiplayer sessions
-	// This variable will be removed in a future version, do not use it, never.
-	TStrongObjectPtr<URoomData> HardRoomData {nullptr};
 
 	UPROPERTY(Replicated, Transient)
 	TArray<FCustomDataPair> CustomData;
