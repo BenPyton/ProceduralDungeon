@@ -37,6 +37,12 @@ public:
 	// Returns true if one of the door type is explicitely set to be compatible with the other.
 	static bool AreCompatible(const UDoorType* A, const UDoorType* B);
 
+#if WITH_DEV_AUTOMATION_TESTS
+	// For unit tests only, to set the compatibility of a door type.
+	void SetCompatibility(const TArray<UDoorType*>& InCompatibility) { Compatibility = InCompatibility; }
+	void SetCompatibleWithItself(bool bInCompatibleWithItself) { bCompatibleWithItself = bInCompatibleWithItself; }
+#endif
+
 protected:
 	// Size of the door bounds, only used by the debug draw as a visual hint for designers and artists.
 	UPROPERTY(EditInstanceOnly, Category = "Door Type", meta = (ClampMin = 0))
