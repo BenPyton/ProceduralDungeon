@@ -364,10 +364,12 @@ void ADungeonGeneratorBase::ChooseDoorClasses()
 		const URoomData* RoomAData = (IsValid(RoomA)) ? RoomA->GetRoomData() : nullptr;
 		const URoomData* RoomBData = (IsValid(RoomB)) ? RoomB->GetRoomData() : nullptr;
 
-		const UDoorType* DoorType = URoomConnection::GetDoorType(Conn);
+		UDoorType* DoorTypeA;
+		UDoorType* DoorTypeB;
+		URoomConnection::GetBothDoorTypes(Conn, DoorTypeA, DoorTypeB);
 
 		bool bFlipped = false;
-		TSubclassOf<ADoor> DoorClass = ChooseDoor(RoomAData, RoomA, RoomBData, RoomB, DoorType, bFlipped);
+		TSubclassOf<ADoor> DoorClass = ChooseDoor(RoomAData, RoomA, RoomBData, RoomB, DoorTypeA, DoorTypeB, bFlipped);
 		Conn->SetDoorClass(DoorClass, bFlipped);
 	}
 }
@@ -657,7 +659,7 @@ void ADungeonGeneratorBase::OnStateEnd(EGenerationState State)
 
 // ===== Default Native Events Implementations =====
 
-TSubclassOf<ADoor> ADungeonGeneratorBase::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, bool& Flipped)
+TSubclassOf<ADoor> ADungeonGeneratorBase::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, const UDoorType* OtherDoorType, bool& Flipped)
 {
 	DungeonLog_Error("Error: ChooseDoor not implemented");
 	return nullptr;
