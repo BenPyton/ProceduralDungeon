@@ -114,7 +114,7 @@ public:
 	// @param Flipped Tells which room the door is facing between CurrentRoom (false) and NextRoom (true).
 	// @return The door actor class to spawn between CurrentRoom and NextRoom.
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose Door"))
-	TSubclassOf<ADoor> ChooseDoor(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, bool& Flipped);
+	TSubclassOf<ADoor> ChooseDoor(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, const UDoorType* OtherDoorType, bool& Flipped);
 
 	// ===== Optional functions to override =====
 

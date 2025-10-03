@@ -344,6 +344,17 @@ UDoorType* URoomConnection::GetDoorType(const URoomConnection* Conn)
 	return Room->GetRoomData()->Doors[DoorId].Type;
 }
 
+void URoomConnection::GetBothDoorTypes(const URoomConnection* Conn, UDoorType*& DoorTypeA, UDoorType*& DoorTypeB)
+{
+	if (!IsValid(Conn))
+	{
+		return;
+	}
+
+	DoorTypeA = Conn->RoomA.IsExplicitlyNull() ? nullptr : Conn->RoomA->GetRoomData()->Doors[Conn->RoomADoorId].Type;
+	DoorTypeB = Conn->RoomB.IsExplicitlyNull() ? nullptr : Conn->RoomB->GetRoomData()->Doors[Conn->RoomBDoorId].Type;
+}
+
 URoomConnection* URoomConnection::CreateConnection(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB, UObject* Outer, int32 IdInOuter)
 {
 	// At least one room and its door index must be valid.
