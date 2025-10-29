@@ -268,6 +268,10 @@ protected:
 	bool AddRoomToDungeon(URoom* const& Room, const TArray<int>& DoorsToConnect, bool bFailIfNotConnected = true);
 	bool AddRoomToDungeon(URoom* const& Room);
 
+	// Tells the generator to wait next frame to continue the generation process.
+	UFUNCTION(BlueprintCallable, Category = "GenerationAlgorithm", meta = (BlueprintProtected))
+	void YieldGeneration();
+
 private:
 	// Choose the door classes for all room connections.
 	// This must happen *after* Graph->InitRooms() to be able to choose door class for unconnected doors.
@@ -392,4 +396,7 @@ private:
 
 	// Transient. Cached collision params used when bUseWorldCollisionChecks is true
 	FCollisionQueryParams WorldCollisionParams;
+
+	// Transient. Current generation status
+	EGenerationStatus GenerationStatus {EGenerationStatus::NotStarted};
 };

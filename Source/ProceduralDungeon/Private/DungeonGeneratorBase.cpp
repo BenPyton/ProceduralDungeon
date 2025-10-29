@@ -394,6 +394,12 @@ bool ADungeonGeneratorBase::AddRoomToDungeon(URoom* const& Room)
 	return AddRoomToDungeon(Room, {});
 }
 
+void ADungeonGeneratorBase::YieldGeneration()
+{
+	GenerationStatus = EGenerationStatus::InProgress;
+	DungeonLog_Debug("Yielding generation...");
+}
+
 bool ADungeonGeneratorBase::CreateDungeon_Implementation()
 {
 	DungeonLog_Error("CreateDungeon is not overriden!");
@@ -580,15 +586,7 @@ void ADungeonGeneratorBase::OnStateBegin(EGenerationState State)
 		check(HasAuthority()); // should never generate on clients!
 		FlushNetDormancy();
 		UpdateSeed();
-		if (CreateDungeon())
-		{
-			OnGenerationSuccess();
-		}
-		else
-		{
-			Graph->Clear();
-			OnGenerationFailed();
-		}
+		GenerationStatus = EGenerationStatus::NotStarted;
 		break;
 	case EGenerationState::Initialization:
 		DungeonLog_Info("======= Begin Dungeon Initialization =======");
@@ -620,6 +618,7 @@ void ADungeonGeneratorBase::OnStateBegin(EGenerationState State)
 
 void ADungeonGeneratorBase::OnStateTick(EGenerationState State)
 {
+	bool bCreationSuccess = false;
 	switch (State)
 	{
 	case EGenerationState::Idle:
@@ -633,6 +632,30 @@ void ADungeonGeneratorBase::OnStateTick(EGenerationState State)
 			SetState((HasAuthority() && IsGenerating()) ? EGenerationState::Generation : EGenerationState::Initialization);
 		break;
 	case EGenerationState::Generation:
+		if (GenerationStatus == EGenerationStatus::InProgress)
+		{
+			DungeonLog_Debug("Resuming generation...");
+		}
+
+		// By default we set it as completed so that CreateDungeon of previous versions will not need any change.
+		// In next major version of the plugin, the generation status will be directly returned by the CreateDungeon function.
+		GenerationStatus = EGenerationStatus::Completed;
+		bCreationSuccess = CreateDungeon();
+		checkf(GenerationStatus != EGenerationStatus::NotStarted, TEXT("CreateDungeon must set the status to InProgress, Completed or Failed"));
+
+		if (GenerationStatus == EGenerationStatus::InProgress)
+			break;
+
+		if (bCreationSuccess)
+		{
+			OnGenerationSuccess();
+		}
+		else
+		{
+			GenerationStatus = EGenerationStatus::Failed;
+			Graph->Clear();
+			OnGenerationFailed();
+		}
 		SetState(EGenerationState::Initialization);
 		break;
 	case EGenerationState::Initialization:
