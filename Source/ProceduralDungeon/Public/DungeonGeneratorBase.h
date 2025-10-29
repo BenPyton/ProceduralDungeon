@@ -255,6 +255,14 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "GenerationAlgorithm", meta = (BlueprintProtected, ReturnDisplayName = "Success", HidePin = "World"))
 	bool TryPlaceRoom(URoom* const& Room, int DoorIndex, const FDoorDef& TargetDoor, const UWorld* World = nullptr) const;
 
+	// Set the position and rotation of a room instance and return true if there is nothing colliding with it.
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "GenerationAlgorithm", meta = (BlueprintProtected, ReturnDisplayName = "Success", HidePin = "World"))
+	bool TryPlaceRoomAtLocation(URoom* const& Room, FIntVector Location, EDoorDirection Rotation, const UWorld* World = nullptr) const;
+
+	// Check if the room instance provided is overlapping with existing rooms in the dungeon graph.
+	// Also checks if bUseWorldCollisionChecks is true, in which case a box overlap test is made in the persistent world.
+	bool CheckRoomOverlap(const URoom* const& Room, const UWorld* World = nullptr) const;
+
 	// Finalize the room creation by adding it to the dungeon graph. OnRoomAdded is called here.
 	UFUNCTION(BlueprintCallable, Category = "GenerationAlgorithm", meta = (BlueprintProtected, ReturnDisplayName = "Success", AutoCreateRefTerm = "DoorsToConnect", AdvancedDisplay = "DoorsToConnect,bFailIfNotConnected"))
 	bool AddRoomToDungeon(URoom* const& Room, const TArray<int>& DoorsToConnect, bool bFailIfNotConnected = true);

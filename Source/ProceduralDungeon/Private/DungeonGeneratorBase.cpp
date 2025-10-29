@@ -299,6 +299,24 @@ bool ADungeonGeneratorBase::TryPlaceRoom(URoom* const& Room, int DoorIndex, cons
 
 	Room->SetPositionAndRotationFromDoor(DoorIndex, TargetDoor.Position, TargetDoor.Direction);
 
+	return CheckRoomOverlap(Room, World);
+}
+
+bool ADungeonGeneratorBase::TryPlaceRoomAtLocation(URoom* const& Room, FIntVector Location, EDoorDirection Rotation, const UWorld* World) const
+{
+	if (!IsValid(Room))
+	{
+		return false;
+	}
+
+	Room->SetPosition(Location);
+	Room->SetDirection(Rotation);
+
+	return CheckRoomOverlap(Room, World);
+}
+
+bool ADungeonGeneratorBase::CheckRoomOverlap(const URoom* const& Room, const UWorld* World) const
+{
 	// Test if it fits in the place
 	bool bCanBePlaced = !URoom::Overlap(*Room, Graph->GetAllRooms());
 	// @TODO: Should be more performant to use voxel bounds instead of room bounds
