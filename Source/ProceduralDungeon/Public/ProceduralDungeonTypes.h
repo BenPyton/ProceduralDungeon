@@ -24,6 +24,16 @@ enum class EGenerationState : uint8
 	NbState					UMETA(Hidden)
 };
 
+UENUM()
+enum class EGenerationStatus : uint8
+{
+	NotStarted				UMETA(DisplayName = "Not Started"),
+	InProgress				UMETA(DisplayName = "In Progress"),
+	Completed				UMETA(DisplayName = "Completed"),
+	Failed					UMETA(DisplayName = "Failed"),
+	NbStatus				UMETA(Hidden)
+};
+
 // The different directions a door can face.
 UENUM(BlueprintType, meta = (DisplayName = "Door Direction"))
 enum class EDoorDirection : uint8
