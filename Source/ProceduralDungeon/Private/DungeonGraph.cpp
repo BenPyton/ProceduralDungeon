@@ -637,6 +637,11 @@ void UDungeonGraph::SynchronizeRooms()
 	{
 		CopyRooms(Rooms, ReplicatedRooms);
 		RebuildBounds();
+		DungeonLog_Debug("Synchronized Rooms from server (length: %d)", Rooms.Num());
+		for (const URoom* Room : Rooms)
+		{
+			DungeonLog_Debug(" - %s (Data: %s Valid: %d)", *GetNameSafe(Room), *GetNameSafe(Room->GetRoomData()), IsValid(Room->GetRoomData()));
+		}
 	}
 
 	bIsDirty = false;
