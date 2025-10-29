@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a new Data Asset called `Dungeon Settings` to allow overriding the `Room Unit` in the `Dungeon Generator` class.
 - Added a compatibility list in `Door Type` assets, so different door types may be compatible
 
+### Changed
+
+- Replaced the hotfix for Steam multiplayer with a proper fix (this impact the saved dungeon, making it not compatible with previous plugin versions)
+
 ## [3.6.4] - 2025-09-30
 
 ### Fixed
