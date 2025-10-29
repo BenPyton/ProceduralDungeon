@@ -124,6 +124,42 @@ void ADungeonGeneratorBase::SerializeDungeon(FArchive& Archive)
 {
 	FDungeonSaveProxyArchive ProxyArchive(Archive);
 
+	static const int32 VersionMask = 0xFFFF0000; // High word for magic header, this still allows for 65536 versions
+	static const int32 MagicHeader = 0x7E250000; // Magic header to dertemine if it's a valid version number
+
+	int32 SavedVersion = FProceduralDungeonCustomVersion::LatestVersion;
+	if (ProxyArchive.IsSaving())
+	{
+		int32 ValidatedVersion = (SavedVersion & ~VersionMask) | MagicHeader; // Place magic header in the version number
+		ProxyArchive << ValidatedVersion;
+	}
+	else if (ProxyArchive.IsLoading())
+	{
+		SavedVersion = FProceduralDungeonCustomVersion::InitialVersion; // Fallback version if no version found
+		const int64 StartPos = ProxyArchive.Tell();
+		int32 PotentialVersion = 0;
+
+		// Try reading an int, but guard against short streams
+		if (ProxyArchive.TotalSize() - StartPos >= sizeof(int32))
+		{
+			ProxyArchive << PotentialVersion;
+
+			if ((PotentialVersion & VersionMask) == MagicHeader) // Check if valid version (high word matches magic header)
+			{
+				SavedVersion = PotentialVersion & ~VersionMask; // Extract version number
+			}
+			else
+			{
+				// Not a version, rewind
+				ProxyArchive.Seek(StartPos);
+			}
+		}
+	}
+
+	FCustomVersionContainer Versions;
+	Versions.SetVersion(FProceduralDungeonCustomVersion::GUID, SavedVersion, TEXT("ProcDungeonVer"));
+	ProxyArchive.SetCustomVersions(Versions);
+
 	TUniquePtr<FArchiveFormatterType> Formatter = CreateArchiveFormatterFromArchive(ProxyArchive,
 #if WITH_EDITORONLY_DATA
 		bUseJsonSave
