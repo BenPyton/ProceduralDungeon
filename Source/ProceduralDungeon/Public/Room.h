@@ -202,8 +202,6 @@ protected:
 	virtual void RegisterReplicableSubobjects(bool bRegister) override;
 	//~ End UReplicableObject Interface
 
-	void SetPosition(const FIntVector& NewPosition);
-	void SetDirection(EDoorDirection NewDirection);
 	void UpdateVisibility() const;
 
 	UFUNCTION() // Needed macro for replication to work
@@ -261,6 +259,9 @@ public:
 	FDoorDef RoomToWorld(const FDoorDef& RoomDoor) const;
 	FVoxelBounds WorldToRoom(const FVoxelBounds& WorldBounds) const;
 	FVoxelBounds RoomToWorld(const FVoxelBounds& RoomBounds) const;
+
+	void SetPosition(const FIntVector& NewPosition);
+	void SetDirection(EDoorDirection NewDirection);
 	void SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot);
 	void SetPositionFromDoor(int DoorIndex, FIntVector WorldPos);
 	void SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot);
