@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Replaced the hotfix for Steam multiplayer with a proper fix (this impact the saved dungeon, making it not compatible with previous plugin versions)
+- Now the generation algorithm can be asynchronous:
+  - Updated the `Dungeon Generator Base` class to allow spreading the `Create Dungeon` work on multiple frames.
+  - Added a `Yield Generation` node to tell the generator to call the `Create Dungeon` again the next frame (must be used in the `Create Dungeon` function only).
+  - Updated the `Create Dungeon` function in `Dungeon Generator` to limit number of room generated per frame (can be set with `Room Batch Size` in the actor's details).
 
 ## [3.6.4] - 2025-09-30
 
