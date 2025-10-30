@@ -10,7 +10,6 @@
 #include "Room.h"
 #include "ProceduralDungeonUtils.h"
 #include "ProceduralDungeonLog.h"
-#include "QueueOrStack.h"
 #include "DungeonGraph.h"
 
 // Sets default values
@@ -29,14 +28,17 @@ bool ADungeonGenerator::CreateDungeon_Implementation()
 	if (!HasAuthority())
 		return false;
 
-	// Maybe move from plugin settings to generator's variable?
-	int TriesLeft = Dungeon::MaxGenerationTryBeforeGivingUp();
-	bool ValidDungeon = false;
-
-	// generate level until IsValidDungeon return true
-	do
+	switch (CurrentState)
 	{
-		TriesLeft--;
+	case EState::Idle:
+		DungeonLog_Debug("--- Idle State");
+		// Maybe move from plugin settings to generator's variable?
+		CurrentTriesLeft = Dungeon::MaxGenerationTryBeforeGivingUp();
+		CurrentState = EState::Initializing;
+		// No break to execute immediatly the Initializing state
+	case EState::Initializing: {
+		DungeonLog_Debug("--- Initializing State");
+		--CurrentTriesLeft;
 
 		// Reset generation data
 		StartNewDungeon();
@@ -60,41 +62,82 @@ bool ADungeonGenerator::CreateDungeon_Implementation()
 		if (!IsValid(def))
 		{
 			DungeonLog_Error("ChooseFirstRoomData returned null.");
-			continue;
 		}
-
-		// Create the first room
-		URoom* root = CreateRoomInstance(def);
-		AddRoomToDungeon(root, /*DoorsToConnect = */ {}, /*bFailIfNotConnected = */ false);
-
-		// Build the list of rooms
-		TQueueOrStack<URoom*> roomStack(listMode);
-		roomStack.Push(root);
-		URoom* currentRoom = nullptr;
-		TArray<URoom*> newRooms;
-		while (!roomStack.IsEmpty())
+		else
 		{
-			currentRoom = roomStack.Pop();
-			check(IsValid(currentRoom)); // currentRoom should always be valid
+			// Create the first room
+			URoom* root = CreateRoomInstance(def);
+			AddRoomToDungeon(root, /*DoorsToConnect = */ {}, /*bFailIfNotConnected = */ false);
 
-			if (!AddNewRooms(*currentRoom, newRooms))
-				break;
+			// Build the list of rooms
+			PendingRooms.SetMode(listMode);
+			PendingRooms.Push(root);
 
-			for (URoom* room : newRooms)
+			CurrentState = EState::AddingRooms;
+		}
+		// No break to execute immediatly the AddingRooms state
+	}
+	case EState::AddingRooms: {
+		DungeonLog_Debug("--- AddingRooms State");
+
+		TArray<URoom*> NewRooms;
+		int BatchCount = RoomBatchSize;
+		while (!PendingRooms.IsEmpty() && BatchCount > 0)
+		{
+			--BatchCount;
+			URoom* CurrentRoom = PendingRooms.Pop();
+			check(IsValid(CurrentRoom)); // CurrentRoom should always be valid
+
+			if (!AddNewRooms(*CurrentRoom, NewRooms))
 			{
-				roomStack.Push(room);
+				// Stop generation here
+				DungeonLog_Debug("--- Stopping generation as AddNewRooms returned false.");
+				PendingRooms.Empty();
+				break;
+			}
+
+			DungeonLog_Debug("--- %d rooms added to the dungeon.", NewRooms.Num());
+			for (URoom* room : NewRooms)
+			{
+				PendingRooms.Push(room);
 			}
 		}
 
+		if (!PendingRooms.IsEmpty())
+		{
+			DungeonLog_Debug("--- Still pending rooms, yielding.");
+		}
+		else
+		{
+			DungeonLog_Debug("--- No more pending rooms, finalizing.");
+			CurrentState = EState::Finalizing;
+		}
+		// Proceed to next tick
+		YieldGeneration();
+		break;
+	}
+	case EState::Finalizing:
+		DungeonLog_Debug("--- Finalizing State");
 		// Initialize the dungeon by eg. altering the room instances
 		FinalizeDungeon();
-
-		ValidDungeon = IsValidDungeon();
-	} while (TriesLeft > 0 && !ValidDungeon);
-
-	if (!ValidDungeon)
-	{
-		DungeonLog_Error("Generated dungeon is not valid after %d tries. Make sure your ChooseNextRoomData and IsValidDungeon functions are correct.", Dungeon::MaxGenerationTryBeforeGivingUp());
+		CurrentState = EState::Idle;
+		if (!IsValidDungeon())
+		{
+			DungeonLog_Debug("--- Dungeon is not valid, tries left: %d", CurrentTriesLeft);
+			if (CurrentTriesLeft <= 0)
+			{
+				DungeonLog_Error("Generated dungeon is not valid after %d tries. Make sure your ChooseNextRoomData and IsValidDungeon functions are correct.", Dungeon::MaxGenerationTryBeforeGivingUp());
+				return false;
+			}
+			else
+			{
+				CurrentState = EState::Initializing;
+				YieldGeneration();
+			}
+		}
+		break;
+	default:
+		DungeonLog_Error("CurrentState value is not supported.");
 		return false;
 	}
 
