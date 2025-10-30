@@ -16,9 +16,16 @@ class TQueueOrStack
 public:
 	enum class EMode { QUEUE, STACK };
 
-	TQueueOrStack(EMode _Mode)
+	TQueueOrStack(EMode _Mode = EMode::QUEUE)
 		: Mode(_Mode), Queue(), Stack()
 	{
+	}
+
+	// Sets the mode (queue or stack) and clears its content.
+	void SetMode(EMode _Mode)
+	{
+		Empty();
+		Mode = _Mode;
 	}
 
 	void Push(T& Element)
@@ -50,17 +57,6 @@ public:
 		return item;
 	}
 
-	int Num()
-	{
-		switch (Mode)
-		{
-		case EMode::QUEUE:
-			return Queue.Num();
-		case EMode::STACK:
-			return Stack.Num();
-		}
-	}
-
 	bool IsEmpty()
 	{
 		switch (Mode)
@@ -71,6 +67,12 @@ public:
 			return Stack.Num() <= 0;
 		}
 		return true;
+	}
+
+	void Empty()
+	{
+		Queue.Empty();
+		Stack.Empty();
 	}
 
 private:
