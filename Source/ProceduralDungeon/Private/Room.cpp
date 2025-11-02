@@ -225,6 +225,54 @@ void URoom::ForceVisibility(bool bForce)
 		UpdateVisibility();
 }
 
+int32 URoom::GetRelevancyLevel(APlayerController* PlayerController) const
+{
+	if (!IsValid(PlayerController))
+	{
+		DungeonLog_Warning("GetRelevancyLevel called with null PlayerController");
+		return -1;
+	}
+
+	if (!IsValid(PlayerController->PlayerState))
+		return -1;
+
+	const int32* Level = RelevancyLevels.Find(PlayerController->PlayerState->GetUniqueId());
+	return (Level != nullptr) ? *Level : -1;
+}
+
+int32 URoom::GetMaxRelevancyLevel() const
+{
+	int32 MaxLevel = -1;
+	for (const auto& Pair : RelevancyLevels)
+	{
+		if (Pair.Value > MaxLevel)
+			MaxLevel = Pair.Value;
+	}
+	return MaxLevel;
+}
+
+int32 URoom::GetMinRelevancyLevel() const
+{
+	int32 MinLevel = -1;
+	for (const auto& Pair : RelevancyLevels)
+	{
+		if (MinLevel < 0 || Pair.Value < MinLevel)
+			MinLevel = Pair.Value;
+	}
+	return MinLevel;
+}
+
+void URoom::GetAllRelevancyLevels(TMap<APlayerController*, int32>& OutRelevancyLevels) const
+{
+	OutRelevancyLevels.Empty();
+	for (const auto& Pair : RelevancyLevels)
+	{
+		APlayerController* Controller = ActorUtils::GetPlayerControllerFromUniqueId(this, Pair.Key);
+		if (IsValid(Controller))
+			OutRelevancyLevels.Add(Controller, Pair.Value);
+	}
+}
+
 void URoom::Lock(bool bLock)
 {
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(bIsLocked, bLock);
@@ -509,6 +557,26 @@ void URoom::SetVisible(bool Visible)
 	bIsVisible = Visible;
 	if (bWasVisible != IsVisible())
 		UpdateVisibility();
+}
+
+void URoom::SetRelevancyLevel(FUniqueNetIdRepl PlayerID, int32 Level)
+{
+	int32* FoundLevel = RelevancyLevels.Find(PlayerID);
+	if (Level < 0)
+	{
+		if (FoundLevel == nullptr)
+			return;
+		RelevancyLevels.Remove(PlayerID);
+	}
+	else
+	{
+		if (FoundLevel != nullptr && *FoundLevel == Level)
+			return;
+		RelevancyLevels.Add(PlayerID, Level);
+	}
+	APlayerController* Controller = ActorUtils::GetPlayerControllerFromUniqueId(GetWorld(), PlayerID);
+	DungeonLog_Debug("Found player controller for id '%s': %s", *PlayerID.ToString(), *GetNameSafe(Controller));
+	OnRelevancyChanged.Broadcast(this, Controller, Level);
 }
 
 void URoom::SetPlayerInside(const FUniqueNetIdRepl& PlayerID, bool PlayerInside)

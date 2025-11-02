@@ -283,6 +283,9 @@ private:
 	// Update the rooms visibility based on the player position
 	void UpdateRoomVisibility();
 
+	// Update the rooms relevancy based on the player position
+	void UpdateRoomRelevancy();
+
 	// Reset all data from a specific generation
 	void Reset();
 
@@ -377,6 +380,10 @@ private:
 	// If false, the generator will do nothing with the navigation system.
 	UPROPERTY(EditAnywhere, AdvancedDisplay, Category = "Procedural Generation", meta = (AllowPrivateAccess = true))
 	bool bRebuildNavmesh {true};
+
+	// Maximum distance (in number of rooms) at which a room is considered relevant for a player.
+	UPROPERTY(EditAnywhere, AdvancedDisplay, Category = "Procedural Generation", meta = (AllowPrivateAccess = true))
+	int32 RoomRelevanceMaxDistance {5};
 
 	EGenerationState CurrentState {EGenerationState::Idle};
 	EGeneratorFlags Flags {EGeneratorFlags::None};

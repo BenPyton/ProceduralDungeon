@@ -19,6 +19,8 @@
 #include "VoxelBounds/VoxelBounds.h"
 #include "Room.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FRelevancyEvent, URoom*, Room, APlayerController*, PlayerController, int32, NewRelevancyLevel);
+
 class ADungeonGeneratorBase;
 class ARoomLevel;
 class ADoor;
@@ -78,6 +80,7 @@ public:
 	const ADungeonGeneratorBase* Generator() const { return GeneratorOwner.Get(); }
 	void SetPlayerInside(const FUniqueNetIdRepl& PlayerID, bool PlayerInside);
 	void SetVisible(bool Visible);
+	void SetRelevancyLevel(FUniqueNetIdRepl PlayerID, int32 Level);
 	FORCEINLINE bool IsReady() const { return RoomData != nullptr; }
 
 	// Is the player currently inside the room?
@@ -93,6 +96,29 @@ public:
 	// Force the room to be veisible
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	void ForceVisibility(bool bForce);
+
+	// Get the relevancy level for the specified player.
+	// A relevancy level < 0 means the room is not relevant for the player.
+	// A relevancy level of 0 means the player is inside the room.
+	// A relevancy level > 0 means the player is outside the room, the higher the level, the further away the room is.
+	UFUNCTION(BlueprintPure, Category = "Room")
+	int32 GetRelevancyLevel(APlayerController* PlayerController) const;
+
+	// Get the maximum relevancy level for this room.
+	// The highest value, the farthest the room is from any player.
+	// A value < 0 means no player has this room as relevant.
+	UFUNCTION(BlueprintPure, Category = "Room")
+	int32 GetMaxRelevancyLevel() const;
+
+	// Get minimum relevancy level for this room.
+	// The lowest value, the closest the room is from any player.
+	// A value < 0 means no player has this room as relevant.
+	UFUNCTION(BlueprintPure, Category = "Room")
+	int32 GetMinRelevancyLevel() const;
+
+	// Get all relevancy levels for this room.
+	UFUNCTION(BlueprintPure, Category = "Room")
+	void GetAllRelevancyLevels(TMap<APlayerController*, int32>& OutRelevancyLevels) const;
 
 	// Is the room locked?
 	// If it is, the doors will be locked (except if they have `Alway Unlocked`).
@@ -162,6 +188,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Room")
 	void GetDoorsWith(const URoom* OtherRoom, TArray<ADoor*>& Doors) const;
 
+public:
+	UPROPERTY(BlueprintAssignable, Category = "Room|Events")
+	FRelevancyEvent OnRelevancyChanged;
+
 private:
 	// Deprecate old way of storing RoomData.
 	// Must not be used anywhere else than in serialization code.
@@ -190,6 +220,7 @@ private:
 	TSet<FUniqueNetIdRepl> PlayerIDInside {};
 	bool bIsVisible {true};
 	bool bForceVisible {false};
+	TMap<FUniqueNetIdRepl, int32> RelevancyLevels {};
 
 	UPROPERTY(ReplicatedUsing = OnRep_IsLocked, SaveGame)
 	bool bIsLocked {false};
