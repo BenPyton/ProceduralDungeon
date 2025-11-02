@@ -76,7 +76,7 @@ public:
 	//~ End IDungeonSaveInterface Interface
 
 	const ADungeonGeneratorBase* Generator() const { return GeneratorOwner.Get(); }
-	void SetPlayerInside(bool PlayerInside);
+	void SetPlayerInside(const FUniqueNetIdRepl& PlayerID, bool PlayerInside);
 	void SetVisible(bool Visible);
 	FORCEINLINE bool IsReady() const { return RoomData != nullptr; }
 
@@ -84,7 +84,7 @@ public:
 	// A player can be in multiple rooms at once, for example when he stands at the door frame,
 	// the player's capsule is in both rooms.
 	UFUNCTION(BlueprintPure, Category = "Room")
-	FORCEINLINE bool IsPlayerInside() const { return bPlayerInside; }
+	FORCEINLINE bool IsPlayerInside(int PlayerID = 0) const;
 
 	// Is the room currently visible?
 	UFUNCTION(BlueprintPure, Category = "Room", meta = (CompactNodeTitle = "Is Visible"))
@@ -187,7 +187,7 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_Id, SaveGame)
 	int64 Id {-1};
 
-	bool bPlayerInside {false};
+	TSet<FUniqueNetIdRepl> PlayerIDInside {};
 	bool bIsVisible {true};
 	bool bForceVisible {false};
 

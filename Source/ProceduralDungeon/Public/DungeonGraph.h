@@ -206,7 +206,7 @@ public:
 
 	// Returns in OutRooms all the rooms in the Distance from each InRooms and optionally apply Func on each rooms.
 	// Distance is the number of room connection between 2 rooms, not the distance in any unit.
-	static void TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* OutRooms, uint32 Distance, TFunction<void(URoom*)> Func);
+	static void TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* OutRooms, uint32 Distance, TFunction<void(URoom*, uint32)> Func);
 
 	static bool FindPath(const URoom* From, const URoom* To, TArray<const URoom*>* OutPath = nullptr, bool IgnoreLocked = false);
 
