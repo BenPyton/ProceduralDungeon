@@ -512,6 +512,23 @@ void ADungeonGeneratorBase::UpdateRoomVisibility()
 	UDungeonGraph::TraverseRooms(PlayerRoom->OldRooms, nullptr, OcclusionDistance, [&VisibleRooms](URoom* room, uint32 distance) { room->SetVisible(VisibleRooms.Contains(room)); });
 }
 
+void ADungeonGeneratorBase::UpdateRoomRelevancy()
+{
+	for (const auto& Pair : PlayerRooms)
+	{
+		const FPlayerRooms& PlayerRoom = Pair.Value;
+		if (!PlayerRoom.bHasChanged)
+			continue;
+
+		TSet<URoom*> RelevantRooms;
+		UDungeonGraph::TraverseRooms(PlayerRoom.CurrentRooms, &RelevantRooms, RoomRelevanceMaxDistance, [&Pair](URoom* room, uint32 distance) { room->SetRelevancyLevel(Pair.Key, distance); });
+		UDungeonGraph::TraverseRooms(PlayerRoom.OldRooms, nullptr, RoomRelevanceMaxDistance, [&RelevantRooms, &Pair](URoom* room, uint32 distance) {
+			if (!RelevantRooms.Contains(room))
+				room->SetRelevancyLevel(Pair.Key, -1);
+		});
+	}
+}
+
 void ADungeonGeneratorBase::Reset()
 {
 	PlayerRooms.Empty();
@@ -640,6 +657,7 @@ void ADungeonGeneratorBase::OnStateTick(EGenerationState State)
 	{
 	case EGenerationState::Idle:
 		UpdatePlayerRooms();
+		UpdateRoomRelevancy();
 		UpdateRoomVisibility();
 		DrawDebug();
 		if (Graph->IsDirty() || IsGenerating() || IsLoadingSavedDungeon())
