@@ -126,7 +126,7 @@ public:
 	// This pawn will also affect the PlayerInside variable of the rooms.
 	// By default returns GetPlayerController(0)->GetPawnOrSpectator().
 	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator")
-	APawn* GetVisibilityPawn();
+	APawn* GetVisibilityPawn(APlayerController* PlayerController);
 
 	// ===== Optional events =====
 
@@ -277,6 +277,9 @@ private:
 	// This must happen *after* Graph->InitRooms() to be able to choose door class for unconnected doors.
 	void ChooseDoorClasses();
 
+	// Update the player rooms based on the player position
+	void UpdatePlayerRooms();
+
 	// Update the rooms visibility based on the player position
 	void UpdateRoomVisibility();
 
@@ -381,9 +384,32 @@ private:
 	// Set to avoid adding increment the seed after we've set manually the seed
 	bool bShouldIncrement {false};
 
+	struct FPlayerRooms
+	{
+		// The rooms the player has left this frame
+		TSet<URoom*> OldRooms;
+		// The rooms the player is currently inside this frame
+		TSet<URoom*> CurrentRooms;
+		// Whether the current rooms has changed this frame
+		bool bHasChanged {false};
+
+		// Move current rooms to old rooms and clear current rooms
+		void Roll()
+		{
+			OldRooms = MoveTemp(CurrentRooms);
+			CurrentRooms.Empty();
+		}
+
+		void AddCurrentRoom(URoom* Room)
+		{
+			OldRooms.Remove(Room);
+			CurrentRooms.Add(Room);
+		}
+	};
+
 	// Occlusion culling system
 	TUniquePtr<FDungeonOctree> Octree;
-	TSet<URoom*> CurrentPlayerRooms;
+	TMap<FUniqueNetIdRepl, FPlayerRooms> PlayerRooms;
 
 	// Transient. Only used to detect when occlusion setting is changed.
 	bool bWasOcclusionEnabled {false};

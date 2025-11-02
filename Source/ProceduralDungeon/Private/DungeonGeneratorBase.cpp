@@ -7,8 +7,8 @@
 
 #include "DungeonGeneratorBase.h"
 #include "Engine/Engine.h" // GEngine
-#include "Kismet/GameplayStatics.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerState.h"
 #include "NavigationSystem.h"
 #include "RoomData.h"
 #include "Room.h"
@@ -17,7 +17,6 @@
 #include "ProceduralDungeonUtils.h"
 #include "ProceduralDungeonLog.h"
 #include "DungeonGraph.h"
-#include "Components/PrimitiveComponent.h"
 #include "Utils/ReplicationUtils.h"
 #include "ProceduralDungeonCustomVersion.h"
 #include "Serialization/MemoryReader.h"
@@ -434,41 +433,55 @@ void ADungeonGeneratorBase::ChooseDoorClasses()
 	}
 }
 
-void ADungeonGeneratorBase::UpdateRoomVisibility()
+void ADungeonGeneratorBase::UpdatePlayerRooms()
 {
-	APawn* Player = GetVisibilityPawn();
-	if (!IsValid(Player))
-		return;
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* Controller = It->Get();
+		if (!IsValid(Controller) || !IsValid(Controller->PlayerState))
+			continue;
 
-	// Copied from AActor::GetComponentsBoundingBox but check also collision response with the room object type
-	FBox WorldPlayerBox(ForceInit);
-	Player->ForEachComponent<UPrimitiveComponent>(/*bIncludeFromChildActors = */false
-		, [&](const UPrimitiveComponent* Component)
-		{
-			if (Component->IsRegistered()
-				&& Component->IsCollisionEnabled()
-				&& Component->GetCollisionResponseToChannel(Dungeon::RoomObjectType()) != ECollisionResponse::ECR_Ignore
-				)
-			{
-				WorldPlayerBox += Component->Bounds.GetBox();
-			}
+		// Using their UniqueID to be reliable even when players join or leave
+		const FUniqueNetIdRepl& UniqueID = Controller->PlayerState->GetUniqueId();
+		if (!UniqueID.IsValid())
+			continue;
+
+		APawn* Player = GetVisibilityPawn(Controller);
+		if (!IsValid(Player))
+			return;
+
+		const FTransform& Transform = UseGeneratorTransform() ? GetTransform() : FTransform::Identity;
+		FBox WorldPlayerBox = ActorUtils::GetActorBoundingBoxForRooms(Player, Transform);
+
+		FPlayerRooms& PlayerRoom = PlayerRooms.FindOrAdd(UniqueID);
+		auto PreviousRoomList(PlayerRoom.CurrentRooms);
+		PlayerRoom.Roll();
+		FindElementsWithBoundsTest(*Octree, WorldPlayerBox, [this, &PlayerRoom, & UniqueID](const FDungeonOctreeElement& Element) {
+			PlayerRoom.AddCurrentRoom(Element.Room);
+			Element.Room->SetPlayerInside(UniqueID, true);
 		});
 
-	FTransform Transform = UseGeneratorTransform() ? GetTransform() : FTransform::Identity;
-	WorldPlayerBox = WorldPlayerBox.InverseTransformBy(Transform);
+		for (URoom* Room : PlayerRoom.OldRooms)
+		{
+			Room->SetPlayerInside(UniqueID, false);
+		}
 
-	TSet<URoom*> RoomsToHide(CurrentPlayerRooms);
-	CurrentPlayerRooms.Empty();
-	FindElementsWithBoundsTest(*Octree, WorldPlayerBox, [this, &RoomsToHide](const FDungeonOctreeElement& Element) {
-		RoomsToHide.Remove(Element.Room);
-		CurrentPlayerRooms.Add(Element.Room);
-		Element.Room->SetPlayerInside(true);
-	});
-
-	for (URoom* room : RoomsToHide)
-	{
-		room->SetPlayerInside(false);
+		// Both sets are equal if each set is included in the other
+		const bool bIsAinB = PreviousRoomList.Includes(PlayerRoom.CurrentRooms);
+		const bool bIsBinA = PlayerRoom.CurrentRooms.Includes(PreviousRoomList);
+		PlayerRoom.bHasChanged = !(bIsAinB && bIsBinA);
 	}
+}
+
+void ADungeonGeneratorBase::UpdateRoomVisibility()
+{
+	// Get local player controller
+	// @TODO: Extend to support splitscreen / multiple local players?
+	FUniqueNetIdRepl UniqueID = ActorUtils::GetPlayerUniqueId(GetWorld(), 0);
+
+	FPlayerRooms* PlayerRoom = PlayerRooms.Find(UniqueID);
+	if (!PlayerRoom)
+		return;
 
 	const bool bIsOcclusionEnabled = Dungeon::OcclusionCulling();
 	const uint32 OcclusionDistance = Dungeon::OcclusionDistance();
@@ -477,7 +490,7 @@ void ADungeonGeneratorBase::UpdateRoomVisibility()
 	if (bWasOcclusionEnabled != bIsOcclusionEnabled
 		|| PreviousOcclusionDistance != OcclusionDistance)
 	{
-		RoomsToHide.Empty();
+		PlayerRoom->OldRooms.Empty();
 		for (URoom* Room : Graph->GetAllRooms())
 		{
 			Room->SetVisible(!bIsOcclusionEnabled);
@@ -490,14 +503,18 @@ void ADungeonGeneratorBase::UpdateRoomVisibility()
 	if (!bIsOcclusionEnabled)
 		return;
 
+	// Save performance by not updating room visibilities if the player rooms haven't changed.
+	if (!PlayerRoom->bHasChanged)
+		return;
+
 	TSet<URoom*> VisibleRooms;
-	UDungeonGraph::TraverseRooms(CurrentPlayerRooms, &VisibleRooms, OcclusionDistance, [](URoom* room) { room->SetVisible(true); });
-	UDungeonGraph::TraverseRooms(RoomsToHide, nullptr, OcclusionDistance, [&VisibleRooms](URoom* room) { room->SetVisible(VisibleRooms.Contains(room)); });
+	UDungeonGraph::TraverseRooms(PlayerRoom->CurrentRooms, &VisibleRooms, OcclusionDistance, [](URoom* room, uint32 distance) { room->SetVisible(true); });
+	UDungeonGraph::TraverseRooms(PlayerRoom->OldRooms, nullptr, OcclusionDistance, [&VisibleRooms](URoom* room, uint32 distance) { room->SetVisible(VisibleRooms.Contains(room)); });
 }
 
 void ADungeonGeneratorBase::Reset()
 {
-	CurrentPlayerRooms.Empty();
+	PlayerRooms.Empty();
 	Octree->Destroy();
 }
 
@@ -622,6 +639,7 @@ void ADungeonGeneratorBase::OnStateTick(EGenerationState State)
 	switch (State)
 	{
 	case EGenerationState::Idle:
+		UpdatePlayerRooms();
 		UpdateRoomVisibility();
 		DrawDebug();
 		if (Graph->IsDirty() || IsGenerating() || IsLoadingSavedDungeon())
@@ -746,9 +764,8 @@ void ADungeonGeneratorBase::InitializeDungeon_Implementation(const UDungeonGraph
 {
 }
 
-APawn* ADungeonGeneratorBase::GetVisibilityPawn_Implementation()
+APawn* ADungeonGeneratorBase::GetVisibilityPawn_Implementation(APlayerController* Controller)
 {
-	APlayerController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!IsValid(Controller))
 		return nullptr;
 

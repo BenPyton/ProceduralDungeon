@@ -24,6 +24,8 @@
 #include "Engine/LevelStreamingDynamic.h"
 #include "Misc/EngineVersionComparison.h"
 #include "ProceduralDungeonCustomVersion.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
 
 void URoom::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -509,12 +511,21 @@ void URoom::SetVisible(bool Visible)
 		UpdateVisibility();
 }
 
-void URoom::SetPlayerInside(bool PlayerInside)
+void URoom::SetPlayerInside(const FUniqueNetIdRepl& PlayerID, bool PlayerInside)
 {
-	if (bPlayerInside == PlayerInside)
+	if (PlayerIDInside.Contains(PlayerID) != PlayerInside)
 		return;
 
-	bPlayerInside = PlayerInside;
+	if (PlayerInside)
+		PlayerIDInside.Add(PlayerID);
+	else
+		PlayerIDInside.Remove(PlayerID);
+}
+
+bool URoom::IsPlayerInside(int PlayerID) const
+{
+	FUniqueNetIdRepl UniqueID = ActorUtils::GetPlayerUniqueId(GetWorld(), PlayerID);
+	return PlayerIDInside.Contains(UniqueID);
 }
 
 bool URoom::CreateCustomData(const TSubclassOf<URoomCustomData>& DataType)

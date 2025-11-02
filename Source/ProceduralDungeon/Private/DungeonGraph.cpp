@@ -470,10 +470,11 @@ const URoom* UDungeonGraph::FindFirstRoomByPredicate(TFunction<bool(const URoom*
 	return nullptr;
 }
 
-void UDungeonGraph::TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* OutRooms, uint32 Distance, TFunction<void(URoom*)> Func)
+void UDungeonGraph::TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* OutRooms, uint32 Distance, TFunction<void(URoom*, uint32)> Func)
 {
 	TSet<URoom*> openList(InRooms);
 	TSet<URoom*> closedList, currentList;
+	const uint32 MaxDistance = Distance;
 	while (Distance > 0 && openList.Num() > 0)
 	{
 		for (URoom* openRoom : openList)
@@ -483,7 +484,7 @@ void UDungeonGraph::TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* Out
 		openList.Empty();
 		for (URoom* currentRoom : currentList)
 		{
-			Func(currentRoom);
+			Func(currentRoom, MaxDistance - Distance);
 			for (int i = 0; i < currentRoom->GetConnectionCount(); ++i)
 			{
 				URoom* nextRoom = currentRoom->GetConnectedRoom(i).Get();

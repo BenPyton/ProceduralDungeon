@@ -11,6 +11,11 @@
 #include "ProceduralDungeonLog.h"
 #include "Math/GenericOctree.h"		// FBoxCenterAndExtent
 #include "ProceduralDungeonTypes.h" // FBoxMinAndMax
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
+#include "GameFramework/GameState.h"
+#include "Components/PrimitiveComponent.h"
 
 FIntVector IntVector::Min(const FIntVector& A, const FIntVector& B)
 {
@@ -240,4 +245,62 @@ void ObjectUtils::DispatchToObjectAndSubobjects(UObject* Obj, TFunction<void(UOb
 	{
 		DispatchToObjectAndSubobjects(Sub, Func, Depth);
 	}
+}
+
+FBox ActorUtils::GetActorBoundingBoxForRooms(AActor* Actor, const FTransform& DungeonTransform)
+{
+	if (!IsValid(Actor))
+	{
+		DungeonLog_Error("Invalid Actor provided.");
+		return FBox(ForceInit);
+	}
+
+	// Copied from AActor::GetComponentsBoundingBox but check also collision response with the room object type
+	FBox ActorBox(ForceInit);
+	Actor->ForEachComponent<UPrimitiveComponent>(/*bIncludeFromChildActors = */ false, [&](const UPrimitiveComponent* Component) {
+		if (Component->IsRegistered()
+			&& Component->IsCollisionEnabled()
+			&& Component->GetCollisionResponseToChannel(Dungeon::RoomObjectType()) != ECollisionResponse::ECR_Ignore)
+		{
+			ActorBox += Component->Bounds.GetBox();
+		}
+	});
+
+	ActorBox = ActorBox.InverseTransformBy(DungeonTransform);
+	return ActorBox;
+}
+
+FUniqueNetIdRepl ActorUtils::GetPlayerUniqueId(const UObject* WorldContextObject, int32 PlayerIndex)
+{
+	APlayerController* Controller = UGameplayStatics::GetPlayerController(WorldContextObject, PlayerIndex);
+	if (!IsValid(Controller) || !IsValid(Controller->PlayerState))
+		return FUniqueNetIdRepl::Invalid();
+
+	return Controller->PlayerState->GetUniqueId();
+}
+
+int32 ActorUtils::GetPlayerIndex(const UObject* WorldContextObject, const FUniqueNetIdRepl& PlayerUniqueId)
+{
+	for (int32 Index = 0;; ++Index)
+	{
+		APlayerController* Controller = UGameplayStatics::GetPlayerController(WorldContextObject, Index);
+		if (!IsValid(Controller))
+			break;
+
+		if (!IsValid(Controller->PlayerState))
+			continue;
+
+		FUniqueNetIdRepl UniqueId = Controller->PlayerState->GetUniqueId();
+		if (UniqueId == PlayerUniqueId)
+			return Index;
+	}
+	return -1;
+}
+
+APlayerController* ActorUtils::GetPlayerControllerFromUniqueId(const UObject* WorldContextObject, const FUniqueNetIdRepl& PlayerUniqueId)
+{
+	APlayerState* State = UGameplayStatics::GetPlayerStateFromUniqueNetId(WorldContextObject, PlayerUniqueId);
+	if (!IsValid(State))
+		return nullptr;
+	return State->GetPlayerController();
 }

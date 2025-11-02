@@ -152,3 +152,18 @@ namespace ObjectUtils
 {
 	void PROCEDURALDUNGEON_API DispatchToObjectAndSubobjects(UObject* Obj, TFunction<void(UObject*)> Func, int32 Depth = 0);
 }
+
+namespace ActorUtils
+{
+	// Returns the bounding box of an actor considering only components that would interact with rooms (based on collision settings).
+	FBox PROCEDURALDUNGEON_API GetActorBoundingBoxForRooms(AActor* Actor, const FTransform& DungeonTransform = FTransform::Identity);
+
+	// Returns the unique id associated with the player index.
+	FUniqueNetIdRepl PROCEDURALDUNGEON_API GetPlayerUniqueId(const UObject* WorldContextObject, int32 PlayerIndex);
+
+	// Returns the index of the player with unique Id.
+	int32 PROCEDURALDUNGEON_API GetPlayerIndex(const UObject* WorldContextObject, const FUniqueNetIdRepl& PlayerUniqueId);
+
+	// Returns the controller of the player with unique Id.
+	class APlayerController* GetPlayerControllerFromUniqueId(const UObject* WorldContextObject, const FUniqueNetIdRepl& PlayerUniqueId);
+}
