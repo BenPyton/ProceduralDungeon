@@ -485,15 +485,16 @@ void ADungeonGeneratorBase::UpdateRoomVisibility()
 
 	const bool bIsOcclusionEnabled = Dungeon::OcclusionCulling();
 	const uint32 OcclusionDistance = Dungeon::OcclusionDistance();
+	bool bForceUpdate = false;
 
 	// Detects occlusion setting changes and toggles on/off all room visibilities when occlusion is enabled/disabled.
 	if (bWasOcclusionEnabled != bIsOcclusionEnabled
 		|| PreviousOcclusionDistance != OcclusionDistance)
 	{
-		PlayerRoom->OldRooms.Empty();
+		bForceUpdate = true;
 		for (URoom* Room : Graph->GetAllRooms())
 		{
-			Room->SetVisible(!bIsOcclusionEnabled);
+			Room->SetVisible(!bIsOcclusionEnabled, /*bForceUpdate=*/true);
 		}
 	}
 	bWasOcclusionEnabled = bIsOcclusionEnabled;
@@ -504,7 +505,7 @@ void ADungeonGeneratorBase::UpdateRoomVisibility()
 		return;
 
 	// Save performance by not updating room visibilities if the player rooms haven't changed.
-	if (!PlayerRoom->bHasChanged)
+	if (!(bForceUpdate || PlayerRoom->bHasChanged))
 		return;
 
 	TSet<URoom*> VisibleRooms;

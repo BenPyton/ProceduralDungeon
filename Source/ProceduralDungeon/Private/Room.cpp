@@ -551,11 +551,11 @@ FTransform URoom::GetTransform() const
 	return Transform;
 }
 
-void URoom::SetVisible(bool Visible)
+void URoom::SetVisible(bool Visible, bool bForceUpdate)
 {
 	const bool bWasVisible = IsVisible();
 	bIsVisible = Visible;
-	if (bWasVisible != IsVisible())
+	if (bForceUpdate || bWasVisible != IsVisible())
 		UpdateVisibility();
 }
 

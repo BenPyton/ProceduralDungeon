@@ -79,7 +79,7 @@ public:
 
 	const ADungeonGeneratorBase* Generator() const { return GeneratorOwner.Get(); }
 	void SetPlayerInside(const FUniqueNetIdRepl& PlayerID, bool PlayerInside);
-	void SetVisible(bool Visible);
+	void SetVisible(bool Visible, bool bForceUpdate = false);
 	void SetRelevancyLevel(FUniqueNetIdRepl PlayerID, int32 Level);
 	FORCEINLINE bool IsReady() const { return RoomData != nullptr; }
 
