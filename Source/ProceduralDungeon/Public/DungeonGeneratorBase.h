@@ -416,7 +416,7 @@ private:
 
 	// Occlusion culling system
 	TUniquePtr<FDungeonOctree> Octree;
-	TMap<FUniqueNetIdRepl, FPlayerRooms> PlayerRooms;
+	TMap<int32, FPlayerRooms> PlayerRooms;
 
 	// Transient. Only used to detect when occlusion setting is changed.
 	bool bWasOcclusionEnabled {false};

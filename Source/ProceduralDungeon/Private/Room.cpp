@@ -236,7 +236,7 @@ int32 URoom::GetRelevancyLevel(APlayerController* PlayerController) const
 	if (!IsValid(PlayerController->PlayerState))
 		return -1;
 
-	const int32* Level = RelevancyLevels.Find(PlayerController->PlayerState->GetUniqueId());
+	const int32* Level = RelevancyLevels.Find(PlayerController->PlayerState->GetPlayerId());
 	return (Level != nullptr) ? *Level : -1;
 }
 
@@ -267,7 +267,7 @@ void URoom::GetAllRelevancyLevels(TMap<APlayerController*, int32>& OutRelevancyL
 	OutRelevancyLevels.Empty();
 	for (const auto& Pair : RelevancyLevels)
 	{
-		APlayerController* Controller = ActorUtils::GetPlayerControllerFromUniqueId(this, Pair.Key);
+		APlayerController* Controller = ActorUtils::GetPlayerControllerFromPlayerId(this, Pair.Key);
 		if (IsValid(Controller))
 			OutRelevancyLevels.Add(Controller, Pair.Value);
 	}
@@ -559,7 +559,7 @@ void URoom::SetVisible(bool Visible, bool bForceUpdate)
 		UpdateVisibility();
 }
 
-void URoom::SetRelevancyLevel(FUniqueNetIdRepl PlayerID, int32 Level)
+void URoom::SetRelevancyLevel(int32 PlayerID, int32 Level)
 {
 	int32* FoundLevel = RelevancyLevels.Find(PlayerID);
 	if (Level < 0)
@@ -574,12 +574,12 @@ void URoom::SetRelevancyLevel(FUniqueNetIdRepl PlayerID, int32 Level)
 			return;
 		RelevancyLevels.Add(PlayerID, Level);
 	}
-	APlayerController* Controller = ActorUtils::GetPlayerControllerFromUniqueId(GetWorld(), PlayerID);
-	DungeonLog_Debug("Found player controller for id '%s': %s", *PlayerID.ToString(), *GetNameSafe(Controller));
+	APlayerController* Controller = ActorUtils::GetPlayerControllerFromPlayerId(GetWorld(), PlayerID);
+	DungeonLog_Debug("Found player controller for id %d: %s", PlayerID, *GetNameSafe(Controller));
 	OnRelevancyChanged.Broadcast(this, Controller, Level);
 }
 
-void URoom::SetPlayerInside(const FUniqueNetIdRepl& PlayerID, bool PlayerInside)
+void URoom::SetPlayerInside(int32 PlayerID, bool PlayerInside)
 {
 	if (PlayerIDInside.Contains(PlayerID) != PlayerInside)
 		return;
@@ -590,9 +590,11 @@ void URoom::SetPlayerInside(const FUniqueNetIdRepl& PlayerID, bool PlayerInside)
 		PlayerIDInside.Remove(PlayerID);
 }
 
-bool URoom::IsPlayerInside(int PlayerID) const
+bool URoom::IsPlayerInside(const APlayerController* PlayerController) const
 {
-	FUniqueNetIdRepl UniqueID = ActorUtils::GetPlayerUniqueId(GetWorld(), PlayerID);
+	if (!IsValid(PlayerController) || !IsValid(PlayerController->PlayerState))
+		return !PlayerIDInside.IsEmpty();
+	int32 UniqueID = PlayerController->PlayerState->GetPlayerId();
 	return PlayerIDInside.Contains(UniqueID);
 }
 

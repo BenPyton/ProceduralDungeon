@@ -15,7 +15,6 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/GameState.h"
-#include "Components/PrimitiveComponent.h"
 
 FIntVector IntVector::Min(const FIntVector& A, const FIntVector& B)
 {
@@ -270,36 +269,21 @@ FBox ActorUtils::GetActorBoundingBoxForRooms(AActor* Actor, const FTransform& Du
 	return ActorBox;
 }
 
-FUniqueNetIdRepl ActorUtils::GetPlayerUniqueId(const UObject* WorldContextObject, int32 PlayerIndex)
+APlayerController* ActorUtils::GetPlayerControllerFromPlayerId(const UObject* WorldContextObject, int32 PlayerId)
 {
-	APlayerController* Controller = UGameplayStatics::GetPlayerController(WorldContextObject, PlayerIndex);
-	if (!IsValid(Controller) || !IsValid(Controller->PlayerState))
-		return FUniqueNetIdRepl::Invalid();
+	UWorld* World = WorldContextObject->GetWorld();
+	if (!IsValid(World))
+		return nullptr;
 
-	return Controller->PlayerState->GetUniqueId();
-}
+	AGameStateBase* GameState = World->GetGameState();
+	if (!IsValid(GameState))
+		return nullptr;
 
-int32 ActorUtils::GetPlayerIndex(const UObject* WorldContextObject, const FUniqueNetIdRepl& PlayerUniqueId)
-{
-	for (int32 Index = 0;; ++Index)
-	{
-		APlayerController* Controller = UGameplayStatics::GetPlayerController(WorldContextObject, Index);
-		if (!IsValid(Controller))
-			break;
+	const auto* StatePtr = GameState->PlayerArray.FindByPredicate([PlayerId](const APlayerState* State) { return State->GetPlayerId() == PlayerId; });
+	if (StatePtr == nullptr)
+		return nullptr;
 
-		if (!IsValid(Controller->PlayerState))
-			continue;
-
-		FUniqueNetIdRepl UniqueId = Controller->PlayerState->GetUniqueId();
-		if (UniqueId == PlayerUniqueId)
-			return Index;
-	}
-	return -1;
-}
-
-APlayerController* ActorUtils::GetPlayerControllerFromUniqueId(const UObject* WorldContextObject, const FUniqueNetIdRepl& PlayerUniqueId)
-{
-	APlayerState* State = UGameplayStatics::GetPlayerStateFromUniqueNetId(WorldContextObject, PlayerUniqueId);
+	const APlayerState* State = *StatePtr;
 	if (!IsValid(State))
 		return nullptr;
 	return State->GetPlayerController();
