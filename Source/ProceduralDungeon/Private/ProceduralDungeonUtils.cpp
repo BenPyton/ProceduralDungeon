@@ -286,5 +286,14 @@ APlayerController* ActorUtils::GetPlayerControllerFromPlayerId(const UObject* Wo
 	const APlayerState* State = *StatePtr;
 	if (!IsValid(State))
 		return nullptr;
+
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
+	const APawn* Pawn = State->GetPawn();
+	if (!IsValid(Pawn))
+		return nullptr;
+
+	return Cast<APlayerController>(Pawn->GetController());
+#else
 	return State->GetPlayerController();
+#endif
 }
