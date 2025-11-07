@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a new Data Asset called `Dungeon Settings` to allow overriding the `Room Unit` in the `Dungeon Generator` class.
 - Added a compatibility list in `Door Type` assets, so different door types may be compatible
 - Added `Try Place Room At Location` for custom dungeon algorithms to place a room without using a `Door Def` structure.
+- Added a relevancy system for the rooms (independent from the room visibilities).
+  - You can set a distance from which a room is considered relevant to the player.
+  - A relevant room has a value to tell how close the player is to the room (the lower, the closest) with 0 the room where the player is in.
+  - Some new nodes in the `Room` instances are available to access this relevancy level, and an event dispatcher to be notified when this relevancy changes.
 
 ### Changed
 
@@ -21,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated the `Dungeon Generator Base` class to allow spreading the `Create Dungeon` work on multiple frames.
   - Added a `Yield Generation` node to tell the generator to call the `Create Dungeon` again the next frame (must be used in the `Create Dungeon` function only).
   - Updated the `Create Dungeon` function in `Dungeon Generator` to limit number of room generated per frame (can be set with `Room Batch Size` in the actor's details).
+- Room Visibility system now handles properly local multiplayer (splitscreens)
+  - The `Get Visibility Pawn` overridable function now takes a `Player Controller` as input.
+
+### Fixed
+- Fixed room visibilities to be updated properly when toggling or changing occlusion distance.
 
 ## [3.6.4] - 2025-09-30
 
