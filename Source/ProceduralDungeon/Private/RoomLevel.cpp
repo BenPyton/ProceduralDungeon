@@ -177,9 +177,9 @@ void ARoomLevel::Tick(float DeltaTime)
 #endif // ENABLE_DRAW_DEBUG
 }
 
-bool ARoomLevel::IsPlayerInside()
+bool ARoomLevel::IsPlayerInside(const APlayerController* PlayerController)
 {
-	return IsValid(Room) ? Room->IsPlayerInside() : false;
+	return IsValid(Room) ? Room->IsPlayerInside(PlayerController) : false;
 }
 
 bool ARoomLevel::IsVisible()

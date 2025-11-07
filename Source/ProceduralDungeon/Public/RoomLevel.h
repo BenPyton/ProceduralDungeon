@@ -56,7 +56,7 @@ public:
 	FORCEINLINE bool IsInit() const { return bIsInit; }
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Player Inside", DeprecatedFunction, DeprecationMessage = "Use GetRoom() instead to access directly the room functions."))
-	bool IsPlayerInside();
+	bool IsPlayerInside(const APlayerController* PlayerController = nullptr);
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Visible", DeprecatedFunction, DeprecationMessage = "Use GetRoom() instead to access directly the room functions."))
 	bool IsVisible();
