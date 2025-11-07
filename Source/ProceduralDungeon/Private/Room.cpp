@@ -593,7 +593,7 @@ void URoom::SetPlayerInside(int32 PlayerID, bool PlayerInside)
 bool URoom::IsPlayerInside(const APlayerController* PlayerController) const
 {
 	if (!IsValid(PlayerController) || !IsValid(PlayerController->PlayerState))
-		return !PlayerIDInside.IsEmpty();
+		return PlayerIDInside.Num() > 0;
 	int32 UniqueID = PlayerController->PlayerState->GetPlayerId();
 	return PlayerIDInside.Contains(UniqueID);
 }
