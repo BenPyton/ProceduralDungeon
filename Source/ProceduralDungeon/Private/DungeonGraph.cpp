@@ -368,23 +368,27 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 		// Try each possible door
 		for (int i = 0; i < RoomData->GetNbDoor(); ++i)
 		{
-			FDoorDef Door = RoomData->Doors[i];
+			const FDoorDef& Door = RoomData->Doors[i];
 
 			// Filter out the door candidate if not compatible with the door
 			// we want to connect from.
 			if (!FDoorDef::AreCompatible(TargetDoor, Door))
 				continue;
 
-			// Create a new bounds placed at the target door
-			EDoorDirection Direction = TargetDoor.Direction - Door.Direction;
-			FVoxelBounds NewBounds = Rotate(DataBounds, Direction);
-			NewBounds += TargetDoor.Position - Rotate(Door.Position, Direction);
+			// Compute new room placement
+			const EDoorDirection RoomDirection = TargetDoor.Direction - Door.Direction;
+			const FIntVector RoomLocation = TargetDoor.Position - Rotate(Door.Position, RoomDirection);
+
+			// Filter out the rooms that does not pass the constraints
+			if (!URoomData::DoesPassAllConstraints(RoomData, RoomLocation, RoomDirection))
+				continue;
 
 			FRoomCandidate Candidate;
 			Candidate.Data = RoomData;
 			Candidate.DoorIndex = i;
 
-			// Check if the room can fit
+			// Check if the new bounds placed at the target door can fit
+			const FVoxelBounds NewBounds = Rotate(DataBounds, RoomDirection) + RoomLocation;
 			if (!NewBounds.GetCompatibilityScore(Bounds, Candidate.Score, CustomScore))
 				continue;
 

@@ -25,6 +25,7 @@ class UDungeonGraph;
 class URoomCustomData;
 class UDoorType;
 class UDungeonSettings;
+class URoomConstraint;
 
 #if WITH_EDITOR
 class URoomData;
@@ -62,6 +63,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Room", AdvancedDisplay)
 	UDungeonSettings* SettingsOverrides {nullptr};
+
+	UPROPERTY(EditAnywhere, Instanced, BlueprintReadOnly, Category = "Room")
+	TArray<URoomConstraint*> Constraints;
 
 public:
 	URoomData();
@@ -113,6 +117,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Room Data")
 	FVector GetRoomUnit() const;
+
+	UFUNCTION(BlueprintPure, Category = "Room Contraint")
+	static bool DoesPassAllConstraints(const URoomData* RoomData, FIntVector Location, EDoorDirection Direction);
 
 	class FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
 	FBoxMinAndMax GetIntBounds() const;

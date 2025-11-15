@@ -12,6 +12,7 @@
 #include "Room.h"
 #include "RoomData.h"
 #include "TestUtils.h"
+#include "./Classes/RoomConstraintChildClasses.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
@@ -298,9 +299,19 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			// |				|
 			// D				D
 
+			CREATE_DATA_ASSET(UConstraintPass, Pass);
+			CREATE_DATA_ASSET(UConstraintFail, Fail);
+
 			CREATE_ROOM_DATA(DA_E);
 			DA_E->SecondPoint = {1, 2, 1};
 			DA_E->Doors.Add({{0, 1, 0}, EDoorDirection::North});
+			DA_E->Constraints.Add(Pass.Get());
+
+			// Same as DA_E but constraint fail
+			CREATE_ROOM_DATA(DA_F);
+			DA_F->SecondPoint = {1, 2, 1};
+			DA_F->Doors.Add({{0, 1, 0}, EDoorDirection::North});
+			DA_F->Constraints.Add(Fail.Get());
 
 			CREATE_ROOM(Room0, DA_C);
 			CREATE_ROOM(Room1, DA_B);
@@ -319,7 +330,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			// Room positions are modified manually, so we need to explicitely rebuild bounds
 			Graph->RebuildBounds();
 
-			const TArray<URoomData*> RoomList = {DA_A.Get(), DA_D.Get(), DA_E.Get()};
+			const TArray<URoomData*> RoomList = {DA_A.Get(), DA_D.Get(), DA_E.Get(), DA_F.Get()};
 			TArray<FRoomCandidate> SortedRooms;
 
 			{
@@ -330,6 +341,18 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 				TestEqual(TEXT("RoomData D should be the best candidate"), SortedRooms[0].Data, DA_D.Get());
 				TestEqual(TEXT("RoomData D Door index 0 should be the best candidate"), SortedRooms[0].DoorIndex, 0);
 				TestEqual(TEXT("RoomData A should be the worst candidate"), SortedRooms[3].Data, DA_A.Get());
+
+				bool bContainsE = false;
+				bool bContainsF = false;
+				for (const FRoomCandidate& Candidate : SortedRooms)
+				{
+					bContainsE |= (Candidate.Data == DA_E.Get());
+					bContainsF |= (Candidate.Data == DA_F.Get());
+				}
+
+				// DA_E and DA_F are the same, but DA_F has a failing constraint
+				TestTrue(TEXT("RoomData E should be a valid candidate"), bContainsE);
+				TestFalse(TEXT("RoomData F should not be a valid candidate"), bContainsF);
 			}
 
 			{
