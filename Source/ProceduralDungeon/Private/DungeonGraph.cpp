@@ -343,13 +343,10 @@ FVector UDungeonGraph::GetDungeonBoundsExtent() const
 	return GetDungeonBounds(Transform).Extent;
 }
 
-struct FRoomCandidatePredicate
+static bool RoomCandidatePredicate(const FRoomCandidate& A, const FRoomCandidate& B)
 {
-	bool operator()(const FRoomCandidate& A, const FRoomCandidate& B) const
-	{
-		return A.Score > B.Score;
-	}
-};
+	return A.Score > B.Score;
+}
 
 bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms, const FScoreCallback& CustomScore) const
 {
@@ -387,7 +384,7 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 			if (!NewBounds.GetCompatibilityScore(Bounds, Candidate.Score, CustomScore))
 				continue;
 
-			SortedRooms.HeapPush(Candidate, FRoomCandidatePredicate());
+			SortedRooms.HeapPush(Candidate, ::RoomCandidatePredicate);
 		}
 	}
 
