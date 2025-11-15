@@ -866,6 +866,40 @@ URoomData* ADungeonGeneratorBase::GetRandomRoomDataWeighted(const TMap<URoomData
 	return Dungeon::GetWeightedAt(RoomDataWeightedMap, Chosen);
 }
 
+const FRoomCandidate& ADungeonGeneratorBase::GetRandomRoomCandidate(const TArray<FRoomCandidate>& RoomCandidates, bool bUseScoresAsWeights) const
+{
+	if (RoomCandidates.Num() <= 0)
+		return FRoomCandidate::Invalid;
+
+	if (!bUseScoresAsWeights)
+	{
+		int32 n = GetRandomStream().RandRange(0, RoomCandidates.Num() - 1);
+		return RoomCandidates[n];
+	}
+	else
+	{
+		int32 TotalScore = 0;
+		for (const FRoomCandidate& Candidate : RoomCandidates)
+		{
+			if (Candidate.Score > 0)
+				TotalScore += Candidate.Score;
+		}
+
+		int32 n = GetRandomStream().RandRange(0, TotalScore - 1);
+
+		for (const FRoomCandidate& Candidate : RoomCandidates)
+		{
+			if (Candidate.Score <= 0)
+				continue;
+			n -= Candidate.Score;
+			if (n <= 0)
+				return Candidate;
+		}
+	}
+
+	return FRoomCandidate::Invalid;
+}
+
 void ADungeonGeneratorBase::GetCompatibleRoomData(bool& bSuccess, TArray<URoomData*>& CompatibleRooms, const TArray<URoomData*>& RoomDataArray, const FDoorDef& DoorData)
 {
 	for (URoomData* RoomData : RoomDataArray)

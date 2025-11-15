@@ -24,24 +24,6 @@ class URoomCustomData;
 class URoomConnection;
 class ADungeonGeneratorBase;
 
-// Describe a potential room to be added to the dungeon.
-// Mainly used by FilterAndSortRooms function.
-USTRUCT(BlueprintType)
-struct FRoomCandidate
-{
-	GENERATED_BODY();
-
-public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
-	URoomData* Data {nullptr};
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
-	int32 DoorIndex {-1};
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
-	int32 Score {-1};
-};
-
 // Holds the generated dungeon.
 // You can access the rooms using many functions.
 UCLASS(BlueprintType)

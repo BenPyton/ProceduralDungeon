@@ -185,3 +185,24 @@ public:
 };
 
 FBoxMinAndMax PROCEDURALDUNGEON_API Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot);
+
+// Describe a potential room to be added to the dungeon.
+// Mainly used by FilterAndSortRooms function.
+USTRUCT(BlueprintType)
+struct PROCEDURALDUNGEON_API FRoomCandidate
+{
+	GENERATED_BODY();
+
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
+	class URoomData* Data {nullptr};
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
+	int32 DoorIndex {-1};
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
+	int32 Score {-1};
+
+public:
+	static FRoomCandidate Invalid;
+};
