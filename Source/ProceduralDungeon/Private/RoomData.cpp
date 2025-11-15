@@ -10,9 +10,11 @@
 #include "RoomCustomData.h"
 #include "ProceduralDungeonTypes.h"
 #include "ProceduralDungeonUtils.h"
+#include "ProceduralDungeonLog.h"
 #include "DoorType.h"
 #include "Math/GenericOctree.h" // FBoxCenterAndExtent
 #include "DungeonSettings.h"
+#include "RoomConstraints/RoomConstraint.h"
 
 #if !USE_LEGACY_DATA_VALIDATION
 	#include "Misc/DataValidation.h"
@@ -116,6 +118,27 @@ void URoomData::CleanupRoom_Implementation(URoom* Room, UDungeonGraph* Dungeon) 
 FVector URoomData::GetRoomUnit() const
 {
 	return UDungeonSettings::GetRoomUnit(GetSettings());
+}
+
+bool URoomData::DoesPassAllConstraints(const URoomData* RoomData, FIntVector Location, EDoorDirection Direction)
+{
+	if (!IsValid(RoomData))
+	{
+		return false;
+	}
+
+	for (const URoomConstraint* Constraint : RoomData->Constraints)
+	{
+		if (!IsValid(Constraint))
+		{
+			DungeonLog_WarningSilent("Invalid constraint detected in RoomData %s", *GetNameSafe(RoomData));
+			continue;
+		}
+
+		if (!Constraint->Check(RoomData, Location, Direction))
+			return false;
+	}
+	return true;
 }
 
 FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
