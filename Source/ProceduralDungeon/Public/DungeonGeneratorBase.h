@@ -174,6 +174,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Dungeon Generator")
 	URoomData* GetRandomRoomDataWeighted(const TMap<URoomData*, int>& RoomDataWeightedMap);
 
+	// Returns a random RoomCandidate from the array provided
+	// When the scores are used as weights, zero and negative scores are discarded automatically
+	UFUNCTION(BlueprintCallable, Category = "Dungeon Graph", meta = (AdvancedDisplay = "bUseScoresAsWeights"))
+	const FRoomCandidate& GetRandomRoomCandidate(const TArray<FRoomCandidate>& RoomCandidates, bool bUseScoresAsWeights = true) const;
+
 	// Returns an array of room data with at least one compatible door with the door data provided.
 	// @param bSuccess True if at least one compatible room data was found.
 	// @param CompatibleRooms Filled with all compatible room data found.

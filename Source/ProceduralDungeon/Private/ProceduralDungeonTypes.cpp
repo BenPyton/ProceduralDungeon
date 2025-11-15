@@ -478,3 +478,5 @@ FBoxMinAndMax Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot)
 	NewBox.Rotate(Rot);
 	return NewBox;
 }
+
+FRoomCandidate FRoomCandidate::Invalid = FRoomCandidate();
