@@ -247,7 +247,7 @@ URoom* UDungeonGraph::GetRandomRoom(const TArray<URoom*>& RoomList) const
 		return nullptr;
 	}
 
-	if (!HasRooms())
+	if (RoomList.Num() <= 0)
 		return nullptr;
 
 	int32 rand = Generator->GetRandomStream().FRandRange(0, RoomList.Num() - 1);
