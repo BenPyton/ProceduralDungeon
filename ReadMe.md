@@ -1,7 +1,7 @@
 # Procedural Dungeon Plugin
 
 [![Plugin version number](https://img.shields.io/github/v/release/BenPyton/ProceduralDungeon?label=Version)](https://github.com/BenPyton/ProceduralDungeon/releases/latest)
-[![Unreal Engine Supported Versions](https://img.shields.io/badge/Unreal_Engine-4.27_%7C_5.3_%7C_5.4_%7C_5.5_%7C_5.6-9455CE?logo=unrealengine)](https://github.com/BenPyton/ProceduralDungeon/releases)
+[![Unreal Engine Supported Versions](https://img.shields.io/badge/Unreal_Engine-4.27_%7C_5.3_%7C_5.4_%7C_5.5_%7C_5.6_%7C_5.7-9455CE?logo=unrealengine)](https://github.com/BenPyton/ProceduralDungeon/releases)
 [![License](https://img.shields.io/badge/License-CeCILL--C_or_Fab_EULA-blue)](LICENSE)
 ![Download count](https://img.shields.io/github/downloads/BenPyton/ProceduralDungeon/total?label=Downloads)
 [![Actively Maintained](https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-green.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
@@ -15,7 +15,9 @@ Rooms are handmade Unreal levels instanced in the world.
 You define their size and their doors as well as several other parameters.
 You code your own rules in blueprints or C++, with great flexibility and customization, to generate the dungeons ***you*** want.
 
-If you have any bug or crash, please open an issue in the Github repo.\
+You can get this plugin on [Fab](https://www.fab.com/fr/listings/62cbdceb-ae3c-4fe4-adac-39d751a15df9) too!
+
+If you have any bug or crash, please [open an issue](https://github.com/BenPyton/proceduralDungeon/issues/new?template=bug_report.yml) in the Github repo.\
 If you have suggestions, questions or need help to use the plugin you can join the [Discord server][Discord] dedicated to this plugin.\
 If you want to contribute, feel free to create a pull request (*contributions to the wiki are also welcomed!*).
 
@@ -169,6 +171,8 @@ This plugin is available under different licenses depending on the source from w
 - The [CeCILL-C license](https://cecill.info/licences/Licence_CeCILL-C_V1-en.html) applies when obtained from any other source.
 
 Please refer to the accompanying [LICENSE file](LICENSE.md) for further details.
+
+You can also take a look in [the wiki](https://benpyton.github.io/ProceduralDungeon/guides/Copyrights-and-Licenses) for the differences in the license terms.
 
 ## *Support Me*
 
