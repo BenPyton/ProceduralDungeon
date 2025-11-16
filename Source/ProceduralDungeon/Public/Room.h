@@ -87,7 +87,7 @@ public:
 	// A player can be in multiple rooms at once, for example when he stands at the door frame,
 	// the player's capsule is in both rooms.
 	UFUNCTION(BlueprintPure, Category = "Room")
-	FORCEINLINE bool IsPlayerInside(const APlayerController* PlayerController = nullptr) const;
+	bool IsPlayerInside(const APlayerController* PlayerController = nullptr) const;
 
 	// Is the room currently visible?
 	UFUNCTION(BlueprintPure, Category = "Room", meta = (CompactNodeTitle = "Is Visible"))
