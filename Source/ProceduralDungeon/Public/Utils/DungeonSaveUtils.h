@@ -56,6 +56,16 @@ bool SerializeUObjectArray(FStructuredArchive::FRecord& ParentRecord, FArchiveFi
 	return bSuccess;
 }
 
+void SerializeUObjectRef(FStructuredArchiveSlot Slot, UObject*& Object);
+
+template<typename T UE_REQUIRES(TIsDerivedFrom<T, UObject>::Value)>
+void SerializeUObjectRef(FStructuredArchiveSlot Slot, T*& Object)
+{
+	UObject* Obj = Object;
+	SerializeUObjectRef(Slot, Obj);
+	Object = Cast<T>(Obj);
+}
+
 // Can't make it an operator<< since it already exists.
 void SerializeUClass(FStructuredArchiveSlot Slot, UClass*& Class);
 

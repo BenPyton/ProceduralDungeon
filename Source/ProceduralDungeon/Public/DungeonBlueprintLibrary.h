@@ -15,6 +15,7 @@
 
 class URoom;
 class URoomCustomData;
+class ARoomLevel;
 
 UCLASS()
 class PROCEDURALDUNGEON_API UDungeonBlueprintLibrary : public UBlueprintFunctionLibrary
@@ -28,6 +29,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Utilities", meta = (DisplayName = "Equal (Data Table Row Handle)", CompactNodeTitle = "=="))
 	static bool CompareDataTableRows(const FDataTableRowHandle& A, const FDataTableRowHandle& B);
 
+	static const ARoomLevel* GetLevelScript(const AActor* Target);
+
 	// Returns the room instance the actor is in.
 	// If the actor is spawned at runtime or the owning level is not a room level, returns null.
 	UFUNCTION(BlueprintPure, Category = "Utilities|Procedural Dungeon", meta = (DefaultToSelf = "Target"))
@@ -37,6 +40,9 @@ public:
 	// If no owning room or no custom data of this type, returns null.
 	UFUNCTION(BlueprintCallable, Category = "Utilities|Procedural Dungeon", meta = (DefaultToSelf = "Target", ExpandBoolAsExecs = "ReturnValue", DeterminesOutputType = "CustomDataClass", DynamicOutputParam = "CustomData"))
 	static bool GetOwningRoomCustomData(const AActor* Target, TSubclassOf<URoomCustomData> CustomDataClass, URoomCustomData*& CustomData);
+	
+	UFUNCTION(BlueprintPure, Category = "Utilities|Procedural Dungeon", meta = (DefaultToSelf = "Target"))
+	static const URoomData* GetLevelRoomData(const AActor* Target);
 
 	UFUNCTION(BlueprintPure, Category = "DoorDef", meta = (DisplayName = "Opposite", CompactNodeTitle = "Opposite"))
 	static FDoorDef DoorDef_GetOpposite(const FDoorDef& DoorDef);
@@ -123,7 +129,7 @@ public:
 	// ===== Plugin Settings Accessors =====
 
 	// Returns the room unit size in unreal units
-	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Get Room Unit"))
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon|Settings", meta = (DisplayName = "Get Default Room Unit", DeprecatedFunction, DeprecationMessage = "Use the GetRoomUnit from the DungeonSettings class instead."))
 	static FVector Settings_RoomUnit();
 
 	// Returns the default door type's size

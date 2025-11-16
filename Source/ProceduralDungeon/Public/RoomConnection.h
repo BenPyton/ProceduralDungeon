@@ -69,6 +69,7 @@ public:
 	static int32 GetOtherDoorId(const URoomConnection* Conn, const URoom* FromRoom);
 	static ADoor* GetDoorInstance(const URoomConnection* Conn);
 	static class UDoorType* GetDoorType(const URoomConnection* Conn);
+	static void GetBothDoorTypes(const URoomConnection* Conn, UDoorType*& DoorTypeA, UDoorType*& DoorTypeB);
 
 	static URoomConnection* CreateConnection(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB, UObject* Outer, int32 IdInOuter);
 

@@ -56,7 +56,7 @@ public:
 	FORCEINLINE bool IsInit() const { return bIsInit; }
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Player Inside", DeprecatedFunction, DeprecationMessage = "Use GetRoom() instead to access directly the room functions."))
-	bool IsPlayerInside();
+	bool IsPlayerInside(const APlayerController* PlayerController = nullptr);
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Is Visible", DeprecatedFunction, DeprecationMessage = "Use GetRoom() instead to access directly the room functions."))
 	bool IsVisible();
@@ -68,7 +68,10 @@ public:
 	void Lock(bool lock);
 
 	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Room"))
-	URoom* GetRoom() { return Room; }
+	URoom* GetRoom() const { return Room; }
+
+	UFUNCTION(BlueprintPure, Category = "Procedural Dungeon", meta = (CompactNodeTitle = "Room Data"))
+	const URoomData* GetRoomData() const { return Data; }
 
 	UFUNCTION()
 	void OnTriggerBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

@@ -11,6 +11,7 @@
 #include "RoomData.h"
 #include "DoorType.h"
 #include "./Classes/RoomCustomDataChildClasses.h"
+#include "./Classes/RoomConstraintChildClasses.h"
 #include "UObject/Package.h"
 #include "TestUtils.h"
 #include "VoxelBounds/VoxelBounds.h"
@@ -401,6 +402,53 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 			FVoxelBounds ConvertedBounds = RoomDataC->GetVoxelBounds();
 			TestEqual("RoomDataC->GetVoxelBounds() == ExpectedBounds", ConvertedBounds, ExpectedBounds);
 		}
+	}
+
+	// Test Room Constraints
+	{
+	#define CHECK_CONSTRAINTS(DATA) URoomData::DoesPassAllConstraints(DATA, FIntVector::ZeroValue, EDoorDirection::North)
+
+		TestFalse("null data should fail.", CHECK_CONSTRAINTS(nullptr));
+
+		CREATE_DATA_ASSET(UConstraintPass, Pass);
+		CREATE_DATA_ASSET(UConstraintFail, Fail);
+
+		CREATE_ROOM_DATA(RoomDataA);
+		TestTrue("No constraint should pass.", CHECK_CONSTRAINTS(RoomDataA.Get()));
+
+		CREATE_ROOM_DATA(RoomDataB);
+		RoomDataB->Constraints.Add(Pass.Get());
+		TestTrue("One passing constraint should pass.", CHECK_CONSTRAINTS(RoomDataB.Get()));
+
+		CREATE_ROOM_DATA(RoomDataC);
+		RoomDataC->Constraints.Add(Fail.Get());
+		TestFalse("One failing constraint should fail.", CHECK_CONSTRAINTS(RoomDataC.Get()));
+
+		CREATE_ROOM_DATA(RoomDataD);
+		RoomDataD->Constraints.Add(Pass.Get());
+		RoomDataD->Constraints.Add(Pass.Get());
+		RoomDataD->Constraints.Add(Pass.Get());
+		TestTrue("All passing constraint should pass.", CHECK_CONSTRAINTS(RoomDataD.Get()));
+
+		CREATE_ROOM_DATA(RoomDataE);
+		RoomDataE->Constraints.Add(Fail.Get());
+		RoomDataE->Constraints.Add(Pass.Get());
+		RoomDataE->Constraints.Add(Pass.Get());
+		TestFalse("First failing constraint should fail.", CHECK_CONSTRAINTS(RoomDataE.Get()));
+
+		CREATE_ROOM_DATA(RoomDataF);
+		RoomDataF->Constraints.Add(Pass.Get());
+		RoomDataF->Constraints.Add(Fail.Get());
+		RoomDataF->Constraints.Add(Pass.Get());
+		TestFalse("Second failing constraint should fail.", CHECK_CONSTRAINTS(RoomDataF.Get()));
+
+		CREATE_ROOM_DATA(RoomDataG);
+		RoomDataG->Constraints.Add(Pass.Get());
+		RoomDataG->Constraints.Add(Pass.Get());
+		RoomDataG->Constraints.Add(Fail.Get());
+		TestFalse("Third failing constraint should fail.", CHECK_CONSTRAINTS(RoomDataG.Get()));
+
+	#undef CHECK_CONSTRAINTS
 	}
 
 	return true;

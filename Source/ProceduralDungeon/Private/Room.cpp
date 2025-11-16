@@ -23,6 +23,9 @@
 #include "Engine/Engine.h"
 #include "Engine/LevelStreamingDynamic.h"
 #include "Misc/EngineVersionComparison.h"
+#include "ProceduralDungeonCustomVersion.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
 
 void URoom::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -70,7 +73,7 @@ void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId
 	SetPosition(FIntVector::ZeroValue);
 	SetDirection(EDoorDirection::North);
 
-	if (RoomData.IsValid())
+	if (IsValid(RoomData))
 	{
 		MARK_PROPERTY_DIRTY_FROM_NAME(URoom, Connections, this);
 		Connections.SetNum(RoomData->GetNbDoor());
@@ -131,7 +134,7 @@ void URoom::Instantiate(UWorld* World)
 {
 	if (Instance == nullptr)
 	{
-		if (RoomData.IsNull())
+		if (!IsValid(RoomData))
 		{
 			DungeonLog_Error("Failed to instantiate the room: it has no RoomData.");
 			return;
@@ -157,7 +160,7 @@ void URoom::Instantiate(UWorld* World)
 		}
 		InstanceName.Appendf(TEXT("_%d"), Id);
 
-		FVector FinalLocation = rotation.RotateVector(Dungeon::RoomUnit() * FVector(Position)) + offset;
+		FVector FinalLocation = rotation.RotateVector(RoomData->GetRoomUnit() * FVector(Position)) + offset;
 		FQuat FinalRotation = rotation * ToQuaternion(Direction);
 		Instance = LoadInstance(World, Level, InstanceName.ToString(), FinalLocation, FinalRotation.Rotator());
 
@@ -222,6 +225,54 @@ void URoom::ForceVisibility(bool bForce)
 		UpdateVisibility();
 }
 
+int32 URoom::GetRelevancyLevel(APlayerController* PlayerController) const
+{
+	if (!IsValid(PlayerController))
+	{
+		DungeonLog_Warning("GetRelevancyLevel called with null PlayerController");
+		return -1;
+	}
+
+	if (!IsValid(PlayerController->PlayerState))
+		return -1;
+
+	const int32* Level = RelevancyLevels.Find(PlayerController->PlayerState->GetPlayerId());
+	return (Level != nullptr) ? *Level : -1;
+}
+
+int32 URoom::GetMaxRelevancyLevel() const
+{
+	int32 MaxLevel = -1;
+	for (const auto& Pair : RelevancyLevels)
+	{
+		if (Pair.Value > MaxLevel)
+			MaxLevel = Pair.Value;
+	}
+	return MaxLevel;
+}
+
+int32 URoom::GetMinRelevancyLevel() const
+{
+	int32 MinLevel = -1;
+	for (const auto& Pair : RelevancyLevels)
+	{
+		if (MinLevel < 0 || Pair.Value < MinLevel)
+			MinLevel = Pair.Value;
+	}
+	return MinLevel;
+}
+
+void URoom::GetAllRelevancyLevels(TMap<APlayerController*, int32>& OutRelevancyLevels) const
+{
+	OutRelevancyLevels.Empty();
+	for (const auto& Pair : RelevancyLevels)
+	{
+		APlayerController* Controller = ActorUtils::GetPlayerControllerFromPlayerId(this, Pair.Key);
+		if (IsValid(Controller))
+			OutRelevancyLevels.Add(Controller, Pair.Value);
+	}
+}
+
 void URoom::Lock(bool bLock)
 {
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(bIsLocked, bLock);
@@ -271,10 +322,7 @@ void URoom::OnRep_Id()
 
 void URoom::OnRep_RoomData()
 {
-	DungeonLog_Debug("[%s] Room '%s' RoomData Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomData.Get()));
-	// This is a hotfix to prevent the RoomData being garbage collected on clients.
-	// Do not use HardRoomData anywhere else.
-	HardRoomData = TStrongObjectPtr<URoomData>(RoomData.Get());
+	DungeonLog_Debug("[%s] Room '%s' RoomData Replicated: %s", *GetAuthorityName(), *GetNameSafe(this), *GetNameSafe(RoomData));
 }
 
 void URoom::OnRep_Connections()
@@ -352,7 +400,7 @@ FIntVector URoom::GetDoorWorldPosition(int DoorIndex) const
 
 bool URoom::IsDoorIndexValid(int32 DoorIndex) const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return DoorIndex >= 0 && DoorIndex < RoomData->Doors.Num();
 }
 
@@ -381,13 +429,13 @@ int URoom::GetOtherDoorIndex(int32 DoorIndex) const
 
 FDoorDef URoom::GetDoorDef(int32 DoorIndex) const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return RoomToWorld(RoomData->GetDoorDef(DoorIndex));
 }
 
 FDoorDef URoom::GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	int32 DoorIndex = GetDoorIndexAt(WorldPos, WorldRot);
 	return (DoorIndex >= 0) ? GetDoorDef(DoorIndex) : FDoorDef::Invalid;
 }
@@ -472,50 +520,82 @@ bool URoom::IsOccupied(FIntVector Cell)
 
 FBoxCenterAndExtent URoom::GetBounds() const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return RoomData->GetBounds(GetTransform());
 }
 
 FBoxCenterAndExtent URoom::GetLocalBounds() const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return RoomData->GetBounds();
 }
 
 FBoxMinAndMax URoom::GetIntBounds() const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return RoomToWorld(RoomData->GetIntBounds());
 }
 
 FVoxelBounds URoom::GetVoxelBounds() const
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	return RoomToWorld(RoomData->GetVoxelBounds());
 }
 
 FTransform URoom::GetTransform() const
 {
+	checkf(IsValid(RoomData), TEXT("Invalid RoomData in URoom class!"));
 	FTransform Transform;
-	Transform.SetLocation(FVector(Position) * Dungeon::RoomUnit());
+	Transform.SetLocation(FVector(Position) * RoomData->GetRoomUnit());
 	Transform.SetRotation(ToQuaternion(Direction));
 	return Transform;
 }
 
-void URoom::SetVisible(bool Visible)
+void URoom::SetVisible(bool Visible, bool bForceUpdate)
 {
 	const bool bWasVisible = IsVisible();
 	bIsVisible = Visible;
-	if (bWasVisible != IsVisible())
+	if (bForceUpdate || bWasVisible != IsVisible())
 		UpdateVisibility();
 }
 
-void URoom::SetPlayerInside(bool PlayerInside)
+void URoom::SetRelevancyLevel(int32 PlayerID, int32 Level)
 {
-	if (bPlayerInside == PlayerInside)
+	int32* FoundLevel = RelevancyLevels.Find(PlayerID);
+	if (Level < 0)
+	{
+		if (FoundLevel == nullptr)
+			return;
+		RelevancyLevels.Remove(PlayerID);
+	}
+	else
+	{
+		if (FoundLevel != nullptr && *FoundLevel == Level)
+			return;
+		RelevancyLevels.Add(PlayerID, Level);
+	}
+	APlayerController* Controller = ActorUtils::GetPlayerControllerFromPlayerId(GetWorld(), PlayerID);
+	DungeonLog_Debug("Found player controller for id %d: %s", PlayerID, *GetNameSafe(Controller));
+	OnRelevancyChanged.Broadcast(this, Controller, Level);
+}
+
+void URoom::SetPlayerInside(int32 PlayerID, bool PlayerInside)
+{
+	if (PlayerIDInside.Contains(PlayerID) != PlayerInside)
 		return;
 
-	bPlayerInside = PlayerInside;
+	if (PlayerInside)
+		PlayerIDInside.Add(PlayerID);
+	else
+		PlayerIDInside.Remove(PlayerID);
+}
+
+bool URoom::IsPlayerInside(const APlayerController* PlayerController) const
+{
+	if (!IsValid(PlayerController) || !IsValid(PlayerController->PlayerState))
+		return PlayerIDInside.Num() > 0;
+	int32 UniqueID = PlayerController->PlayerState->GetPlayerId();
+	return PlayerIDInside.Contains(UniqueID);
 }
 
 bool URoom::CreateCustomData(const TSubclassOf<URoomCustomData>& DataType)
@@ -534,7 +614,7 @@ bool URoom::CreateCustomData(const TSubclassOf<URoomCustomData>& DataType)
 
 bool URoom::CreateAllCustomData()
 {
-	check(RoomData.IsValid());
+	check(IsValid(RoomData));
 	bool bSucceeded = true;
 	for (auto Datum : RoomData->CustomData)
 	{
@@ -735,6 +815,28 @@ bool URoom::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading
 	Record.EnterField(AR_FIELD_NAME("ConnectionIds")) << SaveData->ConnectionIds;
 	Record.EnterField(AR_FIELD_NAME("LevelActor")) << SaveData->LevelActor;
 	Record.EnterField(AR_FIELD_NAME("Actors")) << SaveData->Actors;
+
+	// Handle old `RoomData` SoftObjectPtr
+	const int32 DungeonVersion = Record.GetUnderlyingArchive().CustomVer(FProceduralDungeonCustomVersion::GUID);
+	DungeonLog_Debug("Serializing RoomData (Version: %d, IsLoading: %d)", DungeonVersion, bIsLoading);
+	if (DungeonVersion < FProceduralDungeonCustomVersion::SoftObjectPtrFix)
+	{
+		if (bIsLoading)
+		{
+			const bool bIsSoftPtrNull = SoftRoomData_DEPRECATED.IsNull();
+			RoomData = !bIsSoftPtrNull ? SoftRoomData_DEPRECATED.Get() : nullptr;
+			SoftRoomData_DEPRECATED.Reset();
+			DungeonLog_Debug("Converted old RoomData SoftObjectPtr (IsNull: %d) to regular pointer: %s", bIsSoftPtrNull, *GetNameSafe(RoomData));
+		}
+		else
+		{
+			checkNoEntry(); // Should never happen when saving.
+		}
+	}
+	else
+	{
+		SerializeUObjectRef(Record.EnterField(AR_FIELD_NAME("RoomData")), RoomData);
+	}
 
 	if (!bIsLoading)
 	{

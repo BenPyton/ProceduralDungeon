@@ -11,6 +11,11 @@
 #include "ProceduralDungeonLog.h"
 #include "Math/GenericOctree.h"		// FBoxCenterAndExtent
 #include "ProceduralDungeonTypes.h" // FBoxMinAndMax
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
+#include "GameFramework/GameState.h"
+#include "Components/PrimitiveComponent.h"
 
 FIntVector IntVector::Min(const FIntVector& A, const FIntVector& B)
 {
@@ -28,50 +33,47 @@ void IntVector::MinMax(const FIntVector& A, const FIntVector& B, FIntVector& Out
 	OutMax = Max(A, B);
 }
 
-FVector Dungeon::ToWorldLocation(FIntVector RoomPoint)
+FVector Dungeon::ToWorldLocation(FIntVector RoomPoint, const FVector RoomUnit)
 {
-	return Dungeon::RoomUnit() * (FVector(RoomPoint) - FVector(0.5f, 0.5f, 0.0f));
+	return RoomUnit * (FVector(RoomPoint) - FVector(0.5f, 0.5f, 0.0f));
 }
 
-FVector Dungeon::ToWorldVector(FIntVector RoomPoint)
+FVector Dungeon::ToWorldVector(FIntVector RoomPoint, const FVector RoomUnit)
 {
-	return Dungeon::RoomUnit() * FVector(RoomPoint);
+	return RoomUnit * FVector(RoomPoint);
 }
 
-FBoxCenterAndExtent Dungeon::ToWorld(const FBoxMinAndMax& Box, const FTransform& Transform)
+FBoxCenterAndExtent Dungeon::ToWorld(const FBoxMinAndMax& Box, const FVector RoomUnit, const FTransform& Transform)
 {
-	return ToWorld(Box.ToCenterAndExtent(), Transform);
+	return ToWorld(Box.ToCenterAndExtent(), RoomUnit, Transform);
 }
 
-FBoxCenterAndExtent Dungeon::ToWorld(const FBoxCenterAndExtent& Box, const FTransform& Transform)
+FBoxCenterAndExtent Dungeon::ToWorld(const FBoxCenterAndExtent& Box, const FVector RoomUnit, const FTransform& Transform)
 {
-	const FVector Unit = Dungeon::RoomUnit();
-	const FVector Center = Transform.TransformPosition(Unit * Box.Center);
-	const FVector Extent = Transform.TransformVector(Unit * Box.Extent).GetAbs();
+	const FVector Center = Transform.TransformPositionNoScale(RoomUnit * Box.Center);
+	const FVector Extent = Transform.TransformVector(RoomUnit * Box.Extent).GetAbs();
 	return FBoxCenterAndExtent(Center, Extent);
 }
 
-FIntVector Dungeon::ToRoomLocation(FVector WorldPoint)
+FIntVector Dungeon::ToRoomLocation(FVector WorldPoint, const FVector RoomUnit)
 {
-	const FVector Unit = Dungeon::RoomUnit();
-	const int X = FMath::RoundToInt(0.5f + (WorldPoint.X) / Unit.X);
-	const int Y = FMath::RoundToInt(0.5f + (WorldPoint.Y) / Unit.Y);
-	const int Z = FMath::RoundToInt((WorldPoint.Z) / Unit.Z);
+	const int X = FMath::RoundToInt(0.5f + (WorldPoint.X) / RoomUnit.X);
+	const int Y = FMath::RoundToInt(0.5f + (WorldPoint.Y) / RoomUnit.Y);
+	const int Z = FMath::RoundToInt((WorldPoint.Z) / RoomUnit.Z);
 	return FIntVector(X, Y, Z);
 }
 
-FIntVector Dungeon::ToRoomVector(FVector WorldVector)
+FIntVector Dungeon::ToRoomVector(FVector WorldVector, const FVector RoomUnit)
 {
-	const FVector Unit = Dungeon::RoomUnit();
-	const int X = FMath::RoundToInt(WorldVector.X / Unit.X);
-	const int Y = FMath::RoundToInt(WorldVector.Y / Unit.Y);
-	const int Z = FMath::RoundToInt(WorldVector.Z / Unit.Z);
+	const int X = FMath::RoundToInt(WorldVector.X / RoomUnit.X);
+	const int Y = FMath::RoundToInt(WorldVector.Y / RoomUnit.Y);
+	const int Z = FMath::RoundToInt(WorldVector.Z / RoomUnit.Z);
 	return FIntVector(X, Y, Z);
 }
 
-FVector Dungeon::SnapPoint(FVector Point)
+FVector Dungeon::SnapPoint(FVector Point, const FVector RoomUnit)
 {
-	return ToWorldLocation(ToRoomLocation(Point));
+	return ToWorldLocation(ToRoomLocation(Point, RoomUnit), RoomUnit);
 }
 
 // =================== Plugin's Settings ========================
@@ -243,4 +245,56 @@ void ObjectUtils::DispatchToObjectAndSubobjects(UObject* Obj, TFunction<void(UOb
 	{
 		DispatchToObjectAndSubobjects(Sub, Func, Depth);
 	}
+}
+
+FBox ActorUtils::GetActorBoundingBoxForRooms(AActor* Actor, const FTransform& DungeonTransform)
+{
+	if (!IsValid(Actor))
+	{
+		DungeonLog_Error("Invalid Actor provided.");
+		return FBox(ForceInit);
+	}
+
+	// Copied from AActor::GetComponentsBoundingBox but check also collision response with the room object type
+	FBox ActorBox(ForceInit);
+	Actor->ForEachComponent<UPrimitiveComponent>(/*bIncludeFromChildActors = */ false, [&](const UPrimitiveComponent* Component) {
+		if (Component->IsRegistered()
+			&& Component->IsCollisionEnabled()
+			&& Component->GetCollisionResponseToChannel(Dungeon::RoomObjectType()) != ECollisionResponse::ECR_Ignore)
+		{
+			ActorBox += Component->Bounds.GetBox();
+		}
+	});
+
+	ActorBox = ActorBox.InverseTransformBy(DungeonTransform);
+	return ActorBox;
+}
+
+APlayerController* ActorUtils::GetPlayerControllerFromPlayerId(const UObject* WorldContextObject, int32 PlayerId)
+{
+	UWorld* World = WorldContextObject->GetWorld();
+	if (!IsValid(World))
+		return nullptr;
+
+	AGameStateBase* GameState = World->GetGameState();
+	if (!IsValid(GameState))
+		return nullptr;
+
+	const auto* StatePtr = GameState->PlayerArray.FindByPredicate([PlayerId](const APlayerState* State) { return State->GetPlayerId() == PlayerId; });
+	if (StatePtr == nullptr)
+		return nullptr;
+
+	const APlayerState* State = *StatePtr;
+	if (!IsValid(State))
+		return nullptr;
+
+#if UE_VERSION_OLDER_THAN(5, 0, 0)
+	const APawn* Pawn = State->GetPawn();
+	if (!IsValid(Pawn))
+		return nullptr;
+
+	return Cast<APlayerController>(Pawn->GetController());
+#else
+	return State->GetPlayerController();
+#endif
 }

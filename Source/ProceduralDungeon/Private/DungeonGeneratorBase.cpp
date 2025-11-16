@@ -7,8 +7,11 @@
 
 #include "DungeonGeneratorBase.h"
 #include "Engine/Engine.h" // GEngine
-#include "Kismet/GameplayStatics.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerState.h"
+#include "GameFramework/PlayerController.h"
+#include "Engine/LocalPLayer.h"
+#include "Engine/GameInstance.h"
 #include "NavigationSystem.h"
 #include "RoomData.h"
 #include "Room.h"
@@ -17,7 +20,6 @@
 #include "ProceduralDungeonUtils.h"
 #include "ProceduralDungeonLog.h"
 #include "DungeonGraph.h"
-#include "Components/PrimitiveComponent.h"
 #include "Utils/ReplicationUtils.h"
 #include "ProceduralDungeonCustomVersion.h"
 #include "Serialization/MemoryReader.h"
@@ -28,10 +30,7 @@
 #include "Utils/DungeonSaveUtils.h"
 #include "DrawDebugHelpers.h"
 #include "Utils/CompatUtils.h"
-
-#if UE_VERSION_OLDER_THAN(5, 5, 0)
-	#define SetNetUpdateFrequency(X) NetUpdateFrequency = X
-#endif
+#include "DungeonSettings.h"
 
 FArchive& operator<<(FArchive& Ar, FDungeonSaveData& Data)
 {
@@ -122,6 +121,42 @@ void ADungeonGeneratorBase::LoadDungeon(const FDungeonSaveData& SaveData)
 void ADungeonGeneratorBase::SerializeDungeon(FArchive& Archive)
 {
 	FDungeonSaveProxyArchive ProxyArchive(Archive);
+
+	static const int32 VersionMask = 0xFFFF0000; // High word for magic header, this still allows for 65536 versions
+	static const int32 MagicHeader = 0x7E250000; // Magic header to dertemine if it's a valid version number
+
+	int32 SavedVersion = FProceduralDungeonCustomVersion::LatestVersion;
+	if (ProxyArchive.IsSaving())
+	{
+		int32 ValidatedVersion = (SavedVersion & ~VersionMask) | MagicHeader; // Place magic header in the version number
+		ProxyArchive << ValidatedVersion;
+	}
+	else if (ProxyArchive.IsLoading())
+	{
+		SavedVersion = FProceduralDungeonCustomVersion::InitialVersion; // Fallback version if no version found
+		const int64 StartPos = ProxyArchive.Tell();
+		int32 PotentialVersion = 0;
+
+		// Try reading an int, but guard against short streams
+		if (ProxyArchive.TotalSize() - StartPos >= sizeof(int32))
+		{
+			ProxyArchive << PotentialVersion;
+
+			if ((PotentialVersion & VersionMask) == MagicHeader) // Check if valid version (high word matches magic header)
+			{
+				SavedVersion = PotentialVersion & ~VersionMask; // Extract version number
+			}
+			else
+			{
+				// Not a version, rewind
+				ProxyArchive.Seek(StartPos);
+			}
+		}
+	}
+
+	FCustomVersionContainer Versions;
+	Versions.SetVersion(FProceduralDungeonCustomVersion::GUID, SavedVersion, TEXT("ProcDungeonVer"));
+	ProxyArchive.SetCustomVersions(Versions);
 
 	TUniquePtr<FArchiveFormatterType> Formatter = CreateArchiveFormatterFromArchive(ProxyArchive,
 #if WITH_EDITORONLY_DATA
@@ -262,6 +297,24 @@ bool ADungeonGeneratorBase::TryPlaceRoom(URoom* const& Room, int DoorIndex, cons
 
 	Room->SetPositionAndRotationFromDoor(DoorIndex, TargetDoor.Position, TargetDoor.Direction);
 
+	return CheckRoomOverlap(Room, World);
+}
+
+bool ADungeonGeneratorBase::TryPlaceRoomAtLocation(URoom* const& Room, FIntVector Location, EDoorDirection Rotation, const UWorld* World) const
+{
+	if (!IsValid(Room))
+	{
+		return false;
+	}
+
+	Room->SetPosition(Location);
+	Room->SetDirection(Rotation);
+
+	return CheckRoomOverlap(Room, World);
+}
+
+bool ADungeonGeneratorBase::CheckRoomOverlap(const URoom* const& Room, const UWorld* World) const
+{
 	// Test if it fits in the place
 	bool bCanBePlaced = !URoom::Overlap(*Room, Graph->GetAllRooms());
 	// @TODO: Should be more performant to use voxel bounds instead of room bounds
@@ -299,6 +352,13 @@ bool ADungeonGeneratorBase::AddRoomToDungeon(URoom* const& Room, const TArray<in
 		return false;
 	}
 
+	if (Room->GetRoomData()->GetSettings() != SettingsOverrides)
+	{
+		// Mismatching dungeon settings
+		DungeonLog_Error("Mismatching dungeon settings between dungeon %s and room %s (settings should be %s)", *GetName(), *GetNameSafe(Room->GetRoomData()), *GetNameSafe(SettingsOverrides))
+		return false;
+	}
+
 	bool bConnected = false;
 	// Connect the doors if provided, otherwise try to connect all possible doors
 	if (DoorsToConnect.Num() <= 0)
@@ -332,6 +392,12 @@ bool ADungeonGeneratorBase::AddRoomToDungeon(URoom* const& Room)
 	return AddRoomToDungeon(Room, {});
 }
 
+void ADungeonGeneratorBase::YieldGeneration()
+{
+	GenerationStatus = EGenerationStatus::InProgress;
+	DungeonLog_Debug("Yielding generation...");
+}
+
 bool ADungeonGeneratorBase::CreateDungeon_Implementation()
 {
 	DungeonLog_Error("CreateDungeon is not overriden!");
@@ -356,61 +422,70 @@ void ADungeonGeneratorBase::ChooseDoorClasses()
 		const URoomData* RoomAData = (IsValid(RoomA)) ? RoomA->GetRoomData() : nullptr;
 		const URoomData* RoomBData = (IsValid(RoomB)) ? RoomB->GetRoomData() : nullptr;
 
-		const UDoorType* DoorType = URoomConnection::GetDoorType(Conn);
+		UDoorType* DoorTypeA;
+		UDoorType* DoorTypeB;
+		URoomConnection::GetBothDoorTypes(Conn, DoorTypeA, DoorTypeB);
 
 		bool bFlipped = false;
-		TSubclassOf<ADoor> DoorClass = ChooseDoor(RoomAData, RoomA, RoomBData, RoomB, DoorType, bFlipped);
+		TSubclassOf<ADoor> DoorClass = ChooseDoor(RoomAData, RoomA, RoomBData, RoomB, DoorTypeA, DoorTypeB, bFlipped);
 		Conn->SetDoorClass(DoorClass, bFlipped);
+	}
+}
+
+void ADungeonGeneratorBase::UpdatePlayerRooms()
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* Controller = It->Get();
+		if (!IsValid(Controller) || !IsValid(Controller->PlayerState))
+			continue;
+
+		// Using their UniqueID to be reliable even when players join or leave
+		int32 PlayerID = Controller->PlayerState->GetPlayerId();
+		if (PlayerID <= 0)
+			continue;
+
+		APawn* Player = GetVisibilityPawn(Controller);
+		if (!IsValid(Player))
+			return;
+
+		const FTransform& Transform = UseGeneratorTransform() ? GetTransform() : FTransform::Identity;
+		FBox WorldPlayerBox = ActorUtils::GetActorBoundingBoxForRooms(Player, Transform);
+
+		FPlayerRooms& PlayerRoom = PlayerRooms.FindOrAdd(PlayerID);
+		auto PreviousRoomList(PlayerRoom.CurrentRooms);
+		PlayerRoom.Roll();
+		FindElementsWithBoundsTest(*Octree, WorldPlayerBox, [this, &PlayerRoom, &PlayerID](const FDungeonOctreeElement& Element) {
+			PlayerRoom.AddCurrentRoom(Element.Room);
+			Element.Room->SetPlayerInside(PlayerID, true);
+		});
+
+		for (URoom* Room : PlayerRoom.OldRooms)
+		{
+			Room->SetPlayerInside(PlayerID, false);
+		}
+
+		// Both sets are equal if each set is included in the other
+		const bool bIsAinB = PreviousRoomList.Includes(PlayerRoom.CurrentRooms);
+		const bool bIsBinA = PlayerRoom.CurrentRooms.Includes(PreviousRoomList);
+		PlayerRoom.bHasChanged = !(bIsAinB && bIsBinA);
 	}
 }
 
 void ADungeonGeneratorBase::UpdateRoomVisibility()
 {
-	APawn* Player = GetVisibilityPawn();
-	if (!IsValid(Player))
-		return;
-
-	// Copied from AActor::GetComponentsBoundingBox but check also collision response with the room object type
-	FBox WorldPlayerBox(ForceInit);
-	Player->ForEachComponent<UPrimitiveComponent>(/*bIncludeFromChildActors = */false
-		, [&](const UPrimitiveComponent* Component)
-		{
-			if (Component->IsRegistered()
-				&& Component->IsCollisionEnabled()
-				&& Component->GetCollisionResponseToChannel(Dungeon::RoomObjectType()) != ECollisionResponse::ECR_Ignore
-				)
-			{
-				WorldPlayerBox += Component->Bounds.GetBox();
-			}
-		});
-
-	FTransform Transform = UseGeneratorTransform() ? GetTransform() : FTransform::Identity;
-	WorldPlayerBox = WorldPlayerBox.InverseTransformBy(Transform);
-
-	TSet<URoom*> RoomsToHide(CurrentPlayerRooms);
-	CurrentPlayerRooms.Empty();
-	FindElementsWithBoundsTest(*Octree, WorldPlayerBox, [this, &RoomsToHide](const FDungeonOctreeElement& Element) {
-		RoomsToHide.Remove(Element.Room);
-		CurrentPlayerRooms.Add(Element.Room);
-		Element.Room->SetPlayerInside(true);
-	});
-
-	for (URoom* room : RoomsToHide)
-	{
-		room->SetPlayerInside(false);
-	}
-
 	const bool bIsOcclusionEnabled = Dungeon::OcclusionCulling();
 	const uint32 OcclusionDistance = Dungeon::OcclusionDistance();
+	bool bForceUpdate = false;
 
 	// Detects occlusion setting changes and toggles on/off all room visibilities when occlusion is enabled/disabled.
 	if (bWasOcclusionEnabled != bIsOcclusionEnabled
 		|| PreviousOcclusionDistance != OcclusionDistance)
 	{
-		RoomsToHide.Empty();
+		bForceUpdate = true;
 		for (URoom* Room : Graph->GetAllRooms())
 		{
-			Room->SetVisible(!bIsOcclusionEnabled);
+			Room->SetVisible(!bIsOcclusionEnabled, /*bForceUpdate=*/true);
 		}
 	}
 	bWasOcclusionEnabled = bIsOcclusionEnabled;
@@ -420,14 +495,59 @@ void ADungeonGeneratorBase::UpdateRoomVisibility()
 	if (!bIsOcclusionEnabled)
 		return;
 
+	TSet<URoom*> OldRooms;
+	TSet<URoom*> CurrentRooms;
+	bool bHasChanged = false;
+
+	UGameInstance* GameInstance = GetWorld()->GetGameInstance();
+	for (const ULocalPlayer* LocalPlayer : GameInstance->GetLocalPlayers())
+	{
+		APlayerController* Controller = LocalPlayer->PlayerController;
+		if (!IsValid(Controller))
+			continue;
+
+		APlayerState* State = Controller->PlayerState;
+		if (!IsValid(State))
+			continue;
+		
+		FPlayerRooms* PlayerRoom = PlayerRooms.Find(State->GetPlayerId());
+		if (!PlayerRoom)
+			continue;
+
+		OldRooms.Append(PlayerRoom->OldRooms);
+		CurrentRooms.Append(PlayerRoom->CurrentRooms);
+		bHasChanged |= PlayerRoom->bHasChanged;
+	}
+
+	// Save performance by not updating room visibilities if the player rooms haven't changed.
+	if (!(bForceUpdate || bHasChanged))
+		return;
+
 	TSet<URoom*> VisibleRooms;
-	UDungeonGraph::TraverseRooms(CurrentPlayerRooms, &VisibleRooms, OcclusionDistance, [](URoom* room) { room->SetVisible(true); });
-	UDungeonGraph::TraverseRooms(RoomsToHide, nullptr, OcclusionDistance, [&VisibleRooms](URoom* room) { room->SetVisible(VisibleRooms.Contains(room)); });
+	UDungeonGraph::TraverseRooms(CurrentRooms, &VisibleRooms, OcclusionDistance, [](URoom* room, uint32 distance) { room->SetVisible(true); });
+	UDungeonGraph::TraverseRooms(OldRooms, nullptr, OcclusionDistance, [&VisibleRooms](URoom* room, uint32 distance) { room->SetVisible(VisibleRooms.Contains(room)); });
+}
+
+void ADungeonGeneratorBase::UpdateRoomRelevancy()
+{
+	for (const auto& Pair : PlayerRooms)
+	{
+		const FPlayerRooms& PlayerRoom = Pair.Value;
+		if (!PlayerRoom.bHasChanged)
+			continue;
+
+		TSet<URoom*> RelevantRooms;
+		UDungeonGraph::TraverseRooms(PlayerRoom.CurrentRooms, &RelevantRooms, RoomRelevanceMaxDistance, [&Pair](URoom* room, uint32 distance) { room->SetRelevancyLevel(Pair.Key, distance); });
+		UDungeonGraph::TraverseRooms(PlayerRoom.OldRooms, nullptr, RoomRelevanceMaxDistance, [&RelevantRooms, &Pair](URoom* room, uint32 distance) {
+			if (!RelevantRooms.Contains(room))
+				room->SetRelevancyLevel(Pair.Key, -1);
+		});
+	}
 }
 
 void ADungeonGeneratorBase::Reset()
 {
-	CurrentPlayerRooms.Empty();
+	PlayerRooms.Empty();
 	Octree->Destroy();
 }
 
@@ -516,15 +636,7 @@ void ADungeonGeneratorBase::OnStateBegin(EGenerationState State)
 		check(HasAuthority()); // should never generate on clients!
 		FlushNetDormancy();
 		UpdateSeed();
-		if (CreateDungeon())
-		{
-			OnGenerationSuccess();
-		}
-		else
-		{
-			Graph->Clear();
-			OnGenerationFailed();
-		}
+		GenerationStatus = EGenerationStatus::NotStarted;
 		break;
 	case EGenerationState::Initialization:
 		DungeonLog_Info("======= Begin Dungeon Initialization =======");
@@ -556,9 +668,12 @@ void ADungeonGeneratorBase::OnStateBegin(EGenerationState State)
 
 void ADungeonGeneratorBase::OnStateTick(EGenerationState State)
 {
+	bool bCreationSuccess = false;
 	switch (State)
 	{
 	case EGenerationState::Idle:
+		UpdatePlayerRooms();
+		UpdateRoomRelevancy();
 		UpdateRoomVisibility();
 		DrawDebug();
 		if (Graph->IsDirty() || IsGenerating() || IsLoadingSavedDungeon())
@@ -569,6 +684,30 @@ void ADungeonGeneratorBase::OnStateTick(EGenerationState State)
 			SetState((HasAuthority() && IsGenerating()) ? EGenerationState::Generation : EGenerationState::Initialization);
 		break;
 	case EGenerationState::Generation:
+		if (GenerationStatus == EGenerationStatus::InProgress)
+		{
+			DungeonLog_Debug("Resuming generation...");
+		}
+
+		// By default we set it as completed so that CreateDungeon of previous versions will not need any change.
+		// In next major version of the plugin, the generation status will be directly returned by the CreateDungeon function.
+		GenerationStatus = EGenerationStatus::Completed;
+		bCreationSuccess = CreateDungeon();
+		checkf(GenerationStatus != EGenerationStatus::NotStarted, TEXT("CreateDungeon must set the status to InProgress, Completed or Failed"));
+
+		if (GenerationStatus == EGenerationStatus::InProgress)
+			break;
+
+		if (bCreationSuccess)
+		{
+			OnGenerationSuccess();
+		}
+		else
+		{
+			GenerationStatus = EGenerationStatus::Failed;
+			Graph->Clear();
+			OnGenerationFailed();
+		}
 		SetState(EGenerationState::Initialization);
 		break;
 	case EGenerationState::Initialization:
@@ -649,7 +788,7 @@ void ADungeonGeneratorBase::OnStateEnd(EGenerationState State)
 
 // ===== Default Native Events Implementations =====
 
-TSubclassOf<ADoor> ADungeonGeneratorBase::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, bool& Flipped)
+TSubclassOf<ADoor> ADungeonGeneratorBase::ChooseDoor_Implementation(const URoomData* CurrentRoom, const URoom* CurrentRoomInstance, const URoomData* NextRoom, const URoom* NextRoomInstance, const UDoorType* DoorType, const UDoorType* OtherDoorType, bool& Flipped)
 {
 	DungeonLog_Error("Error: ChooseDoor not implemented");
 	return nullptr;
@@ -659,9 +798,8 @@ void ADungeonGeneratorBase::InitializeDungeon_Implementation(const UDungeonGraph
 {
 }
 
-APawn* ADungeonGeneratorBase::GetVisibilityPawn_Implementation()
+APawn* ADungeonGeneratorBase::GetVisibilityPawn_Implementation(APlayerController* Controller)
 {
-	APlayerController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (!IsValid(Controller))
 		return nullptr;
 
@@ -722,6 +860,40 @@ URoomData* ADungeonGeneratorBase::GetRandomRoomDataWeighted(const TMap<URoomData
 	int Total = Dungeon::GetTotalWeight(RoomDataWeightedMap);
 	const int Chosen = Random.RandRange(0, Total - 1);
 	return Dungeon::GetWeightedAt(RoomDataWeightedMap, Chosen);
+}
+
+const FRoomCandidate& ADungeonGeneratorBase::GetRandomRoomCandidate(const TArray<FRoomCandidate>& RoomCandidates, bool bUseScoresAsWeights) const
+{
+	if (RoomCandidates.Num() <= 0)
+		return FRoomCandidate::Invalid;
+
+	if (!bUseScoresAsWeights)
+	{
+		int32 n = GetRandomStream().RandRange(0, RoomCandidates.Num() - 1);
+		return RoomCandidates[n];
+	}
+	else
+	{
+		int32 TotalScore = 0;
+		for (const FRoomCandidate& Candidate : RoomCandidates)
+		{
+			if (Candidate.Score > 0)
+				TotalScore += Candidate.Score;
+		}
+
+		int32 n = GetRandomStream().RandRange(0, TotalScore - 1);
+
+		for (const FRoomCandidate& Candidate : RoomCandidates)
+		{
+			if (Candidate.Score <= 0)
+				continue;
+			n -= Candidate.Score;
+			if (n <= 0)
+				return Candidate;
+		}
+	}
+
+	return FRoomCandidate::Invalid;
 }
 
 void ADungeonGeneratorBase::GetCompatibleRoomData(bool& bSuccess, TArray<URoomData*>& CompatibleRooms, const TArray<URoomData*>& RoomDataArray, const FDoorDef& DoorData)

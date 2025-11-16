@@ -37,3 +37,7 @@
 #define SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Property, Value) \
 	WakeUpOwnerActor();                                          \
 	SET_OBJECT_REPLICATED_PROPERTY_VALUE(this, Property, Value);
+
+#if UE_VERSION_OLDER_THAN(5, 5, 0)
+	#define SetNetUpdateFrequency(X) NetUpdateFrequency = X
+#endif

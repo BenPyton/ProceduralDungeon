@@ -10,6 +10,7 @@
 #include "CoreMinimal.h"
 #include "DungeonGeneratorBase.h"
 #include "BoundsParams.h"
+#include "QueueOrStack.h"
 #include "DungeonGenerator.generated.h"
 
 class IReadOnlyRoom;
@@ -125,6 +126,28 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Generation", AdvancedDisplay)
 	bool bAutoDiscardRoomIfNull = false;
 
+	// Number of room as parent room to process per tick.
+	UPROPERTY(BlueprintReadOnly, Category = "Procedural Generation", AdvancedDisplay)
+	int RoomBatchSize {10};
+
 	// Flag to explicitely tell we don't want to place a room.
 	bool bDiscardRoom = false;
+
+private:
+
+	enum class EState : uint8
+	{
+		Idle,
+		Initializing,
+		AddingRooms,
+		Finalizing,
+		Completed
+	};
+
+	EState CurrentState {EState::Idle};
+
+	// Holds rooms pending to have new rooms added to them.
+	TQueueOrStack<URoom*> PendingRooms;
+
+	int CurrentTriesLeft {0};
 };

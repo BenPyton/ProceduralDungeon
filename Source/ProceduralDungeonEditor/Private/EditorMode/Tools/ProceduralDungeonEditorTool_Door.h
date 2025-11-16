@@ -39,7 +39,7 @@ protected:
 	void DestroyRoomBox();
 	bool RoomTraceFromMouse(FHitResult& OutHit, FEditorViewportClient* ViewportClient) const;
 	bool RoomTrace(FHitResult& OutHit, const FVector& RayOrigin, const FVector& RayEnd) const;
-	bool GetRoomCellFromHit(const FHitResult& Hit, FIntVector& OutCell, EDoorDirection& OutDirection) const;
+	bool GetRoomCellFromHit(const FHitResult& Hit, const FVector RoomUnit, FIntVector& OutCell, EDoorDirection& OutDirection) const;
 
 private:
 	TWeakObjectPtr<class ARoomLevel> CachedLevel = nullptr;

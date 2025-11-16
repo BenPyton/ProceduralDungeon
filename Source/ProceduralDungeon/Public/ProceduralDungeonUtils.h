@@ -31,25 +31,25 @@ struct FBoxMinAndMax;
 namespace Dungeon
 {
 	// Returns the real world location of a point in room units
-	FVector PROCEDURALDUNGEON_API ToWorldLocation(FIntVector RoomPoint);
+	FVector PROCEDURALDUNGEON_API ToWorldLocation(FIntVector RoomPoint, const FVector RoomUnit);
 
 	// Returns the real world vector (no offset) of a vector in room units
-	FVector PROCEDURALDUNGEON_API ToWorldVector(FIntVector RoomVector);
+	FVector PROCEDURALDUNGEON_API ToWorldVector(FIntVector RoomVector, const FVector RoomUnit);
 
 	// Convertthe Box from dungeon coordinate to world coordinate, applying an optional transform on it.
-	FBoxCenterAndExtent PROCEDURALDUNGEON_API ToWorld(const FBoxMinAndMax& Box, const FTransform& Transform = FTransform::Identity);
+	FBoxCenterAndExtent PROCEDURALDUNGEON_API ToWorld(const FBoxMinAndMax& Box, const FVector RoomUnit, const FTransform& Transform = FTransform::Identity);
 
 	// Convertthe Box from dungeon coordinate to world coordinate, applying an optional transform on it.
-	FBoxCenterAndExtent PROCEDURALDUNGEON_API ToWorld(const FBoxCenterAndExtent& Box, const FTransform& Transform = FTransform::Identity);
+	FBoxCenterAndExtent PROCEDURALDUNGEON_API ToWorld(const FBoxCenterAndExtent& Box, const FVector RoomUnit, const FTransform& Transform = FTransform::Identity);
 
 	// Returns the location in room units from a point in real world
-	FIntVector PROCEDURALDUNGEON_API ToRoomLocation(FVector WorldPoint);
+	FIntVector PROCEDURALDUNGEON_API ToRoomLocation(FVector WorldPoint, const FVector RoomUnit);
 
 	// Returns the vector (no offset) in room units from a vector in real world
-	FIntVector PROCEDURALDUNGEON_API ToRoomVector(FVector WorldVector);
+	FIntVector PROCEDURALDUNGEON_API ToRoomVector(FVector WorldVector, const FVector RoomUnit);
 
 	// Returns the real world snapped location to the nearest point in room units from a real world point
-	FVector PROCEDURALDUNGEON_API SnapPoint(FVector Point);
+	FVector PROCEDURALDUNGEON_API SnapPoint(FVector Point, const FVector RoomUnit);
 
 	template<typename T>
 	int GetTotalWeight(const TMap<T, int>& WeightMap)
@@ -151,4 +151,13 @@ namespace WorldUtils
 namespace ObjectUtils
 {
 	void PROCEDURALDUNGEON_API DispatchToObjectAndSubobjects(UObject* Obj, TFunction<void(UObject*)> Func, int32 Depth = 0);
+}
+
+namespace ActorUtils
+{
+	// Returns the bounding box of an actor considering only components that would interact with rooms (based on collision settings).
+	FBox PROCEDURALDUNGEON_API GetActorBoundingBoxForRooms(AActor* Actor, const FTransform& DungeonTransform = FTransform::Identity);
+
+	// Returns the player controller associated with the player state id.
+	class APlayerController* GetPlayerControllerFromPlayerId(const UObject* WorldContextObject, int32 PlayerId);
 }

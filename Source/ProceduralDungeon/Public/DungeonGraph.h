@@ -24,24 +24,6 @@ class URoomCustomData;
 class URoomConnection;
 class ADungeonGeneratorBase;
 
-// Describe a potential room to be added to the dungeon.
-// Mainly used by FilterAndSortRooms function.
-USTRUCT(BlueprintType)
-struct FRoomCandidate
-{
-	GENERATED_BODY();
-
-public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
-	URoomData* Data {nullptr};
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
-	int32 DoorIndex {-1};
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Room Candidate")
-	int32 Score {-1};
-};
-
 // Holds the generated dungeon.
 // You can access the rooms using many functions.
 UCLASS(BlueprintType)
@@ -206,7 +188,7 @@ public:
 
 	// Returns in OutRooms all the rooms in the Distance from each InRooms and optionally apply Func on each rooms.
 	// Distance is the number of room connection between 2 rooms, not the distance in any unit.
-	static void TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* OutRooms, uint32 Distance, TFunction<void(URoom*)> Func);
+	static void TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* OutRooms, uint32 Distance, TFunction<void(URoom*, uint32)> Func);
 
 	static bool FindPath(const URoom* From, const URoom* To, TArray<const URoom*>* OutPath = nullptr, bool IgnoreLocked = false);
 

@@ -11,6 +11,7 @@
 #include "ProceduralDungeonSettings.h"
 #include "ProceduralDungeonLog.h"
 #include "Misc/EngineVersionComparison.h"
+#include "UObject/CoreRedirects.h"
 
 #define LOCTEXT_NAMESPACE "FProceduralDungeonModule"
 
@@ -61,6 +62,10 @@ void FProceduralDungeonModule::StartupModule()
 	ObjectReplacedHandle = FCoreUObjectDelegates::OnObjectsReinstanced.AddStatic(ObjectReplaced);
 	DungeonLog_Debug("Use Actor Replacement Hack");
 #endif
+
+	TArray<FCoreRedirect> Redirects;
+	Redirects.Emplace(ECoreRedirectFlags::Type_Property, TEXT("/Script/ProceduralDungeon.Room.RoomData"), TEXT("/Script/ProceduralDungeon.Room.SoftRoomData"));
+	FCoreRedirects::AddRedirectList(Redirects, TEXT("ProceduralDungeon"));
 }
 
 void FProceduralDungeonModule::ShutdownModule()
