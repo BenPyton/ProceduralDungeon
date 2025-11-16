@@ -23,6 +23,7 @@
 #include "Components/BoxComponent.h"
 #include "RoomVisibilityComponent.h"
 #include "RoomVisitor.h"
+#include "Utils/ReplicationUtils.h"
 
 #if WITH_EDITOR
 bool ARoomLevel::bIsDungeonEditorMode = false;
@@ -32,6 +33,8 @@ ARoomLevel::ARoomLevel(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = false;
+	SetNetUpdateFrequency(10);
 	bIsInit = false;
 	Room = nullptr;
 	DungeonTransform = FTransform::Identity;

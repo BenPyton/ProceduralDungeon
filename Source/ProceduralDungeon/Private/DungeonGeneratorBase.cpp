@@ -32,10 +32,6 @@
 #include "Utils/CompatUtils.h"
 #include "DungeonSettings.h"
 
-#if UE_VERSION_OLDER_THAN(5, 5, 0)
-	#define SetNetUpdateFrequency(X) NetUpdateFrequency = X
-#endif
-
 FArchive& operator<<(FArchive& Ar, FDungeonSaveData& Data)
 {
 	FStructuredArchiveFromArchive(Ar).GetSlot() << Data;
