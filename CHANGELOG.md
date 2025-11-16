@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added room constraints:
   - New base class `RoomConstraint` to create your own constraints.
   - Added built-in location and direction constraints.
-  - Added new node `Does Pass All Constraints` to check wether a `Room Data` passes all its contraints.
+  - Added new node `Does Pass All Constraints` to check whether a `Room Data` passes all its constraints.
 - Added new node `Get Random Room Candidate` to ease the selection of a `RoomCandidate` struct, optionally using their scores as weights.
 
 ### Changed
@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated the `Create Dungeon` function in `Dungeon Generator` to limit number of room generated per frame (can be set with `Room Batch Size` in the actor's details).
 - Room Visibility system now handles properly local multiplayer (splitscreens)
   - The `Get Visibility Pawn` overridable function now takes a `Player Controller` as input.
-- `Filter and Sort Rooms` now checks if a room candidate passes all its contraints to include it in the output condidates.
+- `Filter and Sort Rooms` now checks if a room candidate passes all its constraints to include it in the output candidates.
 
 ### Fixed
 
