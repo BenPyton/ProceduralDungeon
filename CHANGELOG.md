@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - You can set a distance from which a room is considered relevant to the player.
   - A relevant room has a value to tell how close the player is to the room (the lower, the closest) with 0 the room where the player is in.
   - Some new nodes in the `Room` instances are available to access this relevancy level, and an event dispatcher to be notified when this relevancy changes.
+- Added room constraints:
+  - New base class `RoomConstraint` to create your own constraints.
+  - Added built-in location and direction constraints.
+  - Added new node `Does Pass All Constraints` to check wether a `Room Data` passes all its contraints.
+- Added new node `Get Random Room Candidate` to ease the selection of a `RoomCandidate` struct, optionally using their scores as weights.
 
 ### Changed
 
@@ -27,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Updated the `Create Dungeon` function in `Dungeon Generator` to limit number of room generated per frame (can be set with `Room Batch Size` in the actor's details).
 - Room Visibility system now handles properly local multiplayer (splitscreens)
   - The `Get Visibility Pawn` overridable function now takes a `Player Controller` as input.
+- `Filter and Sort Rooms` now checks if a room candidate passes all its contraints to include it in the output condidates.
 
 ### Fixed
 - Fixed room visibilities to be updated properly when toggling or changing occlusion distance.
