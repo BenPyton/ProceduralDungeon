@@ -19,7 +19,7 @@ You can find the runtime settings in the `Project Settings` -> `Plugins` -> `Pro
 
 Setting | Description
 ---|---
-**Room&#160;Unit** | This is the size of a 1 unit room. Each room have a size made of a multiple of this unit. For instance, if you have a room unit of (1000, 1000, 400) and a room of size (3, 1, 2), this room will have in world unit a size of (3000, 1000, 800).
+**Room&#160;Unit** | This is the size of a 1 unit room. Each room have a size made of a multiple of this unit. For instance, if you have a room unit of (1000, 1000, 400) and a room of size (3, 1, 2), this room will have in world unit a size of (3000, 1000, 800).<br/>This value can be [overridden](../Advanced-Features/Overriding-Dungeon-Settings.md) per-dungeon too.
 **Default&#160;Door&#160;Size** | This is the size used by the debug draw to draw the doors. This is just a visual indication for you, it is not used during the generation process.
 **Door&#160;Offset** | You can add an offset on the Z-axis for the doors (e.g. if you want to place a ground with a non-zero depth). This offset is a percentage between 0 and 1 of the room unit height.
 **Can&#160;Loop** | Enable possibility to link doors when they can.<br/>[*DEPRECATED*] This setting is deprecated and will be removed in a future version.<br/>Use the `Can Loop` variable in the [Dungeon Generator](Generating-Dungeon/Dungeon-Generator.md) instead.<br/>As long as this setting remains, it will act as a global toggle for the feature.<br/>You should keep it ticked if you want to get the same behavior as when it will be removed.
