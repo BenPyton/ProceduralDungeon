@@ -13,10 +13,16 @@ Thus, one room data in the input array may appear several times in the output ar
 
 A room is filtered out (not included in the output) if it can't be placed in the dungeon (e.g. no compatible door, or overlapping with existing rooms).
 
+Also, the rooms are filtered out if they do not pass their [constraints](./Room-Constraints.md).
+
 If a room candidate can be placed, a score is computed.  
 By default, the room size and the door alignments are used to compute this score, but you can create a custom function to compute this score (see next section).
 
 The output array is sorted using this score, so the highest score is the first element of the array.
+
+Once you have your list of `Room Candidate`, you can choose the room you want in it.
+For example, you may choose the first `Room Candidate`, which has the best score, or you may choose a random one using the [`Get Random Room Candidate`](api/Classes/DungeonGeneratorBase/Nodes/GetRandomRoomCandidate/GetRandomRoomCandidate.md) node.
+It's up to you at this point!
 
 ## Custom Score Function
 
