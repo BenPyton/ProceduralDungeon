@@ -123,3 +123,11 @@ URoomData* AMyCustomDungeonGenerator::CreateDungeon_Implementation()
 
 <!-- [END TAB ITEM] C++ --> </TabItem>
 <!-- [END TABS] Blueprint | C++ --> </Tabs>
+
+## Splitting the workload on multiple frames
+
+If your `Create Dungeon` function does a heavy workload that causes CPU spikes, you can split the workload on multiple frames.
+
+To do so, you can use the node [`Yield Generation`](api/Classes/DungeonGeneratorBase/Nodes/YieldGeneration/YieldGeneration.md) which will tell the generator to call the `Create Dungeon` function once again in the next frame.
+
+That way, you can for example group the room placements in small batches each frame!
