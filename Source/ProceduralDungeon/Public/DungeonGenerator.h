@@ -127,7 +127,7 @@ public:
 	bool bAutoDiscardRoomIfNull = false;
 
 	// Number of room as parent room to process per tick.
-	UPROPERTY(BlueprintReadOnly, Category = "Procedural Generation", AdvancedDisplay)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Generation", AdvancedDisplay)
 	int RoomBatchSize {10};
 
 	// Flag to explicitely tell we don't want to place a room.
