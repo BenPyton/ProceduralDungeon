@@ -35,7 +35,7 @@ void URoomObserverComponent::OnActorEnterRoom(ARoomLevel* RoomLevel, AActor* Act
 void URoomObserverComponent::OnActorExitRoom(ARoomLevel* RoomLevel, AActor* Actor)
 {
 	// Just forward the call to the delegate.
-	ActorEnterRoomEvent.Broadcast(RoomLevel, Actor);
+	ActorExitRoomEvent.Broadcast(RoomLevel, Actor);
 }
 
 void URoomObserverComponent::BindToLevel(ARoomLevel* RoomLevel, bool Bind)

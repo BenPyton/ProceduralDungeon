@@ -770,11 +770,7 @@ void ADungeonGeneratorBase::OnStateEnd(EGenerationState State)
 		{
 			DungeonLog_Info("Rebuild navmesh");
 
-			nav->RemoveNavigationBuildLock(ENavigationBuildLock::Custom);
-
-			// With a dynamic navmesh, we don't need anymore to call Build explicitly
-			// Moreover, removing the build lock triggers a rebuild itself.
-			nav->CancelBuild();
+			nav->RemoveNavigationBuildLock(ENavigationBuildLock::Custom, UNavigationSystemV1::ELockRemovalRebuildAction::NoRebuild);
 			nav->Build();
 		}
 
