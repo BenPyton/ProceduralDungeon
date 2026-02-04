@@ -10,7 +10,7 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerState.h"
 #include "GameFramework/PlayerController.h"
-#include "Engine/LocalPLayer.h"
+#include "Engine/LocalPlayer.h"
 #include "Engine/GameInstance.h"
 #include "NavigationSystem.h"
 #include "RoomData.h"
