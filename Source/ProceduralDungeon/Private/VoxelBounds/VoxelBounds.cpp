@@ -81,6 +81,24 @@ TArray<FVoxelBoundsConnection>& FVoxelBounds::AddCell(FIntVector Cell)
 	return Connections;
 }
 
+void FVoxelBounds::AddBox(const FBoxMinAndMax& Box)
+{
+	Bounds.Extend(Box);
+	Cells.Reserve(Cells.Num() + Box.GetSize().X * Box.GetSize().Y * Box.GetSize().Z);
+
+	for (int32 X = Box.GetMin().X; X < Box.GetMax().X; ++X)
+	{
+		for (int32 Y = Box.GetMin().Y; Y < Box.GetMax().Y; ++Y)
+		{
+			for (int32 Z = Box.GetMin().Z; Z < Box.GetMax().Z; ++Z)
+			{
+				auto& Connections = Cells.Add(FIntVector(X, Y, Z));
+				Connections.SetNum(static_cast<uint8>(EDirection::NbDirection));
+			}
+		}
+	}
+}
+
 const FVoxelBoundsConnection* FVoxelBounds::GetCellConnection(FIntVector Cell, EDirection Direction) const
 {
 	auto* CellConnections = Cells.Find(Cell);
@@ -99,6 +117,22 @@ bool FVoxelBounds::SetCellConnection(FIntVector Cell, EDirection Direction, cons
 	return true;
 }
 
+void FVoxelBounds::ResetToWalls()
+{
+	static const FVoxelBoundsConnection NoneConnection(EVoxelBoundsConnectionType::None);
+	static const FVoxelBoundsConnection WallConnection(EVoxelBoundsConnectionType::Wall);
+
+	for (auto& Cell : Cells)
+	{
+		for (uint8 i = 0; i < static_cast<uint8>(EDirection::NbDirection); ++i)
+		{
+			const FIntVector OtherCell = Cell.Key + Directions[i];
+			const auto* FoundOtherCell = Cells.Find(OtherCell);
+			Cell.Value[i] = (FoundOtherCell) ? NoneConnection : WallConnection;
+		}
+	}
+}
+
 bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score, const FScoreCallback& CustomScore) const
 {
 	// Each cell add 1 to the score, so the bigger volume the higher score.
@@ -108,12 +142,12 @@ bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score
 
 	// @TODO: for now, treating a coincident face as overlapping
 	// There is room for further optimizations here later
-	bAreOverlapping |= Bounds.Min.X == Other.Bounds.Max.X;
-	bAreOverlapping |= Bounds.Max.X == Other.Bounds.Min.X;
-	bAreOverlapping |= Bounds.Min.Y == Other.Bounds.Max.Y;
-	bAreOverlapping |= Bounds.Max.Y == Other.Bounds.Min.Y;
-	bAreOverlapping |= Bounds.Min.Z == Other.Bounds.Max.Z;
-	bAreOverlapping |= Bounds.Max.Z == Other.Bounds.Min.Z;
+	bAreOverlapping |= Bounds.GetMin().X == Other.Bounds.GetMax().X;
+	bAreOverlapping |= Bounds.GetMax().X == Other.Bounds.GetMin().X;
+	bAreOverlapping |= Bounds.GetMin().Y == Other.Bounds.GetMax().Y;
+	bAreOverlapping |= Bounds.GetMax().Y == Other.Bounds.GetMin().Y;
+	bAreOverlapping |= Bounds.GetMin().Z == Other.Bounds.GetMax().Z;
+	bAreOverlapping |= Bounds.GetMax().Z == Other.Bounds.GetMin().Z;
 
 	// When not overlapping, the score is equal to the number of cell
 	// and it does always fit outside too.

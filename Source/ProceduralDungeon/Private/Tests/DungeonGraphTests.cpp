@@ -40,6 +40,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonGraphTest, "ProceduralDungeon.Types.Dun
 		Path.Empty();        \
 		Path.Add(nullptr);
 
+#pragma optimize("", off)
 bool FDungeonGraphTest::RunTest(const FString& Parameters)
 {
 	{
@@ -59,7 +60,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 		DA_C->Doors.Add({{0, 0, 0}, EDoorDirection::East});
 		DA_C->Doors.Add({{0, 0, 0}, EDoorDirection::West});
 
-		DA_D->SecondPoint = {1, 1, 2};
+		DA_D->BoundingBoxes[0].SetMinAndMax({0, 0, 0}, {1, 1, 2});
 		DA_D->Doors.Add({{0, 0, 0}, EDoorDirection::North});
 		DA_D->Doors.Add({{0, 0, 1}, EDoorDirection::North});
 
@@ -303,13 +304,13 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			CREATE_DATA_ASSET(UConstraintFail, Fail);
 
 			CREATE_ROOM_DATA(DA_E);
-			DA_E->SecondPoint = {1, 2, 1};
+			DA_E->BoundingBoxes[0].SetMinAndMax({0, 0, 0}, {1, 2, 1});
 			DA_E->Doors.Add({{0, 1, 0}, EDoorDirection::North});
 			DA_E->Constraints.Add(Pass.Get());
 
 			// Same as DA_E but constraint fail
 			CREATE_ROOM_DATA(DA_F);
-			DA_F->SecondPoint = {1, 2, 1};
+			DA_F->BoundingBoxes[0].SetMinAndMax({0, 0, 0}, {1, 2, 1});
 			DA_F->Doors.Add({{0, 1, 0}, EDoorDirection::North});
 			DA_F->Constraints.Add(Fail.Get());
 
@@ -372,6 +373,7 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 
 	return true;
 }
+	#pragma optimize("", on)
 
 	#undef INIT_TEST
 	#undef CLEAN_TEST

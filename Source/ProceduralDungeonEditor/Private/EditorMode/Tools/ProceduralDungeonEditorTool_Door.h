@@ -9,6 +9,8 @@
 
 #include "ProceduralDungeonEditorTool.h"
 
+class ARoomLevel;
+
 class FProceduralDungeonEditorTool_Door : public FProceduralDungeonEditorTool
 {
 public:
@@ -30,20 +32,22 @@ public:
 	virtual bool MouseMove(FEditorViewportClient* ViewportClient, FViewport* Viewport, int32 MouseX, int32 MouseY) override;
 	virtual bool GetCursor(EMouseCursor::Type& OutCursor) const override;
 
-	virtual void OnLevelChanged(const class ARoomLevel* NewLevel) override;
-	virtual void OnDataChanged(const URoomData* NewData = nullptr) override;
+	virtual void OnLevelChanged(const ARoomLevel* NewLevel) override;
+	virtual void OnDataChanged(const URoomData* NewData) override;
+	virtual void OnDataPropertiesChanged(const URoomData* Data) override;
 	//~ End FProceduralDungeonEditorTool Interface
 
 protected:
-	void UpdateRoomBox();
-	void DestroyRoomBox();
+	void CreateCollision(ARoomLevel* level);
+	void UpdateCollision();
+	void DestroyCollision();
 	bool RoomTraceFromMouse(FHitResult& OutHit, FEditorViewportClient* ViewportClient) const;
 	bool RoomTrace(FHitResult& OutHit, const FVector& RayOrigin, const FVector& RayEnd) const;
 	bool GetRoomCellFromHit(const FHitResult& Hit, const FVector RoomUnit, FIntVector& OutCell, EDoorDirection& OutDirection) const;
 
 private:
-	TWeakObjectPtr<class ARoomLevel> CachedLevel = nullptr;
-	TWeakObjectPtr<class UBoxComponent> RoomBox = nullptr;
+	TWeakObjectPtr<ARoomLevel> CachedLevel = nullptr;
+	TArray<TWeakObjectPtr<class UBoxComponent>> RoomBoxes;
 	FDoorDef DoorPreview;
 	bool ShowDoorPreview {false};
 };

@@ -340,7 +340,18 @@ void SProceduralDungeonEdModeWidget::OnDataAssetChanged()
 			CachedData->Level = EdMode->GetWorld();
 			DungeonEd_LogInfo("Room Data's Level asset filled with current editor's Level.");
 		}
-		DataDelegateHandle = CachedData->OnPropertiesChanged.AddLambda([this](URoomData* Data) { UpdateErrorText(); });
+		DataDelegateHandle = CachedData->OnPropertiesChanged.AddLambda([this](URoomData* Data)
+		{
+			UpdateErrorText();
+
+			auto EdMode = GetEditorMode();
+			if (EdMode)
+			{
+				FProceduralDungeonEditorTool* ActiveTool = EdMode->GetActiveTool();
+				if (ActiveTool)
+					ActiveTool->OnDataPropertiesChanged(CachedData.Get());
+			}
+		});
 	}
 
 	UpdateErrorText();

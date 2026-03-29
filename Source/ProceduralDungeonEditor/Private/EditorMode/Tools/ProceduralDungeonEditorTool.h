@@ -52,6 +52,7 @@ public:
 
 	virtual void OnLevelChanged(const class ARoomLevel* NewLevel) {}
 	virtual void OnDataChanged(const class URoomData* NewData) {}
+	virtual void OnDataPropertiesChanged(const class URoomData* Data) {}
 
 	class URoomData* GetRoomData() const;
 

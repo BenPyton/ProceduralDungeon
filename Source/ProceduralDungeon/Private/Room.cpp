@@ -513,9 +513,9 @@ bool URoom::IsOccupied(FIntVector Cell)
 {
 	FIntVector local = WorldToRoom(Cell);
 	FBoxMinAndMax Bounds = RoomData->GetIntBounds();
-	return local.X >= Bounds.Min.X && local.X < Bounds.Max.X
-		&& local.Y >= Bounds.Min.Y && local.Y < Bounds.Max.Y
-		&& local.Z >= Bounds.Min.Z && local.Z < Bounds.Max.Z;
+	return local.X >= Bounds.GetMin().X && local.X < Bounds.GetMax().X
+		&& local.Y >= Bounds.GetMin().Y && local.Y < Bounds.GetMax().Y
+		&& local.Z >= Bounds.GetMin().Z && local.Z < Bounds.GetMax().Z;
 }
 
 FBoxCenterAndExtent URoom::GetBounds() const

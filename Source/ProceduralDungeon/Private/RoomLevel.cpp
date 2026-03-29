@@ -151,7 +151,9 @@ void ARoomLevel::Tick(float DeltaTime)
 			DrawDebugSphere(World, DungeonTransform.TransformPositionNoScale(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
 
 		// Room bounds
-		DrawDebugBox(World, GetBoundsCenter(), GetBoundsExtent(), DungeonTransform.GetRotation(), IsPlayerInside() ? FColor::Green : FColor::Red);
+		DrawDebugBox(World, GetBoundsCenter(), GetBoundsExtent(), DungeonTransform.GetRotation(), FColor::Yellow);
+
+		Data->DrawDebug(World, RoomTransform * DungeonTransform, IsPlayerInside() ? FColor::Green : FColor::Red);
 
 		if (bIsRoomLocked)
 		{

@@ -347,10 +347,22 @@ void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector
 
 // ############ FBoxMinAndMax ##############
 
+const FBoxMinAndMax FBoxMinAndMax::Invalid {FIntVector::ZeroValue, FIntVector::ZeroValue};
+
 FBoxMinAndMax::FBoxMinAndMax(const FIntVector& A, const FIntVector& B)
+{
+	SetMinAndMax(A, B);
+}
+
+void FBoxMinAndMax::SetMinAndMax(const FIntVector& A, const FIntVector& B)
 {
 	Min = IntVector::Min(A, B);
 	Max = IntVector::Max(A, B);
+}
+
+bool FBoxMinAndMax::IsValid() const
+{
+	return Max.X > Min.X && Max.Y > Min.Y && Max.Z > Min.Z;
 }
 
 FIntVector FBoxMinAndMax::GetSize() const

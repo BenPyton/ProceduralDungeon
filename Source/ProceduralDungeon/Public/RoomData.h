@@ -43,7 +43,6 @@ public:
 	UPROPERTY(EditInstanceOnly, Category = "Level")
 	TSoftObjectPtr<UWorld> Level {nullptr};
 
-public:
 	// This will force a random door to be chosen during the dungeon generation.
 	// DEPRECATED: It will be removed in a future version of the plugin. As a replacement, you should return -1 as DoorIndex in the ChooseNextRoomData of your DungeonGenerator.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Doors")
@@ -52,11 +51,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Doors")
 	TArray<FDoorDef> Doors {FDoorDef()};
 
-	UPROPERTY(EditAnywhere, Category = "Room")
+	UPROPERTY(VisibleAnywhere, Category = "Room")
 	FIntVector FirstPoint {0};
 
-	UPROPERTY(EditAnywhere, Category = "Room")
+	UPROPERTY(VisibleAnywhere, Category = "Room")
 	FIntVector SecondPoint {1};
+
+	UPROPERTY(EditAnywhere, Category = "Room")
+	TArray<FBoxMinAndMax> BoundingBoxes;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Room")
 	TSet<TSubclassOf<URoomCustomData>> CustomData;
@@ -130,6 +132,7 @@ public:
 #if !(UE_BUILD_SHIPPING) || WITH_EDITOR
 	bool IsDoorValid(int DoorIndex) const;
 	bool IsDoorDuplicate(int DoorIndex) const;
+	void DrawDebug(const UWorld* World, const FTransform& Transform, const FColor& Color);
 #endif // !(UE_BUILD_SHIPPING) || WITH_EDITOR
 
 #if WITH_EDITOR

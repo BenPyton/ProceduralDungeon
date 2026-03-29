@@ -48,6 +48,33 @@ private:
 	TArray<FLink> LinkedPoints {};
 };
 
+struct FBoxPoints
+{
+public:
+	FBoxPoints();
+
+	void SetID(uint32 InID) { ID = InID; }
+	void SetMin(FVector Value);
+	void SetMax(FVector Value);
+	uint32 GetID() const { return ID; }
+	FVector GetMin() const { return Points[0].GetLocation(); }
+	FVector GetMax() const { return Points[1].GetLocation(); }
+
+	FRoomPoint& GetPoint(int32 Index)
+	{
+		check(Index >= 0 && Index < NbPoints);
+		return Points[Index];
+	}
+
+	void Draw(FPrimitiveDrawInterface* PDI, int32 SelectedPoint) const;
+
+	static const uint32 NbPoints {8};
+
+private:
+	uint32 ID;
+	FRoomPoint Points[NbPoints];
+};
+
 class FProceduralDungeonEditorTool_Size : public FProceduralDungeonEditorTool
 {
 public:
@@ -76,16 +103,24 @@ public:
 	virtual void PostRedo(bool bSuccess) override;
 
 	virtual void OnDataChanged(const URoomData* NewData = nullptr) override;
+	virtual void OnDataPropertiesChanged(const URoomData* Data = nullptr) override;
 
 	bool HasValidSelection() const;
 	void ResetDragPoint();
-	void UpdateDataAsset() const;
+	void UpdateDataAsset(int32 BoxIndex) const;
 
 	void SetSelectedPoint(int32 Index);
 	void ResetSelectedPoint();
 
 private:
+	int32 GetBoxIndexFromPointIndex(int32 PointIndex) const { return PointIndex / FBoxPoints::NbPoints; }
+	int32 GetBoxPointIndex(int32 PointIndex) const { return PointIndex % FBoxPoints::NbPoints; }
+	int32 GetMaxIndex() const { return Boxes.Num() * FBoxPoints::NbPoints; }
+	FRoomPoint& GetSelectedPoint();
+	void UpdateBoxes(const URoomData* Data);
+
+private:
 	int32 SelectedPoint {-1};
-	TArray<FRoomPoint> Points;
+	TArray<FBoxPoints> Boxes;
 	FVector DragPoint;
 };

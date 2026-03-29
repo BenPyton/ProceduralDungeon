@@ -73,10 +73,14 @@ public:
 	static EDirection Opposite(EDirection Direction);
 
 	TArray<FVoxelBoundsConnection>& AddCell(FIntVector Cell);
+	void AddBox(const FBoxMinAndMax& Box);
 
 	const FVoxelBoundsConnection* GetCellConnection(FIntVector Cell, EDirection Direction) const;
 	bool SetCellConnection(FIntVector Cell, EDirection Direction, const FVoxelBoundsConnection& Connection);
 
+	void ResetToWalls();
+
+	int32 GetCellCount() const { return Cells.Num(); }
 	const FBoxMinAndMax& GetBounds() const { return Bounds; }
 	bool IsValid() const { return Cells.Num() > 0; }
 
@@ -107,5 +111,5 @@ public:
 
 private:
 	TMap<FIntVector, TArray<FVoxelBoundsConnection>> Cells;
-	FBoxMinAndMax Bounds;
+	FBoxMinAndMax Bounds {FBoxMinAndMax::Invalid};
 };

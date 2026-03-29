@@ -91,31 +91,6 @@ void FRoomPoint::UpdateFrom(FRoomPoint& From, EAxisList::Type Axis)
 
 void FProceduralDungeonEditorTool_Size::EnterTool()
 {
-	//        6    1
-	//      2    7
-	//        4    5
-	//      0    3
-
-	Points.Empty();
-	Points.AddDefaulted(8);
-
-	Points[0].AddLinkedPoint(Points[2], EAxisList::XY);
-	Points[0].AddLinkedPoint(Points[3], EAxisList::XZ);
-	Points[0].AddLinkedPoint(Points[4], EAxisList::YZ);
-
-	Points[1].AddLinkedPoint(Points[5], EAxisList::XY);
-	Points[1].AddLinkedPoint(Points[6], EAxisList::XZ);
-	Points[1].AddLinkedPoint(Points[7], EAxisList::YZ);
-
-	Points[2].AddLinkedPoint(Points[6], EAxisList::YZ);
-	Points[2].AddLinkedPoint(Points[7], EAxisList::XZ);
-
-	Points[3].AddLinkedPoint(Points[5], EAxisList::YZ);
-	Points[3].AddLinkedPoint(Points[7], EAxisList::XY);
-
-	Points[4].AddLinkedPoint(Points[5], EAxisList::XZ);
-	Points[4].AddLinkedPoint(Points[6], EAxisList::XY);
-
 	OnDataChanged();
 	ResetSelectedPoint();
 }
@@ -127,21 +102,13 @@ void FProceduralDungeonEditorTool_Size::ExitTool()
 
 void FProceduralDungeonEditorTool_Size::Render(const FSceneView* View, FViewport* Viewport, FPrimitiveDrawInterface* PDI)
 {
-	const FColor NormalColor(200, 200, 200);
-	const FColor SelectedColor(255, 128, 0);
-
 	const URoomData* Data = GetRoomData();
 	if (!IsValid(Data))
 		return;
 
-	for (int i = 0; i < Points.Num(); ++i)
+	for (const FBoxPoints& Box : Boxes)
 	{
-		const bool bSelected = (SelectedPoint == i);
-		const FColor& Color = bSelected ? SelectedColor : NormalColor;
-
-		PDI->SetHitProxy(new HRoomPointProxy(i));
-		PDI->DrawPoint(Points[i].GetLocation(), Color, 15.0f, SDPG_Foreground);
-		PDI->SetHitProxy(nullptr);
+		Box.Draw(PDI, SelectedPoint);
 	}
 }
 
@@ -156,7 +123,7 @@ bool FProceduralDungeonEditorTool_Size::HandleClick(FEditorViewportClient* InVie
 		return false;
 
 	const HRoomPointProxy* RoomProxy = (HRoomPointProxy*)HitProxy;
-	checkf(RoomProxy->Index >= 0 && RoomProxy->Index < Points.Num(), TEXT("A room point has been clicked but is out of bounds!"));
+	checkf(RoomProxy->Index >= 0 && RoomProxy->Index < GetMaxIndex(), TEXT("A room point has been clicked but is out of bounds!"));
 
 	SetSelectedPoint(RoomProxy->Index);
 	GEditor->GetSelectedActors()->DeselectAll();
@@ -191,10 +158,11 @@ bool FProceduralDungeonEditorTool_Size::InputDelta(FEditorViewportClient* InView
 	if (!InDrag.IsNearlyZero())
 	{
 		DragPoint += InDrag;
-		FVector OldPoint = Points[SelectedPoint].GetLocation();
-		Points[SelectedPoint].SetLocation(Dungeon::SnapPoint(DragPoint, Data->GetRoomUnit()));
-		if (OldPoint != Points[SelectedPoint].GetLocation())
-			UpdateDataAsset();
+		FRoomPoint& Point = GetSelectedPoint();
+		FVector OldPoint = Point.GetLocation();
+		Point.SetLocation(Dungeon::SnapPoint(DragPoint, Data->GetRoomUnit()));
+		if (OldPoint != Point.GetLocation())
+			UpdateDataAsset(GetBoxIndexFromPointIndex(SelectedPoint));
 	}
 	return true;
 }
@@ -226,41 +194,53 @@ void FProceduralDungeonEditorTool_Size::PostRedo(bool bSuccess)
 
 void FProceduralDungeonEditorTool_Size::OnDataChanged(const URoomData* NewData)
 {
-	const URoomData* Data = GetRoomData();
-	if (!IsValid(Data))
-		return;
-
-	Points[0].SetLocation(Dungeon::ToWorldLocation(Data->FirstPoint, Data->GetRoomUnit()));
-	Points[1].SetLocation(Dungeon::ToWorldLocation(Data->SecondPoint, Data->GetRoomUnit()));
-
+	// When the room data has changed, reset all
+	ResetSelectedPoint();
 	ResetDragPoint();
+
+	UpdateBoxes(NewData);
+}
+
+void FProceduralDungeonEditorTool_Size::OnDataPropertiesChanged(const URoomData* Data)
+{
+	UpdateBoxes(Data);
 }
 
 bool FProceduralDungeonEditorTool_Size::HasValidSelection() const
 {
-	return SelectedPoint >= 0 && SelectedPoint < Points.Num();
+	return SelectedPoint >= 0 && SelectedPoint < GetMaxIndex();
 }
 
 void FProceduralDungeonEditorTool_Size::ResetDragPoint()
 {
 	if (HasValidSelection())
-		DragPoint = Points[SelectedPoint].GetLocation();
+		DragPoint = GetSelectedPoint().GetLocation();
+	else
+		DragPoint = FVector::ZeroVector;
 }
 
-void FProceduralDungeonEditorTool_Size::UpdateDataAsset() const
+void FProceduralDungeonEditorTool_Size::UpdateDataAsset(int32 BoxIndex) const
 {
 	URoomData* Data = GetRoomData();
 	if (!IsValid(Data))
 		return;
 
-	Data->Modify();
-	Data->FirstPoint = Dungeon::ToRoomLocation(Points[0].GetLocation(), Data->GetRoomUnit());
-	Data->SecondPoint = Dungeon::ToRoomLocation(Points[1].GetLocation(), Data->GetRoomUnit());
+	if (BoxIndex >= 0 && BoxIndex < Data->BoundingBoxes.Num())
+	{
+		Data->Modify();
+		const FVector RoomUnit = Data->GetRoomUnit();
+		const FBoxPoints& Box = Boxes[BoxIndex];
+		FBoxMinAndMax& DataBox = Data->BoundingBoxes[BoxIndex];
+		const FIntVector A = Dungeon::ToRoomLocation(Box.GetMin(), RoomUnit);
+		const FIntVector B = Dungeon::ToRoomLocation(Box.GetMax(), RoomUnit);
+		DataBox.SetMinAndMax(A, B);
+		return;
+	}
 }
 
 void FProceduralDungeonEditorTool_Size::SetSelectedPoint(int32 Index)
 {
-	if (Index < 0 || Index >= Points.Num())
+	if (Index < 0 || Index >= GetMaxIndex())
 		Index = -1;
 
 	DungeonEd_LogInfo("Selected Point: %d", Index);
@@ -271,4 +251,87 @@ void FProceduralDungeonEditorTool_Size::SetSelectedPoint(int32 Index)
 void FProceduralDungeonEditorTool_Size::ResetSelectedPoint()
 {
 	SetSelectedPoint(-1);
+}
+
+FRoomPoint& FProceduralDungeonEditorTool_Size::GetSelectedPoint()
+{
+	checkf(HasValidSelection(), TEXT("Trying to get selected point but selection is invalid!"));
+	const int32 BoxIndex = GetBoxIndexFromPointIndex(SelectedPoint);
+	const int32 PointIndex = GetBoxPointIndex(SelectedPoint);
+	checkf(BoxIndex >= 0 && BoxIndex < Boxes.Num(), TEXT("Selected point's box index is out of bounds!"));
+	checkf(PointIndex >= 0 && PointIndex < FBoxPoints::NbPoints, TEXT("Selected point's point index is out of bounds!"));
+	return Boxes[BoxIndex].GetPoint(PointIndex);
+}
+
+void FProceduralDungeonEditorTool_Size::UpdateBoxes(const URoomData* Data)
+{
+	if (!IsValid(Data))
+		return;
+
+	const int32 NbBoxes = Data->BoundingBoxes.Num();
+	if (Boxes.Num() != NbBoxes)
+	{
+		Boxes.SetNum(NbBoxes);
+	}
+
+	const FVector RoomUnit = Data->GetRoomUnit();
+	for (int32 i = 0; i < NbBoxes; ++i)
+	{
+		const FBoxMinAndMax& Box = Data->BoundingBoxes[i];
+		Boxes[i].SetID(i);
+		Boxes[i].SetMin(Dungeon::ToWorldLocation(Box.GetMin(), RoomUnit));
+		Boxes[i].SetMax(Dungeon::ToWorldLocation(Box.GetMax(), RoomUnit));
+	}
+}
+
+FBoxPoints::FBoxPoints()
+{
+	//        6    1
+	//      2    7
+	//        4    5
+	//      0    3
+
+	Points[0].AddLinkedPoint(Points[2], EAxisList::XY);
+	Points[0].AddLinkedPoint(Points[3], EAxisList::XZ);
+	Points[0].AddLinkedPoint(Points[4], EAxisList::YZ);
+
+	Points[1].AddLinkedPoint(Points[5], EAxisList::XY);
+	Points[1].AddLinkedPoint(Points[6], EAxisList::XZ);
+	Points[1].AddLinkedPoint(Points[7], EAxisList::YZ);
+
+	Points[2].AddLinkedPoint(Points[6], EAxisList::YZ);
+	Points[2].AddLinkedPoint(Points[7], EAxisList::XZ);
+
+	Points[3].AddLinkedPoint(Points[5], EAxisList::YZ);
+	Points[3].AddLinkedPoint(Points[7], EAxisList::XY);
+
+	Points[4].AddLinkedPoint(Points[5], EAxisList::XZ);
+	Points[4].AddLinkedPoint(Points[6], EAxisList::XY);
+}
+
+void FBoxPoints::SetMin(FVector Value)
+{
+	Points[0].SetLocation(Value);
+}
+
+void FBoxPoints::SetMax(FVector Value)
+{
+	Points[1].SetLocation(Value);
+}
+
+void FBoxPoints::Draw(FPrimitiveDrawInterface* PDI, int32 SelectedPoint) const
+{
+	static const FColor NormalColor(200, 200, 200);
+	static const FColor SelectedColor(255, 128, 0);
+
+	const int32 LocalSelectedIndex = SelectedPoint - (ID * NbPoints);
+	for (int i = 0; i < NbPoints; ++i)
+	{
+		const bool bSelected = (LocalSelectedIndex == i);
+		const FColor& Color = bSelected ? SelectedColor : NormalColor;
+
+		PDI->SetHitProxy(new HRoomPointProxy(ID * NbPoints + i));
+		PDI->DrawPoint(Points[i].GetLocation(), Color, 10.0f, SDPG_Foreground);
+		PDI->SetHitProxy(nullptr);
+	}
 }

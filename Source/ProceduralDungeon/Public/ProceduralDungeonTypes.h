@@ -155,16 +155,27 @@ public:
 // The downside of doing that would be the Center and Extent computation that is slightly different...
 // Also, the IsInside with another box does not consider coincident faces as inside...
 // Also, operators + and += don't mean the same (extending box to include a point instead of shifting the box)...
+USTRUCT(BlueprintType)
 struct PROCEDURALDUNGEON_API FBoxMinAndMax
 {
-public:
+	GENERATED_BODY();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Box")
 	FIntVector Min {0};
-	FIntVector Max {0};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Box")
+	FIntVector Max {1};
 
 public:
 	FBoxMinAndMax() = default;
 	FBoxMinAndMax(const FIntVector& A, const FIntVector& B);
 
+	void SetMinAndMax(const FIntVector& A, const FIntVector& B);
+	FIntVector GetMin() const { return Min; }
+	FIntVector GetMax() const { return Max; }
+
+	bool IsValid() const;
 	FIntVector GetSize() const;
 	FBoxCenterAndExtent ToCenterAndExtent() const;
 	bool IsInside(const FIntVector& Cell) const;
@@ -182,6 +193,9 @@ public:
 	FBoxMinAndMax operator-(const FIntVector& X) const;
 	bool operator==(const FBoxMinAndMax& Other) const;
 	bool operator!=(const FBoxMinAndMax& Other) const;
+
+public:
+	static const FBoxMinAndMax Invalid;
 };
 
 FBoxMinAndMax PROCEDURALDUNGEON_API Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot);

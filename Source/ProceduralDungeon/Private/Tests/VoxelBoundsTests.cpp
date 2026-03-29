@@ -35,7 +35,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 
 		TestEqual(TEXT("BoundsA == ({0, -1, 0}, {2, 2, 3})"), BoundsA.GetBounds(), FBoxMinAndMax({0, -1, 0}, {2, 2, 3}));
 		TestEqual(TEXT("BoundsB == ({1, 1, 1}, {2, 2, 2})"), BoundsB.GetBounds(), FBoxMinAndMax({1, 1, 1}, {2, 2, 2}));
-		TestEqual(TEXT("BoundsC == ({0, 0, 0}, {0, 0, 0})"), BoundsC.GetBounds(), FBoxMinAndMax());
+		TestEqual(TEXT("BoundsC == ({0, 0, 0}, {0, 0, 0})"), BoundsC.GetBounds(), FBoxMinAndMax::Invalid);
 	}
 
 	// Comparison Test
