@@ -11,10 +11,12 @@
 #include "ProceduralDungeonTypes.h"
 #include "ProceduralDungeonUtils.h"
 #include "ProceduralDungeonLog.h"
+#include "ProceduralDungeonCustomVersion.h"
 #include "DoorType.h"
 #include "Math/GenericOctree.h" // FBoxCenterAndExtent
 #include "DungeonSettings.h"
 #include "RoomConstraints/RoomConstraint.h"
+#include "Serialization/CustomVersion.h"
 
 #if !USE_LEGACY_DATA_VALIDATION
 	#include "Misc/DataValidation.h"
@@ -24,6 +26,33 @@ URoomData::URoomData()
 	: Super()
 {
 	BoundingBoxes.Add({FIntVector(0), FIntVector(1)});
+}
+
+void URoomData::Serialize(FArchive& Ar)
+{
+	Super::Serialize(Ar);
+
+	Ar.UsingCustomVersion(FProceduralDungeonCustomVersion::GUID);
+
+	// If loading an old version, we need to handle the migration
+	if (Ar.IsLoading())
+	{
+		const int32 DungeonVersion = Ar.CustomVer(FProceduralDungeonCustomVersion::GUID);
+		
+		if (DungeonVersion < FProceduralDungeonCustomVersion::RoomDataBoundingBoxesMigration)
+		{
+			DungeonLog_Warning("Migrating RoomData '%s' from legacy FirstPoint/SecondPoint to BoundingBoxes.", *GetName());
+
+			if (BoundingBoxes.Num() == 0)
+				BoundingBoxes.AddDefaulted();
+				
+			BoundingBoxes[0].SetMinAndMax(FirstPoint, SecondPoint);
+				
+			// Clear the legacy data after migration
+			FirstPoint = FIntVector(0);
+			SecondPoint = FIntVector(0);
+		}
+	}
 }
 
 const FDoorDef& URoomData::GetDoorDef(int32 DoorIndex) const

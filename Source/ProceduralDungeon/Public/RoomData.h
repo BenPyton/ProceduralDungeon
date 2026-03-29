@@ -51,10 +51,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Doors")
 	TArray<FDoorDef> Doors {FDoorDef()};
 
-	UPROPERTY(VisibleAnywhere, Category = "Room")
+	UPROPERTY(meta = (DeprecatedProperty, DeprecationMessage = "Use BoundingBoxes instead"))
 	FIntVector FirstPoint {0};
 
-	UPROPERTY(VisibleAnywhere, Category = "Room")
+	UPROPERTY(meta = (DeprecatedProperty, DeprecationMessage = "Use BoundingBoxes instead"))
 	FIntVector SecondPoint {1};
 
 	UPROPERTY(EditAnywhere, Category = "Room")
@@ -71,6 +71,8 @@ public:
 
 public:
 	URoomData();
+
+	virtual void Serialize(FArchive& Ar) override;
 
 	UFUNCTION(BlueprintPure, Category = "Room Data", meta = (DisplayName = "Door Count", CompactNodeTitle = "Door Count"))
 	int GetNbDoor() const { return Doors.Num(); }
