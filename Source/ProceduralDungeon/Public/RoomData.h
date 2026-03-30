@@ -11,6 +11,7 @@
 #include "Engine/DataAsset.h"
 #include "ProceduralDungeonTypes.h"
 #include "Misc/EngineVersionComparison.h"
+#include "Math/GenericOctree.h" // for FBoxCenterAndExtent (required for UE5.0)
 #include "VoxelBounds/VoxelBounds.h"
 #include "RoomData.generated.h"
 
@@ -125,7 +126,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Room Contraint")
 	static bool DoesPassAllConstraints(const UDungeonGraph* Dungeon, const URoomData* RoomData, FIntVector Location, EDoorDirection Direction);
 
-	class FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
+	FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
+	FBoxCenterAndExtent GetSubBounds(int32 Index, FTransform Transform = FTransform::Identity) const;
 	FBoxMinAndMax GetIntBounds() const;
 	FVoxelBounds GetVoxelBounds() const;
 

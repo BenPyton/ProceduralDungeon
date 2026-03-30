@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2023 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2023 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -8,8 +8,9 @@
 #include "DungeonOctree.h"
 #include "Room.h"
 
-FDungeonOctreeElement::FDungeonOctreeElement(URoom* Room)
+FDungeonOctreeElement::FDungeonOctreeElement(URoom* Room, int32 BoxIndex)
 {
+	check(IsValid(Room));
 	this->Room = Room;
-	Bounds = Room->GetBounds();
+	Bounds = Room->GetSubBounds(BoxIndex);
 }

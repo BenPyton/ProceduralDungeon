@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2023 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2023 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -16,6 +16,7 @@
 #include "Templates/Function.h"
 #include "ProceduralDungeonTypes.h"
 #include "VoxelBounds/VoxelBounds.h"
+#include "DungeonOctree.h"
 #include "DungeonGraph.generated.h"
 
 class URoom;
@@ -38,6 +39,8 @@ class PROCEDURALDUNGEON_API UDungeonGraph : public UReplicableObject, public IRo
 #endif
 
 public:
+	UDungeonGraph();
+
 	//~ Begin IRoomContainer Interface
 	// Returns the room instance with the provided index.
 	// Returns null if no room exists with the provided index.
@@ -63,8 +66,11 @@ public:
 	void InitRooms();
 	void Clear();
 
+	bool CanRoomFit(const URoom* Room) const;
 	bool TryConnectDoor(URoom* Room, int32 DoorIndex);
 	bool TryConnectToExistingDoors(URoom* Room);
+
+	TArray<URoom*> GetAllRoomsOverlapping(const FBox& Box) const;
 
 	bool HasRooms() const { return Rooms.Num() > 0; }
 	bool IsDirty() const { return bIsDirty; }
@@ -255,6 +261,9 @@ private:
 
 	// Transient. The computed bounds of the dungeon. Updated each time the room list changes.
 	FVoxelBounds Bounds;
+
+	// Transient, used for room collision checks.
+	FDungeonOctree Octree;
 
 private:
 	struct FSaveData

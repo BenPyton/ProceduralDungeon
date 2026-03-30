@@ -524,6 +524,12 @@ FBoxCenterAndExtent URoom::GetBounds() const
 	return RoomData->GetBounds(GetTransform());
 }
 
+int32 URoom::GetSubBoundsCount() const
+{
+	check(IsValid(RoomData));
+	return RoomData->BoundingBoxes.Num();
+}
+
 FBoxCenterAndExtent URoom::GetLocalBounds() const
 {
 	check(IsValid(RoomData));
@@ -540,6 +546,12 @@ FVoxelBounds URoom::GetVoxelBounds() const
 {
 	check(IsValid(RoomData));
 	return RoomToWorld(RoomData->GetVoxelBounds());
+}
+
+FBoxCenterAndExtent URoom::GetSubBounds(int32 Index) const
+{
+	check(IsValid(RoomData));
+	return RoomData->GetSubBounds(Index, GetTransform());
 }
 
 FTransform URoom::GetTransform() const

@@ -21,6 +21,12 @@
 #include "ProceduralDungeonUtils.h"
 #include "DungeonSettings.h"
 
+UDungeonGraph::UDungeonGraph()
+	: Super()
+	, Octree(FVector::ZeroVector, HALF_WORLD_MAX)
+{
+}
+
 void UDungeonGraph::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -93,6 +99,13 @@ void UDungeonGraph::PostLoadDungeon_Implementation()
 
 void UDungeonGraph::AddRoom(URoom* Room)
 {
+	check(IsValid(Room));
+
+	for (int i = 0; i < Room->GetSubBoundsCount(); ++i)
+	{
+		Octree.AddElement(FDungeonOctreeElement(Room, i));
+	}
+
 	Rooms.Add(Room);
 	UpdateBounds(Room);
 }
@@ -120,6 +133,18 @@ void UDungeonGraph::InitRooms()
 		const URoomData* Data = Room->GetRoomData();
 		Data->InitializeRoom(Room, this);
 	}
+}
+
+bool UDungeonGraph::CanRoomFit(const URoom* Room) const
+{
+	bool bCanFit = true;
+	for (int32 i = 0; i < Room->GetSubBoundsCount() && bCanFit; ++i)
+	{
+		FindElementsWithBoundsTest(Octree, Room->GetSubBounds(i), [&bCanFit, Room](const FDungeonOctreeElement& Element) {
+			bCanFit = false;
+		});
+	}
+	return bCanFit;
 }
 
 bool UDungeonGraph::TryConnectDoor(URoom* Room, int32 DoorIndex)
@@ -167,6 +192,16 @@ bool UDungeonGraph::TryConnectToExistingDoors(URoom* Room)
 		HasConnection |= TryConnectDoor(Room, i);
 	}
 	return HasConnection;
+}
+
+TArray<URoom*> UDungeonGraph::GetAllRoomsOverlapping(const FBox& Box) const
+{
+	TArray<URoom*> RoomsInBox;
+	FindElementsWithBoundsTest(Octree, Box, [&RoomsInBox](const FDungeonOctreeElement& Element) {
+		URoom* Room = Element.Room;
+		RoomsInBox.AddUnique(Room);
+	});
+	return RoomsInBox;
 }
 
 void UDungeonGraph::RetrieveRoomsFromLoadedData()
@@ -424,6 +459,7 @@ URoom* UDungeonGraph::GetRoomByIndex(int64 Index) const
 
 void UDungeonGraph::Clear()
 {
+	// Call cleanup for each room
 	for (URoom* Room : Rooms)
 	{
 		check(IsValid(Room));
@@ -431,8 +467,10 @@ void UDungeonGraph::Clear()
 		check(IsValid(Data));
 		Data->CleanupRoom(Room, this);
 	}
-	Rooms.Empty();
 
+	// Clear out data
+	Octree.Destroy();
+	Rooms.Empty();
 	RoomConnections.Empty();
 
 	RebuildBounds();

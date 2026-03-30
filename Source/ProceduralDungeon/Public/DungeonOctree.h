@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2023 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2023 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -20,8 +20,9 @@ struct FDungeonOctreeElement
 {
 	class URoom* Room;
 	FBoxCenterAndExtent Bounds;
+	int32 Index;
 
-	FDungeonOctreeElement(URoom* Room);
+	FDungeonOctreeElement(URoom* Room, int32 BoxIndex);
 };
 
 struct FDungeonOctreeSemantics
@@ -39,7 +40,7 @@ struct FDungeonOctreeSemantics
 
 	FORCEINLINE static bool AreElementsEqual(const FDungeonOctreeElement& A, const FDungeonOctreeElement& B)
 	{
-		return A.Room == B.Room;
+		return A.Room == B.Room && A.Index == B.Index;
 	}
 
 	FORCEINLINE static void SetElementId(const FDungeonOctreeElement& Element

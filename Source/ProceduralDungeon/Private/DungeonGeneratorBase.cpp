@@ -72,7 +72,6 @@ ADungeonGeneratorBase::ADungeonGeneratorBase()
 	NetDormancy = ENetDormancy::DORM_DormantAll;
 
 	Graph = CreateDefaultSubobject<UDungeonGraph>(TEXT("Dungeon Rooms"));
-	Octree = MakeUnique<FDungeonOctree>(FVector::ZeroVector, HALF_WORLD_MAX);
 }
 
 void ADungeonGeneratorBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -316,11 +315,7 @@ bool ADungeonGeneratorBase::TryPlaceRoomAtLocation(URoom* const& Room, FIntVecto
 bool ADungeonGeneratorBase::CheckRoomOverlap(const URoom* const& Room, const UWorld* World) const
 {
 	// Test if it fits in the place
-	bool bCanBePlaced = !URoom::Overlap(*Room, Graph->GetAllRooms());
-	// @TODO: Should be more performant to use voxel bounds instead of room bounds
-	// Also will be mandatory when RoomData will get voxel bounds editor
-	// But for now if the RoomUnit is really small (like (1,1,1)) it is really a bottle neck of performence...
-	//bool bCanBePlaced = !FVoxelBounds::Overlap(Room->GetVoxelBounds(), Graph->GetVoxelBounds());
+	bool bCanBePlaced = Graph->CanRoomFit(Room);
 
 	// Check that it does not collide with the world too
 	if (bCanBePlaced && bUseWorldCollisionChecks)
@@ -328,16 +323,19 @@ bool ADungeonGeneratorBase::CheckRoomOverlap(const URoom* const& Room, const UWo
 		if (!World)
 			World = GetWorld();
 
-		const FBoxCenterAndExtent Bounds = Room->GetBounds();
 		const FTransform& DungeonTransform = GetDungeonTransform();
-		const bool bCollideWithWorld = World->OverlapBlockingTestByChannel(
-			DungeonTransform.TransformPositionNoScale(Bounds.Center),
-			DungeonTransform.GetRotation(),
-			ECC_WorldStatic,
-			FCollisionShape::MakeBox(Bounds.Extent),
-			WorldCollisionParams
-		);
-		bCanBePlaced &= !bCollideWithWorld;
+		for (int32 i = 0; i < Room->GetSubBoundsCount() && bCanBePlaced; ++i)
+		{
+			const FBoxCenterAndExtent Bounds = Room->GetSubBounds(i);
+			const bool bCollideWithWorld = World->OverlapBlockingTestByChannel(
+				DungeonTransform.TransformPositionNoScale(Bounds.Center),
+				DungeonTransform.GetRotation(),
+				ECC_WorldStatic,
+				FCollisionShape::MakeBox(Bounds.Extent),
+				WorldCollisionParams
+			);
+			bCanBePlaced &= !bCollideWithWorld;
+		}
 	}
 
 	return bCanBePlaced;
@@ -455,10 +453,13 @@ void ADungeonGeneratorBase::UpdatePlayerRooms()
 		FPlayerRooms& PlayerRoom = PlayerRooms.FindOrAdd(PlayerID);
 		auto PreviousRoomList(PlayerRoom.CurrentRooms);
 		PlayerRoom.Roll();
-		FindElementsWithBoundsTest(*Octree, WorldPlayerBox, [this, &PlayerRoom, &PlayerID](const FDungeonOctreeElement& Element) {
-			PlayerRoom.AddCurrentRoom(Element.Room);
-			Element.Room->SetPlayerInside(PlayerID, true);
-		});
+
+		const TArray<URoom*> FoundRooms = Graph->GetAllRoomsOverlapping(WorldPlayerBox);
+		for (const auto& Room : FoundRooms)
+		{
+			PlayerRoom.AddCurrentRoom(Room);
+			Room->SetPlayerInside(PlayerID, true);
+		}
 
 		for (URoom* Room : PlayerRoom.OldRooms)
 		{
@@ -472,14 +473,14 @@ void ADungeonGeneratorBase::UpdatePlayerRooms()
 	}
 }
 
-void ADungeonGeneratorBase::UpdateRoomVisibility()
+void ADungeonGeneratorBase::UpdateRoomVisibility(bool bForceUpdate)
 {
 	const bool bIsOcclusionEnabled = Dungeon::OcclusionCulling();
 	const uint32 OcclusionDistance = Dungeon::OcclusionDistance();
-	bool bForceUpdate = false;
 
 	// Detects occlusion setting changes and toggles on/off all room visibilities when occlusion is enabled/disabled.
-	if (bWasOcclusionEnabled != bIsOcclusionEnabled
+	if (bForceUpdate
+		|| bWasOcclusionEnabled != bIsOcclusionEnabled
 		|| PreviousOcclusionDistance != OcclusionDistance)
 	{
 		bForceUpdate = true;
@@ -548,20 +549,6 @@ void ADungeonGeneratorBase::UpdateRoomRelevancy()
 void ADungeonGeneratorBase::Reset()
 {
 	PlayerRooms.Empty();
-	Octree->Destroy();
-}
-
-void ADungeonGeneratorBase::UpdateOctree()
-{
-	Octree->Destroy();
-	for (URoom* r : Graph->GetAllRooms())
-	{
-		check(IsValid(r));
-		FBoxCenterAndExtent bounds = r->GetBounds();
-		FDungeonOctreeElement octreeElement(r);
-		Octree->AddElement(octreeElement);
-		r->SetVisible(false);
-	}
 }
 
 void ADungeonGeneratorBase::UpdateSeed()
@@ -750,8 +737,8 @@ void ADungeonGeneratorBase::OnStateEnd(EGenerationState State)
 		DungeonLog_Info("======= End Dungeon Generation =======");
 		break;
 	case EGenerationState::Initialization:
+		UpdateRoomVisibility(/*bForceUpdate=*/true);
 		DungeonLog_Info("======= End Dungeon Initialization =======");
-		UpdateOctree();
 		break;
 	case EGenerationState::Load:
 		DungeonLog_Info("======= End Load All Levels =======");

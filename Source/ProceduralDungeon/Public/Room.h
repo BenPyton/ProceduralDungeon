@@ -299,6 +299,8 @@ public:
 
 	FTransform GetTransform() const;
 	FBoxCenterAndExtent GetBounds() const;
+	int32 GetSubBoundsCount() const;
+	FBoxCenterAndExtent GetSubBounds(int32 Index) const;
 	FBoxCenterAndExtent GetLocalBounds() const;
 	FBoxMinAndMax GetIntBounds() const;
 	FVoxelBounds GetVoxelBounds() const;

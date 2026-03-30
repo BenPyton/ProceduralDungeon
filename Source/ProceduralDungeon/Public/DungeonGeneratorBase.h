@@ -10,7 +10,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Math/RandomStream.h"
-#include "DungeonOctree.h"
 #include "ProceduralDungeonTypes.h"
 #include "CollisionQueryParams.h"
 #include "UObject/ScriptInterface.h"
@@ -285,16 +284,13 @@ private:
 	void UpdatePlayerRooms();
 
 	// Update the rooms visibility based on the player position
-	void UpdateRoomVisibility();
+	void UpdateRoomVisibility(bool bForceUpdate = false);
 
 	// Update the rooms relevancy based on the player position
 	void UpdateRoomRelevancy();
 
 	// Reset all data from a specific generation
 	void Reset();
-
-	// Clear and refill octree from the dungeon graph
-	void UpdateOctree();
 
 	// Initialize the seed depending on the seed type setting
 	void UpdateSeed();
@@ -419,7 +415,6 @@ private:
 	};
 
 	// Occlusion culling system
-	TUniquePtr<FDungeonOctree> Octree;
 	TMap<int32, FPlayerRooms> PlayerRooms;
 
 	// Transient. Only used to detect when occlusion setting is changed.

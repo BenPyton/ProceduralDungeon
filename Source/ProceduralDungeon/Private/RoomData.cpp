@@ -13,7 +13,6 @@
 #include "ProceduralDungeonLog.h"
 #include "ProceduralDungeonCustomVersion.h"
 #include "DoorType.h"
-#include "Math/GenericOctree.h" // FBoxCenterAndExtent
 #include "DungeonSettings.h"
 #include "RoomConstraints/RoomConstraint.h"
 #include "Serialization/CustomVersion.h"
@@ -176,6 +175,13 @@ FBoxCenterAndExtent URoomData::GetBounds(FTransform Transform) const
 	return Dungeon::ToWorld(GetIntBounds(), GetRoomUnit(), Transform);
 }
 
+FBoxCenterAndExtent URoomData::GetSubBounds(int32 Index, FTransform Transform) const
+{
+	check(Index >= 0 && Index < BoundingBoxes.Num());
+	const FBoxMinAndMax& Box = BoundingBoxes[Index];
+	return Dungeon::ToWorld(Box, GetRoomUnit(), Transform);
+}
+
 FIntVector URoomData::GetSize() const
 {
 	return GetIntBounds().GetSize();
@@ -272,12 +278,8 @@ void URoomData::DrawDebug(const UWorld* World, const FTransform& Transform, cons
 
 	for (const FBoxMinAndMax& BoundingBox : BoundingBoxes)
 	{
-		FBoxCenterAndExtent Box = Dungeon::ToWorld(BoundingBox, GetRoomUnit(), Transform);
-		const FVector Center = Transform.TransformPositionNoScale(Box.Center);
-		const FVector Extent = Box.Extent;
-		const FQuat Rotation = Transform.GetRotation();
-
-		DrawDebugBox(World, Center, Extent, Rotation, Color, false, -1.0f, SDPG_World, 2.0f);
+		const FBoxCenterAndExtent Box = Dungeon::ToWorld(BoundingBox, GetRoomUnit(), Transform);
+		DrawDebugBox(World, Box.Center, Box.Extent, FQuat::Identity, Color, false, -1.0f, SDPG_World, 2.0f);
 	}
 }
 
