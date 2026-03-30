@@ -305,12 +305,6 @@ public:
 	FBoxMinAndMax GetIntBounds() const;
 	FVoxelBounds GetVoxelBounds() const;
 
-	// AABB Overlapping
-	static bool Overlap(const URoom& A, const URoom& B);
-	static bool Overlap(const URoom& Room, const TArray<URoom*>& RoomList);
-
-	static URoom* GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList);
-
 private:
 	// Utility functions to load/unload level instances
 	static ULevelStreamingDynamic* LoadInstance(UObject* WorldContextObject, const TSoftObjectPtr<UWorld>& Level, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation);

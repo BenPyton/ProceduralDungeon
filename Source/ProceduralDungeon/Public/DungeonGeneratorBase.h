@@ -347,6 +347,7 @@ public:
 	FVector GetDungeonOffset() const;
 	FQuat GetDungeonRotation() const;
 	const FTransform& GetDungeonTransform() const;
+	const UDungeonSettings* GetSettings() const { return SettingsOverrides; }
 
 	FORCEINLINE const UDungeonGraph* GetRooms() const { return Graph; }
 	FORCEINLINE EGenerationState GetCurrentState() const { return CurrentState; }

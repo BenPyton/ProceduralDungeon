@@ -1007,39 +1007,6 @@ void URoom::DispatchCallbackToSavedLevelActors(TFunction<void(AActor*)> Callback
 	}
 }
 
-// AABB Overlapping
-bool URoom::Overlap(const URoom& A, const URoom& B)
-{
-	FBoxMinAndMax BoxA = A.GetIntBounds();
-	FBoxMinAndMax BoxB = B.GetIntBounds();
-	return FBoxMinAndMax::Overlap(BoxA, BoxB);
-}
-
-bool URoom::Overlap(const URoom& Room, const TArray<URoom*>& RoomList)
-{
-	bool overlap = false;
-	for (int i = 0; i < RoomList.Num() && !overlap; i++)
-	{
-		if (Overlap(Room, *RoomList[i]))
-		{
-			overlap = true;
-		}
-	}
-	return overlap;
-}
-
-URoom* URoom::GetRoomAt(FIntVector RoomCell, const TArray<URoom*>& RoomList)
-{
-	for (URoom* Room : RoomList)
-	{
-		if (IsValid(Room) && Room->IsOccupied(RoomCell))
-		{
-			return Room;
-		}
-	}
-	return nullptr;
-}
-
 ULevelStreamingDynamic* URoom::LoadInstance(UObject* WorldContextObject, const TSoftObjectPtr<UWorld>& Level, const FString& InstanceNameSuffix, FVector Location, FRotator Rotation)
 {
 	DungeonLog_InfoSilent("[W:%s] Loading LevelStreamingDynamic", *GetNameSafe(WorldContextObject));

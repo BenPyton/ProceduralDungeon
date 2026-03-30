@@ -364,7 +364,16 @@ bool UDungeonGraph::GetPathBetween(const URoom* A, const URoom* B, TArray<URoom*
 
 URoom* UDungeonGraph::GetRoomAt(FIntVector RoomCell) const
 {
-	return URoom::GetRoomAt(RoomCell, Rooms);
+	const FVector RoomUnit = UDungeonSettings::GetRoomUnit(Generator->GetSettings());
+	FVector Location = Dungeon::ToWorldLocation(RoomCell, RoomUnit);
+	FBox LocationBox(Location, Location + FVector::OneVector);
+
+	URoom* FoundRoom = nullptr;
+	FindElementsWithBoundsTest(Octree, LocationBox, [&FoundRoom](const FDungeonOctreeElement& Element) {
+		FoundRoom = Element.Room;
+	});
+
+	return FoundRoom;
 }
 
 FVector UDungeonGraph::GetDungeonBoundsCenter() const
