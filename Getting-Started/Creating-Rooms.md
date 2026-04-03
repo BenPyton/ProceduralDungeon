@@ -125,9 +125,12 @@ When in `Dungeon Room` editor mode, you have access to 2 tools to ease your room
 
 ![](../Images/ToolSelection.gif)
 
-The `Size` tool will allows you to edit the room's bounding box by dragging points in the viewport.
+The `Size` tool will allows you to edit the room's bounding box by dragging points in the viewport.  
+You can add more boxes or remove existing boxes by modifying the array `Bounding Boxes` in the data asset.
 
 ![](../Images/SizeTool.gif)
+
+![](../Images/SizeTool_AddRemoveBoxes.jpg)
 
 The `Door` tool will allows you to add or remove doors easily by clicking on your room bounding box in the viewport (left-click to add, right-click to remove).\
 If you want to place different [door types](../Advanced-Features/Door-Types.md), you can select the one you want in the selector beside the tool button.\
