@@ -31,3 +31,5 @@ This constraint allows the room to be placed unless there are already a maximum 
 To create your own room constraints, first create a child class of `Room Constraint`, then override the `Check` function.
 
 You must return true if you want to allow the room to be placed, or false to prevent the room to be placed.
+
+![](../Images/RoomConstraint_OverrideCheck.gif)
