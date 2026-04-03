@@ -1,6 +1,6 @@
 # Doors
 
-::: warning
+:::warning
 
 With v3.8, the logic of the `Door` class has been moved into a `Door` component, also any actor can be used as door actor.  
 The `Door` class is deprecated and will be removed in a future version of the plugin.  
@@ -21,13 +21,12 @@ If you want to see the correct size depending on the [door type](../Advanced-Fea
 ## Door Component
 
 The easiest way is to add the `Door Component` to your actor.
-You can then sets it's `Door Type` asset, have a visualization of it's size, etc.
-
-Bind events from the `Door Component` to know when the door is opened/closed or locked/unlocked.
+You can then set its `Door Type` asset, have a visualization of its size, etc.  
+You should bind events from the `Door Component` to know when the door is opened/closed or locked/unlocked.
 
 ![](../Images/DoorComponent.jpg)
 
-::: note
+:::note
 
 The legacy `Door` actor itself now implements the `Door Component`.
 If you have updated the plugin from v3.7, some variables and events may be marked as deprecated.
