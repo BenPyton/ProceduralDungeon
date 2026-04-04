@@ -2,27 +2,27 @@
 
 :::warning
 
-With v3.8, the logic of the `Door` class has been moved into a `Door` component, also any actor can be used as door actor.  
+With v3.8, the logic of the `Door` class has been moved into a `Door` component, also now any actor can be used as door actor.  
 The `Door` class is deprecated and will be removed in a future version of the plugin.  
-This page has been updated to the latest changes.
+This page has been updated to the latest changes.  
+Do a backup of your blueprints (or your whole project) before migrating your door actors (in case you're not using some versioning like git or svn).
 
 :::
 
-You have to manage yourself how your doors open or close.\
-For that, you just need to create a child blueprint class of `Door` and call the `Open`  function whenever you want to open or close the door.\
-You then can do what you want when a door opens or closes by overriding the events `OnOpen` and `OnClose` (like playing animation, sounds, effects, etc.).
+The generator will instantiate some actors to place at door locations if you provide some actor class through its [`Choose Door`](./Generating-Dungeon/Choose-Door.md) function.
 
-If you want to place walls instead of doors when the rooms are not connected, you still need to inherits your blueprint from the `Door` class, but with no logic inside and just a wall static mesh.
-
-You can lock or unlock a door to prevent players from opening the door if you want. You just need to call the `Lock` function for that.
+Only one actor is instantiated for a door shared between 2 rooms, so your 3D mesh must include both sides of the door.  
+An actor may also be instantiated for unconnected doors (a room door that does not lead to another room). Use that to your advantage by spawning a wall for example.
 
 If you want to see the correct size depending on the [door type](../Advanced-Features/Door-Types.md) in the blueprint viewport of the actor, you have to set the `Type` variable of the door.
+
+See the following sections to use the built-in `Door Component` for a fully implemented door logic (so you only have to make your door visual), or to use the `Door Interface` if you want more custom logic.
 
 ## Door Component
 
 The easiest way is to add the `Door Component` to your actor.
 You can then set its `Door Type` asset, have a visualization of its size, etc.  
-You should bind events from the `Door Component` to know when the door is opened/closed or locked/unlocked.
+You should bind events from the `Door Component` to know when the door is opened/closed or locked/unlocked. This is particularly useful to update your door meshes and animations.
 
 ![](../Images/DoorComponent.jpg)
 
