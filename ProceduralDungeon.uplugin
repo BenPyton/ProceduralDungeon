@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 30801,
-	"VersionName": "3.8.1",
+	"Version": 30802,
+	"VersionName": "3.8.2",
 	"FriendlyName": "Procedural Dungeon",
 	"Description": "Create rich and diverse dungeon experiences that combine the best of both worlds: the creativity and precision of handmade room designs, paired with the unpredictability and excitement of procedural generation.",
 	"Category": "Procedural",
