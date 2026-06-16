@@ -882,7 +882,7 @@ bool URoom::FixupReferences(UObject* Context)
 	GeneratorOwner = GeneratorProvider->GetGenerator();
 	if (!GeneratorOwner.IsValid())
 	{
-		DungeonLog_WarningSilent("Failed to fixup references: Generator is invalid.", *GetNameSafe(Context));
+		DungeonLog_WarningSilent("Failed to fixup references: Generator is invalid.");
 		return false;
 	}
 

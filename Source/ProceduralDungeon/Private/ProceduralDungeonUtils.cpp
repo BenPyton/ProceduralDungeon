@@ -237,7 +237,12 @@ void ObjectUtils::DispatchToObjectAndSubobjects(UObject* Obj, TFunction<void(UOb
 
 	// Get all direct subobjects of this object.
 	TArray<UObject*> Subobjects;
+
+#if UE_VERSION_OLDER_THAN(5, 8, 0)
 	GetObjectsWithOuter(Obj, Subobjects, /*bIncludeNestedObjects = */ false);
+#else
+	GetObjectsWithOuter(Obj, Subobjects, EGetObjectsFlags::None);
+#endif
 
 	++Depth;
 	// Recursively dispatch to all subobjects found.

@@ -13,4 +13,9 @@ FDungeonOctreeElement::FDungeonOctreeElement(URoom* Room, int32 BoxIndex)
 	check(IsValid(Room));
 	this->Room = Room;
 	Bounds = Room->GetSubBounds(BoxIndex);
+
+	// Shrink the bounds slightly to avoid overlapping with other rooms in the octree when sharing the same face.
+	// Also forces W to 0 to avoid issues with octree intersection tests.
+	Bounds.Extent -= FVector(0.0001f);
+	Bounds.Extent.W = 0;
 }
