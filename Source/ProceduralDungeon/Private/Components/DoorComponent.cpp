@@ -183,3 +183,8 @@ bool UDoorComponent::OwnerHasAuthority() const
 
 	return Owner->HasAuthority();
 }
+
+void UDoorComponent::OnRep_RoomConnection()
+{
+	DungeonLog_Debug("Door %s OnRep_RoomConnection: %s", *GetNameSafe(this), *GetNameSafe(RoomConnection));
+}
