@@ -87,11 +87,14 @@ protected:
 
 	bool OwnerHasAuthority() const;
 
+	UFUNCTION()
+	void OnRep_RoomConnection();
+
 protected:
 	bool bLocked {false};
 	bool bIsOpen {false};
 
-	UPROPERTY(BlueprintReadOnly, Replicated, Category = "Door")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_RoomConnection, Category = "Door")
 	URoomConnection* RoomConnection {nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, SaveGame, Category = "Door", meta = (DisplayName = "Always Visible"))

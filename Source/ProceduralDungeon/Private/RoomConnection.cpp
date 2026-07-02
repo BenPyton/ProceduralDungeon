@@ -240,12 +240,14 @@ bool URoomConnection::IsDoorLocked() const
 
 void URoomConnection::SetDoorOpen(bool bOpen)
 {
+	WakeUpOwnerActor();
 	DoorState.bIsOpen = bOpen;
 	MARK_PROPERTY_DIRTY_FROM_NAME(URoomConnection, DoorState, this);
 }
 
 void URoomConnection::SetDoorLocked(bool bLocked)
 {
+	WakeUpOwnerActor();
 	DoorState.bIsLocked = bLocked;
 	MARK_PROPERTY_DIRTY_FROM_NAME(URoomConnection, DoorState, this);
 }
