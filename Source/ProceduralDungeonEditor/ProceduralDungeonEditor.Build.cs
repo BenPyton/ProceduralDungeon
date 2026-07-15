@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2019 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2019 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -33,7 +33,8 @@ public class ProceduralDungeonEditor : ModuleRules
 #if UE_5_0_OR_LATER
 				"EditorFramework",
 #endif
-				"Engine"
+				"Engine",
+				"DeveloperSettings",
 			}
 		);
 	}

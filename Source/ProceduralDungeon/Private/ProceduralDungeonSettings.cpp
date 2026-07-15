@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2019 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2019 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -11,6 +11,10 @@
 UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	// UDeveloperSettings
+	CategoryName = TEXT("Plugins");
+	SectionName = TEXT("Procedural Dungeon");
+
 	// Dungeon settings
 	RoomUnit = FVector(1000, 1000, 400);
 	DoorSize = FVector(40, 640, 400);
@@ -81,3 +85,17 @@ UProceduralDungeonSettings::UProceduralDungeonSettings(const FObjectInitializer&
 		, EConsoleVariableFlags::ECVF_Cheat
 	);
 }
+
+#if WITH_EDITOR
+
+FText UProceduralDungeonSettings::GetSectionText() const
+{
+	return NSLOCTEXT("ProceduralDungeonPlugin", "RuntimeGeneralSettingsName", "Procedural Dungeon");
+}
+
+FText UProceduralDungeonSettings::GetSectionDescription() const
+{
+	return NSLOCTEXT("ProceduralDungeonPlugin", "RuntimeGeneralSettingsDescription", "Configuration for the Procedural Dungeon plugin");
+}
+
+#endif // WITH_EDITOR

@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2019 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2019 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -7,19 +7,26 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Engine/DeveloperSettings.h"
 #include "UObject/NoExportTypes.h"
 #include "Engine/EngineTypes.h"
 #include "ProceduralDungeonSettings.generated.h"
 
 // Holds the plugin's settings.
 UCLASS(Config = Game, DefaultConfig)
-class PROCEDURALDUNGEON_API UProceduralDungeonSettings : public UObject
+class PROCEDURALDUNGEON_API UProceduralDungeonSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
 public:
 	UProceduralDungeonSettings(const FObjectInitializer& ObjectInitializer);
+
+	//~ Begin UDeveloperSettings Interface
+#if WITH_EDITOR
+	virtual FText GetSectionText() const override;
+	virtual FText GetSectionDescription() const override;
+#endif // WITH_EDITOR
+	//~ End UDeveloperSettings Interface
 
 	// Size of a room unit. Room's size in data assets will express the multiple of this unit size.
 	// For example a room size of (5, 10, 1) with a unit size of (100, 100, 400) will result of a real room size of (500, 1000, 400).
