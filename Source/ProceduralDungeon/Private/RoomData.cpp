@@ -152,6 +152,7 @@ FVector URoomData::GetRoomUnit() const
 
 bool URoomData::DoesPassAllConstraints(const UDungeonGraph* Dungeon, const URoomData* RoomData, FIntVector Location, EDoorDirection Direction)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(URoomData::DoesPassAllConstraints);
 	if (!IsValid(RoomData))
 	{
 		return false;
@@ -201,6 +202,7 @@ FBoxMinAndMax URoomData::GetIntBounds() const
 
 FVoxelBounds URoomData::GetVoxelBounds() const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(URoomData::GetVoxelBounds);
 	if (CachedVoxelBounds.IsValid())
 		return CachedVoxelBounds;
 

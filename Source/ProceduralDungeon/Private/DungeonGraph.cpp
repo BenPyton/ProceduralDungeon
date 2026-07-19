@@ -128,6 +128,7 @@ void UDungeonGraph::AddRoom(URoom* Room)
 
 void UDungeonGraph::InitRooms()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::InitRooms);
 	// First create empty connections for remaining unconnected doors
 	TArray<int32> EmptyConnections;
 	for (URoom* Room : Rooms)
@@ -151,6 +152,7 @@ void UDungeonGraph::InitRooms()
 
 bool UDungeonGraph::CanRoomFit(const URoom* Room) const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::CanRoomFit);
 	bool bCanFit = true;
 	for (int32 i = 0; i < Room->GetSubBoundsCount() && bCanFit; ++i)
 	{
@@ -210,6 +212,7 @@ bool UDungeonGraph::TryConnectToExistingDoors(URoom* Room)
 
 TArray<URoom*> UDungeonGraph::GetAllRoomsOverlapping(const FBox& Box) const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::GetAllRoomsOverlapping);
 	TArray<URoom*> RoomsInBox;
 	FindElementsWithBoundsTest(Octree, Box, [&RoomsInBox](const FDungeonOctreeElement& Element) {
 		URoom* Room = Element.Room;
@@ -412,6 +415,7 @@ static bool RoomCandidatePredicate(const FRoomCandidate& A, const FRoomCandidate
 
 bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms, const FScoreCallback& CustomScore) const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::FilterAndSortRooms);
 	SortedRooms.Empty();
 
 	FDoorDef TargetDoor = FromDoor.GetOpposite();
@@ -426,6 +430,7 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 		// Try each possible door
 		for (int i = 0; i < RoomData->GetNbDoor(); ++i)
 		{
+			TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::FilterAndSortRooms::LoopRoomCandidate);
 			const FDoorDef& Door = RoomData->Doors[i];
 
 			// Filter out the door candidate if not compatible with the door
@@ -450,7 +455,10 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 			if (!NewBounds.GetCompatibilityScore(Bounds, Candidate.Score, CustomScore))
 				continue;
 
-			SortedRooms.HeapPush(Candidate, ::RoomCandidatePredicate);
+			{
+				TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::FilterAndSortRooms::HeapPush);
+				SortedRooms.HeapPush(Candidate, ::RoomCandidatePredicate);
+			}
 		}
 	}
 
@@ -544,6 +552,7 @@ const URoom* UDungeonGraph::FindFirstRoomByPredicate(TFunction<bool(const URoom*
 
 void UDungeonGraph::TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* OutRooms, uint32 Distance, TFunction<void(URoom*, uint32)> Func)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::TraverseRooms);
 	TSet<URoom*> openList(InRooms);
 	TSet<URoom*> closedList, currentList;
 	const uint32 MaxDistance = Distance;
@@ -576,6 +585,7 @@ void UDungeonGraph::TraverseRooms(const TSet<URoom*>& InRooms, TSet<URoom*>* Out
 // Returns true if OutCommon had been filled
 bool BFS_Cycle(TQueue<const URoom*>& Queue, TSet<const URoom*>& MarkedThis, const TSet<const URoom*>& MarkedOther, TMap<const URoom*, const URoom*>& ParentMap, const URoom*& OutCommon, bool IgnoreLocked)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(BFS_Cycle);
 	const URoom* Current = nullptr;
 	const URoom* Next = nullptr;
 
@@ -619,6 +629,7 @@ bool BFS_Cycle(TQueue<const URoom*>& Queue, TSet<const URoom*>& MarkedThis, cons
 
 void ReconstructPath(const URoom* Common, const TMap<const URoom*, const URoom*>& ParentsForward, const TMap<const URoom*, const URoom*>& ParentsReverse, TArray<const URoom*>& OutPath)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(ReconstructPath);
 	OutPath.Empty();
 
 	if (Common == nullptr)
@@ -645,6 +656,7 @@ void ReconstructPath(const URoom* Common, const TMap<const URoom*, const URoom*>
 // Uses Bidirectional BFS to find a path between A and B
 bool UDungeonGraph::FindPath(const URoom* From, const URoom* To, TArray<const URoom*>* OutPath, bool IgnoreLocked)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::FindPath);
 	if (OutPath)
 		OutPath->Empty();
 
@@ -707,6 +719,7 @@ void CopyRooms(TArray<URoom*>& To, TArray<URoom*>& From)
 
 void UDungeonGraph::SynchronizeRooms()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::SynchronizeRooms);
 	AActor* Owner = GetTypedOuter<AActor>();
 	if (!IsValid(Owner))
 		return;
@@ -784,6 +797,7 @@ void UDungeonGraph::SpawnAllDoors()
 	if (!HasAuthority())
 		return;
 
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::SpawnAllDoors);
 	checkf(Generator.IsValid(), TEXT("Spawning dungeon's doors is only available with a ADungeonGenerator outer."));
 
 	for (auto* RoomConnection : RoomConnections)
@@ -796,6 +810,7 @@ void UDungeonGraph::SpawnAllDoors()
 
 void UDungeonGraph::LoadAllRooms()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::LoadAllRooms);
 	// When a level is correct, load all rooms
 	for (URoom* Room : Rooms)
 	{
@@ -807,6 +822,7 @@ void UDungeonGraph::LoadAllRooms()
 
 void UDungeonGraph::UnloadAllRooms()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::UnloadAllRooms);
 	if (HasAuthority())
 	{
 		for (auto* RoomConnection : RoomConnections)
@@ -830,6 +846,7 @@ void UDungeonGraph::UpdateBounds(const URoom* Room)
 
 void UDungeonGraph::RebuildBounds()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::RebuildBounds);
 	Bounds = FVoxelBounds();
 	for (const URoom* Room : Rooms)
 	{
@@ -848,6 +865,7 @@ void UDungeonGraph::UpdateOctree(URoom* Room)
 
 void UDungeonGraph::RebuildOctree()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::RebuildOctree);
 	Octree.Destroy();
 	for (URoom* Room : Rooms)
 	{

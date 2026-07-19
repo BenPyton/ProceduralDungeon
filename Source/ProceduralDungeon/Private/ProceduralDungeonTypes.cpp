@@ -228,6 +228,7 @@ bool FDoorDef::operator==(const FDoorDef& Other) const
 
 bool FDoorDef::AreCompatible(const FDoorDef& A, const FDoorDef& B)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FDoorDef::AreCompatible);
 	return UDoorType::AreCompatible(A.Type, B.Type);
 }
 

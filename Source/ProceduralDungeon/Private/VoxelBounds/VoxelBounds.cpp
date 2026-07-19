@@ -135,6 +135,7 @@ void FVoxelBounds::ResetToWalls()
 
 bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score, const FScoreCallback& CustomScore) const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::GetCompatibilityScore);
 	// Each cell add 1 to the score, so the bigger volume the higher score.
 	Score = Cells.Num();
 
@@ -181,11 +182,13 @@ bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score
 
 			if (CustomScore.IsBound())
 			{
+				TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBoundsConnection::GetCompatibilityScore::Custom);
 				if (!CustomScore.Execute(Connection, OtherConnection, Score))
 					return false;
 			}
 			else
 			{
+				TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBoundsConnection::GetCompatibilityScore::Default);
 				Score += FVoxelBoundsConnection::GetCompatibilityScore(Connection, OtherConnection);
 			}
 		}
@@ -206,6 +209,7 @@ void FVoxelBounds::operator-=(const FIntVector& Offset)
 
 FVoxelBounds operator+(const FVoxelBounds& Bounds, const FIntVector& Offset)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::operator+(FIntVector));
 	FVoxelBounds NewBounds;
 	for (const auto& Cell : Bounds.Cells)
 	{
@@ -217,11 +221,13 @@ FVoxelBounds operator+(const FVoxelBounds& Bounds, const FIntVector& Offset)
 
 FVoxelBounds operator-(const FVoxelBounds& Bounds, const FIntVector& Offset)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::operator-(FIntVector));
 	return Bounds + (FIntVector::ZeroValue - Offset);
 }
 
 void FVoxelBounds::operator+=(const FVoxelBounds& Other)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::operator+=(FVoxelBounds));
 	for (const auto& Cell : Other.Cells)
 	{
 		// Ignore incoming cells that are already defined
@@ -252,6 +258,7 @@ void FVoxelBounds::operator+=(const FVoxelBounds& Other)
 
 void FVoxelBounds::operator-=(const FVoxelBounds& Other)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::operator-=(FVoxelBounds));
 	for (const auto& Cell : Other.Cells)
 	{
 		if (!Cells.Remove(Cell.Key))
@@ -287,6 +294,7 @@ FVoxelBounds operator-(const FVoxelBounds& A, const FVoxelBounds& B)
 
 bool FVoxelBounds::operator==(const FVoxelBounds& Other) const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::operator==(FVoxelBounds));
 	if (Cells.Num() != Other.Cells.Num())
 		return false;
 
@@ -309,6 +317,7 @@ bool FVoxelBounds::operator==(const FVoxelBounds& Other) const
 
 bool FVoxelBounds::Overlap(const FVoxelBounds& A, const FVoxelBounds& B)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::Overlap);
 	if (!FBoxMinAndMax::Overlap(A.Bounds, B.Bounds))
 		return false;
 
@@ -324,6 +333,7 @@ bool FVoxelBounds::Overlap(const FVoxelBounds& A, const FVoxelBounds& B)
 
 FVoxelBounds Rotate(const FVoxelBounds& Bounds, const EDoorDirection& Rot)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::Rotate);
 	FVoxelBounds NewBounds;
 
 	for (const auto& Cell : Bounds.Cells)

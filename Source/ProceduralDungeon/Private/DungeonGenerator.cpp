@@ -28,6 +28,7 @@ bool ADungeonGenerator::CreateDungeon_Implementation()
 	if (!HasAuthority())
 		return false;
 
+	TRACE_CPUPROFILER_EVENT_SCOPE(ADungeonGenerator::CreateDungeon);
 	switch (CurrentState)
 	{
 	case EState::Idle:
@@ -58,7 +59,11 @@ bool ADungeonGenerator::CreateDungeon_Implementation()
 			return false;
 		}
 
-		URoomData* def = ChooseFirstRoomData();
+		URoomData* def = nullptr;
+		{
+			TRACE_CPUPROFILER_EVENT_SCOPE(ADungeonGenerator::ChooseFirstRoomData);
+			def = ChooseFirstRoomData();
+		}
 		if (!IsValid(def))
 		{
 			DungeonLog_Error("ChooseFirstRoomData returned null.");
@@ -148,6 +153,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 {
 	check(HasAuthority());
 
+	TRACE_CPUPROFILER_EVENT_SCOPE(ADungeonGenerator::AddNewRooms);
 	int nbDoor = ParentRoom.GetRoomData()->GetNbDoor();
 	if (nbDoor <= 0)
 		DungeonLog_Error("The room data '%s' has no door! Nothing could be generated with it!", *GetNameSafe(ParentRoom.GetRoomData()));
@@ -163,6 +169,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 		if (ParentRoom.IsConnected(i))
 			continue;
 
+		TRACE_CPUPROFILER_EVENT_SCOPE(ADungeonGenerator::AddNewRooms::Loop);
 		// Get the door definition in its world position and direction
 		FDoorDef doorDef = ParentRoom.GetDoorDef(i);
 
@@ -180,7 +187,11 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 		{
 			nbTries--;
 			bDiscardRoom = false;
-			URoomData* roomDef = ChooseNextRoomData(ParentRoom.GetRoomData(), &ParentRoom, doorDef, doorIndex);
+			URoomData* roomDef = nullptr;
+			{
+				TRACE_CPUPROFILER_EVENT_SCOPE(ADungeonGenerator::ChooseNextRoomData);
+				roomDef = ChooseNextRoomData(ParentRoom.GetRoomData(), &ParentRoom, doorDef, doorIndex);
+			}
 			if (!IsValid(roomDef))
 			{
 				bDiscardRoom |= bAutoDiscardRoomIfNull;
