@@ -45,32 +45,31 @@ enum class EDoorDirection : uint8
 	NbDirection	= 4 		UMETA(Hidden)
 };
 
-bool PROCEDURALDUNGEON_API operator!(const EDoorDirection& Direction);
-EDoorDirection PROCEDURALDUNGEON_API operator+(const EDoorDirection& A, const EDoorDirection& B);
-EDoorDirection PROCEDURALDUNGEON_API operator-(const EDoorDirection& A, const EDoorDirection& B);
-// TODO: Don't know how to export these...
-EDoorDirection& operator+=(EDoorDirection& A, const EDoorDirection& B);
-EDoorDirection& operator-=(EDoorDirection& A, const EDoorDirection& B);
-EDoorDirection& operator++(EDoorDirection& Direction);
-EDoorDirection& operator--(EDoorDirection& Direction);
-EDoorDirection PROCEDURALDUNGEON_API operator++(EDoorDirection& Direction, int);
-EDoorDirection PROCEDURALDUNGEON_API operator--(EDoorDirection& Direction, int);
-EDoorDirection PROCEDURALDUNGEON_API operator-(const EDoorDirection& Direction);
-EDoorDirection PROCEDURALDUNGEON_API operator~(const EDoorDirection& Direction);
-inline EDoorDirection PROCEDURALDUNGEON_API Opposite(const EDoorDirection& Direction) { return ~Direction; }
-FIntVector PROCEDURALDUNGEON_API ToIntVector(const EDoorDirection& Direction);
-FVector PROCEDURALDUNGEON_API ToVector(const EDoorDirection& Direction);
-FQuat PROCEDURALDUNGEON_API ToQuaternion(const EDoorDirection& Direction);
-float PROCEDURALDUNGEON_API ToAngle(const EDoorDirection& Direction);
-FIntVector PROCEDURALDUNGEON_API Rotate(const FIntVector& Pos, const EDoorDirection& Rot);
-FVector PROCEDURALDUNGEON_API Rotate(const FVector& Pos, const EDoorDirection& Rot);
+PROCEDURALDUNGEON_API bool operator!(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API EDoorDirection operator+(const EDoorDirection& A, const EDoorDirection& B);
+PROCEDURALDUNGEON_API EDoorDirection operator-(const EDoorDirection& A, const EDoorDirection& B);
+PROCEDURALDUNGEON_API EDoorDirection& operator+=(EDoorDirection& A, const EDoorDirection& B);
+PROCEDURALDUNGEON_API EDoorDirection& operator-=(EDoorDirection& A, const EDoorDirection& B);
+PROCEDURALDUNGEON_API EDoorDirection& operator++(EDoorDirection& Direction);
+PROCEDURALDUNGEON_API EDoorDirection& operator--(EDoorDirection& Direction);
+PROCEDURALDUNGEON_API EDoorDirection operator++(EDoorDirection& Direction, int);
+PROCEDURALDUNGEON_API EDoorDirection operator--(EDoorDirection& Direction, int);
+PROCEDURALDUNGEON_API EDoorDirection operator-(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API EDoorDirection operator~(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API inline EDoorDirection Opposite(const EDoorDirection& Direction) { return ~Direction; }
+PROCEDURALDUNGEON_API FIntVector ToIntVector(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API FVector ToVector(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API FQuat ToQuaternion(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API float ToAngle(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API FIntVector Rotate(const FIntVector& Pos, const EDoorDirection& Rot);
+PROCEDURALDUNGEON_API FVector Rotate(const FVector& Pos, const EDoorDirection& Rot);
 
-FIntVector PROCEDURALDUNGEON_API Transform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation);
-FIntVector PROCEDURALDUNGEON_API InverseTransform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation);
+PROCEDURALDUNGEON_API FIntVector Transform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation);
+PROCEDURALDUNGEON_API FIntVector InverseTransform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation);
 
 // Those ones are just for consistent naming and centralized code
-EDoorDirection PROCEDURALDUNGEON_API Transform(const EDoorDirection& Direction, const EDoorDirection& Rotation);
-EDoorDirection PROCEDURALDUNGEON_API InverseTransform(const EDoorDirection& Direction, const EDoorDirection& Rotation);
+PROCEDURALDUNGEON_API EDoorDirection Transform(const EDoorDirection& Direction, const EDoorDirection& Rotation);
+PROCEDURALDUNGEON_API EDoorDirection InverseTransform(const EDoorDirection& Direction, const EDoorDirection& Rotation);
 
 //The different types of generation algorithms.
 UENUM(BlueprintType, meta = (DisplayName = "Generation Type"))
@@ -198,7 +197,7 @@ public:
 	static const FBoxMinAndMax Invalid;
 };
 
-FBoxMinAndMax PROCEDURALDUNGEON_API Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot);
+PROCEDURALDUNGEON_API FBoxMinAndMax Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot);
 
 // Describe a potential room to be added to the dungeon.
 // Mainly used by FilterAndSortRooms function.
