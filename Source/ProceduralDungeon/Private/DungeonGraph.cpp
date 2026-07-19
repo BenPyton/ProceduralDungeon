@@ -97,6 +97,26 @@ void UDungeonGraph::PostLoadDungeon_Implementation()
 	SavedData.Reset();
 }
 
+URoom* UDungeonGraph::AcquireRoomInstance(URoomData* RoomData, ADungeonGeneratorBase* InGenerator)
+{
+	URoom* Instance = RoomPool.Acquire(InGenerator);
+	Instance->Init(RoomData, InGenerator, Count());
+	return Instance;
+}
+
+void UDungeonGraph::ReleaseRoomInstance(URoom* Room)
+{
+	check(IsValid(Room));
+	Room->Reset();
+	RoomPool.Release(Room);
+}
+
+void UDungeonGraph::ClearPools()
+{
+	RoomPool.Clear();
+	ConnectionPool.Clear();
+}
+
 void UDungeonGraph::AddRoom(URoom* Room)
 {
 	check(IsValid(Room));
@@ -108,8 +128,6 @@ void UDungeonGraph::AddRoom(URoom* Room)
 
 void UDungeonGraph::InitRooms()
 {
-	// We split the for loops to ensure custom data are created for all rooms before initializing them
-
 	// First create empty connections for remaining unconnected doors
 	TArray<int32> EmptyConnections;
 	for (URoom* Room : Rooms)
@@ -222,7 +240,9 @@ void UDungeonGraph::RetrieveRoomsFromLoadedData()
 
 void UDungeonGraph::Connect(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB)
 {
-	URoomConnection* NewConnection = URoomConnection::CreateConnection(RoomA, DoorA, RoomB, DoorB, this, RoomConnections.Num());
+	//URoomConnection* NewConnection = NewObject<URoomConnection>(this);
+	URoomConnection* NewConnection = ConnectionPool.Acquire(this);
+	NewConnection->Init(RoomA, DoorA, RoomB, DoorB, RoomConnections.Num());
 	RoomConnections.Add(NewConnection);
 	DungeonLog_Debug("Connected %s (%d) to %s (%d)", *GetNameSafe(RoomA), DoorA, *GetNameSafe(RoomB), DoorB);
 	MARK_PROPERTY_DIRTY_FROM_NAME(UDungeonGraph, RoomConnections, this);
@@ -472,6 +492,13 @@ void UDungeonGraph::Clear()
 		const URoomData* Data = Room->GetRoomData();
 		check(IsValid(Data));
 		Data->CleanupRoom(Room, this);
+		ReleaseRoomInstance(Room);
+	}
+
+	for (URoomConnection* Conn : RoomConnections)
+	{
+		Conn->Reset();
+		ConnectionPool.Release(Conn);
 	}
 
 	// Clear out data

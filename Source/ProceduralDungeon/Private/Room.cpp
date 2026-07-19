@@ -77,6 +77,10 @@ void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId
 	{
 		MARK_PROPERTY_DIRTY_FROM_NAME(URoom, Connections, this);
 		Connections.SetNum(RoomData->GetNbDoor());
+		for (auto& Conn : Connections)
+		{
+			Conn.Reset();
+		}
 	}
 	else
 	{
@@ -84,6 +88,24 @@ void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId
 	}
 
 	CreateAllCustomData();
+}
+
+void URoom::Reset()
+{
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(RoomData, nullptr);
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(GeneratorOwner, nullptr);
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Id, -1);
+	Instance = nullptr;
+	SetPosition(FIntVector::ZeroValue);
+	SetDirection(EDoorDirection::North);
+
+	PlayerIDInside.Empty();
+	bIsVisible = true;
+	bForceVisible = false;
+	RelevancyLevels.Empty();
+	bIsLocked = false;
+	OnRelevancyChanged.Clear();
+	Connections.Empty();
 }
 
 bool URoom::IsConnected(int32 DoorIndex) const
@@ -627,7 +649,9 @@ bool URoom::CreateCustomData(const TSubclassOf<URoomCustomData>& DataType)
 bool URoom::CreateAllCustomData()
 {
 	check(IsValid(RoomData));
+
 	bool bSucceeded = true;
+	CustomData.Empty(RoomData->CustomData.Num());
 	for (auto Datum : RoomData->CustomData)
 	{
 		bSucceeded &= CreateCustomData(Datum);

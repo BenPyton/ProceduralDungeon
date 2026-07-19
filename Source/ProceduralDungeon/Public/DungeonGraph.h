@@ -62,6 +62,10 @@ public:
 	virtual ADungeonGeneratorBase* GetGenerator() const override { return Generator.Get(); }
 	//~ End IGeneratorProvider Interface
 
+	URoom* AcquireRoomInstance(URoomData* Data, ADungeonGeneratorBase* Generator);
+	void ReleaseRoomInstance(URoom* Room);
+	void ClearPools();
+
 	void AddRoom(URoom* Room);
 	void InitRooms();
 	void Clear();
@@ -276,4 +280,38 @@ private:
 	};
 
 	TUniquePtr<FSaveData> SavedData {nullptr};
+
+private:
+	template<typename T>
+	class FPool
+	{
+	public:
+		T* Acquire(UObject* Owner)
+		{
+			if (PooledObjects.Num() > 0)
+			{
+				return PooledObjects.Pop(/*bAllowShrinking=*/false).Get();
+			}
+			else
+			{
+				return NewObject<T>(Owner);
+			}
+		}
+
+		void Release(T* Instance)
+		{
+			PooledObjects.Add(TStrongObjectPtr(Instance));
+		}
+
+		void Clear()
+		{
+			PooledObjects.Empty();
+		}
+
+	private:
+		TArray<TStrongObjectPtr<T>> PooledObjects;
+	};
+
+	FPool<URoom> RoomPool;
+	FPool<URoomConnection> ConnectionPool;
 };

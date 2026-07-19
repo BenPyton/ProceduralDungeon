@@ -251,8 +251,15 @@ protected:
 	void FinalizeDungeon();
 
 	// Create and initialize a new room instance using the room data provided.
+	// If you don't add the room to the dungeon, use DiscardRoomInstance to benefit from the pooling system.
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "GenerationAlgorithm", meta = (BlueprintProtected))
 	URoom* CreateRoomInstance(URoomData* RoomData);
+
+	// Tells explicitely you will not add the room instance to the dungeon.
+	// Use this to benefit from the pooling system.
+	// The room instance is automatically reset to null.
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "GenerationAlgorithm", meta = (BlueprintProtected))
+	void DiscardRoomInstance(UPARAM(Ref) URoom*& RoomInstance);
 
 	// Set the position and rotation of a room instance and return true if there is nothing colliding with it.
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "GenerationAlgorithm", meta = (BlueprintProtected, ReturnDisplayName = "Success", HidePin = "World"))

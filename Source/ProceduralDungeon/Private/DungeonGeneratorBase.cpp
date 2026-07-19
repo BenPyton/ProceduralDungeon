@@ -282,9 +282,13 @@ void ADungeonGeneratorBase::FinalizeDungeon()
 
 URoom* ADungeonGeneratorBase::CreateRoomInstance(URoomData* RoomData)
 {
-	URoom* Instance = NewObject<URoom>(this);
-	Instance->Init(RoomData, this, Graph->Count());
-	return Instance;
+	return Graph->AcquireRoomInstance(RoomData, this);
+}
+
+void ADungeonGeneratorBase::DiscardRoomInstance(URoom*& Room)
+{
+	Graph->ReleaseRoomInstance(Room);
+	Room = nullptr;
 }
 
 bool ADungeonGeneratorBase::TryPlaceRoom(URoom* const& Room, int DoorIndex, const FDoorDef& TargetDoor, const UWorld* World) const
@@ -549,6 +553,7 @@ void ADungeonGeneratorBase::UpdateRoomRelevancy()
 void ADungeonGeneratorBase::Reset()
 {
 	PlayerRooms.Empty();
+	Graph->ClearPools();
 }
 
 void ADungeonGeneratorBase::UpdateSeed()

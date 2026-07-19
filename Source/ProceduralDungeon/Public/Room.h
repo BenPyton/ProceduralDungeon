@@ -255,6 +255,7 @@ protected:
 
 public:
 	void Init(URoomData* RoomData, ADungeonGeneratorBase* Generator, int32 RoomId);
+	void Reset();
 
 	void Instantiate(UWorld* World);
 	void Destroy();

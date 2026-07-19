@@ -423,31 +423,44 @@ void URoomConnection::GetBothDoorTypes(const URoomConnection* Conn, UDoorType*& 
 	DoorTypeB = Conn->RoomB.IsExplicitlyNull() ? nullptr : Conn->RoomB->GetRoomData()->Doors[Conn->RoomBDoorId].Type;
 }
 
-URoomConnection* URoomConnection::CreateConnection(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB, UObject* Outer, int32 IdInOuter)
+void URoomConnection::Init(URoom* InRoomA, int32 DoorA, URoom* InRoomB, int32 DoorB, int32 Id)
 {
 	// At least one room and its door index must be valid.
-	const bool bIsAValid = IsValid(RoomA) && RoomA->IsDoorIndexValid(DoorA);
-	const bool bIsBValid = IsValid(RoomB) && RoomB->IsDoorIndexValid(DoorB);
+	const bool bIsAValid = IsValid(InRoomA) && InRoomA->IsDoorIndexValid(DoorA);
+	const bool bIsBValid = IsValid(InRoomB) && InRoomB->IsDoorIndexValid(DoorB);
 	check(bIsAValid || bIsBValid);
 
-	URoomConnection* NewConnection = NewObject<URoomConnection>(Outer);
-	check(NewConnection != nullptr);
-
-	NewConnection->ID = IdInOuter;
-	NewConnection->RoomA = RoomA;
-	NewConnection->RoomADoorId = DoorA;
-	NewConnection->RoomB = RoomB;
-	NewConnection->RoomBDoorId = DoorB;
+	ID = Id;
+	RoomA = InRoomA;
+	RoomADoorId = DoorA;
+	RoomB = InRoomB;
+	RoomBDoorId = DoorB;
 
 	if (bIsAValid)
 	{
-		RoomA->SetConnection(DoorA, NewConnection);
+		RoomA->SetConnection(DoorA, this);
 	}
 
 	if (bIsBValid)
 	{
-		RoomB->SetConnection(DoorB, NewConnection);
+		RoomB->SetConnection(DoorB, this);
 	}
+}
 
-	return NewConnection;
+void URoomConnection::Reset()
+{
+	ID = -1;
+	RoomA = nullptr;
+	RoomADoorId = -1;
+	RoomB = nullptr;
+	RoomBDoorId = -1;
+	DoorClass = nullptr;
+	bFlipped = false;
+	DoorState = FDoorState();
+
+	if (DoorInstance.IsValid())
+	{
+		DungeonLog_WarningSilent("RoomConnection is reset while a door instance is still valid. Please report this issue.");
+		DoorInstance.Reset();
+	}
 }

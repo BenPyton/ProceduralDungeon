@@ -237,8 +237,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 			// Place the room at targeted door position if possible
 			if (!TryPlaceRoom(newRoom, doorIndex, newRoomDoor, World))
 			{
-				// The object will be automatically deleted by the GC
-				newRoom = nullptr;
+				DiscardRoomInstance(newRoom);
 			}
 		} while (nbTries > 0 && newRoom == nullptr);
 
