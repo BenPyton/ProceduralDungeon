@@ -415,6 +415,26 @@ static bool RoomCandidatePredicate(const FRoomCandidate& A, const FRoomCandidate
 
 bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms, const FScoreCallback& CustomScore) const
 {
+	if (CustomScore.IsBound())
+	{
+		return FilterAndSortRooms(RoomList, FromDoor, SortedRooms,
+			[&CustomScore](const FVoxelBoundsConnection& A, const FVoxelBoundsConnection& B, int32& OutScore) -> bool {
+				return CustomScore.Execute(A, B, OutScore);
+			});
+	}
+	else
+	{
+		return FilterAndSortRooms(RoomList, FromDoor, SortedRooms);
+	}
+}
+
+bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms) const
+{
+	return FilterAndSortRooms(RoomList, FromDoor, SortedRooms, &FVoxelBounds::DefaultScoreFunc);
+}
+
+bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms, const FVoxelBounds::FScoreFunction& ScoreFunc) const
+{
 	TRACE_CPUPROFILER_EVENT_SCOPE(UDungeonGraph::FilterAndSortRooms);
 	SortedRooms.Empty();
 
@@ -451,8 +471,7 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 			Candidate.DoorIndex = i;
 
 			// Check if the new bounds placed at the target door can fit
-			const FVoxelBounds NewBounds = Rotate(DataBounds, RoomDirection) + RoomLocation;
-			if (!NewBounds.GetCompatibilityScore(Bounds, Candidate.Score, CustomScore))
+			if (!DataBounds.GetCompatibilityScore(Bounds, RoomLocation, RoomDirection, Candidate.Score, ScoreFunc))
 				continue;
 
 			{
@@ -463,11 +482,6 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 	}
 
 	return SortedRooms.Num() > 0;
-}
-
-bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms) const
-{
-	return FilterAndSortRooms(RoomList, FromDoor, SortedRooms, FScoreCallback());
 }
 
 FBoxCenterAndExtent UDungeonGraph::GetDungeonBounds(const FTransform& Transform) const

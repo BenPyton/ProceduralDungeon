@@ -223,6 +223,8 @@ FVoxelBounds URoomData::GetVoxelBounds() const
 		CachedVoxelBounds.SetCellConnection(DoorPos, FVoxelBounds::EDirection(DoorDir), FVoxelBoundsConnection(Door.Type));
 	}
 
+	CachedVoxelBounds.FlagBoundaryCells();
+
 	return CachedVoxelBounds;
 }
 
