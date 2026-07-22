@@ -116,12 +116,18 @@ FIntVector UDungeonBlueprintLibrary::Dungeon_InverseTransformPosition(const FInt
 
 FDoorDef UDungeonBlueprintLibrary::Dungeon_TransformDoorDef(const FDoorDef& DoorDef, const FIntVector& Translation, const EDoorDirection& Rotation)
 {
-	return FDoorDef::Transform(DoorDef, Translation, Rotation);
+	const FRoomTransform Transform {Translation, Rotation};
+	FDoorDef NewDoorDef = DoorDef;
+	NewDoorDef.Transform = Transform.Transform(DoorDef.Transform);
+	return NewDoorDef;
 }
 
 FDoorDef UDungeonBlueprintLibrary::Dungeon_InverseTransformDoorDef(const FDoorDef& DoorDef, const FIntVector& Translation, const EDoorDirection& Rotation)
 {
-	return FDoorDef::InverseTransform(DoorDef, Translation, Rotation);
+	const FRoomTransform Transform {Translation, Rotation};
+	FDoorDef NewDoorDef = DoorDef;
+	NewDoorDef.Transform = Transform.InverseTransform(DoorDef.Transform);
+	return NewDoorDef;
 }
 
 FIntVector UDungeonBlueprintLibrary::IntVector_Add(const FIntVector& A, const FIntVector& B)

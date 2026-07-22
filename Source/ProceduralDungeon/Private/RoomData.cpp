@@ -218,8 +218,8 @@ FVoxelBounds URoomData::GetVoxelBounds() const
 	for (int i = 0; i < Doors.Num(); ++i)
 	{
 		const FDoorDef& Door = Doors[i];
-		const FIntVector DoorPos = Door.Position;
-		const EDoorDirection DoorDir = Door.Direction;
+		const FIntVector DoorPos = Door.Transform.Translation;
+		const EDoorDirection DoorDir = Door.Transform.Rotation;
 		CachedVoxelBounds.SetCellConnection(DoorPos, FVoxelBounds::EDirection(DoorDir), FVoxelBoundsConnection(Door.Type));
 	}
 
@@ -239,9 +239,9 @@ bool URoomData::IsRoomInBounds(const FBoxMinAndMax& Bounds, int DoorIndex, const
 
 	const FDoorDef& Door = Doors[DoorIndex];
 	FBoxMinAndMax RoomBounds = GetIntBounds();
-	RoomBounds -= Door.Position;
-	RoomBounds.Rotate(DoorDungeonPos.Direction - Door.Direction);
-	RoomBounds += DoorDungeonPos.Position;
+	RoomBounds -= Door.Transform.Translation;
+	RoomBounds.Rotate(DoorDungeonPos.Transform.Rotation - Door.Transform.Rotation);
+	RoomBounds += DoorDungeonPos.Transform.Translation;
 	return Bounds.IsInside(RoomBounds);
 }
 
@@ -256,9 +256,9 @@ bool URoomData::IsDoorValid(int DoorIndex) const
 	const FDoorDef& DoorDef = Doors[DoorIndex];
 	for (const auto& Box : BoundingBoxes)
 	{
-		bAtLeastInABox |= Box.IsInside(DoorDef.Position);
+		bAtLeastInABox |= Box.IsInside(DoorDef.Transform.Translation);
 
-		const FIntVector FacingCell = DoorDef.Position + ToIntVector(DoorDef.Direction);
+		const FIntVector FacingCell = DoorDef.Transform.Translation + ToIntVector(DoorDef.Transform.Rotation);
 		bFacingNoBox &= !Box.IsInside(FacingCell);
 	}
 

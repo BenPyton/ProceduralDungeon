@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2025 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -157,10 +157,10 @@ void FVoxelBounds::FlagBoundaryCells()
 
 bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score, const FScoreFunction& ScoreFunc) const
 {
-	return GetCompatibilityScore(Other, FIntVector::ZeroValue, EDoorDirection::North, Score, ScoreFunc);
+	return GetCompatibilityScore(Other, FRoomTransform::Identity, Score, ScoreFunc);
 }
 
-bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, const FIntVector& Offset, EDoorDirection Rotation, int32& Score, const FScoreFunction& ScoreFunc) const
+bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, const FRoomTransform& Transform, int32& Score, const FScoreFunction& ScoreFunc) const
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::GetCompatibilityScore);
 	// Each cell add 1 to the score, so the bigger volume the higher score.
@@ -168,7 +168,7 @@ bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, const FIntVe
 
 	checkf(ScoreFunc, TEXT("ScoreFunc must be callable!"));
 
-	const FBoxMinAndMax TransformedBounds = ::Rotate(Bounds, Rotation) + Offset;
+	const FBoxMinAndMax TransformedBounds = ::Rotate(Bounds, Transform.Rotation) + Transform.Translation;
 	bool bAreOverlapping = FBoxMinAndMax::Overlap(TransformedBounds, Other.Bounds);
 
 	// @TODO: for now, treating a coincident face as overlapping
@@ -189,7 +189,7 @@ bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, const FIntVe
 
 	for (const auto& Pair : Cells)
 	{
-		const FIntVector Cell = ::Transform(Pair.Key, Offset, Rotation);
+		const FIntVector Cell = Transform.Transform(Pair.Key);
 
 		// When a cell is defined in both bounds, it does not fit outside
 		if (Other.Cells.Contains(Cell))
@@ -207,7 +207,7 @@ bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, const FIntVe
 		for (uint8 i = 0; i < static_cast<uint8>(EDoorDirection::NbDirection); ++i)
 		{
 			// Get Neighbor cell
-			const EDirection RotatedDir = Rotate(static_cast<EDirection>(i), Rotation);
+			const EDirection RotatedDir = Rotate(static_cast<EDirection>(i), Transform.Rotation);
 			const FIntVector Neighbor = Cell + Directions[static_cast<uint8>(RotatedDir)];
 			auto* NeighConns = Other.Cells.Find(Neighbor);
 			if (nullptr == NeighConns)

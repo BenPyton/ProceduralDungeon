@@ -39,8 +39,7 @@ void URoom::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePro
 	// InitialOnly is not called on newly created subobjects after the InitialCond of actor owner has already been called!!!
 	//Params.Condition = COND_InitialOnly;
 	DOREPLIFETIME_WITH_PARAMS(URoom, RoomData, Params);
-	DOREPLIFETIME_WITH_PARAMS(URoom, Position, Params);
-	DOREPLIFETIME_WITH_PARAMS(URoom, Direction, Params);
+	DOREPLIFETIME_WITH_PARAMS(URoom, Transform, Params);
 	DOREPLIFETIME_WITH_PARAMS(URoom, Connections, Params);
 	DOREPLIFETIME_WITH_PARAMS(URoom, GeneratorOwner, Params);
 	DOREPLIFETIME_WITH_PARAMS(URoom, Id, Params);
@@ -70,8 +69,7 @@ void URoom::Init(URoomData* Data, ADungeonGeneratorBase* Generator, int32 RoomId
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(GeneratorOwner, Generator);
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Id, RoomId);
 	Instance = nullptr;
-	SetPosition(FIntVector::ZeroValue);
-	SetDirection(EDoorDirection::North);
+	SetRoomTransform(FRoomTransform::Identity);
 
 	if (IsValid(RoomData))
 	{
@@ -96,8 +94,7 @@ void URoom::Reset()
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(GeneratorOwner, nullptr);
 	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Id, -1);
 	Instance = nullptr;
-	SetPosition(FIntVector::ZeroValue);
-	SetDirection(EDoorDirection::North);
+	SetRoomTransform(FRoomTransform::Identity);
 
 	PlayerIDInside.Empty();
 	bIsVisible = true;
@@ -182,8 +179,8 @@ void URoom::Instantiate(UWorld* World)
 		}
 		InstanceName.Appendf(TEXT("_%d"), Id);
 
-		FVector FinalLocation = rotation.RotateVector(RoomData->GetRoomUnit() * FVector(Position)) + offset;
-		FQuat FinalRotation = rotation * ToQuaternion(Direction);
+		FVector FinalLocation = rotation.RotateVector(RoomData->GetRoomUnit() * FVector(GetPosition())) + offset;
+		FQuat FinalRotation = rotation * ToQuaternion(GetDirection());
 		Instance = LoadInstance(World, Level, InstanceName.ToString(), FinalLocation, FinalRotation.Rotator());
 
 		if (!IsValid(Instance))
@@ -303,12 +300,16 @@ void URoom::Lock(bool bLock)
 
 void URoom::SetPosition(const FIntVector& NewPosition)
 {
-	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Position, NewPosition);
+	WakeUpOwnerActor();
+	Transform.Translation = NewPosition;
+	MARK_PROPERTY_DIRTY_FROM_NAME(URoom, Transform, this);
 }
 
 void URoom::SetDirection(EDoorDirection NewDirection)
 {
-	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Direction, NewDirection);
+	WakeUpOwnerActor();
+	Transform.Rotation = NewDirection;
+	MARK_PROPERTY_DIRTY_FROM_NAME(URoom, Transform, this);
 }
 
 void URoom::UpdateVisibility() const
@@ -411,13 +412,13 @@ void URoom::CreateLevelComponents(ARoomLevel* LevelActor)
 EDoorDirection URoom::GetDoorWorldOrientation(int DoorIndex) const
 {
 	check(IsDoorIndexValid(DoorIndex));
-	return RoomData->Doors[DoorIndex].Direction + Direction;
+	return RoomToWorld(RoomData->Doors[DoorIndex].Transform.Rotation);
 }
 
 FIntVector URoom::GetDoorWorldPosition(int DoorIndex) const
 {
 	check(IsDoorIndexValid(DoorIndex));
-	return RoomToWorld(RoomData->Doors[DoorIndex].Position);
+	return RoomToWorld(RoomData->Doors[DoorIndex].Transform.Translation);
 }
 
 bool URoom::IsDoorIndexValid(int32 DoorIndex) const
@@ -428,16 +429,18 @@ bool URoom::IsDoorIndexValid(int32 DoorIndex) const
 
 int URoom::GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot) const
 {
-	if (EDoorDirection::NbDirection == WorldRot)
+	return GetDoorIndexAt(FRoomTransform {WorldPos, WorldRot});
+}
+
+int32 URoom::GetDoorIndexAt(const FRoomTransform& WorldTransform) const
+{
+	if (!WorldTransform.IsValid())
 		return -2;
 
-	FIntVector localPos = WorldToRoom(WorldPos);
-	EDoorDirection localRot = WorldToRoom(WorldRot);
-
+	const FRoomTransform LocalTransform = WorldToRoom(WorldTransform);
 	for (int i = 0; i < RoomData->Doors.Num(); ++i)
 	{
-		const FDoorDef door = RoomData->Doors[i];
-		if (door.Position == localPos && door.Direction == localRot)
+		if (RoomData->Doors[i].Transform == LocalTransform)
 			return i;
 	}
 	return -1;
@@ -457,78 +460,111 @@ FDoorDef URoom::GetDoorDef(int32 DoorIndex) const
 
 FDoorDef URoom::GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const
 {
+	return GetDoorDefAt(FRoomTransform {WorldPos, WorldRot});
+}
+
+FDoorDef URoom::GetDoorDefAt(const FRoomTransform& WorldTransform) const
+{
 	check(IsValid(RoomData));
-	int32 DoorIndex = GetDoorIndexAt(WorldPos, WorldRot);
+	int32 DoorIndex = GetDoorIndexAt(WorldTransform);
 	return (DoorIndex >= 0) ? GetDoorDef(DoorIndex) : FDoorDef::Invalid;
 }
 
 FIntVector URoom::WorldToRoom(const FIntVector& WorldPos) const
 {
-	return InverseTransform(WorldPos, Position, Direction);
+	return GetRoomTransform().InverseTransform(WorldPos);
 }
 
 FIntVector URoom::RoomToWorld(const FIntVector& RoomPos) const
 {
-	return Transform(RoomPos, Position, Direction);
+	return GetRoomTransform().Transform(RoomPos);
 }
 
 EDoorDirection URoom::WorldToRoom(const EDoorDirection& WorldRot) const
 {
-	return InverseTransform(WorldRot, Direction);
+	return GetRoomTransform().InverseTransform(WorldRot);
 }
 
 EDoorDirection URoom::RoomToWorld(const EDoorDirection& RoomRot) const
 {
-	return Transform(RoomRot, Direction);
+	return GetRoomTransform().Transform(RoomRot);
+}
+
+FRoomTransform URoom::WorldToRoom(const FRoomTransform& WorldTransform) const
+{
+	return GetRoomTransform().InverseTransform(WorldTransform);
+}
+
+FRoomTransform URoom::RoomToWorld(const FRoomTransform& RoomTransform) const
+{
+	return GetRoomTransform().Transform(RoomTransform);
 }
 
 FBoxMinAndMax URoom::WorldToRoom(const FBoxMinAndMax& WorldBox) const
 {
-	return Rotate(WorldBox - Position, -Direction);
+	const FRoomTransform& T = GetRoomTransform();
+	return Rotate(WorldBox - T.Translation, -T.Rotation);
 }
 
 FBoxMinAndMax URoom::RoomToWorld(const FBoxMinAndMax& RoomBox) const
 {
-	return Rotate(RoomBox, Direction) + Position;
+	const FRoomTransform& T = GetRoomTransform();
+	return Rotate(RoomBox, T.Rotation) + T.Translation;
 }
 
 FDoorDef URoom::WorldToRoom(const FDoorDef& WorldDoor) const
 {
-	return FDoorDef::InverseTransform(WorldDoor, Position, Direction);
+	FDoorDef NewDoorDef(WorldDoor);
+	NewDoorDef.Transform = GetRoomTransform().InverseTransform(WorldDoor.Transform);
+	return NewDoorDef;
 }
 
 FDoorDef URoom::RoomToWorld(const FDoorDef& RoomDoor) const
 {
-	return FDoorDef::Transform(RoomDoor, Position, Direction);
+	FDoorDef NewDoorDef(RoomDoor);
+	NewDoorDef.Transform = GetRoomTransform().Transform(RoomDoor.Transform);
+	return NewDoorDef;
 }
 
 FVoxelBounds URoom::WorldToRoom(const FVoxelBounds& WorldBounds) const
 {
-	return Rotate(WorldBounds - Position, -Direction);
+	const FRoomTransform& T = GetRoomTransform();
+	return Rotate(WorldBounds - T.Translation, -T.Rotation);
 }
 
 FVoxelBounds URoom::RoomToWorld(const FVoxelBounds& RoomBounds) const
 {
-	return Rotate(RoomBounds, Direction) + Position;
+	const FRoomTransform& T = GetRoomTransform();
+	return Rotate(RoomBounds, T.Rotation) + T.Translation;
 }
 
 void URoom::SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot)
 {
 	check(IsDoorIndexValid(DoorIndex));
-	SetDirection(WorldRot - RoomData->Doors[DoorIndex].Direction);
+	SetDirection(WorldRot - RoomData->Doors[DoorIndex].Transform.Rotation);
 }
 
 void URoom::SetPositionFromDoor(int DoorIndex, FIntVector WorldPos)
 {
 	check(IsDoorIndexValid(DoorIndex));
-	SetPosition(WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction));
+	SetPosition(WorldPos - Rotate(RoomData->Doors[DoorIndex].Transform.Translation, GetRoomTransform().Rotation));
 }
 
 void URoom::SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot)
 {
+	SetRoomTransformFromDoor(DoorIndex, FRoomTransform {WorldPos, WorldRot});
+}
+
+void URoom::SetRoomTransform(const FRoomTransform& NewTransform)
+{
+	SET_SUBOBJECT_REPLICATED_PROPERTY_VALUE(Transform, NewTransform);
+}
+
+void URoom::SetRoomTransformFromDoor(int DoorIndex, const FRoomTransform& DoorTransform)
+{
 	check(IsDoorIndexValid(DoorIndex));
-	SetDirection(WorldRot - RoomData->Doors[DoorIndex].Direction);
-	SetPosition(WorldPos - Rotate(RoomData->Doors[DoorIndex].Position, Direction));
+	const FRoomTransform NewTransform = RoomData->Doors[DoorIndex].GetTransformToTarget(DoorTransform);
+	SetRoomTransform(NewTransform);
 }
 
 bool URoom::IsOccupied(FIntVector Cell)
@@ -579,10 +615,10 @@ FBoxCenterAndExtent URoom::GetSubBounds(int32 Index) const
 FTransform URoom::GetTransform() const
 {
 	checkf(IsValid(RoomData), TEXT("Invalid RoomData in URoom class!"));
-	FTransform Transform;
-	Transform.SetLocation(FVector(Position) * RoomData->GetRoomUnit());
-	Transform.SetRotation(ToQuaternion(Direction));
-	return Transform;
+	FTransform WorldTransform;
+	WorldTransform.SetLocation(FVector(GetPosition()) * RoomData->GetRoomUnit());
+	WorldTransform.SetRotation(ToQuaternion(GetDirection()));
+	return WorldTransform;
 }
 
 void URoom::SetVisible(bool Visible, bool bForceUpdate)
@@ -863,16 +899,19 @@ bool URoom::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading
 	Record.EnterField(AR_FIELD_NAME("LevelActor")) << SaveData->LevelActor;
 	Record.EnterField(AR_FIELD_NAME("Actors")) << SaveData->Actors;
 
-	// Handle old `RoomData` SoftObjectPtr
 	const int32 DungeonVersion = Record.GetUnderlyingArchive().CustomVer(FProceduralDungeonCustomVersion::GUID);
 	DungeonLog_Debug("Serializing RoomData (Version: %d, IsLoading: %d)", DungeonVersion, bIsLoading);
+
+	// Handle old `RoomData` SoftObjectPtr
 	if (DungeonVersion < FProceduralDungeonCustomVersion::SoftObjectPtrFix)
 	{
 		if (bIsLoading)
 		{
+			PRAGMA_DISABLE_DEPRECATION_WARNINGS
 			const bool bIsSoftPtrNull = SoftRoomData_DEPRECATED.IsNull();
 			RoomData = !bIsSoftPtrNull ? SoftRoomData_DEPRECATED.Get() : nullptr;
 			SoftRoomData_DEPRECATED.Reset();
+			PRAGMA_ENABLE_DEPRECATION_WARNINGS
 			DungeonLog_Debug("Converted old RoomData SoftObjectPtr (IsNull: %d) to regular pointer: %s", bIsSoftPtrNull, *GetNameSafe(RoomData));
 		}
 		else
@@ -883,6 +922,27 @@ bool URoom::SerializeObject(FStructuredArchive::FRecord& Record, bool bIsLoading
 	else
 	{
 		SerializeUObjectRef(Record.EnterField(AR_FIELD_NAME("RoomData")), RoomData);
+	}
+
+	if (DungeonVersion < FProceduralDungeonCustomVersion::RoomTransformMigration)
+	{
+		if (bIsLoading)
+		{
+			PRAGMA_DISABLE_DEPRECATION_WARNINGS
+			Transform.Translation = Position;
+			Transform.Rotation = Direction;
+			PRAGMA_ENABLE_DEPRECATION_WARNINGS
+			DungeonLog_Warning("Migrated {Position,Direction} into a RoomTransform for room '%s'", *GetNameSafe(this));
+		}
+		else
+		{
+			checkNoEntry(); // Should never happen when saving.
+		}
+	}
+	else
+	{
+		Record.EnterField(AR_FIELD_NAME("Location")) << Transform.Translation;
+		Record.EnterField(AR_FIELD_NAME("Rotation")) << Transform.Rotation;
 	}
 
 	if (!bIsLoading)

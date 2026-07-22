@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2023 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2023 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -18,8 +18,9 @@ TSharedRef<IPropertyTypeCustomization> FDoorDefCustomization::MakeInstance()
 
 void FDoorDefCustomization::GetSortedChildren(TSharedRef<IPropertyHandle> StructPropertyHandle, TArray<TSharedRef<IPropertyHandle>>& OutChildren)
 {
-	TSharedPtr<IPropertyHandle> PositionProp = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDoorDef, Position));
-	TSharedPtr<IPropertyHandle> DirectionProp = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDoorDef, Direction));
+	TSharedPtr<IPropertyHandle> TransformProp = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDoorDef, Transform));
+	TSharedPtr<IPropertyHandle> PositionProp = TransformProp->GetChildHandle(GET_MEMBER_NAME_CHECKED(FRoomTransform, Translation));
+	TSharedPtr<IPropertyHandle> DirectionProp = TransformProp->GetChildHandle(GET_MEMBER_NAME_CHECKED(FRoomTransform, Rotation));
 	TSharedPtr<IPropertyHandle> TypeProp = StructPropertyHandle->GetChildHandle(GET_MEMBER_NAME_CHECKED(FDoorDef, Type));
 
 	// ============= Copied from VectorStructCustomization class (private in engine so can't inherit from it) ============================

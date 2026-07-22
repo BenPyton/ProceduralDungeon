@@ -172,23 +172,22 @@ bool UDungeonGraph::TryConnectDoor(URoom* Room, int32 DoorIndex)
 		return true;
 
 	// Get the room in front of the door if any.
-	EDoorDirection DoorDir = Room->GetDoorWorldOrientation(DoorIndex);
-	FIntVector AdjacentCell = Room->GetDoorWorldPosition(DoorIndex) + ToIntVector(DoorDir);
-	URoom* OtherRoom = GetRoomAt(AdjacentCell);
+	const FDoorDef ThisDoor = Room->GetDoorDef(DoorIndex);
+	FRoomTransform OtherDoorTransform = ThisDoor.GetOpposite().Transform;
+	URoom* OtherRoom = GetRoomAt(OtherDoorTransform.Translation);
 	if (!IsValid(OtherRoom))
 	{
 		return false;
 	}
 
 	// Get the door index of the other room if any.
-	int OtherDoorIndex = OtherRoom->GetDoorIndexAt(AdjacentCell, ~DoorDir);
+	int OtherDoorIndex = OtherRoom->GetDoorIndexAt(OtherDoorTransform);
 	if (OtherDoorIndex < 0) // -1 if no door
 	{
 		return false;
 	}
 
 	// Check door compatibility.
-	const FDoorDef& ThisDoor = Room->GetRoomData()->Doors[DoorIndex];
 	const FDoorDef& OtherDoor = OtherRoom->GetRoomData()->Doors[OtherDoorIndex];
 	if (!FDoorDef::AreCompatible(ThisDoor, OtherDoor))
 	{
@@ -459,11 +458,10 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 				continue;
 
 			// Compute new room placement
-			const EDoorDirection RoomDirection = TargetDoor.Direction - Door.Direction;
-			const FIntVector RoomLocation = TargetDoor.Position - Rotate(Door.Position, RoomDirection);
+			const FRoomTransform RoomTransform = Door.GetTransformToTarget(TargetDoor.Transform);
 
 			// Filter out the rooms that does not pass the constraints
-			if (!URoomData::DoesPassAllConstraints(this, RoomData, RoomLocation, RoomDirection))
+			if (!URoomData::DoesPassAllConstraints(this, RoomData, RoomTransform.Translation, RoomTransform.Rotation))
 				continue;
 
 			FRoomCandidate Candidate;
@@ -471,7 +469,7 @@ bool UDungeonGraph::FilterAndSortRooms(const TArray<URoomData*>& RoomList, const
 			Candidate.DoorIndex = i;
 
 			// Check if the new bounds placed at the target door can fit
-			if (!DataBounds.GetCompatibilityScore(Bounds, RoomLocation, RoomDirection, Candidate.Score, ScoreFunc))
+			if (!DataBounds.GetCompatibilityScore(Bounds, RoomTransform, Candidate.Score, ScoreFunc))
 				continue;
 
 			{

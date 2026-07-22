@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2019 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2019 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -101,6 +101,39 @@ enum class EVisibilityMode : uint8
 	NbMode			UMETA(Hidden)
 };
 
+// Describe a Translation (FIntVector) and Rotation (EDoorDirection)
+USTRUCT(BlueprintType)
+struct PROCEDURALDUNGEON_API FRoomTransform
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame, Category = "Room Transform")
+	FIntVector Translation {FIntVector::ZeroValue};
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame, Category = "Room Transform");
+	EDoorDirection Rotation {EDoorDirection::North};
+
+public:
+	FIntVector Transform(const FIntVector& Point) const;
+	FIntVector InverseTransform(const FIntVector& Point) const;
+
+	EDoorDirection Transform(const EDoorDirection& Direction) const;
+	EDoorDirection InverseTransform(const EDoorDirection& Direction) const;
+
+	FRoomTransform Transform(const FRoomTransform& Other) const;
+	FRoomTransform InverseTransform(const FRoomTransform& Other) const;
+
+	bool operator==(const FRoomTransform& Other) const;
+	bool operator!=(const FRoomTransform& Other) const;
+
+	bool IsValid() const;
+
+public:
+	static const FRoomTransform Identity;
+	static const FRoomTransform Invalid;
+};
+
 // Structure that defines a door.
 // A door is defined by its position, its direction, and its type.
 USTRUCT(BlueprintType)
@@ -112,20 +145,29 @@ public:
 	static const FDoorDef Invalid;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef")
+	UE_DEPRECATED(3.9, "Use Transform.Translation instead.")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef", meta = (DeprecatedProperty, DeprecationMessage = "Use Transform.Translation instead."))
 	FIntVector Position {FIntVector::ZeroValue};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef")
+
+	UE_DEPRECATED(3.9, "Use Transform.Rotation instead.")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef", meta = (DeprecatedProperty, DeprecationMessage = "Use Transform.Rotation instead."))
 	EDoorDirection Direction {EDoorDirection::North};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef", meta = (ShowOnlyInnerProperties))
+	FRoomTransform Transform {FRoomTransform::Identity};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef", meta = (DisplayThumbnail = false))
 	class UDoorType* Type {nullptr};
 
 public:
 	FDoorDef() = default;
 	FDoorDef(const FIntVector& InPosition, EDoorDirection InDirection, class UDoorType* InType = nullptr);
+	FDoorDef(const FRoomTransform& InTransform, class UDoorType* InType = nullptr);
 
 	bool IsValid() const;
 	operator bool() const { return IsValid(); }
 	bool operator==(const FDoorDef& Other) const;
+	bool operator!=(const FDoorDef& Other) const;
 
 	static bool AreCompatible(const FDoorDef& A, const FDoorDef& B);
 
@@ -136,18 +178,26 @@ public:
 	FString ToString() const;
 	FDoorDef GetOpposite() const;
 	FBoxCenterAndExtent GetBounds(const FVector RoomUnit, bool bIncludeOffset = true) const;
+	FRoomTransform GetTransformToTarget(const FRoomTransform& Destination) const;
 
 	static FVector GetRealDoorPosition(const FDoorDef& DoorDef, const FVector RoomUnit, bool bIncludeOffset = true);
 	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, const FVector RoomUnit, float DoorOffset = 0.0f);
 	static FQuat GetRealDoorRotation(const FDoorDef& DoorDef, bool bFlipped = false);
 
-	static FDoorDef Transform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation);
-	static FDoorDef InverseTransform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation);
-
 #if !UE_BUILD_SHIPPING
 	static void DrawDebug(const class UWorld* World, const FDoorDef& DoorDef, const FVector RoomUnit, const FTransform& Transform = FTransform::Identity, bool bIncludeOffset = false, bool bIsConnected = true);
 	static void DrawDebug(const class UWorld* World, const FColor& Color, const FVector& DoorSize, const FVector RoomUnit, const FIntVector& DoorCell = FIntVector::ZeroValue, const EDoorDirection& DoorRot = EDoorDirection::NbDirection, const FTransform& Transform = FTransform::Identity, float DoorOffset = 0.0f, bool bIsConnected = true);
 #endif // !UE_BUILD_SHIPPING
+
+	void PostSerialize(const FArchive& Ar);
+};
+
+template<>
+struct TStructOpsTypeTraits<FDoorDef> : public TStructOpsTypeTraitsBase2<FDoorDef>
+{
+	enum {
+		WithPostSerialize = true
+	};
 };
 
 // TODO: Use UE built-in TBox<FIntVector> instead?
@@ -217,7 +267,7 @@ public:
 	int32 Score {-1};
 
 public:
-	static FRoomCandidate Invalid;
+	static const FRoomCandidate Invalid;
 };
 
 USTRUCT()
@@ -232,4 +282,3 @@ public:
 	UPROPERTY(SaveGame)
 	bool bIsOpen {false};
 };
-	

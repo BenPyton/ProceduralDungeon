@@ -108,7 +108,7 @@ public:
 	// Checks how well the bounds fit together.
 	// Returns true if the bounds fit together and sets the score.
 	bool GetCompatibilityScore(const FVoxelBounds& Other, int32& Score, const FScoreFunction& ScoreFunc = &DefaultScoreFunc) const;
-	bool GetCompatibilityScore(const FVoxelBounds& Other, const FIntVector& Offset, EDoorDirection Rotation, int32& Score, const FScoreFunction& ScoreFunc = &DefaultScoreFunc) const;
+	bool GetCompatibilityScore(const FVoxelBounds& Other, const FRoomTransform& Transform, int32& Score, const FScoreFunction& ScoreFunc = &DefaultScoreFunc) const;
 	static bool DefaultScoreFunc(const FVoxelBoundsConnection& A, const FVoxelBoundsConnection& B, int32& OutScore);
 
 	// Operators to offset the bounds

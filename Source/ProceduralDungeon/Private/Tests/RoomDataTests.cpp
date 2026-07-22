@@ -28,8 +28,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FRoomDataTests, "ProceduralDungeon.Types.RoomDa
 	#define ADD_DOOR(ROOM, DOOR_POS, DOOR_DIR, DOOR_TYPE) \
 		{                                                 \
 			FDoorDef Door;                                \
-			Door.Position = DOOR_POS;                     \
-			Door.Direction = DOOR_DIR;                    \
+			Door.Transform = {DOOR_POS, DOOR_DIR};        \
 			Door.Type = DOOR_TYPE;                        \
 			ROOM->Doors.Add(Door);                        \
 		}
@@ -51,8 +50,7 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 		RoomData->BoundingBoxes[0].SetMinAndMax(FIntVector(-2, -1, -1), FIntVector(1, 2, 2));
 
 		FDoorDef Door;
-		Door.Position = FIntVector(-2, 0, 0);
-		Door.Direction = EDoorDirection::South;
+		Door.Transform = {FIntVector(-2, 0, 0), EDoorDirection::South};
 		RoomData->Doors.Add(Door);
 
 		// If we want to limit the dungeon cells from -2 to 2,
@@ -63,37 +61,37 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 		//	   -2  -1   0   1   2   3
 		FBoxMinAndMax DungeonBounds({-1000, -2, -1000}, {1000, 3, 1000});
 
-		FBoxMinAndMax RoomBoundsAtDoorLocation = RoomData->GetIntBounds() - Door.Position;
+		FBoxMinAndMax RoomBoundsAtDoorLocation = RoomData->GetIntBounds() - Door.Transform.Translation;
 
 		// Rotated to South
 		{
 			FBoxMinAndMax RotatedRoomBounds = Rotate(RoomBoundsAtDoorLocation, EDoorDirection::North);
 			TestEqual(TEXT("[S] Rotated Room Bounds: ((0, -1, -1), (3, 2, 2))"), RotatedRoomBounds, FBoxMinAndMax({0, -1, -1}, {3, 2, 2}));
 
-			Door.Direction = EDoorDirection::South;
-			Door.Position = {0, 0, 0};
+			Door.Transform.Rotation = EDoorDirection::South;
+			Door.Transform.Translation = {0, 0, 0};
 			TestTrue(TEXT("[S] Inside with no coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
 			// Positive Y
 
-			Door.Position = {0, 1, 0};
+			Door.Transform.Translation = {0, 1, 0};
 			TestTrue(TEXT("[S] Inside with Y+ as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, 2, 0};
+			Door.Transform.Translation = {0, 2, 0};
 			TestFalse(TEXT("[S] Intersecting in Y+"), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, 4, 0};
+			Door.Transform.Translation = {0, 4, 0};
 			TestFalse(TEXT("[S] Outside with Y+ as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
 			// Negative Y
 
-			Door.Position = {0, -1, 0};
+			Door.Transform.Translation = {0, -1, 0};
 			TestTrue(TEXT("[S] Inside with Y- as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, -2, 0};
+			Door.Transform.Translation = {0, -2, 0};
 			TestFalse(TEXT("[S] Intersecting in Y-"), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, -4, 0};
+			Door.Transform.Translation = {0, -4, 0};
 			TestFalse(TEXT("[S] Outside with Y- as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 		}
 
@@ -102,30 +100,30 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 			FBoxMinAndMax RotatedRoomBounds = Rotate(RoomBoundsAtDoorLocation, EDoorDirection::West);
 			TestEqual(TEXT("[E] Rotated Room Bounds: ((-1, -2, -1), (2, 1, 2))"), RotatedRoomBounds, FBoxMinAndMax({-1, -2, -1}, {2, 1, 2}));
 
-			Door.Direction = EDoorDirection::East;
-			Door.Position = {0, 1, 0};
+			Door.Transform.Rotation = EDoorDirection::East;
+			Door.Transform.Translation = {0, 1, 0};
 			TestTrue(TEXT("[E] Inside with no coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
 			// Positive Y
 
-			Door.Position = {0, 2, 0};
+			Door.Transform.Translation = {0, 2, 0};
 			TestTrue(TEXT("[E] Inside with Y+ as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, 3, 0};
+			Door.Transform.Translation = {0, 3, 0};
 			TestFalse(TEXT("[E] Intersecting in Y+"), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, 5, 0};
+			Door.Transform.Translation = {0, 5, 0};
 			TestFalse(TEXT("[E] Outside with Y+ as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
 			// Negative Y
 
-			Door.Position = {0, 0, 0};
+			Door.Transform.Translation = {0, 0, 0};
 			TestTrue(TEXT("[E] Inside with Y- as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, -1, 0};
+			Door.Transform.Translation = {0, -1, 0};
 			TestFalse(TEXT("[E] Intersecting in Y-"), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, -3, 0};
+			Door.Transform.Translation = {0, -3, 0};
 			TestFalse(TEXT("[E] Outside with Y- as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 		}
 
@@ -134,30 +132,30 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 			FBoxMinAndMax RotatedRoomBounds = Rotate(RoomBoundsAtDoorLocation, EDoorDirection::East);
 			TestEqual(TEXT("[W] Rotated Room Bounds: ((-1, 0, -1), (2, 3, 2))"), RotatedRoomBounds, FBoxMinAndMax({-1, 0, -1}, {2, 3, 2}));
 
-			Door.Direction = EDoorDirection::West;
-			Door.Position = {0, -1, 0};
+			Door.Transform.Rotation = EDoorDirection::West;
+			Door.Transform.Translation = {0, -1, 0};
 			TestTrue(TEXT("[W] Inside with no coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
 			// Positive Y
 
-			Door.Position = {0, 0, 0};
+			Door.Transform.Translation = {0, 0, 0};
 			TestTrue(TEXT("[W] Inside with Y+ as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, 1, 0};
+			Door.Transform.Translation = {0, 1, 0};
 			TestFalse(TEXT("[W] Intersecting in Y+"), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, 3, 0};
+			Door.Transform.Translation = {0, 3, 0};
 			TestFalse(TEXT("[W] Outside with Y+ as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
 			// Negative Y
 
-			Door.Position = {0, -2, 0};
+			Door.Transform.Translation = {0, -2, 0};
 			TestTrue(TEXT("[W] Inside with Y- as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, -3, 0};
+			Door.Transform.Translation = {0, -3, 0};
 			TestFalse(TEXT("[W] Intersecting in Y-"), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, -5, 0};
+			Door.Transform.Translation = {0, -5, 0};
 			TestFalse(TEXT("[W] Outside with Y- as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 		}
 
@@ -166,30 +164,30 @@ bool FRoomDataTests::RunTest(const FString& Parameters)
 			FBoxMinAndMax RotatedRoomBounds = Rotate(RoomBoundsAtDoorLocation, EDoorDirection::South);
 			TestEqual(TEXT("[N] Rotated Room Bounds: ((-2, -1, -1), (1, 2, 2))"), RotatedRoomBounds, FBoxMinAndMax({-2, -1, -1}, {1, 2, 2}));
 
-			Door.Direction = EDoorDirection::North;
-			Door.Position = {0, 0, 0};
+			Door.Transform.Rotation = EDoorDirection::North;
+			Door.Transform.Translation = {0, 0, 0};
 			TestTrue(TEXT("[N] Inside with no coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
 			// Positive Y
 
-			Door.Position = {0, 1, 0};
+			Door.Transform.Translation = {0, 1, 0};
 			TestTrue(TEXT("[N] Inside with Y+ as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, 2, 0};
+			Door.Transform.Translation = {0, 2, 0};
 			TestFalse(TEXT("[N] Intersecting in Y+"), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, 4, 0};
+			Door.Transform.Translation = {0, 4, 0};
 			TestFalse(TEXT("[N] Outside with Y+ as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
 			// Negative Y
 
-			Door.Position = {0, -1, 0};
+			Door.Transform.Translation = {0, -1, 0};
 			TestTrue(TEXT("[N] Inside with Y- as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, -2, 0};
+			Door.Transform.Translation = {0, -2, 0};
 			TestFalse(TEXT("[N] Intersecting in Y-"), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 
-			Door.Position = {0, -4, 0};
+			Door.Transform.Translation = {0, -4, 0};
 			TestFalse(TEXT("[N] Outside with Y- as coincident face."), RoomData->IsRoomInBounds(DungeonBounds, 0, Door));
 		}
 	}

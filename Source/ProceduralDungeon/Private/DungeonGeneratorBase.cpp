@@ -304,22 +304,24 @@ bool ADungeonGeneratorBase::TryPlaceRoom(URoom* const& Room, int DoorIndex, cons
 		return false;
 	}
 
-	Room->SetPositionAndRotationFromDoor(DoorIndex, TargetDoor.Position, TargetDoor.Direction);
-
+	Room->SetRoomTransformFromDoor(DoorIndex, TargetDoor.Transform);
 	return CheckRoomOverlap(Room, World);
 }
 
 bool ADungeonGeneratorBase::TryPlaceRoomAtLocation(URoom* const& Room, FIntVector Location, EDoorDirection Rotation, const UWorld* World) const
 {
-	TRACE_CPUPROFILER_EVENT_SCOPE(TryPlaceRoomAtLocation);
+	return TryPlaceRoomAtTransform(Room, FRoomTransform {Location, Rotation}, World);
+}
+
+bool ADungeonGeneratorBase::TryPlaceRoomAtTransform(URoom* const& Room, const FRoomTransform& Transform, const UWorld* World) const
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(TryPlaceRoomAtTransform);
 	if (!IsValid(Room))
 	{
 		return false;
 	}
 
-	Room->SetPosition(Location);
-	Room->SetDirection(Rotation);
-
+	Room->SetRoomTransform(Transform);
 	return CheckRoomOverlap(Room, World);
 }
 

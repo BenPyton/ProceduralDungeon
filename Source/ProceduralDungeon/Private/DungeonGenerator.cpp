@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2019 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2019 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -154,8 +154,8 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 	check(HasAuthority());
 
 	TRACE_CPUPROFILER_EVENT_SCOPE(ADungeonGenerator::AddNewRooms);
-	int nbDoor = ParentRoom.GetRoomData()->GetNbDoor();
-	if (nbDoor <= 0)
+	int NbDoor = ParentRoom.GetRoomData()->GetNbDoor();
+	if (NbDoor <= 0)
 		DungeonLog_Error("The room data '%s' has no door! Nothing could be generated with it!", *GetNameSafe(ParentRoom.GetRoomData()));
 
 	// Cache world before loops
@@ -163,36 +163,36 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 	const FBoxMinAndMax DungeonBounds = DungeonLimits.GetBox();
 
 	AddedRooms.Reset();
-	bool shouldContinue = false;
-	for (int i = 0; shouldContinue = ContinueToAddRoom(), i < nbDoor && shouldContinue; ++i)
+	bool ShouldContinue = false;
+	for (int i = 0; ShouldContinue = ContinueToAddRoom(), i < NbDoor && ShouldContinue; ++i)
 	{
 		if (ParentRoom.IsConnected(i))
 			continue;
 
 		TRACE_CPUPROFILER_EVENT_SCOPE(ADungeonGenerator::AddNewRooms::Loop);
 		// Get the door definition in its world position and direction
-		FDoorDef doorDef = ParentRoom.GetDoorDef(i);
+		FDoorDef DoorDef = ParentRoom.GetDoorDef(i);
 
 		// Get the door definition for the next room
-		const FDoorDef newRoomDoor = doorDef.GetOpposite();
-		if (!DungeonBounds.IsInside(newRoomDoor.Position))
+		const FDoorDef NewRoomDoor = DoorDef.GetOpposite();
+		if (!DungeonBounds.IsInside(NewRoomDoor.Transform.Translation))
 			continue;
 
 		// Maybe move from plugin settings to generator's variable?
-		int nbTries = Dungeon::MaxRoomPlacementTryBeforeGivingUp();
-		URoom* newRoom = nullptr;
-		int doorIndex = -1;
+		int NbTries = Dungeon::MaxRoomPlacementTryBeforeGivingUp();
+		URoom* NewRoom = nullptr;
+		int DoorIndex = -1;
 		// Try to place a new room
 		do
 		{
-			nbTries--;
+			NbTries--;
 			bDiscardRoom = false;
-			URoomData* roomDef = nullptr;
+			URoomData* RoomDef = nullptr;
 			{
 				TRACE_CPUPROFILER_EVENT_SCOPE(ADungeonGenerator::ChooseNextRoomData);
-				roomDef = ChooseNextRoomData(ParentRoom.GetRoomData(), &ParentRoom, doorDef, doorIndex);
+				RoomDef = ChooseNextRoomData(ParentRoom.GetRoomData(), &ParentRoom, DoorDef, DoorIndex);
 			}
-			if (!IsValid(roomDef))
+			if (!IsValid(RoomDef))
 			{
 				bDiscardRoom |= bAutoDiscardRoomIfNull;
 				if (bDiscardRoom)
@@ -206,51 +206,51 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 				}
 			}
 
-			if (doorIndex >= roomDef->Doors.Num())
+			if (DoorIndex >= RoomDef->Doors.Num())
 			{
-				DungeonLog_Error("ChooseNextRoomData returned door index '%d' which is out of range in the RoomData '%s' door list (max: %d).", doorIndex, *roomDef->GetName(), roomDef->Doors.Num() - 1);
+				DungeonLog_Error("ChooseNextRoomData returned door index '%d' which is out of range in the RoomData '%s' door list (max: %d).", DoorIndex, *RoomDef->GetName(), RoomDef->Doors.Num() - 1);
 				continue;
 			}
 
 			// Get all compatible door indices from the chosen room data
 			TArray<int> compatibleDoors;
-			roomDef->GetCompatibleDoors(doorDef, compatibleDoors);
+			RoomDef->GetCompatibleDoors(DoorDef, compatibleDoors);
 			if (compatibleDoors.Num() <= 0)
 			{
-				DungeonLog_Error("ChooseNextRoomData returned room data '%s' with no compatible door (door type: '%s').", *roomDef->GetName(), *doorDef.GetTypeName());
+				DungeonLog_Error("ChooseNextRoomData returned room data '%s' with no compatible door (door type: '%s').", *RoomDef->GetName(), *DoorDef.GetTypeName());
 				continue;
 			}
 
 			// Get only doors if the new room could fit in the dungeon bounds
 			for (int n = compatibleDoors.Num() - 1; n >= 0; --n)
 			{
-				if (!roomDef->IsRoomInBounds(DungeonBounds, compatibleDoors[n], newRoomDoor))
+				if (!RoomDef->IsRoomInBounds(DungeonBounds, compatibleDoors[n], NewRoomDoor))
 					compatibleDoors.RemoveAt(n);
 			}
 
 			if (compatibleDoors.Num() <= 0)
 			{
-				DungeonLog_Warning("ChooseNextRoomData returned room data '%s' that could not fit in dungeon bounds.", *roomDef->GetName());
+				DungeonLog_Warning("ChooseNextRoomData returned room data '%s' that could not fit in dungeon bounds.", *RoomDef->GetName());
 				continue;
 			}
 
-			if (roomDef->RandomDoor || (doorIndex < 0))
-				doorIndex = compatibleDoors[GetRandomStream().RandRange(0, compatibleDoors.Num() - 1)];
-			else if (!compatibleDoors.Contains(doorIndex))
+			if (RoomDef->RandomDoor || (DoorIndex < 0))
+				DoorIndex = compatibleDoors[GetRandomStream().RandRange(0, compatibleDoors.Num() - 1)];
+			else if (!compatibleDoors.Contains(DoorIndex))
 			{
-				DungeonLog_Error("ChooseNextRoomData returned door index '%d' (RoomData '%s') which its type '%s' is not compatible with '%s'.", doorIndex, *roomDef->GetName(), *roomDef->Doors[doorIndex].GetTypeName(), *doorDef.GetTypeName());
+				DungeonLog_Error("ChooseNextRoomData returned door index '%d' (RoomData '%s') which its type '%s' is not compatible with '%s'.", DoorIndex, *RoomDef->GetName(), *RoomDef->Doors[DoorIndex].GetTypeName(), *DoorDef.GetTypeName());
 				continue;
 			}
 
 			// Create new room instance from roomdef
-			newRoom = CreateRoomInstance(roomDef);
+			NewRoom = CreateRoomInstance(RoomDef);
 
 			// Place the room at targeted door position if possible
-			if (!TryPlaceRoom(newRoom, doorIndex, newRoomDoor, World))
+			if (!TryPlaceRoom(NewRoom, DoorIndex, NewRoomDoor, World))
 			{
-				DiscardRoomInstance(newRoom);
+				DiscardRoomInstance(NewRoom);
 			}
-		} while (nbTries > 0 && newRoom == nullptr);
+		} while (NbTries > 0 && NewRoom == nullptr);
 
 		// If we explicitely want to not place a room, then goes to next door
 		if (bDiscardRoom)
@@ -258,14 +258,14 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 
 		// Plugin-wide setting is deprecated, will be removed in v4.0
 		const bool bConnectAllDoors = bCanLoop && Dungeon::CanLoop();
-		if (AddRoomToDungeon(newRoom, bConnectAllDoors ? TArray<int> {} : TArray<int> {doorIndex}))
+		if (AddRoomToDungeon(NewRoom, bConnectAllDoors ? TArray<int> {} : TArray<int> {DoorIndex}))
 		{
-			AddedRooms.Add(newRoom);
+			AddedRooms.Add(NewRoom);
 		}
 		else // No room can be placed and all placement tries exhausted
 		{
 			// @TODO: Find a way to move this call in AddRoomToDungeon
-			OnFailedToAddRoom(ParentRoom.GetRoomData(), doorDef);
+			OnFailedToAddRoom(ParentRoom.GetRoomData(), DoorDef);
 		}
 	}
 
@@ -276,7 +276,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 		DungeonLog_Warning("Dungeon has reached the room limit of %d! Check your 'Continue To Add Room' to make sure your dungeon is not in an infinite loop, or increase the room limit in the plugin settings if this is intentional.", Dungeon::RoomLimit());
 	}
 
-	return shouldContinue && !bRoomLimitReached;
+	return ShouldContinue && !bRoomLimitReached;
 }
 
 // ===== Default Native Events Implementations =====
