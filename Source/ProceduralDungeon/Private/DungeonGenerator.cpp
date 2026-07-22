@@ -45,38 +45,40 @@ bool ADungeonGenerator::CreateDungeon_Implementation()
 		StartNewDungeon();
 
 		// Create the list with the correct mode (depth or breadth)
-		TQueueOrStack<URoom*>::EMode listMode;
+		TQueueOrStack<URoom*>::EMode ListMode;
 		switch (GenerationType)
 		{
 		case EGenerationType::DFS:
-			listMode = TQueueOrStack<URoom*>::EMode::STACK;
+			ListMode = TQueueOrStack<URoom*>::EMode::STACK;
 			break;
 		case EGenerationType::BFS:
-			listMode = TQueueOrStack<URoom*>::EMode::QUEUE;
+			ListMode = TQueueOrStack<URoom*>::EMode::QUEUE;
 			break;
 		default:
 			DungeonLog_Error("GenerationType value is not supported.");
 			return false;
 		}
 
-		URoomData* def = nullptr;
+		URoomData* FirstRoomData = nullptr;
+		FRoomTransform FirstRoomTransform;
 		{
 			TRACE_CPUPROFILER_EVENT_SCOPE(ADungeonGenerator::ChooseFirstRoomData);
-			def = ChooseFirstRoomData();
+			FirstRoomData = ChooseFirstRoomData(FirstRoomTransform);
 		}
-		if (!IsValid(def))
+		if (!IsValid(FirstRoomData))
 		{
 			DungeonLog_Error("ChooseFirstRoomData returned null.");
 		}
 		else
 		{
 			// Create the first room
-			URoom* root = CreateRoomInstance(def);
-			AddRoomToDungeon(root, /*DoorsToConnect = */ {}, /*bFailIfNotConnected = */ false);
+			URoom* FirstRoom = CreateRoomInstance(FirstRoomData);
+			FirstRoom->SetRoomTransform(FirstRoomTransform);
+			AddRoomToDungeon(FirstRoom, /*DoorsToConnect = */ {}, /*bFailIfNotConnected = */ false);
 
 			// Build the list of rooms
-			PendingRooms.SetMode(listMode);
-			PendingRooms.Push(root);
+			PendingRooms.SetMode(ListMode);
+			PendingRooms.Push(FirstRoom);
 
 			CurrentState = EState::AddingRooms;
 		}
@@ -102,9 +104,9 @@ bool ADungeonGenerator::CreateDungeon_Implementation()
 			}
 
 			DungeonLog_Debug("--- %d rooms added to the dungeon.", NewRooms.Num());
-			for (URoom* room : NewRooms)
+			for (URoom* Room : NewRooms)
 			{
-				PendingRooms.Push(room);
+				PendingRooms.Push(Room);
 			}
 		}
 
@@ -281,7 +283,7 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 
 // ===== Default Native Events Implementations =====
 
-URoomData* ADungeonGenerator::ChooseFirstRoomData_Implementation()
+URoomData* ADungeonGenerator::ChooseFirstRoomData_Implementation(FRoomTransform& Transform)
 {
 	DungeonLog_Error("Error: ChooseFirstRoomData not implemented");
 	return nullptr;
