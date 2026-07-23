@@ -335,6 +335,7 @@ public:
 	FBoxCenterAndExtent GetBounds() const;
 	int32 GetSubBoundsCount() const;
 	FBoxCenterAndExtent GetSubBounds(int32 Index) const;
+	FBoxCenterAndExtent GetLocalSubBounds(int32 Index) const;
 	FBoxCenterAndExtent GetLocalBounds() const;
 	FBoxMinAndMax GetIntBounds() const;
 	FVoxelBounds GetVoxelBounds() const;

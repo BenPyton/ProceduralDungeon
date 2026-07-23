@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2019 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2019 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -72,37 +72,43 @@ void ARoomLevel::BeginPlay()
 		DungeonLog_Error("RoomLevel's Data does not match RoomData's Level [Data \"%s\" | Level \"%s\"]. Debug Draw will be incorrect.", *GetNameSafe(Room->GetRoomData()), *GetName());
 	}
 
-	// Create trigger box to track dynamic actors inside the room with IRoomVisitor
-	RoomTrigger = NewObject<UBoxComponent>(this, UBoxComponent::StaticClass(), FName("Room Trigger"));
-	RoomTrigger->RegisterComponent();
-	RoomTrigger->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-	RoomTrigger->SetCanEverAffectNavigation(false);
-	RoomTrigger->SetGenerateOverlapEvents(true);
-	RoomTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	RoomTrigger->SetCollisionObjectType(Dungeon::RoomObjectType());
-	RoomTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
-	RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Ignore);
-	RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
-	RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-
-	static const uint8 FirstChannel = static_cast<uint8>(ECollisionChannel::ECC_GameTraceChannel1);
-	static const uint8 LastChannel = static_cast<uint8>(ECollisionChannel::ECC_GameTraceChannel18);
-	for (uint8 Channel = FirstChannel; Channel <= LastChannel; ++Channel)
+	for (int i = 0; i < Room->GetSubBoundsCount(); ++i)
 	{
-		ETraceTypeQuery TraceChannel = UEngineTypes::ConvertToTraceType(static_cast<ECollisionChannel>(Channel));
-		if (TraceChannel != ETraceTypeQuery::TraceTypeQuery_MAX)
+		// Create trigger box to track dynamic actors inside the room with IRoomVisitor
+		FName TriggerName = MakeUniqueObjectName(this, UBoxComponent::StaticClass(), "RoomTrigger");
+		UBoxComponent* RoomTrigger = NewObject<UBoxComponent>(this, UBoxComponent::StaticClass(), TriggerName);
+		RoomTrigger->RegisterComponent();
+		RoomTrigger->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+		RoomTrigger->SetCanEverAffectNavigation(false);
+		RoomTrigger->SetGenerateOverlapEvents(true);
+		RoomTrigger->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		RoomTrigger->SetCollisionObjectType(Dungeon::RoomObjectType());
+		RoomTrigger->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
+		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Ignore);
+		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Ignore);
+		RoomTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+		static const uint8 FirstChannel = static_cast<uint8>(ECollisionChannel::ECC_GameTraceChannel1);
+		static const uint8 LastChannel = static_cast<uint8>(ECollisionChannel::ECC_GameTraceChannel18);
+		for (uint8 Channel = FirstChannel; Channel <= LastChannel; ++Channel)
 		{
-			RoomTrigger->SetCollisionResponseToChannel(static_cast<ECollisionChannel>(Channel), ECollisionResponse::ECR_Ignore);
+			ETraceTypeQuery TraceChannel = UEngineTypes::ConvertToTraceType(static_cast<ECollisionChannel>(Channel));
+			if (TraceChannel != ETraceTypeQuery::TraceTypeQuery_MAX)
+			{
+				RoomTrigger->SetCollisionResponseToChannel(static_cast<ECollisionChannel>(Channel), ECollisionResponse::ECR_Ignore);
+			}
 		}
+
+		RoomTrigger->OnComponentBeginOverlap.AddDynamic(this, &ARoomLevel::OnTriggerBeginOverlap);
+		RoomTrigger->OnComponentEndOverlap.AddDynamic(this, &ARoomLevel::OnTriggerEndOverlap);
+
+		// Update trigger box to have the room's bounds
+		FBoxCenterAndExtent LocalBounds = Room->GetLocalSubBounds(i);
+		RoomTrigger->SetRelativeLocationAndRotation(LocalBounds.Center, FQuat::Identity);
+		RoomTrigger->SetBoxExtent(LocalBounds.Extent, true);
+
+		RoomTriggers.Add(RoomTrigger);
 	}
-
-	RoomTrigger->OnComponentBeginOverlap.AddDynamic(this, &ARoomLevel::OnTriggerBeginOverlap);
-	RoomTrigger->OnComponentEndOverlap.AddDynamic(this, &ARoomLevel::OnTriggerEndOverlap);
-
-	// Update trigger box to have the room's bounds
-	FBoxCenterAndExtent LocalBounds = Room->GetLocalBounds();
-	RoomTrigger->SetRelativeLocationAndRotation(LocalBounds.Center, FQuat::Identity);
-	RoomTrigger->SetBoxExtent(LocalBounds.Extent, true);
 
 	SetActorsVisible(Room->IsVisible());
 
@@ -151,23 +157,7 @@ void ARoomLevel::Tick(float DeltaTime)
 			DrawDebugSphere(World, DungeonTransform.TransformPositionNoScale(RoomTransform.GetLocation()), 100.0f, 4, FColor::Magenta);
 
 		// Room bounds
-		Data->DrawDebug(World, RoomTransform * DungeonTransform, IsPlayerInside() ? FColor::Green : FColor::Red);
-
-		if (bIsRoomLocked)
-		{
-			FBox Box = Bounds.GetBox();
-			const FVector& Min = Box.Min;
-			const FVector& Max = Box.Max;
-	#ifdef T
-			static_assert(false, "T macro is already defined! Please change its name to avoid potential conflicts");
-	#endif
-	#define T(POINT) DungeonTransform.TransformPositionNoScale(POINT)
-			DrawDebugLine(World, T(Min), T(Max), FColor::Red);
-			DrawDebugLine(World, T(FVector(Min.X, Min.Y, Max.Z)), T(FVector(Max.X, Max.Y, Min.Z)), FColor::Red);
-			DrawDebugLine(World, T(FVector(Min.X, Max.Y, Max.Z)), T(FVector(Max.X, Min.Y, Min.Z)), FColor::Red);
-			DrawDebugLine(World, T(FVector(Min.X, Max.Y, Min.Z)), T(FVector(Max.X, Min.Y, Max.Z)), FColor::Red);
-	#undef T
-		}
+		Data->DrawDebug(World, RoomTransform * DungeonTransform, IsPlayerInside() ? FColor::Green : FColor::Red, bIsRoomLocked);
 
 		// Doors
 		for (int i = 0; i < Data->GetNbDoor(); i++)
@@ -271,15 +261,29 @@ void ARoomLevel::UpdateVisitor(UObject* Visitor, bool IsInside)
 {
 	check(Visitor->Implements<URoomVisitor>());
 
-	if (IsInside && !Visitors.Contains(Visitor))
+	uint32* VisitCounter = Visitors.Find(Visitor);
+	if (IsInside)
 	{
-		Visitors.Add(Visitor);
-		IRoomVisitor::Execute_OnRoomEnter(Visitor, this);
+		if (VisitCounter == nullptr)
+		{
+			DungeonLog_Debug("%s enters room '%s'", *GetNameSafe(Visitor), *GetNameSafe(this));
+			VisitCounter = &Visitors.Add(Visitor);
+			IRoomVisitor::Execute_OnRoomEnter(Visitor, this);
+		}
+
+		++(*VisitCounter);
+		DungeonLog_Debug("%s increment visit count (%d) for %s", *GetNameSafe(Visitor), *VisitCounter, *GetNameSafe(this));
 	}
-	else if (!IsInside && Visitors.Contains(Visitor))
+	else if (VisitCounter != nullptr)
 	{
-		Visitors.Remove(Visitor);
-		IRoomVisitor::Execute_OnRoomExit(Visitor, this);
+		--(*VisitCounter);
+		DungeonLog_Debug("%s decrement visit count (%d) for %s", *GetNameSafe(Visitor), *VisitCounter, *GetNameSafe(this));
+		if (*VisitCounter == 0)
+		{
+			DungeonLog_Debug("%s exits room '%s'", *GetNameSafe(Visitor), *GetNameSafe(this));
+			Visitors.Remove(Visitor);
+			IRoomVisitor::Execute_OnRoomExit(Visitor, this);
+		}
 	}
 }
 
@@ -295,7 +299,7 @@ void ARoomLevel::TriggerActor(AActor* Actor, bool IsInTrigger)
 	}
 
 	// Call the interface on its components too
-	TArray<UActorComponent*, FDefaultAllocator> VisitorComps = Actor->GetComponentsByInterface(URoomVisitor::StaticClass());
+	TArray<UActorComponent*> VisitorComps = Actor->GetComponentsByInterface(URoomVisitor::StaticClass());
 	for (UActorComponent* VisitorComp : VisitorComps)
 	{
 		check(VisitorComp);

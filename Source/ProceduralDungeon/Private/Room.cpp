@@ -612,6 +612,12 @@ FBoxCenterAndExtent URoom::GetSubBounds(int32 Index) const
 	return RoomData->GetSubBounds(Index, GetTransform());
 }
 
+FBoxCenterAndExtent URoom::GetLocalSubBounds(int32 Index) const
+{
+	check(IsValid(RoomData));
+	return RoomData->GetSubBounds(Index);
+}
+
 FTransform URoom::GetTransform() const
 {
 	checkf(IsValid(RoomData), TEXT("Invalid RoomData in URoom class!"));

@@ -276,7 +276,7 @@ bool URoomData::IsDoorDuplicate(int DoorIndex) const
 	return false;
 }
 
-void URoomData::DrawDebug(const UWorld* World, const FTransform& Transform, const FColor& Color)
+void URoomData::DrawDebug(const UWorld* World, const FTransform& Transform, const FColor& Color, bool bLocked)
 {
 	if (!IsValid(World))
 		return;
@@ -285,6 +285,22 @@ void URoomData::DrawDebug(const UWorld* World, const FTransform& Transform, cons
 	{
 		const FBoxCenterAndExtent Box = Dungeon::ToWorld(BoundingBox, GetRoomUnit(), Transform);
 		DrawDebugBox(World, Box.Center, Box.Extent, FQuat::Identity, Color, false, -1.0f, SDPG_World, 2.0f);
+
+		if (bLocked)
+		{
+			const FBox MinMaxBox = Box.GetBox();
+			const FVector& Min = MinMaxBox.Min;
+			const FVector& Max = MinMaxBox.Max;
+	#ifdef T
+			static_assert(false, "T macro is already defined! Please change its name to avoid potential conflicts");
+	#endif
+	#define T(POINT) POINT
+			DrawDebugLine(World, T(Min), T(Max), FColor::Red);
+			DrawDebugLine(World, T(FVector(Min.X, Min.Y, Max.Z)), T(FVector(Max.X, Max.Y, Min.Z)), Color);
+			DrawDebugLine(World, T(FVector(Min.X, Max.Y, Max.Z)), T(FVector(Max.X, Min.Y, Min.Z)), Color);
+			DrawDebugLine(World, T(FVector(Min.X, Max.Y, Min.Z)), T(FVector(Max.X, Min.Y, Max.Z)), Color);
+	#undef T
+		}
 	}
 }
 
