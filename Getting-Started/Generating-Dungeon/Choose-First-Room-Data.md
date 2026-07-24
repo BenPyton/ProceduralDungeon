@@ -15,6 +15,8 @@ import TabItem from '@theme/TabItem';
 This function defines the root of the dungeon generation, *not* the first room where the player starts.\
 You **must** pass a valid `RoomData`, or the generator will throw an error.
 
+You may pass an optional `Room Transform` to place the first room somewhere else than (0,0,0).
+
 :::tip
 
 You can use whatever room that makes sense in your project.\
@@ -41,7 +43,7 @@ class AMyDungeonGenerator : public ADungeonGenerator
 public:
     // ...
 
-    virtual URoomData* ChooseFirstRoomData_Implementation() override;
+    virtual URoomData* ChooseFirstRoomData_Implementation(FRoomTransform& Transform) override;
 
     // This variable is just for example purpose
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "My Dungeon")
@@ -53,7 +55,7 @@ public:
 
 ```cpp title="MyDungeonGenerator.cpp"
 
-URoomData* AMyDungeonGenerator::ChooseFirstRoomData_Implementation()
+URoomData* AMyDungeonGenerator::ChooseFirstRoomData_Implementation(FRoomTransform& Transform)
 {
     return FirstRoom;
 }
