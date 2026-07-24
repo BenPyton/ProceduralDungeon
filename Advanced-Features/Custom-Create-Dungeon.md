@@ -97,7 +97,7 @@ URoomData* AMyCustomDungeonGenerator::CreateDungeon_Implementation()
         if (!TryPlaceRoom(NewRoom, NewRoomDoorIndex, TargetDoor, GetWorld())
         {
             // The room could not be placed.
-            NewRoom = nullptr;
+			DiscardRoomInstance(NewRoom);
         }
 
         // Will actually adds the room into the dungeon and connects the provided doors if possible.
@@ -124,6 +124,17 @@ URoomData* AMyCustomDungeonGenerator::CreateDungeon_Implementation()
 <!-- [END TAB ITEM] C++ --> </TabItem>
 <!-- [END TABS] Blueprint | C++ --> </Tabs>
 
+Here the list of functions provided by the `Dungeon Generator Base` class:
+
+- **`Start New Dungeon`**: Call this at the beginning of a dungeon creation. It will reset the rooms and call `Generation Init`.
+- **`Finalize Dungeon`**: Call this at the end of dungeon creation. It will initialize all room instances and call `Initialize Dungeon`.
+- **`Create Room Instance`**: Use this function to create a new room instance based on a room data. You will be able to move it afterward and try to place it in the dungeon.
+- **`Discard Room Instance`**: Use this function to explicitly discard a room instance from the dungeon creation. The room must not be placed in the dungeon as this instance will be pooled and may be reused afterward when calling `Create Room Instance`.
+- **`Try Place Room`**: Call this to move the room instance, using one of its door to target an existing door location. This function will return whether the room instance overlaps another existing room in the dungeon or optionally colliding with the world (outside of the dungeon). **The room is not added to the dungeon yet!**
+- **`Try Place Room At Transform`**: Same as `Try Place Room` but you provide directly the room transform instead of letting the plugin compute the room transform from a target door location.
+- **`Add Room To Dungeon`**: Use this to finally add the room instance to the dungeon. It will try to connect its door indices you provide (or all doors if you don't provide them). It will call `On Room Added` if the room is actually added to the dungeon. You may call `On Failed To Add Room` if the room is not added to the dungeon.
+- **`Yield Generation`**: See below section for its use.
+
 ## Splitting the workload on multiple frames
 
 If your `Create Dungeon` function does a heavy workload that causes CPU spikes, you can split the workload on multiple frames.
@@ -131,3 +142,9 @@ If your `Create Dungeon` function does a heavy workload that causes CPU spikes, 
 To do so, you can use the node [`Yield Generation`](api/Classes/DungeonGeneratorBase/Nodes/YieldGeneration/YieldGeneration.md) which will tell the generator to call the `Create Dungeon` function once again in the next frame.
 
 That way, you can for example group the room placements in small batches each frame!
+
+:::note
+
+Make sure to add some flags in your algorithm to avoid calling `Start New Dungeon` or `Finalize Dungeon` each time.
+
+:::
