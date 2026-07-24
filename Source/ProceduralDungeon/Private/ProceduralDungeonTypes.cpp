@@ -222,6 +222,15 @@ FDoorDef::FDoorDef(const FRoomTransform& InTransform, UDoorType* InType)
 {
 }
 
+// Disable deprecation warnings when compiling for Linux
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+FDoorDef::FDoorDef() = default;
+FDoorDef::FDoorDef(const FDoorDef&) = default;
+FDoorDef::FDoorDef(FDoorDef&&) = default;
+FDoorDef& FDoorDef::operator=(const FDoorDef&) = default;
+FDoorDef& FDoorDef::operator=(FDoorDef&&) = default;
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
+
 bool FDoorDef::IsValid() const
 {
 	return Transform.IsValid();

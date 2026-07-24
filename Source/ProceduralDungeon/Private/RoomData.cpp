@@ -39,6 +39,7 @@ void URoomData::Serialize(FArchive& Ar)
 	{
 		const int32 DungeonVersion = Ar.CustomVer(FProceduralDungeonCustomVersion::GUID);
 		
+		PRAGMA_DISABLE_DEPRECATION_WARNINGS
 		if (DungeonVersion < FProceduralDungeonCustomVersion::RoomDataBoundingBoxesMigration)
 		{
 			DungeonLog_Warning("Migrating RoomData '%s' from legacy FirstPoint/SecondPoint to BoundingBoxes.", *GetName());
@@ -52,6 +53,7 @@ void URoomData::Serialize(FArchive& Ar)
 			FirstPoint = FIntVector(0);
 			SecondPoint = FIntVector(0);
 		}
+		PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	}
 }
 

@@ -40,9 +40,9 @@ bool FRoomTransformTest::RunTest(const FString& Parameters)
 	{
 		FIntVector BaseVector {-1, 3, 2};
 
-		FRoomTransform TransformationA({1, 2, -1}, EDoorDirection::East);
-		FRoomTransform TransformationB({-2, 1, 0}, EDoorDirection::South);
-		FRoomTransform TransformationC({0, -1, 2}, EDoorDirection::West);
+		FRoomTransform TransformationA {{1, 2, -1}, EDoorDirection::East};
+		FRoomTransform TransformationB {{-2, 1, 0}, EDoorDirection::South};
+		FRoomTransform TransformationC {{0, -1, 2}, EDoorDirection::West};
 
 		FIntVector ExpectedVectorA {-2, 1, 1};
 		FIntVector ExpectedVectorB {-1, -2, 2};
@@ -65,9 +65,9 @@ bool FRoomTransformTest::RunTest(const FString& Parameters)
 
 	// Transform DoorDirection Test
 	{
-		FRoomTransform TransformationA({1, 2, -1}, EDoorDirection::East);
-		FRoomTransform TransformationB({-2, 1, 0}, EDoorDirection::South);
-		FRoomTransform TransformationC({0, -1, 2}, EDoorDirection::West);
+		FRoomTransform TransformationA {{1, 2, -1}, EDoorDirection::East};
+		FRoomTransform TransformationB {{-2, 1, 0}, EDoorDirection::South};
+		FRoomTransform TransformationC {{0, -1, 2}, EDoorDirection::West};
 
 		TestEqual(TEXT("North Transformation A is correct"), TransformationA.Transform(EDoorDirection::North), EDoorDirection::East);
 		TestEqual(TEXT("North Transformation B is correct"), TransformationB.Transform(EDoorDirection::North), EDoorDirection::South);
@@ -104,15 +104,15 @@ bool FRoomTransformTest::RunTest(const FString& Parameters)
 
 	// Transform Transform Test
 	{
-		FRoomTransform BaseTransform({1, 2, 3}, EDoorDirection::North);
+		FRoomTransform BaseTransform {{1, 2, 3}, EDoorDirection::North};
 
-		FRoomTransform TransformationA({1, 2, 3}, EDoorDirection::East);
-		FRoomTransform TransformationB({1, 2, 3}, EDoorDirection::South);
-		FRoomTransform TransformationC({1, 2, 3}, EDoorDirection::West);
+		FRoomTransform TransformationA {{1, 2, 3}, EDoorDirection::East};
+		FRoomTransform TransformationB {{1, 2, 3}, EDoorDirection::South};
+		FRoomTransform TransformationC {{1, 2, 3}, EDoorDirection::West};
 
-		FRoomTransform ExpectedTransformA({-1, 3, 6}, EDoorDirection::East);
-		FRoomTransform ExpectedTransformB({0, 0, 6}, EDoorDirection::South);
-		FRoomTransform ExpectedTransformC({3, 1, 6}, EDoorDirection::West);
+		FRoomTransform ExpectedTransformA {{-1, 3, 6}, EDoorDirection::East};
+		FRoomTransform ExpectedTransformB {{0, 0, 6}, EDoorDirection::South};
+		FRoomTransform ExpectedTransformC {{3, 1, 6}, EDoorDirection::West};
 
 		FRoomTransform ActualTransformA = TransformationA.Transform(BaseTransform);
 		FRoomTransform ActualTransformB = TransformationB.Transform(BaseTransform);

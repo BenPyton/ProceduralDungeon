@@ -723,7 +723,9 @@ void CopyRooms(TArray<URoom*>& To, TArray<URoom*>& From)
 	for (URoom* Room : From)
 	{
 		if (Room->Instance)
+		{
 			DungeonLog_Debug("[%s] Loaded Level: %s", *GetNameSafe(Room), *GetNameSafe(Room->Instance->GetLoadedLevel()));
+		}
 	}
 
 	To = TArray<URoom*>(From);

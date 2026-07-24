@@ -69,19 +69,19 @@ bool FDoorDefTest::RunTest(const FString& Parameters)
 
 	// GetTransformToTarget Test
 	{
-		FRoomTransform TransformA({1, 2, 3}, EDoorDirection::North);
-		FRoomTransform TransformB({1, 2, 3}, EDoorDirection::East);
-		FRoomTransform TransformC({1, 2, 3}, EDoorDirection::South);
-		FRoomTransform TransformD({1, 2, 3}, EDoorDirection::West);
-		FRoomTransform TransformE({1, 0, 0}, EDoorDirection::South);
+		FRoomTransform TransformA {{1, 2, 3}, EDoorDirection::North};
+		FRoomTransform TransformB {{1, 2, 3}, EDoorDirection::East};
+		FRoomTransform TransformC {{1, 2, 3}, EDoorDirection::South};
+		FRoomTransform TransformD {{1, 2, 3}, EDoorDirection::West};
+		FRoomTransform TransformE {{1, 0, 0}, EDoorDirection::South};
 
 		FDoorDef DoorA({1, 2, 3}, EDoorDirection::East, DoorTypeA.Get());
 
-		FRoomTransform ExpectedATransformA({-1, 3, 0}, EDoorDirection::West);
-		FRoomTransform ExpectedATransformB({0, 0, 0}, EDoorDirection::North);
-		FRoomTransform ExpectedATransformC({3, 1, 0}, EDoorDirection::East);
-		FRoomTransform ExpectedATransformD({2, 4, 0}, EDoorDirection::South);
-		FRoomTransform ExpectedATransformE({3, -1, -3}, EDoorDirection::East);
+		FRoomTransform ExpectedATransformA {{-1, 3, 0}, EDoorDirection::West};
+		FRoomTransform ExpectedATransformB {{0, 0, 0}, EDoorDirection::North};
+		FRoomTransform ExpectedATransformC {{3, 1, 0}, EDoorDirection::East};
+		FRoomTransform ExpectedATransformD {{2, 4, 0}, EDoorDirection::South};
+		FRoomTransform ExpectedATransformE {{3, -1, -3}, EDoorDirection::East};
 
 		FRoomTransform ActualATransformA = DoorA.GetTransformToTarget(TransformA);
 		FRoomTransform ActualATransformB = DoorA.GetTransformToTarget(TransformB);
@@ -95,11 +95,11 @@ bool FDoorDefTest::RunTest(const FString& Parameters)
 
 		FDoorDef DoorB({0, 0, 0}, EDoorDirection::South, DoorTypeA.Get());
 
-		FRoomTransform ExpectedBTransformA({1, 2, 3}, EDoorDirection::South);
-		FRoomTransform ExpectedBTransformB({1, 2, 3}, EDoorDirection::West);
-		FRoomTransform ExpectedBTransformC({1, 2, 3}, EDoorDirection::North);
-		FRoomTransform ExpectedBTransformD({1, 2, 3}, EDoorDirection::East);
-		FRoomTransform ExpectedBTransformE({1, 0, 0}, EDoorDirection::North);
+		FRoomTransform ExpectedBTransformA {{1, 2, 3}, EDoorDirection::South};
+		FRoomTransform ExpectedBTransformB {{1, 2, 3}, EDoorDirection::West};
+		FRoomTransform ExpectedBTransformC {{1, 2, 3}, EDoorDirection::North};
+		FRoomTransform ExpectedBTransformD {{1, 2, 3}, EDoorDirection::East};
+		FRoomTransform ExpectedBTransformE {{1, 0, 0}, EDoorDirection::North};
 
 		FRoomTransform ActualBTransformA = DoorB.GetTransformToTarget(TransformA);
 		FRoomTransform ActualBTransformB = DoorB.GetTransformToTarget(TransformB);

@@ -16,7 +16,7 @@
 #define _PD_LOG_PrivateImpl(LogCategory, Verbosity, Detailed, Format, ...) \
 { \
 	if constexpr (Detailed) \
-		{ UE_LOG(LogCategory, Verbosity, TEXT("[" __FUNCTION__ ":%d] " Format), __LINE__, ##__VA_ARGS__); } \
+		{ UE_LOG(LogCategory, Verbosity, TEXT("[%hs:%d] " Format), __FUNCTION__, __LINE__, ##__VA_ARGS__); } \
 	else \
 		{ UE_LOG(LogCategory, Verbosity, TEXT(Format), ##__VA_ARGS__); } \
 }

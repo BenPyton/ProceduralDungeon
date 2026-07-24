@@ -17,6 +17,7 @@
 #include "ProceduralDungeonTypes.h"
 #include "VoxelBounds/VoxelBounds.h"
 #include "DungeonOctree.h"
+#include "UObject/StrongObjectPtr.h"
 #include "DungeonGraph.generated.h"
 
 class URoom;
@@ -291,7 +292,11 @@ private:
 		{
 			if (PooledObjects.Num() > 0)
 			{
+#if UE_VERSION_OLDER_THAN(5, 5, 0)
 				return PooledObjects.Pop(/*bAllowShrinking=*/false).Get();
+#else
+				return PooledObjects.Pop(EAllowShrinking::No).Get();
+#endif
 			}
 			else
 			{
@@ -301,7 +306,7 @@ private:
 
 		void Release(T* Instance)
 		{
-			PooledObjects.Add(TStrongObjectPtr(Instance));
+			PooledObjects.Add(TStrongObjectPtr<T>(Instance));
 		}
 
 		void Clear()

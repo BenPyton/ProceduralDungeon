@@ -160,9 +160,13 @@ public:
 	class UDoorType* Type {nullptr};
 
 public:
-	FDoorDef() = default;
+	FDoorDef();
 	FDoorDef(const FIntVector& InPosition, EDoorDirection InDirection, class UDoorType* InType = nullptr);
 	FDoorDef(const FRoomTransform& InTransform, class UDoorType* InType = nullptr);
+	FDoorDef(const FDoorDef&);
+	FDoorDef(FDoorDef&&);
+	FDoorDef& operator=(const FDoorDef&);
+	FDoorDef& operator=(FDoorDef&&);
 
 	bool IsValid() const;
 	operator bool() const { return IsValid(); }

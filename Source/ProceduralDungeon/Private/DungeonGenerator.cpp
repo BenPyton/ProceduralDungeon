@@ -158,7 +158,9 @@ bool ADungeonGenerator::AddNewRooms(URoom& ParentRoom, TArray<URoom*>& AddedRoom
 	TRACE_CPUPROFILER_EVENT_SCOPE(ADungeonGenerator::AddNewRooms);
 	int NbDoor = ParentRoom.GetRoomData()->GetNbDoor();
 	if (NbDoor <= 0)
+	{
 		DungeonLog_Error("The room data '%s' has no door! Nothing could be generated with it!", *GetNameSafe(ParentRoom.GetRoomData()));
+	}
 
 	// Cache world before loops
 	const UWorld* World = GetWorld();

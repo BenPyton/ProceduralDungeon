@@ -10,6 +10,7 @@
 #include "CoreMinimal.h"
 #include "ProceduralDungeonLog.h"
 #include "Utils/CompatUtils.h"
+#include "Templates/SubclassOf.h"
 
 TUniquePtr<FArchiveFormatterType> CreateArchiveFormatterFromArchive(FArchive& Ar, bool bTextFormat = true);
 
