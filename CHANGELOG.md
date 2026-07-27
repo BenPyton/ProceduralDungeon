@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.0] - 2026-07-27
+
+### Added
+
+- Added some profiling traces during the generation process to help optimizing dungeon generation performances.
+- Added `FRoomTransform` struct to encapsulate the location (`FIntVector`) and rotation (`EDoorDirection`) for `URoom` and `FDoorDef`.
+
+### Changed
+
+- Updated plugin settings to use `UDeveloperSettings` class.
+- `URoom` and `URoomConnection` instances are now pooled to be reused in order to reduce memory allocations and GC work.
+- Optimized `FilterAndSortRoom` function (at least twice as fast).
+- `ChooseFirstRoomData` function now has an `FRoomTransform` output to allow placing the first room anywhere.
+
+### Fixed
+
+- Fixed room visitors and room visibility components with the multiple bounding boxes of rooms.
+
+### Deprecated
+
+- Deprecated the use of `Position` and `Direction` from both `URoom` and `FDoorDef`. Use their `Transform` property instead.
+- Deprecated `TryPlaceRoomAtLocation` in favor of the new `TryPlaceRoomAtTransform`.
+
+### Premium Features (exclusive to the Fab version)
+
+- New **Dungeon Map** widget:
+  - Added a Slate/UMG widget to display your generated dungeons as a full map or minimap in your game.
+  - Added `DungeonMapComponent` to track your actors on your minimap.
+  - Added default textures and brushes assets for the map widget.
+
 ## [3.8.3] - 2026-07-02
 
 ### Fixed
@@ -497,6 +527,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial Release
 
+[3.9.0]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.8.3...v3.9.0
 [3.8.3]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.8.2...v3.8.3
 [3.8.2]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.8.1...v3.8.2
 [3.8.1]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.8.0...v3.8.1
