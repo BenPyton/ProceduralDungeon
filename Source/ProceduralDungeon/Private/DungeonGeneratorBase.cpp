@@ -240,8 +240,9 @@ void ADungeonGeneratorBase::PostInitializeComponents()
 void ADungeonGeneratorBase::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	if (EndPlayReason == EEndPlayReason::Destroyed)
-		Graph->UnloadAllRooms();
+	Graph->UnloadAllRooms();
+	Graph->Clear();
+	Graph->ClearPools();
 }
 
 void ADungeonGeneratorBase::Tick(float DeltaTime)
@@ -263,7 +264,7 @@ void ADungeonGeneratorBase::Unload()
 {
 	// Do it only on server, do nothing on clients
 	if (HasAuthority())
-		return
+		return;
 
 	// Mark graph as if the room list have been modified.
 	// Doing so will not trigger the generation phase,
@@ -569,7 +570,6 @@ void ADungeonGeneratorBase::UpdateRoomRelevancy()
 void ADungeonGeneratorBase::Reset()
 {
 	PlayerRooms.Empty();
-	Graph->ClearPools();
 }
 
 void ADungeonGeneratorBase::UpdateSeed()
@@ -760,6 +760,7 @@ void ADungeonGeneratorBase::OnStateEnd(EGenerationState State)
 	case EGenerationState::Unload:
 		if (HasAuthority())
 			Graph->Clear();
+		Graph->ClearPools();
 		GetWorld()->FlushLevelStreaming();
 		GEngine->ForceGarbageCollection(true);
 		DungeonLog_Info("======= End Unload All Levels =======");
