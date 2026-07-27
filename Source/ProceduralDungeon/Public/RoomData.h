@@ -131,7 +131,7 @@ public:
 	FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
 	FBoxCenterAndExtent GetSubBounds(int32 Index, FTransform Transform = FTransform::Identity) const;
 	FBoxMinAndMax GetIntBounds() const;
-	FVoxelBounds GetVoxelBounds() const;
+	const FVoxelBounds& GetVoxelBounds() const;
 
 	bool IsRoomInBounds(const FBoxMinAndMax& Bounds, int DoorIndex, const FDoorDef& DoorDungeonPos) const;
 

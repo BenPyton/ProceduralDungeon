@@ -95,6 +95,9 @@ public:
 	FCell& AddCell(FIntVector Cell);
 	void AddBox(const FBoxMinAndMax& Box);
 
+	bool HasCellAt(FIntVector Cell) const { return Cells.Contains(Cell); }
+	const TMap<FIntVector, FCell>& GetAllCells() const { return Cells; }
+
 	const FVoxelBoundsConnection* GetCellConnection(FIntVector Cell, EDirection Direction) const;
 	bool SetCellConnection(FIntVector Cell, EDirection Direction, const FVoxelBoundsConnection& Connection);
 

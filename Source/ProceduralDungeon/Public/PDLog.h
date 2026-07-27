@@ -24,7 +24,7 @@
 
 // Logs a message to output only
 // Must define a LOG_CATEGORY
-#define PD_LOG_DEBUG(Format, ...) _PD_LOG_PrivateImpl(LOG_CATEGORY, VeryVerbose, true, Format, ...)
-#define PD_LOG_INFO(Format, ...) _PD_LOG_PrivateImpl(LOG_CATEGORY, Log, false, Format, ...)
-#define PD_LOG_WARNING(Format, ...) _PD_LOG_PrivateImpl(LOG_CATEGORY, Warning, true, Format, ...)
-#define PD_LOG_ERROR(Format, ...) _PD_LOG_PrivateImpl(LOG_CATEGORY, Error, true, Format, ...)
+#define PD_LOG_DEBUG(Format, ...) _PD_LOG_PrivateImpl(LOG_CATEGORY, VeryVerbose, true, Format, ##__VA_ARGS__)
+#define PD_LOG_INFO(Format, ...) _PD_LOG_PrivateImpl(LOG_CATEGORY, Log, false, Format, ##__VA_ARGS__)
+#define PD_LOG_WARNING(Format, ...) _PD_LOG_PrivateImpl(LOG_CATEGORY, Warning, true, Format, ##__VA_ARGS__)
+#define PD_LOG_ERROR(Format, ...) _PD_LOG_PrivateImpl(LOG_CATEGORY, Error, true, Format, ##__VA_ARGS__)

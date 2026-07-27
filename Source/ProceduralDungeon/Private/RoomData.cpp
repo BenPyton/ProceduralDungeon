@@ -202,7 +202,7 @@ FBoxMinAndMax URoomData::GetIntBounds() const
 	return GetVoxelBounds().GetBounds();
 }
 
-FVoxelBounds URoomData::GetVoxelBounds() const
+const FVoxelBounds& URoomData::GetVoxelBounds() const
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE(URoomData::GetVoxelBounds);
 	if (CachedVoxelBounds.IsValid())
