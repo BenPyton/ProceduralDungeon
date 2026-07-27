@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2024 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2024 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -41,6 +41,10 @@ public:
 	// Returns the direction of the room.
 	UFUNCTION(BlueprintCallable, Category = "Room")
 	virtual EDoorDirection GetDirection() const { return EDoorDirection::North; }
+
+	// Returns the transform of the room.
+	UFUNCTION(BlueprintCallable, Category = "Room")
+	virtual const FRoomTransform& GetRoomTransform() const { return FRoomTransform::Identity; }
 
 	// Returns true if all the doors of this room are connected to other rooms.
 	UFUNCTION(BlueprintCallable, Category = "Room")

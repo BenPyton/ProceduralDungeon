@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2019 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2019 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -9,6 +9,8 @@
 #include "DrawDebugHelpers.h"
 #include "ProceduralDungeonUtils.h"
 #include "DoorType.h"
+#include "ProceduralDungeonCustomVersion.h"
+#include "ProceduralDungeonLog.h"
 
 bool operator!(const EDoorDirection& Direction)
 {
@@ -210,24 +212,43 @@ EDoorDirection InverseTransform(const EDoorDirection& Direction, const EDoorDire
 const FDoorDef FDoorDef::Invalid(FIntVector::ZeroValue, EDoorDirection::NbDirection);
 
 FDoorDef::FDoorDef(const FIntVector& InPosition, EDoorDirection InDirection, UDoorType* InType)
+	: FDoorDef(FRoomTransform {InPosition, InDirection}, InType)
 {
-	Position = InPosition;
-	Direction = InDirection;
-	Type = InType;
 }
+
+FDoorDef::FDoorDef(const FRoomTransform& InTransform, UDoorType* InType)
+	: Transform(InTransform)
+	, Type(InType)
+{
+}
+
+// Disable deprecation warnings when compiling for Linux
+PRAGMA_DISABLE_DEPRECATION_WARNINGS
+FDoorDef::FDoorDef() = default;
+FDoorDef::FDoorDef(const FDoorDef&) = default;
+FDoorDef::FDoorDef(FDoorDef&&) = default;
+FDoorDef& FDoorDef::operator=(const FDoorDef&) = default;
+FDoorDef& FDoorDef::operator=(FDoorDef&&) = default;
+PRAGMA_ENABLE_DEPRECATION_WARNINGS
 
 bool FDoorDef::IsValid() const
 {
-	return Direction != EDoorDirection::NbDirection;
+	return Transform.IsValid();
 }
 
 bool FDoorDef::operator==(const FDoorDef& Other) const
 {
-	return Position == Other.Position && Direction == Other.Direction;
+	return Transform == Other.Transform;
+}
+
+bool FDoorDef::operator!=(const FDoorDef& Other) const
+{
+	return !operator==(Other);
 }
 
 bool FDoorDef::AreCompatible(const FDoorDef& A, const FDoorDef& B)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FDoorDef::AreCompatible);
 	return UDoorType::AreCompatible(A.Type, B.Type);
 }
 
@@ -254,28 +275,36 @@ FString FDoorDef::GetTypeName() const
 FString FDoorDef::ToString() const
 {
 	FText DirectionName;
-	UEnum::GetDisplayValueAsText(Direction, DirectionName);
-	return FString::Printf(TEXT("(%d,%d,%d) [%s]"), Position.X, Position.Y, Position.Z, *DirectionName.ToString());
+	UEnum::GetDisplayValueAsText(Transform.Rotation, DirectionName);
+	return FString::Printf(TEXT("(%d,%d,%d) [%s]"), Transform.Translation.X, Transform.Translation.Y, Transform.Translation.Z, *DirectionName.ToString());
 }
 
 FDoorDef FDoorDef::GetOpposite() const
 {
 	FDoorDef OppositeDoor(*this);
-	OppositeDoor.Position = Position + ToIntVector(Direction);
-	OppositeDoor.Direction = ~Direction;
+	OppositeDoor.Transform.Translation = Transform.Translation + ToIntVector(Transform.Rotation);
+	OppositeDoor.Transform.Rotation = ~Transform.Rotation;
 	return OppositeDoor;
 }
 
 FBoxCenterAndExtent FDoorDef::GetBounds(const FVector RoomUnit, bool bIncludeOffset) const
 {
-	const FVector RotatedDoorSize = Rotate(GetDoorSize(), (!Direction) ? EDoorDirection::North : Direction).GetAbs();
+	const FVector RotatedDoorSize = Rotate(GetDoorSize(), (!Transform.Rotation) ? EDoorDirection::North : Transform.Rotation).GetAbs();
 	const FVector WorldPosition = GetRealDoorPosition(*this, RoomUnit, bIncludeOffset) + FVector(0, 0, RotatedDoorSize.Z * 0.5f);
 	return FBoxCenterAndExtent(WorldPosition, 0.5f * RotatedDoorSize);
 }
 
+FRoomTransform FDoorDef::GetTransformToTarget(const FRoomTransform& Destination) const
+{
+	FRoomTransform NewTransform;
+	NewTransform.Rotation = Destination.Rotation - Transform.Rotation;
+	NewTransform.Translation = Destination.Translation - Rotate(Transform.Translation, NewTransform.Rotation);
+	return NewTransform;
+}
+
 FVector FDoorDef::GetRealDoorPosition(const FDoorDef& DoorDef, const FVector RoomUnit, bool bIncludeOffset)
 {
-	return GetRealDoorPosition(DoorDef.Position, DoorDef.Direction, RoomUnit, bIncludeOffset ? DoorDef.GetDoorOffset() : 0.0f);
+	return GetRealDoorPosition(DoorDef.Transform.Translation, DoorDef.Transform.Rotation, RoomUnit, bIncludeOffset ? DoorDef.GetDoorOffset() : 0.0f);
 }
 
 FVector FDoorDef::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, const FVector RoomUnit, float DoorOffset)
@@ -288,29 +317,13 @@ FVector FDoorDef::GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRo
 
 FQuat FDoorDef::GetRealDoorRotation(const FDoorDef& DoorDef, bool bFlipped)
 {
-	return FRotator(0, 90 * static_cast<uint8>(DoorDef.Direction) + bFlipped * 180, 0).Quaternion();
-}
-
-FDoorDef FDoorDef::Transform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation)
-{
-	FDoorDef NewDoor = DoorDef;
-	NewDoor.Position = ::Transform(DoorDef.Position, Translation, Rotation);
-	NewDoor.Direction = ::Transform(DoorDef.Direction, Rotation);
-	return NewDoor;
-}
-
-FDoorDef FDoorDef::InverseTransform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation)
-{
-	FDoorDef NewDoor = DoorDef;
-	NewDoor.Position = ::InverseTransform(DoorDef.Position, Translation, Rotation);
-	NewDoor.Direction = ::InverseTransform(DoorDef.Direction, Rotation);
-	return NewDoor;
+	return FRotator(0, 90 * static_cast<uint8>(DoorDef.Transform.Rotation) + bFlipped * 180, 0).Quaternion();
 }
 
 #if !UE_BUILD_SHIPPING
 void FDoorDef::DrawDebug(const UWorld* World, const FDoorDef& DoorDef, const FVector RoomUnit, const FTransform& Transform, bool bIncludeOffset, bool bIsConnected)
 {
-	DrawDebug(World, DoorDef.GetDoorColor(), DoorDef.GetDoorSize(), RoomUnit, DoorDef.Position, DoorDef.Direction, Transform, bIncludeOffset ? DoorDef.GetDoorOffset() : 0.0f, bIsConnected);
+	DrawDebug(World, DoorDef.GetDoorColor(), DoorDef.GetDoorSize(), RoomUnit, DoorDef.Transform.Translation, DoorDef.Transform.Rotation, Transform, bIncludeOffset ? DoorDef.GetDoorOffset() : 0.0f, bIsConnected);
 
 	// Door debug draw using its bounds
 	//FBoxCenterAndExtent DoorBounds = DoorDef.GetBounds(bIncludeOffset);
@@ -344,6 +357,28 @@ void FDoorDef::DrawDebug(const UWorld* World, const FColor& Color, const FVector
 	#endif // ENABLE_DRAW_DEBUG
 }
 #endif // !UE_BUILD_SHIPPING
+
+void FDoorDef::PostSerialize(const FArchive& Ar)
+{
+	if (!Ar.IsLoading())
+		return;
+
+	PRAGMA_DISABLE_DEPRECATION_WARNINGS
+	const int32 Version = Ar.CustomVer(FProceduralDungeonCustomVersion::GUID);
+	const bool bHasLegacyData = (Position != FIntVector::ZeroValue) || (Direction != EDoorDirection::North);
+
+	if (Version < FProceduralDungeonCustomVersion::RoomTransformMigration && bHasLegacyData)
+	{
+		Transform.Translation = Position;
+		Transform.Rotation = Direction;
+
+		Position = FIntVector::ZeroValue;
+		Direction = EDoorDirection::North;
+
+		DungeonLog_WarningSilent("Migrated DoorDef Transform values.");
+	}
+	PRAGMA_ENABLE_DEPRECATION_WARNINGS
+}
 
 // ############ FBoxMinAndMax ##############
 
@@ -491,4 +526,60 @@ FBoxMinAndMax Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot)
 	return NewBox;
 }
 
-FRoomCandidate FRoomCandidate::Invalid = FRoomCandidate();
+const FRoomCandidate FRoomCandidate::Invalid = FRoomCandidate();
+
+// ############ FRoomTransform ##############
+
+const FRoomTransform FRoomTransform::Identity = FRoomTransform();
+const FRoomTransform FRoomTransform::Invalid = FRoomTransform {FIntVector::ZeroValue, EDoorDirection::NbDirection};
+
+FIntVector FRoomTransform::Transform(const FIntVector& Point) const
+{
+	return Rotate(Point, Rotation) + Translation;
+}
+
+FIntVector FRoomTransform::InverseTransform(const FIntVector& Point) const
+{
+	return Rotate(Point - Translation, -Rotation);
+}
+
+EDoorDirection FRoomTransform::Transform(const EDoorDirection& Direction) const
+{
+	return Direction + Rotation;
+}
+
+EDoorDirection FRoomTransform::InverseTransform(const EDoorDirection& Direction) const
+{
+	return Direction - Rotation;
+}
+
+FRoomTransform FRoomTransform::Transform(const FRoomTransform& Other) const
+{
+	FRoomTransform NewTransform;
+	NewTransform.Translation = Transform(Other.Translation);
+	NewTransform.Rotation = Transform(Other.Rotation);
+	return NewTransform;
+}
+
+FRoomTransform FRoomTransform::InverseTransform(const FRoomTransform& Other) const
+{
+	FRoomTransform NewTransform;
+	NewTransform.Translation = InverseTransform(Other.Translation);
+	NewTransform.Rotation = InverseTransform(Other.Rotation);
+	return NewTransform;
+}
+
+bool FRoomTransform::operator==(const FRoomTransform& Other) const
+{
+	return Translation == Other.Translation && Rotation == Other.Rotation;
+}
+
+bool FRoomTransform::operator!=(const FRoomTransform& Other) const
+{
+	return !operator==(Other);
+}
+
+bool FRoomTransform::IsValid() const
+{
+	return Rotation != EDoorDirection::NbDirection;
+}

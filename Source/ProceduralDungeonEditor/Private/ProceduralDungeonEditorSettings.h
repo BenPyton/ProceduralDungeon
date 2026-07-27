@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2023 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2023 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -7,19 +7,26 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "Engine/DeveloperSettings.h"
 #include "UObject/NoExportTypes.h"
 #include "RoomData.h"
 #include "ProceduralDungeonEdTypes.h"
 #include "ProceduralDungeonEditorSettings.generated.h"
 
 UCLASS(Config = Editor, DefaultConfig)
-class UProceduralDungeonEditorSettings : public UObject
+class UProceduralDungeonEditorSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
 public:
 	UProceduralDungeonEditorSettings(const FObjectInitializer& ObjectInitializer);
+
+	//~ Begin UDeveloperSettings Interface
+#if WITH_EDITOR
+	virtual FText GetSectionText() const override;
+	virtual FText GetSectionDescription() const override;
+#endif // WITH_EDITOR
+	//~ End UDeveloperSettings Interface
 
 	// The default RoomData class to use in the class picker when creating a new RoomData asset.
 	UPROPERTY(Config, EditAnywhere, Category = "General", NoClear, meta = (AllowAbstract = false))

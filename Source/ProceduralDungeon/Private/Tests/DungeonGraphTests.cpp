@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2023 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2023 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -40,7 +40,6 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDungeonGraphTest, "ProceduralDungeon.Types.Dun
 		Path.Empty();        \
 		Path.Add(nullptr);
 
-#pragma optimize("", off)
 bool FDungeonGraphTest::RunTest(const FString& Parameters)
 {
 	{
@@ -185,12 +184,11 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			CREATE_ROOM(Room4, DA_C);
 			CREATE_ROOM(Room5, DA_C);
 
-			Room1->Position = {0, 1, 0};
-			Room2->Position = {0, 2, 0};
-			Room2->Direction = EDoorDirection::East;
-			Room3->Position = {-1, 0, 0};
-			Room4->Position = {0, 0, 1};
-			Room5->Position = {0, 1, 1};
+			Room1->SetPosition({0, 1, 0});
+			Room2->SetRoomTransform({{0, 2, 0}, EDoorDirection::East});
+			Room3->SetPosition({-1, 0, 0});
+			Room4->SetPosition({0, 0, 1});
+			Room5->SetPosition({0, 1, 1});
 
 			// Room positions are modified manually, so we need to explicitely rebuild bounds
 			Graph->RebuildBounds();
@@ -321,12 +319,11 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 			CREATE_ROOM(Room4, DA_C);
 			CREATE_ROOM(Room5, DA_C);
 
-			Room1->Position = {0, 1, 0};
-			Room2->Position = {0, 2, 0};
-			Room2->Direction = EDoorDirection::East;
-			Room3->Position = {-1, 0, 0};
-			Room4->Position = {0, 0, 1};
-			Room5->Position = {0, 1, 1};
+			Room1->SetPosition({0, 1, 0});
+			Room2->SetRoomTransform({{0, 2, 0}, EDoorDirection::East});
+			Room3->SetPosition({-1, 0, 0});
+			Room4->SetPosition({0, 0, 1});
+			Room5->SetPosition({0, 1, 1});
 
 			// Room positions are modified manually, so we need to explicitely rebuild bounds
 			Graph->RebuildBounds();
@@ -373,7 +370,6 @@ bool FDungeonGraphTest::RunTest(const FString& Parameters)
 
 	return true;
 }
-	#pragma optimize("", on)
 
 	#undef INIT_TEST
 	#undef CLEAN_TEST

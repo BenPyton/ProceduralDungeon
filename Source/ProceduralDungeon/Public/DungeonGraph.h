@@ -17,6 +17,7 @@
 #include "ProceduralDungeonTypes.h"
 #include "VoxelBounds/VoxelBounds.h"
 #include "DungeonOctree.h"
+#include "UObject/StrongObjectPtr.h"
 #include "DungeonGraph.generated.h"
 
 class URoom;
@@ -61,6 +62,10 @@ public:
 	//~ Begin IGeneratorProvider Interface
 	virtual ADungeonGeneratorBase* GetGenerator() const override { return Generator.Get(); }
 	//~ End IGeneratorProvider Interface
+
+	URoom* AcquireRoomInstance(URoomData* Data, ADungeonGeneratorBase* Generator);
+	void ReleaseRoomInstance(URoom* Room);
+	void ClearPools();
 
 	void AddRoom(URoom* Room);
 	void InitRooms();
@@ -186,6 +191,7 @@ public:
 	UFUNCTION(BlueprintPure = false, Category = "Dungeon Graph", meta = (ExpandBoolAsExecs = "ReturnValue", AdvancedDisplay = "CustomFilter", AutoCreateRefTerm = "CustomScore"))
 	bool FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms, const FScoreCallback& CustomScore) const;
 	bool FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms) const;
+	bool FilterAndSortRooms(const TArray<URoomData*>& RoomList, const FDoorDef& FromDoor, TArray<FRoomCandidate>& SortedRooms, const FVoxelBounds::FScoreFunction& ScoreFunc) const;
 
 	// Returns the computed dungeon bounds.
 	class FBoxCenterAndExtent GetDungeonBounds(const FTransform& Transform = FTransform::Identity) const;
@@ -276,4 +282,42 @@ private:
 	};
 
 	TUniquePtr<FSaveData> SavedData {nullptr};
+
+private:
+	template<typename T>
+	class FPool
+	{
+	public:
+		T* Acquire(UObject* Owner)
+		{
+			if (PooledObjects.Num() > 0)
+			{
+#if UE_VERSION_OLDER_THAN(5, 5, 0)
+				return PooledObjects.Pop(/*bAllowShrinking=*/false).Get();
+#else
+				return PooledObjects.Pop(EAllowShrinking::No).Get();
+#endif
+			}
+			else
+			{
+				return NewObject<T>(Owner);
+			}
+		}
+
+		void Release(T* Instance)
+		{
+			PooledObjects.Add(TStrongObjectPtr<T>(Instance));
+		}
+
+		void Clear()
+		{
+			PooledObjects.Empty();
+		}
+
+	private:
+		TArray<TStrongObjectPtr<T>> PooledObjects;
+	};
+
+	FPool<URoom> RoomPool;
+	FPool<URoomConnection> ConnectionPool;
 };

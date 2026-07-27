@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2023 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2023 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -19,11 +19,12 @@
 bool AreDoorsOverlapping(const FDoorDef& DoorA, const FDoorDef& DoorB, const FVector RoomUnit)
 {
 	// If not in same direction, they will never overlap.
-	if (DoorA.Direction != DoorB.Direction)
+	// Or can they?
+	if (DoorA.Transform.Rotation != DoorB.Transform.Rotation)
 		return false;
 
 	// If same direction and position, then will always overlap.
-	if (DoorA.Position == DoorB.Position)
+	if (DoorA.Transform.Translation == DoorB.Transform.Translation)
 		return true;
 
 	const FBoxCenterAndExtent DoorBoundsA = DoorA.GetBounds(RoomUnit);
@@ -34,7 +35,7 @@ bool AreDoorsOverlapping(const FDoorDef& DoorA, const FDoorDef& DoorB, const FVe
 bool IsPositionInside(const FDoorDef& Door, const FIntVector& Position, const FVector RoomUnit)
 {
 	// If same position, then always inside.
-	if (Door.Position == Position)
+	if (Door.Transform.Translation == Position)
 		return true;
 
 	const FBoxCenterAndExtent DoorBounds = Door.GetBounds(RoomUnit);
@@ -224,17 +225,16 @@ bool FProceduralDungeonEditorTool_Door::MouseMove(FEditorViewportClient* Viewpor
 		return false;
 
 	ShowDoorPreview = true;
-	DoorPreview.Position = RoomCell;
-	DoorPreview.Direction = DoorDirection;
+	DoorPreview.Transform = {RoomCell, DoorDirection};
 	DoorPreview.Type = EdMode->Settings->DoorType;
 
 	// Snap preview to existing door if RoomCell is inside
 	for (const FDoorDef& RoomDoor : Data->Doors)
 	{
-		if (RoomDoor.Direction != DoorPreview.Direction)
+		if (RoomDoor.Transform.Rotation != DoorPreview.Transform.Rotation)
 			continue;
 
-		if (IsPositionInside(RoomDoor, DoorPreview.Position, Data->GetRoomUnit()))
+		if (IsPositionInside(RoomDoor, DoorPreview.Transform.Translation, Data->GetRoomUnit()))
 		{
 			DoorPreview = RoomDoor;
 			break;

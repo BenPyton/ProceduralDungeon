@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2019 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2019 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -102,9 +102,10 @@ private:
 	bool bIsInit = false;
 	FTransform DungeonTransform;
 	FBoxCenterAndExtent Bounds;
+
 	UPROPERTY(Transient)
-	class UBoxComponent* RoomTrigger = nullptr;
-	TSet<TWeakObjectPtr<UObject>> Visitors;
+	TArray<class UBoxComponent*> RoomTriggers;
+	TMap<TWeakObjectPtr<UObject>, uint32> Visitors;
 
 private:
 	void UpdateBounds();

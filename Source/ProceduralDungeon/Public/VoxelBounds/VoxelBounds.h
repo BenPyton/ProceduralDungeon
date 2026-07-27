@@ -9,6 +9,7 @@
 
 #include "ProceduralDungeonTypes.h"
 #include "ProceduralDungeonUtils.h"
+#include "Containers/StaticArray.h"
 #include "VoxelBounds.generated.h"
 
 class UDoorType;
@@ -68,17 +69,40 @@ public:
 		NbDirection
 	};
 
+	using FScoreFunction = TFunction<bool(const FVoxelBoundsConnection&, const FVoxelBoundsConnection&, int32&)>;
+
+	struct FCell
+	{
+		friend FVoxelBounds;
+	public:
+		static constexpr uint8 NumConnections = static_cast<uint8>(EDirection::NbDirection);
+
+		FORCEINLINE FVoxelBoundsConnection& operator[](int32 Index) { return Connections[Index]; }
+		FORCEINLINE const FVoxelBoundsConnection& operator[](int32 Index) const { return Connections[Index]; }
+		FORCEINLINE uint8 Num() const { return NumConnections; }
+		FORCEINLINE bool IsBoundary() const { return bBoundary; }
+
+	private:
+		TStaticArray<FVoxelBoundsConnection, NumConnections> Connections;
+		bool bBoundary {false};
+	};
+
 	// All directions in the 3D space.
 	static const FIntVector Directions[(uint8)EDirection::NbDirection];
+	static EDirection Rotate(EDirection Direction, EDoorDirection Rotation);
 	static EDirection Opposite(EDirection Direction);
 
-	TArray<FVoxelBoundsConnection>& AddCell(FIntVector Cell);
+	FCell& AddCell(FIntVector Cell);
 	void AddBox(const FBoxMinAndMax& Box);
+
+	bool HasCellAt(FIntVector Cell) const { return Cells.Contains(Cell); }
+	const TMap<FIntVector, FCell>& GetAllCells() const { return Cells; }
 
 	const FVoxelBoundsConnection* GetCellConnection(FIntVector Cell, EDirection Direction) const;
 	bool SetCellConnection(FIntVector Cell, EDirection Direction, const FVoxelBoundsConnection& Connection);
 
 	void ResetToWalls();
+	void FlagBoundaryCells();
 
 	int32 GetCellCount() const { return Cells.Num(); }
 	const FBoxMinAndMax& GetBounds() const { return Bounds; }
@@ -86,7 +110,9 @@ public:
 
 	// Checks how well the bounds fit together.
 	// Returns true if the bounds fit together and sets the score.
-	bool GetCompatibilityScore(const FVoxelBounds& Other, int32& Score, const FScoreCallback& CustomScore = FScoreCallback()) const;
+	bool GetCompatibilityScore(const FVoxelBounds& Other, int32& Score, const FScoreFunction& ScoreFunc = &DefaultScoreFunc) const;
+	bool GetCompatibilityScore(const FVoxelBounds& Other, const FRoomTransform& Transform, int32& Score, const FScoreFunction& ScoreFunc = &DefaultScoreFunc) const;
+	static bool DefaultScoreFunc(const FVoxelBoundsConnection& A, const FVoxelBoundsConnection& B, int32& OutScore);
 
 	// Operators to offset the bounds
 	void operator+=(const FIntVector& Offset);
@@ -110,6 +136,6 @@ public:
 	friend FVoxelBounds Rotate(const FVoxelBounds& Bounds, const EDoorDirection& Rot);
 
 private:
-	TMap<FIntVector, TArray<FVoxelBoundsConnection>> Cells;
+	TMap<FIntVector, FCell> Cells;
 	FBoxMinAndMax Bounds {FBoxMinAndMax::Invalid};
 };

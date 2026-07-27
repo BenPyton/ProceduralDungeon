@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2025 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -53,6 +53,14 @@ int32 FVoxelBoundsConnection::GetCompatibilityScore(const FVoxelBoundsConnection
 	return 0;
 }
 
+FVoxelBounds::EDirection FVoxelBounds::Rotate(EDirection Direction, EDoorDirection Rotation)
+{
+	// Rotate only NSEW directions, leave untouched UP and DOWN
+	return (static_cast<uint8>(Direction) < static_cast<uint8>(EDoorDirection::NbDirection))
+		? static_cast<EDirection>(static_cast<EDoorDirection>(Direction) + Rotation)
+		: Direction ;
+}
+
 FVoxelBounds::EDirection FVoxelBounds::Opposite(EDirection Direction)
 {
 	static const EDirection OppositeDirections[] = {
@@ -73,12 +81,11 @@ FVoxelBounds::EDirection FVoxelBounds::Opposite(EDirection Direction)
 	return EDirection::NbDirection;
 }
 
-TArray<FVoxelBoundsConnection>& FVoxelBounds::AddCell(FIntVector Cell)
+FVoxelBounds::FCell& FVoxelBounds::AddCell(FIntVector Cell)
 {
-	auto& Connections = Cells.Add(Cell);
-	Connections.SetNum(static_cast<uint8>(EDirection::NbDirection));
+	auto& NewCell = Cells.Add(Cell);
 	Bounds.Extend(FBoxMinAndMax(Cell, Cell + FIntVector(1)));
-	return Connections;
+	return NewCell;
 }
 
 void FVoxelBounds::AddBox(const FBoxMinAndMax& Box)
@@ -92,8 +99,7 @@ void FVoxelBounds::AddBox(const FBoxMinAndMax& Box)
 		{
 			for (int32 Z = Box.GetMin().Z; Z < Box.GetMax().Z; ++Z)
 			{
-				auto& Connections = Cells.Add(FIntVector(X, Y, Z));
-				Connections.SetNum(static_cast<uint8>(EDirection::NbDirection));
+				Cells.Add(FIntVector(X, Y, Z));
 			}
 		}
 	}
@@ -133,21 +139,46 @@ void FVoxelBounds::ResetToWalls()
 	}
 }
 
-bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score, const FScoreCallback& CustomScore) const
+void FVoxelBounds::FlagBoundaryCells()
 {
+	for (auto& Pair : Cells)
+	{
+		Pair.Value.bBoundary = false;
+		for (uint8 i = 0; i < static_cast<uint8>(EDoorDirection::NbDirection); ++i)
+		{
+			if (!Cells.Contains(Pair.Key + Directions[i]))
+			{
+				Pair.Value.bBoundary = true;
+				break;
+			}
+		}
+	}
+}
+
+bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score, const FScoreFunction& ScoreFunc) const
+{
+	return GetCompatibilityScore(Other, FRoomTransform::Identity, Score, ScoreFunc);
+}
+
+bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, const FRoomTransform& Transform, int32& Score, const FScoreFunction& ScoreFunc) const
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::GetCompatibilityScore);
 	// Each cell add 1 to the score, so the bigger volume the higher score.
 	Score = Cells.Num();
 
-	bool bAreOverlapping = FBoxMinAndMax::Overlap(Bounds, Other.Bounds);
+	checkf(ScoreFunc, TEXT("ScoreFunc must be callable!"));
+
+	const FBoxMinAndMax TransformedBounds = ::Rotate(Bounds, Transform.Rotation) + Transform.Translation;
+	bool bAreOverlapping = FBoxMinAndMax::Overlap(TransformedBounds, Other.Bounds);
 
 	// @TODO: for now, treating a coincident face as overlapping
 	// There is room for further optimizations here later
-	bAreOverlapping |= Bounds.GetMin().X == Other.Bounds.GetMax().X;
-	bAreOverlapping |= Bounds.GetMax().X == Other.Bounds.GetMin().X;
-	bAreOverlapping |= Bounds.GetMin().Y == Other.Bounds.GetMax().Y;
-	bAreOverlapping |= Bounds.GetMax().Y == Other.Bounds.GetMin().Y;
-	bAreOverlapping |= Bounds.GetMin().Z == Other.Bounds.GetMax().Z;
-	bAreOverlapping |= Bounds.GetMax().Z == Other.Bounds.GetMin().Z;
+	bAreOverlapping |= TransformedBounds.GetMin().X == Other.Bounds.GetMax().X;
+	bAreOverlapping |= TransformedBounds.GetMax().X == Other.Bounds.GetMin().X;
+	bAreOverlapping |= TransformedBounds.GetMin().Y == Other.Bounds.GetMax().Y;
+	bAreOverlapping |= TransformedBounds.GetMax().Y == Other.Bounds.GetMin().Y;
+	bAreOverlapping |= TransformedBounds.GetMin().Z == Other.Bounds.GetMax().Z;
+	bAreOverlapping |= TransformedBounds.GetMax().Z == Other.Bounds.GetMin().Z;
 
 	// When not overlapping, the score is equal to the number of cell
 	// and it does always fit outside too.
@@ -156,14 +187,19 @@ bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score
 		return true;
 	}
 
-	for (const auto& Cell : Cells)
+	for (const auto& Pair : Cells)
 	{
+		const FIntVector Cell = Transform.Transform(Pair.Key);
+
 		// When a cell is defined in both bounds, it does not fit outside
-		if (Other.Cells.Contains(Cell.Key))
+		if (Other.Cells.Contains(Cell))
 		{
 			Score = -1;
 			return false;
 		}
+
+		if (!Pair.Value.IsBoundary())
+			continue;
 
 		// Case when this cell is not defined in the other bounds
 		// We set a score depending on the connection compatibility
@@ -171,26 +207,26 @@ bool FVoxelBounds::GetCompatibilityScore(const FVoxelBounds& Other, int32& Score
 		for (uint8 i = 0; i < static_cast<uint8>(EDoorDirection::NbDirection); ++i)
 		{
 			// Get Neighbor cell
-			const FIntVector Neighbor = Cell.Key + Directions[i];
+			const EDirection RotatedDir = Rotate(static_cast<EDirection>(i), Transform.Rotation);
+			const FIntVector Neighbor = Cell + Directions[static_cast<uint8>(RotatedDir)];
 			auto* NeighConns = Other.Cells.Find(Neighbor);
 			if (nullptr == NeighConns)
 				continue;
 
-			const auto& Connection = Cell.Value[i];
-			const auto& OtherConnection = (*NeighConns)[static_cast<uint8>(Opposite(static_cast<EDirection>(i)))];
+			const auto& Connection = Pair.Value[i];
+			const auto& OtherConnection = (*NeighConns)[static_cast<uint8>(Opposite(RotatedDir))];
 
-			if (CustomScore.IsBound())
-			{
-				if (!CustomScore.Execute(Connection, OtherConnection, Score))
-					return false;
-			}
-			else
-			{
-				Score += FVoxelBoundsConnection::GetCompatibilityScore(Connection, OtherConnection);
-			}
+			if (!ScoreFunc(Connection, OtherConnection, Score))
+				return false;
 		}
 	}
 
+	return true;
+}
+
+bool FVoxelBounds::DefaultScoreFunc(const FVoxelBoundsConnection& A, const FVoxelBoundsConnection& B, int32& OutScore)
+{
+	OutScore += FVoxelBoundsConnection::GetCompatibilityScore(A, B);
 	return true;
 }
 
@@ -206,6 +242,7 @@ void FVoxelBounds::operator-=(const FIntVector& Offset)
 
 FVoxelBounds operator+(const FVoxelBounds& Bounds, const FIntVector& Offset)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::operator+(FIntVector));
 	FVoxelBounds NewBounds;
 	for (const auto& Cell : Bounds.Cells)
 	{
@@ -217,11 +254,13 @@ FVoxelBounds operator+(const FVoxelBounds& Bounds, const FIntVector& Offset)
 
 FVoxelBounds operator-(const FVoxelBounds& Bounds, const FIntVector& Offset)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::operator-(FIntVector));
 	return Bounds + (FIntVector::ZeroValue - Offset);
 }
 
 void FVoxelBounds::operator+=(const FVoxelBounds& Other)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::operator+=(FVoxelBounds));
 	for (const auto& Cell : Other.Cells)
 	{
 		// Ignore incoming cells that are already defined
@@ -252,6 +291,7 @@ void FVoxelBounds::operator+=(const FVoxelBounds& Other)
 
 void FVoxelBounds::operator-=(const FVoxelBounds& Other)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::operator-=(FVoxelBounds));
 	for (const auto& Cell : Other.Cells)
 	{
 		if (!Cells.Remove(Cell.Key))
@@ -287,6 +327,7 @@ FVoxelBounds operator-(const FVoxelBounds& A, const FVoxelBounds& B)
 
 bool FVoxelBounds::operator==(const FVoxelBounds& Other) const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::operator==(FVoxelBounds));
 	if (Cells.Num() != Other.Cells.Num())
 		return false;
 
@@ -309,6 +350,7 @@ bool FVoxelBounds::operator==(const FVoxelBounds& Other) const
 
 bool FVoxelBounds::Overlap(const FVoxelBounds& A, const FVoxelBounds& B)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::Overlap);
 	if (!FBoxMinAndMax::Overlap(A.Bounds, B.Bounds))
 		return false;
 
@@ -324,6 +366,7 @@ bool FVoxelBounds::Overlap(const FVoxelBounds& A, const FVoxelBounds& B)
 
 FVoxelBounds Rotate(const FVoxelBounds& Bounds, const EDoorDirection& Rot)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FVoxelBounds::Rotate);
 	FVoxelBounds NewBounds;
 
 	for (const auto& Cell : Bounds.Cells)

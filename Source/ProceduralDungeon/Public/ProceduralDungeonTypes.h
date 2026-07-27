@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2019 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2019 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -45,32 +45,31 @@ enum class EDoorDirection : uint8
 	NbDirection	= 4 		UMETA(Hidden)
 };
 
-bool PROCEDURALDUNGEON_API operator!(const EDoorDirection& Direction);
-EDoorDirection PROCEDURALDUNGEON_API operator+(const EDoorDirection& A, const EDoorDirection& B);
-EDoorDirection PROCEDURALDUNGEON_API operator-(const EDoorDirection& A, const EDoorDirection& B);
-// TODO: Don't know how to export these...
-EDoorDirection& operator+=(EDoorDirection& A, const EDoorDirection& B);
-EDoorDirection& operator-=(EDoorDirection& A, const EDoorDirection& B);
-EDoorDirection& operator++(EDoorDirection& Direction);
-EDoorDirection& operator--(EDoorDirection& Direction);
-EDoorDirection PROCEDURALDUNGEON_API operator++(EDoorDirection& Direction, int);
-EDoorDirection PROCEDURALDUNGEON_API operator--(EDoorDirection& Direction, int);
-EDoorDirection PROCEDURALDUNGEON_API operator-(const EDoorDirection& Direction);
-EDoorDirection PROCEDURALDUNGEON_API operator~(const EDoorDirection& Direction);
-inline EDoorDirection PROCEDURALDUNGEON_API Opposite(const EDoorDirection& Direction) { return ~Direction; }
-FIntVector PROCEDURALDUNGEON_API ToIntVector(const EDoorDirection& Direction);
-FVector PROCEDURALDUNGEON_API ToVector(const EDoorDirection& Direction);
-FQuat PROCEDURALDUNGEON_API ToQuaternion(const EDoorDirection& Direction);
-float PROCEDURALDUNGEON_API ToAngle(const EDoorDirection& Direction);
-FIntVector PROCEDURALDUNGEON_API Rotate(const FIntVector& Pos, const EDoorDirection& Rot);
-FVector PROCEDURALDUNGEON_API Rotate(const FVector& Pos, const EDoorDirection& Rot);
+PROCEDURALDUNGEON_API bool operator!(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API EDoorDirection operator+(const EDoorDirection& A, const EDoorDirection& B);
+PROCEDURALDUNGEON_API EDoorDirection operator-(const EDoorDirection& A, const EDoorDirection& B);
+PROCEDURALDUNGEON_API EDoorDirection& operator+=(EDoorDirection& A, const EDoorDirection& B);
+PROCEDURALDUNGEON_API EDoorDirection& operator-=(EDoorDirection& A, const EDoorDirection& B);
+PROCEDURALDUNGEON_API EDoorDirection& operator++(EDoorDirection& Direction);
+PROCEDURALDUNGEON_API EDoorDirection& operator--(EDoorDirection& Direction);
+PROCEDURALDUNGEON_API EDoorDirection operator++(EDoorDirection& Direction, int);
+PROCEDURALDUNGEON_API EDoorDirection operator--(EDoorDirection& Direction, int);
+PROCEDURALDUNGEON_API EDoorDirection operator-(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API EDoorDirection operator~(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API inline EDoorDirection Opposite(const EDoorDirection& Direction) { return ~Direction; }
+PROCEDURALDUNGEON_API FIntVector ToIntVector(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API FVector ToVector(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API FQuat ToQuaternion(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API float ToAngle(const EDoorDirection& Direction);
+PROCEDURALDUNGEON_API FIntVector Rotate(const FIntVector& Pos, const EDoorDirection& Rot);
+PROCEDURALDUNGEON_API FVector Rotate(const FVector& Pos, const EDoorDirection& Rot);
 
-FIntVector PROCEDURALDUNGEON_API Transform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation);
-FIntVector PROCEDURALDUNGEON_API InverseTransform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation);
+PROCEDURALDUNGEON_API FIntVector Transform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation);
+PROCEDURALDUNGEON_API FIntVector InverseTransform(const FIntVector& Pos, const FIntVector& Translation, const EDoorDirection& Rotation);
 
 // Those ones are just for consistent naming and centralized code
-EDoorDirection PROCEDURALDUNGEON_API Transform(const EDoorDirection& Direction, const EDoorDirection& Rotation);
-EDoorDirection PROCEDURALDUNGEON_API InverseTransform(const EDoorDirection& Direction, const EDoorDirection& Rotation);
+PROCEDURALDUNGEON_API EDoorDirection Transform(const EDoorDirection& Direction, const EDoorDirection& Rotation);
+PROCEDURALDUNGEON_API EDoorDirection InverseTransform(const EDoorDirection& Direction, const EDoorDirection& Rotation);
 
 //The different types of generation algorithms.
 UENUM(BlueprintType, meta = (DisplayName = "Generation Type"))
@@ -102,6 +101,39 @@ enum class EVisibilityMode : uint8
 	NbMode			UMETA(Hidden)
 };
 
+// Describe a Translation (FIntVector) and Rotation (EDoorDirection)
+USTRUCT(BlueprintType)
+struct PROCEDURALDUNGEON_API FRoomTransform
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame, Category = "Room Transform")
+	FIntVector Translation {FIntVector::ZeroValue};
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, SaveGame, Category = "Room Transform");
+	EDoorDirection Rotation {EDoorDirection::North};
+
+public:
+	FIntVector Transform(const FIntVector& Point) const;
+	FIntVector InverseTransform(const FIntVector& Point) const;
+
+	EDoorDirection Transform(const EDoorDirection& Direction) const;
+	EDoorDirection InverseTransform(const EDoorDirection& Direction) const;
+
+	FRoomTransform Transform(const FRoomTransform& Other) const;
+	FRoomTransform InverseTransform(const FRoomTransform& Other) const;
+
+	bool operator==(const FRoomTransform& Other) const;
+	bool operator!=(const FRoomTransform& Other) const;
+
+	bool IsValid() const;
+
+public:
+	static const FRoomTransform Identity;
+	static const FRoomTransform Invalid;
+};
+
 // Structure that defines a door.
 // A door is defined by its position, its direction, and its type.
 USTRUCT(BlueprintType)
@@ -113,20 +145,33 @@ public:
 	static const FDoorDef Invalid;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef")
+	UE_DEPRECATED(3.9, "Use Transform.Translation instead.")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef", meta = (DeprecatedProperty, DeprecationMessage = "Use Transform.Translation instead."))
 	FIntVector Position {FIntVector::ZeroValue};
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef")
+
+	UE_DEPRECATED(3.9, "Use Transform.Rotation instead.")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef", meta = (DeprecatedProperty, DeprecationMessage = "Use Transform.Rotation instead."))
 	EDoorDirection Direction {EDoorDirection::North};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef", meta = (ShowOnlyInnerProperties))
+	FRoomTransform Transform {FRoomTransform::Identity};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorDef", meta = (DisplayThumbnail = false))
 	class UDoorType* Type {nullptr};
 
 public:
-	FDoorDef() = default;
+	FDoorDef();
 	FDoorDef(const FIntVector& InPosition, EDoorDirection InDirection, class UDoorType* InType = nullptr);
+	FDoorDef(const FRoomTransform& InTransform, class UDoorType* InType = nullptr);
+	FDoorDef(const FDoorDef&);
+	FDoorDef(FDoorDef&&);
+	FDoorDef& operator=(const FDoorDef&);
+	FDoorDef& operator=(FDoorDef&&);
 
 	bool IsValid() const;
 	operator bool() const { return IsValid(); }
 	bool operator==(const FDoorDef& Other) const;
+	bool operator!=(const FDoorDef& Other) const;
 
 	static bool AreCompatible(const FDoorDef& A, const FDoorDef& B);
 
@@ -137,18 +182,26 @@ public:
 	FString ToString() const;
 	FDoorDef GetOpposite() const;
 	FBoxCenterAndExtent GetBounds(const FVector RoomUnit, bool bIncludeOffset = true) const;
+	FRoomTransform GetTransformToTarget(const FRoomTransform& Destination) const;
 
 	static FVector GetRealDoorPosition(const FDoorDef& DoorDef, const FVector RoomUnit, bool bIncludeOffset = true);
 	static FVector GetRealDoorPosition(FIntVector DoorCell, EDoorDirection DoorRot, const FVector RoomUnit, float DoorOffset = 0.0f);
 	static FQuat GetRealDoorRotation(const FDoorDef& DoorDef, bool bFlipped = false);
 
-	static FDoorDef Transform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation);
-	static FDoorDef InverseTransform(const FDoorDef& DoorDef, FIntVector Translation, EDoorDirection Rotation);
-
 #if !UE_BUILD_SHIPPING
 	static void DrawDebug(const class UWorld* World, const FDoorDef& DoorDef, const FVector RoomUnit, const FTransform& Transform = FTransform::Identity, bool bIncludeOffset = false, bool bIsConnected = true);
 	static void DrawDebug(const class UWorld* World, const FColor& Color, const FVector& DoorSize, const FVector RoomUnit, const FIntVector& DoorCell = FIntVector::ZeroValue, const EDoorDirection& DoorRot = EDoorDirection::NbDirection, const FTransform& Transform = FTransform::Identity, float DoorOffset = 0.0f, bool bIsConnected = true);
 #endif // !UE_BUILD_SHIPPING
+
+	void PostSerialize(const FArchive& Ar);
+};
+
+template<>
+struct TStructOpsTypeTraits<FDoorDef> : public TStructOpsTypeTraitsBase2<FDoorDef>
+{
+	enum {
+		WithPostSerialize = true
+	};
 };
 
 // TODO: Use UE built-in TBox<FIntVector> instead?
@@ -198,7 +251,7 @@ public:
 	static const FBoxMinAndMax Invalid;
 };
 
-FBoxMinAndMax PROCEDURALDUNGEON_API Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot);
+PROCEDURALDUNGEON_API FBoxMinAndMax Rotate(const FBoxMinAndMax& Box, const EDoorDirection& Rot);
 
 // Describe a potential room to be added to the dungeon.
 // Mainly used by FilterAndSortRooms function.
@@ -218,7 +271,7 @@ public:
 	int32 Score {-1};
 
 public:
-	static FRoomCandidate Invalid;
+	static const FRoomCandidate Invalid;
 };
 
 USTRUCT()
@@ -233,4 +286,3 @@ public:
 	UPROPERTY(SaveGame)
 	bool bIsOpen {false};
 };
-	

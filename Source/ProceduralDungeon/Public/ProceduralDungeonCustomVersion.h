@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2025 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -20,6 +20,7 @@ struct FProceduralDungeonCustomVersion
 		SoftObjectPtrFix, // Fixed issues with SoftObjectPtr replication in Room.h
 		RoomDataBoundingBoxesMigration, // Migrated FirstPoint/SecondPoint to BoundingBoxes in RoomData.h
 		DoorLogicRefactored,			// Migrated logic for the ADoor into DoorComponent + DoorState
+		RoomTransformMigration,			// Migrated FIntVector + EDoorDirection into an FRoomTransform
 
 		// -----<new versions can be added above this line>-------------------------------------------------
 		VersionPlusOne,

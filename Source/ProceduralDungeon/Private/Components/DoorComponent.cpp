@@ -108,7 +108,6 @@ void UDoorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 	if (Dungeon::DrawDebug() && GetWorld()->WorldType == EWorldType::EditorPreview)
 	{
 		FDoorDef DoorDef;
-		DoorDef.Direction = EDoorDirection::NbDirection;
 		DoorDef.Type = Type;
 		FDoorDef::DrawDebug(GetWorld(), DoorDef, FVector::ZeroVector);
 	}

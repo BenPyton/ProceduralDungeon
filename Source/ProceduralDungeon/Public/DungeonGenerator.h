@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2019 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2019 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -33,8 +33,8 @@ public:
 	// ===== Methods that should be overriden in blueprint =====
 
 	// Return the RoomData you want as root of the dungeon generation
-	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose First Room"))
-	URoomData* ChooseFirstRoomData();
+	UFUNCTION(BlueprintNativeEvent, Category = "Dungeon Generator", meta = (DisplayName = "Choose First Room", ReturnDisplayName = "Room Data"))
+	URoomData* ChooseFirstRoomData(FRoomTransform& Transform);
 
 	/** Return the RoomData that will be connected to the Current Room
 	 * @param CurrentRoom [DEPRECATED] Use CurrentRoomInstance->GetRoomData instead.

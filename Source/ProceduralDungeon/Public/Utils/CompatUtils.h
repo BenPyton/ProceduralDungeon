@@ -25,3 +25,8 @@
 #else
 	#define AR_FIELD_NAME(Name) TEXT(Name)
 #endif
+
+#if UE_VERSION_OLDER_THAN(5, 3, 0)
+	#define TRACE_BEGIN_REGION(...)
+	#define TRACE_END_REGION(...)
+#endif

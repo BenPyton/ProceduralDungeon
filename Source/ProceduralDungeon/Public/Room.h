@@ -50,16 +50,21 @@ public:
 	// TODO: Make them private
 	UPROPERTY()
 	ULevelStreamingDynamic* Instance {nullptr};
-	UPROPERTY(Replicated, SaveGame)
+
+	UE_DEPRECATED(3.9, "Use GetPosition() instead.")
+	UPROPERTY(SaveGame, Transient, meta = (DeprecatedProperty))
 	FIntVector Position {0};
-	UPROPERTY(Replicated, SaveGame)
+
+	UE_DEPRECATED(3.9, "Use GetDirection() instead.")
+	UPROPERTY(SaveGame, Transient, meta = (DeprecatedProperty))
 	EDoorDirection Direction {EDoorDirection::NbDirection};
 
 	//~ Begin IReadOnlyRoom Interface
 	virtual const URoomData* GetRoomData() const override { return RoomData; }
 	virtual int64 GetRoomID() const override { return Id; }
-	virtual FIntVector GetPosition() const { return Position; }
-	virtual EDoorDirection GetDirection() const { return Direction; }
+	virtual FIntVector GetPosition() const override { return Transform.Translation; }
+	virtual EDoorDirection GetDirection() const override { return Transform.Rotation; }
+	virtual const FRoomTransform& GetRoomTransform() const override { return Transform; }
 	virtual bool AreAllDoorsConnected() const override;
 	virtual int CountConnectedDoors() const override;
 	virtual FVector GetBoundsCenter() const override;
@@ -200,6 +205,7 @@ private:
 	// Must not be used anywhere else than in serialization code.
 	// It has been renamed SoftRoomData, because despite the DEPRECATED suffix,
 	// the engine treats RoomData_DEPRECATED as RoomData, and thus conflicting with the below one.
+	UE_DEPRECATED(3.9, "Use RoomData instead.")
 	UPROPERTY(SaveGame, Transient, meta=(DeprecatedProperty))
 	TSoftObjectPtr<URoomData> SoftRoomData_DEPRECATED {nullptr};
 
@@ -219,6 +225,9 @@ private:
 
 	UPROPERTY(ReplicatedUsing = OnRep_Id, SaveGame)
 	int64 Id {-1};
+
+	UPROPERTY(Replicated)
+	FRoomTransform Transform;
 
 	TSet<int32> PlayerIDInside {};
 	bool bIsVisible {true};
@@ -255,6 +264,7 @@ protected:
 
 public:
 	void Init(URoomData* RoomData, ADungeonGeneratorBase* Generator, int32 RoomId);
+	void Reset();
 
 	void Instantiate(UWorld* World);
 	void Destroy();
@@ -264,7 +274,9 @@ public:
 	bool IsInstanceInitialized() const;
 	void CreateLevelComponents(ARoomLevel* LevelActor);
 
+	UE_DEPRECATED(3.9, "Use GetDoorDef(DoorIndex).Transform.Rotation instead.")
 	EDoorDirection GetDoorWorldOrientation(int DoorIndex) const;
+	UE_DEPRECATED(3.9, "Use GetDoorDef(DoorIndex).Transform.Translation instead.")
 	FIntVector GetDoorWorldPosition(int DoorIndex) const;
 
 	int32 GetConnectionCount() const { return Connections.Num(); }
@@ -276,18 +288,25 @@ public:
 	const TArray<TWeakObjectPtr<URoomConnection>>& GetAllConnections() const { return Connections; } 
 
 	bool IsDoorIndexValid(int32 DoorIndex) const;
+
+	UE_DEPRECATED(3.9, "Use GetDoorIndexAt(FRoomTransform) instead.")
 	int32 GetDoorIndexAt(FIntVector WorldPos, EDoorDirection WorldRot) const;
+	int32 GetDoorIndexAt(const FRoomTransform& WorldTransform) const;
 	int32 GetOtherDoorIndex(int32 DoorIndex) const;
 
 	UFUNCTION(BlueprintPure, Category = "Room")
 	FDoorDef GetDoorDef(int32 DoorIndex) const;
 
+	UE_DEPRECATED(3.9, "Use GetDoorDefAt(FRoomTransform) instead.")
 	FDoorDef GetDoorDefAt(FIntVector WorldPos, EDoorDirection WorldRot) const;
+	FDoorDef GetDoorDefAt(const FRoomTransform& WorldTransform) const;
 
 	FIntVector WorldToRoom(const FIntVector& WorldPos) const;
 	FIntVector RoomToWorld(const FIntVector& RoomPos) const;
 	EDoorDirection WorldToRoom(const EDoorDirection& WorldRot) const;
 	EDoorDirection RoomToWorld(const EDoorDirection& RoomRot) const;
+	FRoomTransform WorldToRoom(const FRoomTransform& WorldTransform) const;
+	FRoomTransform RoomToWorld(const FRoomTransform& RoomTransform) const;
 	FBoxMinAndMax WorldToRoom(const FBoxMinAndMax& WorldBox) const;
 	FBoxMinAndMax RoomToWorld(const FBoxMinAndMax& RoomBox) const;
 	FDoorDef WorldToRoom(const FDoorDef& WorldDoor) const;
@@ -297,15 +316,26 @@ public:
 
 	void SetPosition(const FIntVector& NewPosition);
 	void SetDirection(EDoorDirection NewDirection);
+
+	UE_DEPRECATED(3.9, "Use SetRoomTransformFromDoor instead.")
 	void SetRotationFromDoor(int DoorIndex, EDoorDirection WorldRot);
+
+	UE_DEPRECATED(3.9, "Use SetRoomTransformFromDoor instead.")
 	void SetPositionFromDoor(int DoorIndex, FIntVector WorldPos);
+
+	UE_DEPRECATED(3.9, "Use SetRoomTransformFromDoor instead.")
 	void SetPositionAndRotationFromDoor(int DoorIndex, FIntVector WorldPos, EDoorDirection WorldRot);
+
+	void SetRoomTransform(const FRoomTransform& Transform);
+	void SetRoomTransformFromDoor(int DoorIndex, const FRoomTransform& Transform);
+
 	bool IsOccupied(FIntVector Cell);
 
 	FTransform GetTransform() const;
 	FBoxCenterAndExtent GetBounds() const;
 	int32 GetSubBoundsCount() const;
 	FBoxCenterAndExtent GetSubBounds(int32 Index) const;
+	FBoxCenterAndExtent GetLocalSubBounds(int32 Index) const;
 	FBoxCenterAndExtent GetLocalBounds() const;
 	FBoxMinAndMax GetIntBounds() const;
 	FVoxelBounds GetVoxelBounds() const;

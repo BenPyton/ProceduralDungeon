@@ -10,7 +10,6 @@
 #include "Misc/AutomationTest.h"
 #include "ProceduralDungeonTypes.h"
 #include "VoxelBounds/VoxelBounds.h"
-#include "Tests/Classes/CustomScoreCallbacks.h"
 #include "TestUtils.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
@@ -263,6 +262,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 		DungeonBounds.AddCell(FIntVector(0, 1, 0));
 		DungeonBounds.AddCell(FIntVector(1, 1, 0));
 		DungeonBounds.AddCell(FIntVector(1, 1, 1));
+		DungeonBounds.FlagBoundaryCells();
 
 		SET_CONNECTION(DungeonBounds, (1, 0, 0), North, Wall);
 		SET_CONNECTION(DungeonBounds, (1, 0, 0), South, Door);
@@ -296,6 +296,8 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			// +---+   +
 			FVoxelBounds BoundsA;
 			BoundsA.AddCell(FIntVector(0, 0, 0));
+			BoundsA.FlagBoundaryCells();
+
 			SET_CONNECTION(BoundsA, (0, 0, 0), North, Door);
 			SET_CONNECTION(BoundsA, (0, 0, 0), East, Wall);
 			SET_CONNECTION(BoundsA, (0, 0, 0), South, Wall);
@@ -311,6 +313,8 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			// +---+   +
 			FVoxelBounds BoundsB;
 			BoundsB.AddCell(FIntVector(0, 0, 0));
+			BoundsB.FlagBoundaryCells();
+
 			SET_CONNECTION(BoundsB, (0, 0, 0), North, Door);
 			SET_CONNECTION(BoundsB, (0, 0, 0), East, Door);
 			SET_CONNECTION(BoundsB, (0, 0, 0), South, Wall);
@@ -327,6 +331,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			FVoxelBounds BoundsC;
 			BoundsC.AddCell(FIntVector(0, 0, 1));
 			BoundsC.AddCell(FIntVector(1, 0, 1));
+			BoundsC.FlagBoundaryCells();
 
 			SET_CONNECTION(BoundsC, (0, 0, 1), East, Door);
 			SET_CONNECTION(BoundsC, (0, 0, 1), South, Wall);
@@ -349,6 +354,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			FVoxelBounds BoundsD;
 			BoundsD.AddCell(FIntVector(0, 0, 1));
 			BoundsD.AddCell(FIntVector(1, 0, 1));
+			BoundsD.FlagBoundaryCells();
 
 			SET_CONNECTION(BoundsD, (0, 0, 1), East, Door);
 			SET_CONNECTION(BoundsD, (0, 0, 1), South, Wall);
@@ -369,6 +375,8 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			FVoxelBounds BoundsE;
 			BoundsE.AddCell(FIntVector(2, 1, 0));
 			BoundsE.AddCell(FIntVector(2, 1, 1));
+			BoundsE.FlagBoundaryCells();
+
 			SET_CONNECTION(BoundsE, (2, 1, 0), North, Wall);
 			SET_CONNECTION(BoundsE, (2, 1, 0), East, Wall);
 			SET_CONNECTION(BoundsE, (2, 1, 0), South, Door);
@@ -388,6 +396,8 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			FVoxelBounds BoundsF;
 			BoundsF.AddCell(FIntVector(2, 1, 0));
 			BoundsF.AddCell(FIntVector(2, 1, 1));
+			BoundsF.FlagBoundaryCells();
+
 			SET_CONNECTION(BoundsF, (2, 1, 0), North, Wall);
 			SET_CONNECTION(BoundsF, (2, 1, 0), East, Wall);
 			SET_CONNECTION(BoundsF, (2, 1, 0), South, Door);
@@ -409,6 +419,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			FVoxelBounds BoundsG;
 			BoundsG.AddCell(FIntVector(0, 0, 1));
 			BoundsG.AddCell(FIntVector(0, 1, 1));
+			BoundsG.FlagBoundaryCells();
 
 			SET_CONNECTION(BoundsG, (0, 0, 1), North, Door);
 			SET_CONNECTION(BoundsG, (0, 0, 1), South, Wall);
@@ -450,6 +461,8 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			// +   +   +
 			FVoxelBounds BoundsA;
 			BoundsA.AddCell(FIntVector(1, 0, 0));
+			BoundsA.FlagBoundaryCells();
+
 			SET_CONNECTION(BoundsA, (1, 0, 0), East, Wall);
 			SET_CONNECTION(BoundsA, (1, 0, 0), North, Door);
 			SET_CONNECTION(BoundsA, (1, 0, 0), West, Wall);
@@ -468,6 +481,7 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 			FVoxelBounds BoundsB;
 			BoundsB.AddCell(FIntVector(0, 0, 0));
 			BoundsB.AddCell(FIntVector(1, 0, 0));
+			BoundsB.FlagBoundaryCells();
 
 			SET_CONNECTION(BoundsB, (0, 0, 0), North, Wall);
 			SET_CONNECTION(BoundsB, (0, 0, 0), East, Wall);
@@ -487,16 +501,19 @@ bool FVoxelBoundsTest::RunTest(const FString& Parameters)
 
 		// Custom Score Test
 		{
-			UCustomScoreCallback* CustomCallbacks = NewObject<UCustomScoreCallback>();
+			auto ZeroScore = [](const FVoxelBoundsConnection& A, const FVoxelBoundsConnection& B, int32& Score) -> bool {
+				Score = 0;
+				return true;
+			};
 
-			FScoreCallback ZeroScore;
-			ZeroScore.BindDynamic(CustomCallbacks, &UCustomScoreCallback::ZeroScore);
-
-			FScoreCallback NeverPassScore;
-			NeverPassScore.BindDynamic(CustomCallbacks, &UCustomScoreCallback::NeverPass);
+			auto NeverPassScore = [](const FVoxelBoundsConnection& A, const FVoxelBoundsConnection& B, int32& Score) -> bool {
+				return false;
+			};
 
 			FVoxelBounds BoundsA;
 			BoundsA.AddCell(FIntVector(0, 0, 0));
+			BoundsA.FlagBoundaryCells();
+
 			SET_CONNECTION(BoundsA, (0, 0, 0), North, Door);
 			SET_CONNECTION(BoundsA, (0, 0, 0), East, Wall);
 			SET_CONNECTION(BoundsA, (0, 0, 0), South, Wall);

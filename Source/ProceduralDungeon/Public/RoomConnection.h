@@ -83,7 +83,8 @@ public:
 	static class UDoorType* GetDoorType(const URoomConnection* Conn);
 	static void GetBothDoorTypes(const URoomConnection* Conn, UDoorType*& DoorTypeA, UDoorType*& DoorTypeB);
 
-	static URoomConnection* CreateConnection(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB, UObject* Outer, int32 IdInOuter);
+	void Init(URoom* RoomA, int32 DoorA, URoom* RoomB, int32 DoorB, int32 Id);
+	void Reset();
 
 protected:
 	UFUNCTION(BlueprintPure, Category = "Room Connection", meta = (DisplayName = "Get Room A", CompactNodeTitle = "Room A"))

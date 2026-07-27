@@ -52,9 +52,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Doors")
 	TArray<FDoorDef> Doors {FDoorDef()};
 
+	UE_DEPRECATED(3.8, "Use the BoundingBoxes array instead.")
 	UPROPERTY(meta = (DeprecatedProperty, DeprecationMessage = "Use BoundingBoxes instead"))
 	FIntVector FirstPoint {0};
 
+	UE_DEPRECATED(3.8, "Use the BoundingBoxes array instead.")
 	UPROPERTY(meta = (DeprecatedProperty, DeprecationMessage = "Use BoundingBoxes instead"))
 	FIntVector SecondPoint {1};
 
@@ -129,14 +131,14 @@ public:
 	FBoxCenterAndExtent GetBounds(FTransform Transform = FTransform::Identity) const;
 	FBoxCenterAndExtent GetSubBounds(int32 Index, FTransform Transform = FTransform::Identity) const;
 	FBoxMinAndMax GetIntBounds() const;
-	FVoxelBounds GetVoxelBounds() const;
+	const FVoxelBounds& GetVoxelBounds() const;
 
 	bool IsRoomInBounds(const FBoxMinAndMax& Bounds, int DoorIndex, const FDoorDef& DoorDungeonPos) const;
 
 #if !(UE_BUILD_SHIPPING) || WITH_EDITOR
 	bool IsDoorValid(int DoorIndex) const;
 	bool IsDoorDuplicate(int DoorIndex) const;
-	void DrawDebug(const UWorld* World, const FTransform& Transform, const FColor& Color);
+	void DrawDebug(const UWorld* World, const FTransform& Transform, const FColor& Color, bool bLocked = false);
 #endif // !(UE_BUILD_SHIPPING) || WITH_EDITOR
 
 #if WITH_EDITOR

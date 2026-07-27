@@ -85,6 +85,7 @@ void ADungeonGeneratorBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 
 bool ADungeonGeneratorBase::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR("Dungeon Replication");
 	bool bWroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 	bWroteSomething |= Graph->ReplicateSubobject(Channel, Bunch, RepFlags);
 	return bWroteSomething;
@@ -98,6 +99,7 @@ void ADungeonGeneratorBase::SaveDungeon(FDungeonSaveData& SaveData)
 		return;
 	}
 
+	TRACE_CPUPROFILER_EVENT_SCOPE(SaveDungeon);
 	SaveData.GeneratorId = Id;
 	SaveData.Data.Reset(0);
 
@@ -113,6 +115,7 @@ void ADungeonGeneratorBase::LoadDungeon(const FDungeonSaveData& SaveData)
 		return;
 	}
 
+	TRACE_CPUPROFILER_EVENT_SCOPE(LoadDungeon);
 	FMemoryReader MemReader(SaveData.Data);
 	SerializeDungeon(MemReader);
 }
@@ -270,50 +273,61 @@ void ADungeonGeneratorBase::Unload()
 
 void ADungeonGeneratorBase::StartNewDungeon()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(StartNewDungeon);
 	OnGenerationInit();
 	Graph->Clear();
 }
 
 void ADungeonGeneratorBase::FinalizeDungeon()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(FinalizeDungeon);
 	Graph->InitRooms();
 	InitializeDungeon(Graph);
 }
 
 URoom* ADungeonGeneratorBase::CreateRoomInstance(URoomData* RoomData)
 {
-	URoom* Instance = NewObject<URoom>(this);
-	Instance->Init(RoomData, this, Graph->Count());
-	return Instance;
+	return Graph->AcquireRoomInstance(RoomData, this);
+}
+
+void ADungeonGeneratorBase::DiscardRoomInstance(URoom*& Room)
+{
+	Graph->ReleaseRoomInstance(Room);
+	Room = nullptr;
 }
 
 bool ADungeonGeneratorBase::TryPlaceRoom(URoom* const& Room, int DoorIndex, const FDoorDef& TargetDoor, const UWorld* World) const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(TryPlaceRoom);
 	if (!IsValid(Room))
 	{
 		return false;
 	}
 
-	Room->SetPositionAndRotationFromDoor(DoorIndex, TargetDoor.Position, TargetDoor.Direction);
-
+	Room->SetRoomTransformFromDoor(DoorIndex, TargetDoor.Transform);
 	return CheckRoomOverlap(Room, World);
 }
 
 bool ADungeonGeneratorBase::TryPlaceRoomAtLocation(URoom* const& Room, FIntVector Location, EDoorDirection Rotation, const UWorld* World) const
 {
+	return TryPlaceRoomAtTransform(Room, FRoomTransform {Location, Rotation}, World);
+}
+
+bool ADungeonGeneratorBase::TryPlaceRoomAtTransform(URoom* const& Room, const FRoomTransform& Transform, const UWorld* World) const
+{
+	TRACE_CPUPROFILER_EVENT_SCOPE(TryPlaceRoomAtTransform);
 	if (!IsValid(Room))
 	{
 		return false;
 	}
 
-	Room->SetPosition(Location);
-	Room->SetDirection(Rotation);
-
+	Room->SetRoomTransform(Transform);
 	return CheckRoomOverlap(Room, World);
 }
 
 bool ADungeonGeneratorBase::CheckRoomOverlap(const URoom* const& Room, const UWorld* World) const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(CheckRoomOverlap);
 	// Test if it fits in the place
 	bool bCanBePlaced = Graph->CanRoomFit(Room);
 
@@ -343,6 +357,7 @@ bool ADungeonGeneratorBase::CheckRoomOverlap(const URoom* const& Room, const UWo
 
 bool ADungeonGeneratorBase::AddRoomToDungeon(URoom* const& Room, const TArray<int>& DoorsToConnect, bool bFailIfNotConnected)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(AddRoomToDungeon);
 	if (!IsValid(Room))
 	{
 		// @TODO: do something to be able to call OnFailedToAddRoom here (either pass arguments or change them for current room)
@@ -410,6 +425,8 @@ void ADungeonGeneratorBase::ChooseDoorClasses()
 	if (!IsGenerating())
 		return;
 
+	TRACE_CPUPROFILER_EVENT_SCOPE(ChooseDoorClasses);
+
 	for (auto* Conn : Graph->GetAllConnections())
 	{
 		check(IsValid(Conn));
@@ -432,6 +449,7 @@ void ADungeonGeneratorBase::ChooseDoorClasses()
 
 void ADungeonGeneratorBase::UpdatePlayerRooms()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UpdatePlayerRooms);
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
 		APlayerController* Controller = It->Get();
@@ -475,6 +493,7 @@ void ADungeonGeneratorBase::UpdatePlayerRooms()
 
 void ADungeonGeneratorBase::UpdateRoomVisibility(bool bForceUpdate)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UpdateRoomVisibility);
 	const bool bIsOcclusionEnabled = Dungeon::OcclusionCulling();
 	const uint32 OcclusionDistance = Dungeon::OcclusionDistance();
 
@@ -531,6 +550,7 @@ void ADungeonGeneratorBase::UpdateRoomVisibility(bool bForceUpdate)
 
 void ADungeonGeneratorBase::UpdateRoomRelevancy()
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(UpdateRoomRelevancy);
 	for (const auto& Pair : PlayerRooms)
 	{
 		const FPlayerRooms& PlayerRoom = Pair.Value;
@@ -549,6 +569,7 @@ void ADungeonGeneratorBase::UpdateRoomRelevancy()
 void ADungeonGeneratorBase::Reset()
 {
 	PlayerRooms.Empty();
+	Graph->ClearPools();
 }
 
 void ADungeonGeneratorBase::UpdateSeed()
@@ -613,12 +634,14 @@ void ADungeonGeneratorBase::OnStateBegin(EGenerationState State)
 	switch (State)
 	{
 	case EGenerationState::Unload:
+		TRACE_BEGIN_REGION(TEXT("Dungeon Generator: Unload"));
 		DungeonLog_Info("======= Begin Unload All Levels =======");
 		Reset();
 		DungeonLog_Info("Nb Room To Unload: %d", Graph->Count());
 		Graph->UnloadAllRooms();
 		break;
 	case EGenerationState::Generation:
+		TRACE_BEGIN_REGION(TEXT("Dungeon Generator: Generation"));
 		DungeonLog_Info("======= Begin Dungeon Generation =======");
 		check(HasAuthority()); // should never generate on clients!
 		FlushNetDormancy();
@@ -626,6 +649,7 @@ void ADungeonGeneratorBase::OnStateBegin(EGenerationState State)
 		GenerationStatus = EGenerationStatus::NotStarted;
 		break;
 	case EGenerationState::Initialization:
+		TRACE_BEGIN_REGION(TEXT("Dungeon Generator: Initialization"));
 		DungeonLog_Info("======= Begin Dungeon Initialization =======");
 
 		if (IsLoadingSavedDungeon())
@@ -636,6 +660,7 @@ void ADungeonGeneratorBase::OnStateBegin(EGenerationState State)
 		Graph->SynchronizeRooms();
 		break;
 	case EGenerationState::Load:
+		TRACE_BEGIN_REGION(TEXT("Dungeon Generator: Load"));
 		DungeonLog_Info("======= Begin Load All Levels =======");
 		DungeonLog_Info("Nb Room To Load: %d", Graph->Count());
 		// I've placed `ChooseDoor` here to keep same behavior as before,
@@ -659,9 +684,12 @@ void ADungeonGeneratorBase::OnStateTick(EGenerationState State)
 	switch (State)
 	{
 	case EGenerationState::Idle:
-		UpdatePlayerRooms();
-		UpdateRoomRelevancy();
-		UpdateRoomVisibility();
+		{
+			TRACE_CPUPROFILER_EVENT_SCOPE_STR("Dungeon Generator: Update");
+			UpdatePlayerRooms();
+			UpdateRoomRelevancy();
+			UpdateRoomVisibility();
+		}
 		DrawDebug();
 		if (Graph->IsDirty() || IsGenerating() || IsLoadingSavedDungeon())
 			SetState(EGenerationState::Unload);
@@ -679,7 +707,10 @@ void ADungeonGeneratorBase::OnStateTick(EGenerationState State)
 		// By default we set it as completed so that CreateDungeon of previous versions will not need any change.
 		// In next major version of the plugin, the generation status will be directly returned by the CreateDungeon function.
 		GenerationStatus = EGenerationStatus::Completed;
-		bCreationSuccess = CreateDungeon();
+		{
+			TRACE_CPUPROFILER_EVENT_SCOPE(CreateDungeon);
+			bCreationSuccess = CreateDungeon();
+		}
 		checkf(GenerationStatus != EGenerationStatus::NotStarted, TEXT("CreateDungeon must set the status to InProgress, Completed or Failed"));
 
 		if (GenerationStatus == EGenerationStatus::InProgress)
@@ -732,13 +763,16 @@ void ADungeonGeneratorBase::OnStateEnd(EGenerationState State)
 		GetWorld()->FlushLevelStreaming();
 		GEngine->ForceGarbageCollection(true);
 		DungeonLog_Info("======= End Unload All Levels =======");
+		TRACE_END_REGION(TEXT("Dungeon Generator: Unload"));
 		break;
 	case EGenerationState::Generation:
 		DungeonLog_Info("======= End Dungeon Generation =======");
+		TRACE_END_REGION(TEXT("Dungeon Generator: Generation"));
 		break;
 	case EGenerationState::Initialization:
 		UpdateRoomVisibility(/*bForceUpdate=*/true);
 		DungeonLog_Info("======= End Dungeon Initialization =======");
+		TRACE_END_REGION(TEXT("Dungeon Generator: Initialization"));
 		break;
 	case EGenerationState::Load:
 		DungeonLog_Info("======= End Load All Levels =======");
@@ -762,7 +796,11 @@ void ADungeonGeneratorBase::OnStateEnd(EGenerationState State)
 		}
 
 		// Invoke Post Generation Event when initialization is done
-		OnPostGeneration();
+		{
+			TRACE_CPUPROFILER_EVENT_SCOPE(OnPostGeneration);
+			OnPostGeneration();
+		}
+		TRACE_END_REGION(TEXT("Dungeon Generator: Load"));
 		break;
 	default:
 		break;
@@ -919,6 +957,7 @@ URoom* ADungeonGeneratorBase::GetRoomByIndex(int64 Index) const
 
 void ADungeonGeneratorBase::SaveAllDungeons(const UObject* WorldContextObject, TArray<FDungeonSaveData>& SavedData)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(SaveAllDungeons);
 	UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
 	if (!IsValid(World))
 	{
@@ -945,6 +984,7 @@ void ADungeonGeneratorBase::SaveAllDungeons(const UObject* WorldContextObject, T
 
 void ADungeonGeneratorBase::LoadAllDungeons(const UObject* WorldContextObject, const TArray<FDungeonSaveData>& SavedData)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(LoadAllDungeons);
 	UWorld* World = IsValid(WorldContextObject) ? WorldContextObject->GetWorld() : nullptr;
 	if (!IsValid(World))
 	{

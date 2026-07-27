@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2019 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2019 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -19,6 +19,7 @@ public class ProceduralDungeon : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core",
 			"NavigationSystem",
+			"DeveloperSettings",
 #if UE_5_2_OR_LATER
 			"IrisCore",
 #endif

@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2023 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2023 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -29,8 +29,6 @@
 
 void FProceduralDungeonEditorModule::StartupModule()
 {
-	RegisterSettings();
-
 	FProceduralDungeonEditorCommands::Register();
 
 	// Register assets in the "Procedural Dungeon" category
@@ -88,52 +86,6 @@ void FProceduralDungeonEditorModule::ShutdownModule()
 
 	// Unregister editor mode
 	FEditorModeRegistry::Get().UnregisterMode(FProceduralDungeonEdMode::EM_ProceduralDungeon);
-
-	if (UObjectInitialized())
-	{
-		UnregisterSettings();
-	}
-}
-
-void FProceduralDungeonEditorModule::RegisterSettings()
-{
-	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
-	{
-		// Register the settings
-		ISettingsSectionPtr SettingsSection = SettingsModule->RegisterSettings("Project", "Editor", "Procedural Dungeon",
-			LOCTEXT("ProceduralDungeonEditorSettingsName", "Procedural Dungeon"),
-			LOCTEXT("ProceduralDungeonEditorSettingsDescription", "Configuration for the Procedural Dungeon plugin"),
-			GetMutableDefault<UProceduralDungeonEditorSettings>()
-		);
-
-		if (SettingsSection.IsValid())
-		{
-			SettingsSection->OnModified().BindRaw(this, &FProceduralDungeonEditorModule::HandleSettingsSaved);
-		}
-	}
-}
-
-void FProceduralDungeonEditorModule::UnregisterSettings()
-{
-	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
-	{
-		SettingsModule->UnregisterSettings("Project", "Plugins", "Procedural Dungeon");
-	}
-}
-
-bool FProceduralDungeonEditorModule::HandleSettingsSaved()
-{
-	UProceduralDungeonEditorSettings* Settings = GetMutableDefault<UProceduralDungeonEditorSettings>();
-	bool ResaveSettings = false;
-
-	// Here check and resave if any changes have been made
-
-	if (ResaveSettings)
-	{
-		Settings->SaveConfig();
-	}
-
-	return true;
 }
 
 #undef LOCTEXT_NAMESPACE

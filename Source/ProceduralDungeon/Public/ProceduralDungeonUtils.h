@@ -16,13 +16,13 @@
 namespace IntVector
 {
 	// Returns the component-wise minimum of A and B
-	FIntVector PROCEDURALDUNGEON_API Min(const FIntVector& A, const FIntVector& B);
+	PROCEDURALDUNGEON_API FIntVector Min(const FIntVector& A, const FIntVector& B);
 
 	// Returns the component-wise maximum of A and B
-	FIntVector PROCEDURALDUNGEON_API Max(const FIntVector& A, const FIntVector& B);
+	PROCEDURALDUNGEON_API FIntVector Max(const FIntVector& A, const FIntVector& B);
 
 	// Returns the component-wise minimum and maximum of A and B
-	void PROCEDURALDUNGEON_API MinMax(const FIntVector& A, const FIntVector& B, FIntVector& OutMin, FIntVector& OutMax);
+	PROCEDURALDUNGEON_API void MinMax(const FIntVector& A, const FIntVector& B, FIntVector& OutMin, FIntVector& OutMax);
 } //namespace IntVector
 
 class FBoxCenterAndExtent;
@@ -31,25 +31,25 @@ struct FBoxMinAndMax;
 namespace Dungeon
 {
 	// Returns the real world location of a point in room units
-	FVector PROCEDURALDUNGEON_API ToWorldLocation(FIntVector RoomPoint, const FVector RoomUnit);
+	PROCEDURALDUNGEON_API FVector ToWorldLocation(FIntVector RoomPoint, const FVector RoomUnit);
 
 	// Returns the real world vector (no offset) of a vector in room units
-	FVector PROCEDURALDUNGEON_API ToWorldVector(FIntVector RoomVector, const FVector RoomUnit);
+	PROCEDURALDUNGEON_API FVector ToWorldVector(FIntVector RoomVector, const FVector RoomUnit);
 
-	// Convertthe Box from dungeon coordinate to world coordinate, applying an optional transform on it.
-	FBoxCenterAndExtent PROCEDURALDUNGEON_API ToWorld(const FBoxMinAndMax& Box, const FVector RoomUnit, const FTransform& Transform = FTransform::Identity);
+	// Convert the Box from dungeon coordinate to world coordinate, applying an optional transform on it.
+	PROCEDURALDUNGEON_API FBoxCenterAndExtent ToWorld(const FBoxMinAndMax& Box, const FVector RoomUnit, const FTransform& Transform = FTransform::Identity);
 
-	// Convertthe Box from dungeon coordinate to world coordinate, applying an optional transform on it.
-	FBoxCenterAndExtent PROCEDURALDUNGEON_API ToWorld(const FBoxCenterAndExtent& Box, const FVector RoomUnit, const FTransform& Transform = FTransform::Identity);
+	// Convert the Box from dungeon coordinate to world coordinate, applying an optional transform on it.
+	PROCEDURALDUNGEON_API FBoxCenterAndExtent ToWorld(const FBoxCenterAndExtent& Box, const FVector RoomUnit, const FTransform& Transform = FTransform::Identity);
 
 	// Returns the location in room units from a point in real world
-	FIntVector PROCEDURALDUNGEON_API ToRoomLocation(FVector WorldPoint, const FVector RoomUnit);
+	PROCEDURALDUNGEON_API FIntVector ToRoomLocation(FVector WorldPoint, const FVector RoomUnit);
 
 	// Returns the vector (no offset) in room units from a vector in real world
-	FIntVector PROCEDURALDUNGEON_API ToRoomVector(FVector WorldVector, const FVector RoomUnit);
+	PROCEDURALDUNGEON_API FIntVector ToRoomVector(FVector WorldVector, const FVector RoomUnit);
 
 	// Returns the real world snapped location to the nearest point in room units from a real world point
-	FVector PROCEDURALDUNGEON_API SnapPoint(FVector Point, const FVector RoomUnit);
+	PROCEDURALDUNGEON_API FVector SnapPoint(FVector Point, const FVector RoomUnit);
 
 	template<typename T>
 	int GetTotalWeight(const TMap<T, int>& WeightMap)
@@ -80,34 +80,34 @@ namespace Dungeon
 
 	// ===== Plugin's Settings =====
 
-	FVector PROCEDURALDUNGEON_API RoomUnit();
-	FVector PROCEDURALDUNGEON_API DefaultDoorSize();
-	FColor PROCEDURALDUNGEON_API DefaultDoorColor();
-	float PROCEDURALDUNGEON_API DoorOffset();
-	bool PROCEDURALDUNGEON_API OcclusionCulling();
-	bool PROCEDURALDUNGEON_API UseLegacyOcclusion();
-	uint32 PROCEDURALDUNGEON_API OcclusionDistance();
-	bool PROCEDURALDUNGEON_API OccludeDynamicActors();
-	bool PROCEDURALDUNGEON_API DrawDebug();
-	bool PROCEDURALDUNGEON_API DrawOnlyWhenEditingRoom();
-	bool PROCEDURALDUNGEON_API ShowRoomOrigin();
-	bool PROCEDURALDUNGEON_API FlipDoorArrow();
-	float PROCEDURALDUNGEON_API DoorArrowLength();
-	float PROCEDURALDUNGEON_API DoorArrowHeadSize();
-	bool PROCEDURALDUNGEON_API CanLoop();
-	ECollisionChannel PROCEDURALDUNGEON_API RoomObjectType();
-	uint32 PROCEDURALDUNGEON_API MaxGenerationTryBeforeGivingUp();
-	uint32 PROCEDURALDUNGEON_API MaxRoomPlacementTryBeforeGivingUp();
-	int32 PROCEDURALDUNGEON_API RoomLimit();
+	PROCEDURALDUNGEON_API FVector RoomUnit();
+	PROCEDURALDUNGEON_API FVector DefaultDoorSize();
+	PROCEDURALDUNGEON_API FColor DefaultDoorColor();
+	PROCEDURALDUNGEON_API float DoorOffset();
+	PROCEDURALDUNGEON_API bool OcclusionCulling();
+	PROCEDURALDUNGEON_API bool UseLegacyOcclusion();
+	PROCEDURALDUNGEON_API uint32 OcclusionDistance();
+	PROCEDURALDUNGEON_API bool OccludeDynamicActors();
+	PROCEDURALDUNGEON_API bool DrawDebug();
+	PROCEDURALDUNGEON_API bool DrawOnlyWhenEditingRoom();
+	PROCEDURALDUNGEON_API bool ShowRoomOrigin();
+	PROCEDURALDUNGEON_API bool FlipDoorArrow();
+	PROCEDURALDUNGEON_API float DoorArrowLength();
+	PROCEDURALDUNGEON_API float DoorArrowHeadSize();
+	PROCEDURALDUNGEON_API bool CanLoop();
+	PROCEDURALDUNGEON_API ECollisionChannel RoomObjectType();
+	PROCEDURALDUNGEON_API uint32 MaxGenerationTryBeforeGivingUp();
+	PROCEDURALDUNGEON_API uint32 MaxRoomPlacementTryBeforeGivingUp();
+	PROCEDURALDUNGEON_API int32 RoomLimit();
 
-	void PROCEDURALDUNGEON_API EnableOcclusionCulling(bool Enable);
-	void PROCEDURALDUNGEON_API SetOcclusionDistance(int32 Distance);
+	PROCEDURALDUNGEON_API void EnableOcclusionCulling(bool Enable);
+	PROCEDURALDUNGEON_API void SetOcclusionDistance(int32 Distance);
 } //namespace Dungeon
 
 namespace Random
 {
-	uint32 PROCEDURALDUNGEON_API Guid2Seed(FGuid Guid, int64 Salt);
-}
+	PROCEDURALDUNGEON_API uint32 Guid2Seed(FGuid Guid, int64 Salt);
+} //namespace Random
 
 namespace WorldUtils
 {
@@ -150,22 +150,22 @@ namespace WorldUtils
 
 namespace ObjectUtils
 {
-	void PROCEDURALDUNGEON_API DispatchToObjectAndSubobjects(UObject* Obj, TFunction<void(UObject*)> Func, int32 Depth = 0);
-}
+	PROCEDURALDUNGEON_API void DispatchToObjectAndSubobjects(UObject* Obj, TFunction<void(UObject*)> Func, int32 Depth = 0);
+} //namespace ObjectUtils
 
 namespace ActorUtils
 {
 	// Returns the bounding box of an actor considering only components that would interact with rooms (based on collision settings).
-	FBox PROCEDURALDUNGEON_API GetActorBoundingBoxForRooms(AActor* Actor, const FTransform& DungeonTransform = FTransform::Identity);
+	PROCEDURALDUNGEON_API FBox GetActorBoundingBoxForRooms(AActor* Actor, const FTransform& DungeonTransform = FTransform::Identity);
 
 	// Returns the player controller associated with the player state id.
-	class APlayerController* GetPlayerControllerFromPlayerId(const UObject* WorldContextObject, int32 PlayerId);
+	PROCEDURALDUNGEON_API class APlayerController* GetPlayerControllerFromPlayerId(const UObject* WorldContextObject, int32 PlayerId);
 
-	UObject* GetInterfaceImplementer(AActor* Actor, TSubclassOf<UInterface> InterfaceClass);
+	PROCEDURALDUNGEON_API UObject* GetInterfaceImplementer(AActor* Actor, TSubclassOf<UInterface> InterfaceClass);
 
 	template<typename T UE_REQUIRES(TIsDerivedFrom<T, UInterface>::Value)>
 	UObject* GetInterfaceImplementer(AActor* Actor)
 	{
 		return GetInterfaceImplementer(Actor, T::StaticClass());
 	}
-}
+} //namespace ActorUtils

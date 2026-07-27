@@ -39,6 +39,7 @@ void URoomData::Serialize(FArchive& Ar)
 	{
 		const int32 DungeonVersion = Ar.CustomVer(FProceduralDungeonCustomVersion::GUID);
 		
+		PRAGMA_DISABLE_DEPRECATION_WARNINGS
 		if (DungeonVersion < FProceduralDungeonCustomVersion::RoomDataBoundingBoxesMigration)
 		{
 			DungeonLog_Warning("Migrating RoomData '%s' from legacy FirstPoint/SecondPoint to BoundingBoxes.", *GetName());
@@ -52,6 +53,7 @@ void URoomData::Serialize(FArchive& Ar)
 			FirstPoint = FIntVector(0);
 			SecondPoint = FIntVector(0);
 		}
+		PRAGMA_ENABLE_DEPRECATION_WARNINGS
 	}
 }
 
@@ -152,6 +154,7 @@ FVector URoomData::GetRoomUnit() const
 
 bool URoomData::DoesPassAllConstraints(const UDungeonGraph* Dungeon, const URoomData* RoomData, FIntVector Location, EDoorDirection Direction)
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(URoomData::DoesPassAllConstraints);
 	if (!IsValid(RoomData))
 	{
 		return false;
@@ -199,8 +202,9 @@ FBoxMinAndMax URoomData::GetIntBounds() const
 	return GetVoxelBounds().GetBounds();
 }
 
-FVoxelBounds URoomData::GetVoxelBounds() const
+const FVoxelBounds& URoomData::GetVoxelBounds() const
 {
+	TRACE_CPUPROFILER_EVENT_SCOPE(URoomData::GetVoxelBounds);
 	if (CachedVoxelBounds.IsValid())
 		return CachedVoxelBounds;
 
@@ -216,10 +220,12 @@ FVoxelBounds URoomData::GetVoxelBounds() const
 	for (int i = 0; i < Doors.Num(); ++i)
 	{
 		const FDoorDef& Door = Doors[i];
-		const FIntVector DoorPos = Door.Position;
-		const EDoorDirection DoorDir = Door.Direction;
+		const FIntVector DoorPos = Door.Transform.Translation;
+		const EDoorDirection DoorDir = Door.Transform.Rotation;
 		CachedVoxelBounds.SetCellConnection(DoorPos, FVoxelBounds::EDirection(DoorDir), FVoxelBoundsConnection(Door.Type));
 	}
+
+	CachedVoxelBounds.FlagBoundaryCells();
 
 	return CachedVoxelBounds;
 }
@@ -235,9 +241,9 @@ bool URoomData::IsRoomInBounds(const FBoxMinAndMax& Bounds, int DoorIndex, const
 
 	const FDoorDef& Door = Doors[DoorIndex];
 	FBoxMinAndMax RoomBounds = GetIntBounds();
-	RoomBounds -= Door.Position;
-	RoomBounds.Rotate(DoorDungeonPos.Direction - Door.Direction);
-	RoomBounds += DoorDungeonPos.Position;
+	RoomBounds -= Door.Transform.Translation;
+	RoomBounds.Rotate(DoorDungeonPos.Transform.Rotation - Door.Transform.Rotation);
+	RoomBounds += DoorDungeonPos.Transform.Translation;
 	return Bounds.IsInside(RoomBounds);
 }
 
@@ -252,9 +258,9 @@ bool URoomData::IsDoorValid(int DoorIndex) const
 	const FDoorDef& DoorDef = Doors[DoorIndex];
 	for (const auto& Box : BoundingBoxes)
 	{
-		bAtLeastInABox |= Box.IsInside(DoorDef.Position);
+		bAtLeastInABox |= Box.IsInside(DoorDef.Transform.Translation);
 
-		const FIntVector FacingCell = DoorDef.Position + ToIntVector(DoorDef.Direction);
+		const FIntVector FacingCell = DoorDef.Transform.Translation + ToIntVector(DoorDef.Transform.Rotation);
 		bFacingNoBox &= !Box.IsInside(FacingCell);
 	}
 
@@ -272,7 +278,7 @@ bool URoomData::IsDoorDuplicate(int DoorIndex) const
 	return false;
 }
 
-void URoomData::DrawDebug(const UWorld* World, const FTransform& Transform, const FColor& Color)
+void URoomData::DrawDebug(const UWorld* World, const FTransform& Transform, const FColor& Color, bool bLocked)
 {
 	if (!IsValid(World))
 		return;
@@ -281,6 +287,22 @@ void URoomData::DrawDebug(const UWorld* World, const FTransform& Transform, cons
 	{
 		const FBoxCenterAndExtent Box = Dungeon::ToWorld(BoundingBox, GetRoomUnit(), Transform);
 		DrawDebugBox(World, Box.Center, Box.Extent, FQuat::Identity, Color, false, -1.0f, SDPG_World, 2.0f);
+
+		if (bLocked)
+		{
+			const FBox MinMaxBox = Box.GetBox();
+			const FVector& Min = MinMaxBox.Min;
+			const FVector& Max = MinMaxBox.Max;
+	#ifdef T
+			static_assert(false, "T macro is already defined! Please change its name to avoid potential conflicts");
+	#endif
+	#define T(POINT) POINT
+			DrawDebugLine(World, T(Min), T(Max), FColor::Red);
+			DrawDebugLine(World, T(FVector(Min.X, Min.Y, Max.Z)), T(FVector(Max.X, Max.Y, Min.Z)), Color);
+			DrawDebugLine(World, T(FVector(Min.X, Max.Y, Max.Z)), T(FVector(Max.X, Min.Y, Min.Z)), Color);
+			DrawDebugLine(World, T(FVector(Min.X, Max.Y, Min.Z)), T(FVector(Max.X, Min.Y, Max.Z)), Color);
+	#undef T
+		}
 	}
 }
 

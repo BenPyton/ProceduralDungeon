@@ -1,4 +1,4 @@
-// Copyright Benoit Pelletier 2023 - 2025 All Rights Reserved.
+// Copyright Benoit Pelletier 2023 - 2026 All Rights Reserved.
 //
 // This software is available under different licenses depending on the source from which it was obtained:
 // - The Fab EULA (https://fab.com/eula) applies when obtained from the Fab marketplace.
@@ -16,17 +16,12 @@ class FSlateStyleSet;
 class FProceduralDungeonEditorModule : public IModuleInterface
 {
 public:
-	// ~BEGIN IModuleInterface
+	//~ Begin IModuleInterface Interface
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	// ~END IModuleInterface
+	//~ End IModuleInterface Interface
 
 	FORCEINLINE EAssetTypeCategories::Type GetAssetTypeCategory() const { return AssetTypeCategory; }
-
-private:
-	void RegisterSettings();
-	void UnregisterSettings();
-	bool HandleSettingsSaved();
 
 private:
 	EAssetTypeCategories::Type AssetTypeCategory {EAssetTypeCategories::Type::None};

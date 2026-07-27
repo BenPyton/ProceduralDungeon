@@ -1,13 +1,13 @@
 # Procedural Dungeon Plugin
 
 [![Plugin version number](https://img.shields.io/github/v/release/BenPyton/ProceduralDungeon?label=Version)](https://github.com/BenPyton/ProceduralDungeon/releases/latest)
-[![Unreal Engine Supported Versions](https://img.shields.io/badge/Unreal_Engine-4.27_%7C_5.3_%7C_5.4_%7C_5.5_%7C_5.6_%7C_5.7-9455CE?logo=unrealengine)](https://github.com/BenPyton/ProceduralDungeon/releases)
+[![Unreal Engine Supported Versions](https://img.shields.io/badge/Unreal_Engine-4.27_%7C_5.4_%7C_5.5_%7C_5.6_%7C_5.7_%7C_5.8-9455CE?logo=unrealengine)](https://github.com/BenPyton/ProceduralDungeon/releases)
 [![License](https://img.shields.io/badge/License-CeCILL--C_or_Fab_EULA-blue)](LICENSE)
 ![Download count](https://img.shields.io/github/downloads/BenPyton/ProceduralDungeon/total?label=Downloads)
 [![Actively Maintained](https://img.shields.io/badge/Maintenance%20Level-Actively%20Maintained-green.svg)](https://gist.github.com/cheerfulstoic/d107229326a01ff0f333a1d3476e068d)
 [![Discord](https://img.shields.io/discord/1182461404092055574?logo=discord&logoColor=white&label=Discord&color=%235865F2)][Discord]
 
-## Overview
+## 🔍 Overview
 
 This Unreal Engine plugin allows you to create rich, diverse dungeon experiences that combine the best of both worlds: the creativity and precision of handmade room designs, paired with the unpredictability and excitement of procedural generation.
 
@@ -21,7 +21,7 @@ If you have any bug or crash, please [open an issue](https://github.com/BenPyton
 If you have suggestions, questions or need help to use the plugin you can join the [Discord server][Discord] dedicated to this plugin.\
 If you want to contribute, feel free to create a pull request (*contributions to the wiki are also welcomed!*).
 
-## Features
+## ✨ Features
 
 - Handcrafted rooms, giving full control of their design by the level designers.
 - Generation rules defined in blueprint or C++, allowing flexible and powerful procedural generation.
@@ -30,11 +30,18 @@ If you want to contribute, feel free to create a pull request (*contributions to
 - Different door types, allowing more complex dungeons.
 - Optional room culling system, allowing to render only the relevant rooms to the player.
 - Ready for multiplayer games (push model and subobject lists are implemented).
-- :construction:[^experimental] Save/Load nodes for the dungeon, easy to use with any game save system (blueprint or C++)
+- 🚧[^experimental] Save/Load nodes for the dungeon, easy to use with any game save system (blueprint or C++)
+
+#### 💎 Premium features exclusive to the Fab version
+
+- 💎 A Dungeon Map UMG widget ready to be used out of the box and fully customizable.
 
 [^experimental]: :construction: : Experimental features
 
-## Example
+## 🎮 Example
+
+[![Youtube Video](https://img.shields.io/badge/Youtube_Video-CC0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/RyL7HGyZuso)
+[![Example Project](https://img.shields.io/badge/Example_Project-005FAD?style=for-the-badge&logo=github&logoColor=white)](https://github.com/BenPyton/DungeonExample)
 
 Some hand-made rooms defined with bounds and doors:\
 <img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonDemo_RoomSpawn.gif" alt="Animated GIF" width="125"/>
@@ -55,11 +62,7 @@ Possible results:\
 <img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonResult.gif" alt="Animated GIF" width="400"/>
 <img src="https://github.com/BenPyton/ProceduralDungeon/wiki/Images/ProceduralDungeonResult2.gif" alt="Animated GIF" width="400"/>
 
-[Demo Video on Youtube](http://www.youtube.com/watch?v=DmyNEd0YtDE "Procedural Dungeon Demo")<br>
-
-You can find an example project [here](https://github.com/BenPyton/DungeonExample) too.
-
-## How to use it
+## 🎓 How to use it
 
 Follow the [Getting Started guide on the wiki](https://benpyton.github.io/ProceduralDungeon/guides/Introduction) to start working with the plugin.
 
@@ -69,13 +72,13 @@ You have also access in the wiki to all the exposed [classes and nodes](https://
 
 You can also join the [Discord server][Discord] dedicated to this plugin if you want to ask question or get help from the community.
 
-## Installation
+## ⚙️ Installation
 
 Install it like any other Unreal Engine plugin.
 
-If you have any trouble with installation, read the [Installation](https://benpyton.github.io/ProceduralDungeon/guides/Getting-Started/Installation) page of the wiki.
+If you have any trouble with installation, read the [Installation](https://benpyton.github.io/ProceduralDungeon/guides/Getting-Started/Installation?source=github) page of the wiki.
 
-## FAQ
+## ❓ FAQ
 
 <details>
 <summary><b>Can I generate levels during runtime? What I mean is if I can generate a new dungeon while the player is in it.</b></summary>
@@ -163,7 +166,7 @@ If you have any trouble with installation, read the [Installation](https://benpy
 
 </details>
 
-## License
+## ⚖️ License
 
 This plugin is available under different licenses depending on the source from which it was obtained:
 
@@ -174,7 +177,7 @@ Please refer to the accompanying [LICENSE file](LICENSE.md) for further details.
 
 You can also take a look in [the wiki](https://benpyton.github.io/ProceduralDungeon/guides/Copyrights-and-Licenses) for the differences in the license terms.
 
-## *Support Me*
+## 💖 *Support Me*
 
  If you like my plugin, please consider leaving a tip, it would mean so much to me! 😊
 
