@@ -22,7 +22,7 @@ The widget is configurable to use it either as a full map or as a minimap in you
 
 - **`Style`**: You can set up the default room brush and door brush used by the map. Check [how to customize](Customizing.md) your widget to setup specific brushes per room/door.
 - **`Unit Size`**: This one is tricky. It should match the `Image Size` of your room brush. The `Image Size` of your brush must be the size of **one tile** on the tileset.
-- **`Padding`**: This is a padding (in pixels) used for the tileset of the Room Brush. Must be used only in specific cases. Keep `1` unless you see artifacts on your map (in that case set it to 2). See [how the room tileset works](Customizing.md#dual-grid-tileset) for a better understanding of this parameter.
+- **`Padding`**: This is a padding (in pixels) used for the tileset of the Room Brush. Must be used only in specific cases. Keep `1` unless you see artifacts on your map (in that case set it to 2). See [how the room tileset works](Customizing.md#creating-your-own-room-tileset) for a better understanding of this parameter.
 
 #### Zooming
 
