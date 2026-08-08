@@ -1,1 +1,0 @@
-"use strict";(globalThis.webpackChunkprocedural_dungeon_wiki||=[]).push([[18401],{24397(s,e,a){a.d(e,{A:()=>u});a(96540);var c=a(78466),n=a(76262),r=a(74848);const u={...c.A,Blueprint:function({src:s,className:e}){return(0,r.jsx)(n.Blueprint,{code:s,className:"blueprint"+(e?" ${className}":"")})}}}}]);
