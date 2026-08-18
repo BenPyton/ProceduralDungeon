@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.2] - 2026-08-17
+
+### Fixed
+
+- Fixed issues with debug draw of room bounds with rotated dungeon
+
+### Premium Features (exclusive to the Fab version)
+
+- Fixed player tracking and entities not placed correctly on map and with UseGeneratorTransform
+
+## 3.9.1 - 2026-08-07
+
+### Premium Features (exclusive to the Fab version)
+
+- Fixed a crash during the `Rebuild Map` of the dungeon map when dungeon generator is not yet set.
+- Categorized nicely the `UDungeonMap` properties in the detail panel.
+
 ## [3.9.0] - 2026-07-28
 
 ### Added
@@ -527,6 +544,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial Release
 
+[3.9.2]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.9.0...v3.9.2
 [3.9.0]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.8.3...v3.9.0
 [3.8.3]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.8.2...v3.8.3
 [3.8.2]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.8.1...v3.8.2
