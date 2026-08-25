@@ -657,7 +657,7 @@ void URoom::SetRelevancyLevel(int32 PlayerID, int32 Level)
 
 void URoom::SetPlayerInside(int32 PlayerID, bool PlayerInside)
 {
-	if (PlayerIDInside.Contains(PlayerID) != PlayerInside)
+	if (PlayerIDInside.Contains(PlayerID) == PlayerInside)
 		return;
 
 	if (PlayerInside)
