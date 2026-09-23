@@ -466,7 +466,7 @@ void ADungeonGeneratorBase::UpdatePlayerRooms()
 		if (!IsValid(Player))
 			return;
 
-		const FTransform& Transform = UseGeneratorTransform() ? GetTransform() : FTransform::Identity;
+		const FTransform& Transform = GetDungeonTransform();
 		FBox WorldPlayerBox = ActorUtils::GetActorBoundingBoxForRooms(Player, Transform);
 
 		FPlayerRooms& PlayerRoom = PlayerRooms.FindOrAdd(PlayerID);
