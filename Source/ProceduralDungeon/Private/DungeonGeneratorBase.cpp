@@ -263,7 +263,7 @@ void ADungeonGeneratorBase::Generate()
 void ADungeonGeneratorBase::Unload()
 {
 	// Do it only on server, do nothing on clients
-	if (HasAuthority())
+	if (!HasAuthority())
 		return;
 
 	// Mark graph as if the room list have been modified.
@@ -466,7 +466,7 @@ void ADungeonGeneratorBase::UpdatePlayerRooms()
 		if (!IsValid(Player))
 			return;
 
-		const FTransform& Transform = UseGeneratorTransform() ? GetTransform() : FTransform::Identity;
+		const FTransform& Transform = GetDungeonTransform();
 		FBox WorldPlayerBox = ActorUtils::GetActorBoundingBoxForRooms(Player, Transform);
 
 		FPlayerRooms& PlayerRoom = PlayerRooms.FindOrAdd(PlayerID);

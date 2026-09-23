@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.3] - 2026-09-23
+
+### Fixed
+
+- Fixed URoom::IsPlayerInside not updated correctly
+- Fixed UDungeonGeneratorBase::Unload wrong authority check
+
 ## [3.9.2] - 2026-08-17
 
 ### Fixed
@@ -13,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Premium Features (exclusive to the Fab version)
 
-- Fixed player tracking and entities not placed correctly on map and with UseGeneratorTransform
+- Fixed player tracking and entities not placed correctly on map with UseGeneratorTransform enabled
 
 ## 3.9.1 - 2026-08-07
 
@@ -544,6 +551,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial Release
 
+[3.9.3]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.9.2...v3.9.3
 [3.9.2]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.9.0...v3.9.2
 [3.9.0]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.8.3...v3.9.0
 [3.8.3]: https://github.com/BenPyton/ProceduralDungeon/compare/v3.8.2...v3.8.3
