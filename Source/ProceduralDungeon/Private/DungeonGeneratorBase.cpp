@@ -263,7 +263,7 @@ void ADungeonGeneratorBase::Generate()
 void ADungeonGeneratorBase::Unload()
 {
 	// Do it only on server, do nothing on clients
-	if (HasAuthority())
+	if (!HasAuthority())
 		return;
 
 	// Mark graph as if the room list have been modified.
