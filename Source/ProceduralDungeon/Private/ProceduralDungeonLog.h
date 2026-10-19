@@ -27,9 +27,9 @@ void LogOnScreen(const FString& Message, FColor Color, bool bForceOnScreen = fal
 
 // Logs a message to output and possibly on screen too
 // No LOG_CATEGORY to define
-#define DungeonLog_Debug(Format, ...) _PD_LOG_PrivateImpl(LogProceduralDungeon, VeryVerbose, true, Format, ##__VA_ARGS__)
-#define DungeonLog_Info(Format, ...) _DungeonLog_PrivateImpl(LogProceduralDungeon, Log, false, false, FColor::White, Format, ##__VA_ARGS__)
-#define DungeonLog_InfoSilent(Format, ...) _PD_LOG_PrivateImpl(LogProceduralDungeon, Log, false, Format, ##__VA_ARGS__)
-#define DungeonLog_Warning(Format, ...) _DungeonLog_PrivateImpl(LogProceduralDungeon, Warning, true, false, FColor::Yellow, Format, ##__VA_ARGS__)
-#define DungeonLog_WarningSilent(Format, ...) _PD_LOG_PrivateImpl(LogProceduralDungeon, Warning, true, Format, ##__VA_ARGS__)
-#define DungeonLog_Error(Format, ...) _DungeonLog_PrivateImpl(LogProceduralDungeon, Error, true, true, FColor::Red, Format, ##__VA_ARGS__)
+#define DungeonLog_Debug(Format, ...) _PD_LOG_PrivateImpl(LogProceduralDungeon, VeryVerbose, Detailed, Format, ##__VA_ARGS__)
+#define DungeonLog_Info(Format, ...) _DungeonLog_PrivateImpl(LogProceduralDungeon, Log, Simple, false, FColor::White, Format, ##__VA_ARGS__)
+#define DungeonLog_InfoSilent(Format, ...) _PD_LOG_PrivateImpl(LogProceduralDungeon, Log, Simple, Format, ##__VA_ARGS__)
+#define DungeonLog_Warning(Format, ...) _DungeonLog_PrivateImpl(LogProceduralDungeon, Warning, Detailed, false, FColor::Yellow, Format, ##__VA_ARGS__)
+#define DungeonLog_WarningSilent(Format, ...) _PD_LOG_PrivateImpl(LogProceduralDungeon, Warning, Detailed, Format, ##__VA_ARGS__)
+#define DungeonLog_Error(Format, ...) _DungeonLog_PrivateImpl(LogProceduralDungeon, Error, Detailed, true, FColor::Red, Format, ##__VA_ARGS__)
