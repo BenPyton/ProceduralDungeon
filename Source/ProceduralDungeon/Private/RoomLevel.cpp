@@ -272,12 +272,12 @@ void ARoomLevel::UpdateVisitor(UObject* Visitor, bool IsInside)
 		}
 
 		++(*VisitCounter);
-		DungeonLog_Debug("%s increment visit count (%d) for %s", *GetNameSafe(Visitor), *VisitCounter, *GetNameSafe(this));
+		DungeonLog_Debug("%s increment visit count (%u) for %s", *GetNameSafe(Visitor), *VisitCounter, *GetNameSafe(this));
 	}
 	else if (VisitCounter != nullptr)
 	{
 		--(*VisitCounter);
-		DungeonLog_Debug("%s decrement visit count (%d) for %s", *GetNameSafe(Visitor), *VisitCounter, *GetNameSafe(this));
+		DungeonLog_Debug("%s decrement visit count (%u) for %s", *GetNameSafe(Visitor), *VisitCounter, *GetNameSafe(this));
 		if (*VisitCounter == 0)
 		{
 			DungeonLog_Debug("%s exits room '%s'", *GetNameSafe(Visitor), *GetNameSafe(this));

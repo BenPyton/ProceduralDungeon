@@ -96,8 +96,8 @@ namespace Dungeon
 	PROCEDURALDUNGEON_API float DoorArrowHeadSize();
 	PROCEDURALDUNGEON_API bool CanLoop();
 	PROCEDURALDUNGEON_API ECollisionChannel RoomObjectType();
-	PROCEDURALDUNGEON_API uint32 MaxGenerationTryBeforeGivingUp();
-	PROCEDURALDUNGEON_API uint32 MaxRoomPlacementTryBeforeGivingUp();
+	PROCEDURALDUNGEON_API int32 MaxGenerationTryBeforeGivingUp();
+	PROCEDURALDUNGEON_API int32 MaxRoomPlacementTryBeforeGivingUp();
 	PROCEDURALDUNGEON_API int32 RoomLimit();
 
 	PROCEDURALDUNGEON_API void EnableOcclusionCulling(bool Enable);

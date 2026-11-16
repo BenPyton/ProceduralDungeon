@@ -177,7 +177,7 @@ void URoom::Instantiate(UWorld* World)
 			rotation = GeneratorOwner->GetDungeonRotation();
 			InstanceName.Appendf(TEXT("_%s_%d"), *GeneratorOwner->GetGuid().ToString(), GeneratorOwner->GetSeed());
 		}
-		InstanceName.Appendf(TEXT("_%d"), Id);
+		InstanceName.Appendf(TEXT("_%lld"), Id);
 
 		FVector FinalLocation = rotation.RotateVector(RoomData->GetRoomUnit() * FVector(GetPosition())) + offset;
 		FQuat FinalRotation = rotation * ToQuaternion(GetDirection());
@@ -340,7 +340,7 @@ void URoom::OnRep_IsLocked()
 
 void URoom::OnRep_Id()
 {
-	DungeonLog_Debug("[%s] Room '%s' Id Replicated: %d", *GetAuthorityName(), *GetNameSafe(this), Id);
+	DungeonLog_Debug("[%s] Room '%s' Id Replicated: %lld", *GetAuthorityName(), *GetNameSafe(this), Id);
 }
 
 void URoom::OnRep_RoomData()

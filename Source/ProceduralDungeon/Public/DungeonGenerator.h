@@ -149,5 +149,5 @@ private:
 	// Holds rooms pending to have new rooms added to them.
 	TQueueOrStack<URoom*> PendingRooms;
 
-	int CurrentTriesLeft {0};
+	int32 CurrentTriesLeft {0};
 };

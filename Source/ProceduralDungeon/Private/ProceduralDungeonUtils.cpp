@@ -174,13 +174,13 @@ ECollisionChannel Dungeon::RoomObjectType()
 	return Settings->RoomObjectType;
 }
 
-uint32 Dungeon::MaxGenerationTryBeforeGivingUp()
+int32 Dungeon::MaxGenerationTryBeforeGivingUp()
 {
 	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
 	return Settings->MaxGenerationTry;
 }
 
-uint32 Dungeon::MaxRoomPlacementTryBeforeGivingUp()
+int32 Dungeon::MaxRoomPlacementTryBeforeGivingUp()
 {
 	const UProceduralDungeonSettings* Settings = GetDefault<UProceduralDungeonSettings>();
 	return Settings->MaxRoomPlacementTry;
